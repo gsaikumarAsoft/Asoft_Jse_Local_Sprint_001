@@ -1,0 +1,31 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class BrokerClient extends Model
+{
+
+    // protected $guarded = ['id'];
+
+    protected $fillable = [
+        'local_broker_id',
+        'name',
+        'email',
+        'orders_limit',
+        'open_orders',
+        'jcsd',
+        'status'
+    ];
+
+    public function local_broker()
+    {
+        return $this->belongsTo(LocalBroker::class);
+    }
+    public function permission()
+    {
+        return $this->hasMany(BrokerClientPermission::class);
+    }
+}
+ 

@@ -1,0 +1,288 @@
+<template>
+  <div>
+    <head-nav></head-nav>
+    <div class="container">
+      <div class="content">
+        <b-table
+          striped
+          hover
+          show-empty
+          :empty-text="'No Clients have been Created. Create a Client below.'"
+          id="local-brokers"
+          :items="clients"
+          :fields="fields"
+          :per-page="perPage"
+          :current-page="currentPage"
+          @row-clicked="brokerClientHandler"
+        >
+          <template slot="index" slot-scope="row">{{ row }}</template>
+        </b-table>
+        <b-pagination
+          v-model="currentPage"
+          :total-rows="rows"
+          :per-page="perPage"
+          aria-controls="local-brokers"
+        ></b-pagination>
+        <b-button v-b-modal.modal-1 @click="create = true">Create Client</b-button>
+        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+          <p class="my-4">Please update the fields below as required!</p>
+          <form ref="form" @submit.stop.prevent="handleSubmit">
+            <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
+              <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
+            </b-form-group>
+            <b-form-group
+              label="Email"
+              label-for="email-input"
+              invalid-feedback="Email is required"
+            >
+              <b-form-input id="name-input" v-model="broker.email" :state="nameState" required></b-form-input>
+            </b-form-group>
+            <b-form-group
+              label="JCSD Number"
+              label-for="jcsd-input"
+              invalid-feedback="Name is required"
+            >
+              <b-form-input
+                id="jcsd-input"
+                v-model="broker.jcsd"
+                type="number"
+                :state="nameState"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group
+              sm
+              label="Account Balance"
+              label-for="name-input"
+              invalid-feedback="Name is required"
+            >
+              <b-form-input
+                id="account-balance-input"
+                v-model="broker.balane"
+                type="number"
+                :state="nameState"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group label="Access Permissions:">
+              <b-form-checkbox-group
+                id="checkbox-group-1"
+                v-model="selected_permissions"
+                :options="options"
+                name="flavour-1"
+              ></b-form-checkbox-group>
+            </b-form-group>
+          </form>
+        </b-modal>
+      </div>
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import axios from "axios";
+import headNav from "./../partials/Nav";
+export default {
+  components: {
+    headNav
+  },
+  data() {
+    return {
+      selected_permissions: [],
+      create: false,
+      clients: [],
+      local_brokers: [],
+      broker: {},
+      perPage: 5,
+      currentPage: 1,
+      options: [
+        { text: "Create", value: "Create" },
+        { text: "Read", value: "Read" },
+        { text: "Update", value: "Update" },
+        { text: "Delete", value: "Delete" },
+        { text: "Approve", value: "Approve" }
+      ],
+      status: [
+        { key: 1, text: "Approved", value: "Approved" },
+        { key: 2, text: "Denied", value: "Denied" },
+        { key: 3, text: "Un-Verified", value: "Un-Verified" }
+      ],
+      fields: [
+        {
+          key: "local_broker.name",
+          label: "Local Broker",
+          sortable: true
+        },
+        {
+          key: "name",
+          sortable: true
+        },
+        {
+          key: "email",
+          sortable: true
+        },
+        {
+          key: "status",
+          sortable: true
+        },
+        {
+          key: "types",
+          label: "Access Permissions"
+        }
+      ],
+      modalTitle: "Client Update",
+      nameState: null
+    };
+  },
+  computed: {
+    rows() {
+      return this.clients.length;
+    }
+  },
+  watch: {
+    create: function(data) {
+      if (data) {
+        this.modalTitle = "Create Client";
+      } else {
+        this.modalTitle = "Client Update";
+      }
+    }
+  },
+  methods: {
+    checkFormValidity() {
+      const valid = this.$refs.form.checkValidity();
+      //3.81.122.101/
+      http: this.nameState = valid;
+      return valid;
+    },
+    resetModal() {
+      this.create = false;
+      this.broker = {};
+    },
+    handleOk(bvModalEvt) {
+      // Prevent modal from closing
+      bvModalEvt.preventDefault();
+      // Trigger submit handler
+      this.handleSubmit();
+    },
+    handleSubmit() {
+      // Exit when the form isn't valid
+      if (!this.checkFormValidity()) {
+      } else {
+        this.$bvModal.hide("modal-1"); //Close the modal if it is open
+
+        //Determine if a new client is being created or we are updating an existing client
+        if (this.create) {
+          //Exclude ID
+          this.storeClient({
+            name: this.broker.name,
+            local_broker_id: 1,
+            email: this.broker.email,
+            jcsd: this.broker.jcsd,
+            status: "Approved",
+            permission: this.selected_permissions,
+            balance: this.broker.balance
+          });
+          this.$swal(`Account created for ${this.broker.email}`);
+        } else {
+          //Include ID
+          this.storeClient({
+            id: this.broker.id,
+            local_broker_id: 1,
+            name: this.broker.name,
+            email: this.broker.email,
+            jcsd: this.broker.jcsd,
+            status: "Approved",
+            permission: this.selected_permissions,
+            balance: this.broker.balance
+          });
+          this.$swal(`Account Updated for ${this.broker.email}`);
+        }
+
+        this.resetModal();
+        this.$nextTick(() => {
+          this.$bvModal.hide("modal-1");
+        });
+      }
+      // Push the name to submitted names
+      // this.submittedNames.push(this.name);
+      // Hide the modal manually
+      // this.$nextTick(() => {
+      //   this.$bvModal.hide("modal-1");
+      // });
+    },
+    brokerClientHandler(b) {
+      this.broker = b;
+      this.$swal({
+        title: "",
+        icon: "info",
+        html: `Would you like to Edit Or Delete the following Client <b>(${b.name})</b> `,
+        showCloseButton: true,
+        showCancelButton: true,
+        // focusConfirm: true,
+        cancelButtonColor: "#DD6B55",
+        confirmButtonText: "Edit",
+        confirmButtonAriaLabel: "delete",
+        cancelButtonText: "Delete",
+        cancelButtonAriaLabel: "cancel"
+      }).then(result => {
+        if (result.value) {
+          this.$bvModal.show("modal-1");
+        }
+        if (result.dismiss === "cancel") {
+          this.destroy(b.id);
+          this.$swal("Deleted!", "Client Has Been Removed.", "success");
+        }
+      });
+    },
+    getClients() {
+      axios.get("operator-clients").then(response => {
+        let data = response.data;
+        let user_permissions = [{}];
+        this.clients = data;
+        // console.log(this.clients);
+
+        //Handle Permissions
+        let i, j, k;
+        for (i = 0; i < this.clients.length; i++) {
+          this.clients[i].types = [];
+          user_permissions = this.clients[i].permission;
+          console.log(user_permissions);
+          for (k = 0; k < user_permissions.length; k++) {
+            var specific_permission = user_permissions[k].permission;
+            this.clients[i].types.push(specific_permission);
+          }
+        }
+      });
+    },
+    storeClient(broker) {
+      axios
+        .post("store-broker-trader", broker)
+        .then(response => {
+          this.getClients();
+        })
+        .catch(error => {});
+    },
+    add() {
+      this.create = true;
+    },
+    destroy(id) {
+      axios.delete(`client-broker-delete/${id}`).then(response => {
+        this.getClients();
+      });
+    }
+  },
+  mounted() {
+    axios.get("trading-accounts").then(response => {
+      let local_brokers = response.data;
+      let i;
+      for (i = 0; i < local_brokers.length; i++) {
+        this.local_brokers.push({
+          text: local_brokers[i].name,
+          value: local_brokers[i].id
+        });
+      }
+    });
+    this.getClients();
+  }
+};
+</script>

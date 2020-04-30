@@ -1,0 +1,11 @@
+{
+    "EncryptMethod" : "0",
+    "HeartBtInt" : "",
+    "ResetSeqNumFlag" : "", //not required
+    "Username" : "",
+    "Password" : "",
+    "NewPassword" : "", //not reequired
+    "DefaultApplVerId" : "1.0" //not required
+
+    
+}
