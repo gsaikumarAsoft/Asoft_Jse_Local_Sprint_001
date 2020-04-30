@@ -18,8 +18,8 @@
     
     <p>Please confirm or deny this new user using the links below:</p>
     
-    <a href="http://100.24.69.39/verify-broker-user/{{$user['hash']}}/accept">Confirm Request </a><br>
-    <a href="http://100.24.69.39/verify-broker-user/{{$user['hash']}}/reject">Deny Request </a><br>
+    <a href="{{env('APP_URL')}}verify-broker-user/{{$user['hash']}}/accept">Confirm Request </a><br>
+    <a href="{{env('APP_URL')}}verify-broker-user/{{$user['hash']}}/reject">Deny Request </a><br>
     
     
 

@@ -10,8 +10,8 @@
 {{-- <p>User Details Here</p> --}}
 Registered email-id is {{$user['email']}}
 <p>Please provide your verification of these settings using the links below:</p>
-<a href="http://100.24.69.39/verify-broker-trader/{{$user['id']}}/accept">Accept </a><br>
-<a href="http://100.24.69.39/verify-broker-trader/{{$user['id']}}/reject">Reject </a><br>
+<a href="{{env('APP_URL')}}verify-broker-trader/{{$user['id']}}/accept">Accept </a><br>
+<a href="{{env('APP_URL')}}verify-broker-trader/{{$user['id']}}/reject">Reject </a><br>
 </body>
 
 </html>

@@ -15,9 +15,9 @@ Registered user-temporary-password is <b>{{$pass}}</b>
 </p>
 
 <p>Please use the links below to verify or reject the updated information</p>
-{{-- <a href="http://100.24.69.39/logout">Login</a><br> --}}
-<a href="http://100.24.69.39/verify/{{$user['hash']}}/accept">Accept Request </a><a>
-<a href="http://100.24.69.39/verify/{{$user['hash']}}/reject">Reject </a><br>
+{{-- <a href="{{env('APP_URL')}}logout">Login</a><br> --}}
+<a href="{{env('APP_URL')}}verify/{{$user['hash']}}/accept">Accept Request </a><a>
+<a href="{{env('APP_URL')}}verify/{{$user['hash']}}/reject">Reject </a><br>
 
 </body>
 

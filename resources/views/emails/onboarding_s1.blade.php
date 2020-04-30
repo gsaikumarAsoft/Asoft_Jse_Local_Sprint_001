@@ -17,8 +17,8 @@
 <li>Password: <b>{{$user['password']}}</b></li>
 <br>
        <p> Please provide your verification of these settings using the links below:</p>
-       <a href="http://100.24.69.39/verify-settlement-account/{{$user['hash']}}/accept">Accept </a><br>
-       <a href="http://100.24.69.39/verify-settlement-account/{{$user['hash']}}/reject">Reject </a><br>
+       <a href="{{env('APP_URL')}}verify-settlement-account/{{$user['hash']}}/accept">Accept </a><br>
+       <a href="{{env('APP_URL')}}verify-settlement-account/{{$user['hash']}}/reject">Reject </a><br>
 
 </body>
 

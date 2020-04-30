@@ -17,8 +17,8 @@
         <li>SenderCompID: {{$user['sender_comp_id']}}</li>
         
         <p>Please provide your verification of these settings using the links below:</p>
-        <a href="http://100.24.69.39/verify-trading-account/b2b/{{$user['hash']}}/accept">Accept </a><br>
-        <a href="http://100.24.69.39/verify-trading-account/b2b/{{$user['hash']}}/reject">Reject </a><br>
+        <a href="{{env('APP_URL')}}verify-trading-account/b2b/{{$user['hash']}}/accept">Accept </a><br>
+        <a href="{{env('APP_URL')}}verify-trading-account/b2b/{{$user['hash']}}/reject">Reject </a><br>
  
 </body>
 
