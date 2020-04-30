@@ -54487,9 +54487,11 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_Permissions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../mixins/Permissions */ "./resources/js/mixins/Permissions.vue");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+
 
 
 
@@ -54574,11 +54576,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    mixins: [_mixins_Permissions__WEBPACK_IMPORTED_MODULE_0__["default"]],
   components: {
-    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_1__["default"]
+    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   data() {
     return {
+      permissions: [],
       selected_permissions: [],
       create: false,
       clients: [],
@@ -54599,11 +54603,11 @@ __webpack_require__.r(__webpack_exports__);
         { key: 3, text: "Un-Verified", value: "Un-Verified" }
       ],
       fields: [
-        {
-          key: "local_broker.name",
-          label: "Local Broker",
-          sortable: true
-        },
+        // {
+        //   key: "local_broker.name",
+        //   label: "Local Broker",
+        //   sortable: true
+        // },
         {
           key: "name",
           sortable: true
@@ -54616,10 +54620,10 @@ __webpack_require__.r(__webpack_exports__);
           key: "status",
           sortable: true
         },
-        {
-          key: "types",
-          label: "Access Permissions"
-        }
+        // {
+        //   key: "types",
+        //   label: "Access Permissions"
+        // }
       ],
       modalTitle: "Client Update",
       nameState: null
@@ -54672,7 +54676,7 @@ __webpack_require__.r(__webpack_exports__);
             jcsd: this.broker.jcsd,
             status: "Approved",
             permission: this.selected_permissions,
-            balance: this.broker.balance
+            account_balance: this.broker.account_balance
           });
           this.$swal(`Account created for ${this.broker.email}`);
         } else {
@@ -54685,7 +54689,7 @@ __webpack_require__.r(__webpack_exports__);
             jcsd: this.broker.jcsd,
             status: "Approved",
             permission: this.selected_permissions,
-            balance: this.broker.balance
+            account_balance: this.broker.account_balance
           });
           this.$swal(`Account Updated for ${this.broker.email}`);
         }
@@ -54727,7 +54731,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     getClients() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("operator-clients").then(response => {
+      axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("operator-clients").then(response => {
         let data = response.data;
         let user_permissions = [{}];
         this.clients = data;
@@ -54738,7 +54742,7 @@ __webpack_require__.r(__webpack_exports__);
         for (i = 0; i < this.clients.length; i++) {
           this.clients[i].types = [];
           user_permissions = this.clients[i].permission;
-          console.log(user_permissions);
+          // console.log(user_permissions);
           for (k = 0; k < user_permissions.length; k++) {
             var specific_permission = user_permissions[k].permission;
             this.clients[i].types.push(specific_permission);
@@ -54747,7 +54751,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     storeClient(broker) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
+      axios__WEBPACK_IMPORTED_MODULE_1___default.a
         .post("store-broker-trader", broker)
         .then(response => {
           this.getClients();
@@ -54758,13 +54762,21 @@ __webpack_require__.r(__webpack_exports__);
       this.create = true;
     },
     destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`client-broker-delete/${id}`).then(response => {
+      axios__WEBPACK_IMPORTED_MODULE_1___default.a.delete(`client-broker-delete/${id}`).then(response => {
         this.getClients();
       });
     }
   },
   mounted() {
-    axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trading-accounts").then(response => {
+    // //Define Permission On Front And Back End
+    let p = JSON.parse(this.$userPermissions);
+    //Looop through and identify all permission to validate against actions
+    for (let i = 0; i < p.length; i++) {
+      this.permissions.push(p[i].name);
+    }
+
+
+    axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("trading-accounts").then(response => {
       let local_brokers = response.data;
       let i;
       for (i = 0; i < local_brokers.length; i++) {
@@ -57998,24 +58010,26 @@ var render = function() {
               }
             }),
             _vm._v(" "),
-            _c(
-              "b-button",
-              {
-                directives: [
+            _vm.permissions.indexOf("create-broker-client") !== -1
+              ? _c(
+                  "b-button",
                   {
-                    name: "b-modal",
-                    rawName: "v-b-modal.modal-1",
-                    modifiers: { "modal-1": true }
-                  }
-                ],
-                on: {
-                  click: function($event) {
-                    _vm.create = true
-                  }
-                }
-              },
-              [_vm._v("Create Client")]
-            ),
+                    directives: [
+                      {
+                        name: "b-modal",
+                        rawName: "v-b-modal.modal-1",
+                        modifiers: { "modal-1": true }
+                      }
+                    ],
+                    on: {
+                      click: function($event) {
+                        _vm.create = true
+                      }
+                    }
+                  },
+                  [_vm._v("Create Client")]
+                )
+              : _vm._e(),
             _vm._v(" "),
             _c(
               "b-modal",
@@ -58145,11 +58159,11 @@ var render = function() {
                             required: ""
                           },
                           model: {
-                            value: _vm.broker.balane,
+                            value: _vm.broker.account_balance,
                             callback: function($$v) {
-                              _vm.$set(_vm.broker, "balane", $$v)
+                              _vm.$set(_vm.broker, "account_balance", $$v)
                             },
-                            expression: "broker.balane"
+                            expression: "broker.account_balance"
                           }
                         })
                       ],

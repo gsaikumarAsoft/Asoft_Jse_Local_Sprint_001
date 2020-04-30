@@ -20,11 +20,9 @@ class OperatorController extends Controller
     }
     public function clients()
     {
-
-        $operator_clients = BrokerClient::with('permission')->Get();
-        // return $operator_clients;
+        $operator = auth()->user();
+        $operator_clients = BrokerClient::with('permission')->where('local_broker_id', $operator->local_broker_id)->get();
         return view('operators.client')->with('operator_clients', $operator_clients);
-        // return view('brokers.client');
     }
     function traderList() 
     {
@@ -35,7 +33,8 @@ class OperatorController extends Controller
     function ClientList()
     {
 
-        $clients = BrokerClient::with('local_broker', 'permission')->get();
+        $operator = auth()->user();
+        $clients = BrokerClient::with('local_broker', 'permission')->where('local_broker_id', $operator->local_broker_id)->get();
         return $clients;
     }
     function brokerList()

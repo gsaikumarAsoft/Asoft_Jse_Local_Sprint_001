@@ -206,21 +206,22 @@ class AccountVerificationController extends Controller
         switch ($action) {
             case 'accept':
 
-
+                $password = $this->HelperClass->rand_pass(8);
+                //Update Status & Create User Account & Email Credentials   
                 $broker = User::updateOrCreate(
-                    ['id' => $id],
-                    ['status' => 'Verified' ]
+                    ['hash' => $id],
+                    ['status' => 'Verified', 'password' => Hash::make($password) ]
 
                 );
 
 
-                //Find the user we are trying to send credentials to.
+                // Find the user we are trying to send credentials to using their hash.
+                $user = User::where('hash', $id)->first();
+                $user['p'] = $password;
+                
 
-                // $user = User::find($id);
-
-                // return $user;
-                //Create User Account & Email Credentials   
-                // Mail::to($user->email)->send(new BrokerUserAccountCreated($user));
+                // Notify the new broker user with their login credentials
+                Mail::to($user->email)->send(new BrokerUserAccountCreated($user));
 
                 // $this->HelperClass->createBrokerUserAccount($id);
 

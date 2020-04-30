@@ -12,57 +12,6 @@ class RoleTableSeeder extends Seeder
    */
   public function run()
   {
-    // $role_broker = new Role();
-    // $role_broker->name = 'ADMB';
-    // $role_broker->description = 'Local Broker Admin';
-    // $role_broker->save();
-
-    // $role_admin = new Role();
-    // $role_admin->name = 'ADMD';
-    // $role_admin->description = 'DMA Admin';
-    // $role_admin->save();
-
-
-    // $role_admin = new Role();
-    // $role_admin->name = 'OPRB';
-    // $role_admin->description = 'DMA Operator';
-    // $role_admin->save();
-
-    // $role_admin = new Role();
-    // $role_admin->name = 'TRDB';
-    // $role_admin->description = 'Local Broker Trader';
-    // $role_admin->save();
-
-    // Role::create([
-    //   'name' => 'ADMB',
-    //   'guard_name' => 'web',
-    //   'description' => 'DMA Admin',
-    // ]);
-
-    // Role::create([
-    //   'name' => 'ADMBU',
-    //   'guard_name' => 'web',
-    //   'description' => 'Local Broker User',
-    // ]);
-
-    // Role::create([
-    //   'name' => 'ADMD',
-    //   'guard_name' => 'web',
-    //   'description' => 'DMA Admin',
-    // ]);
-
-    // Role::create([
-    //   'name' => 'OPRB',
-    //   'guard_name' => 'web', 
-    //   'description' => 'DMA Operator',
-    // ]);
-
-    // Role::create([
-    //   'name' => 'TRDB',
-    //   'guard_name' => 'web',
-    //   'description' => 'Local Broker Trader',
-    // ]);
-
     Role::create([
       'description' => 'DMA Admin	',
       'guard_name' => 'web',

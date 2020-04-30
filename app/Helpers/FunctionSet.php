@@ -200,7 +200,8 @@ class FunctionSet
 
 
         $local_broker = $this->getUserAll($request->local_broker_id);
-        // return $local_broker->email;
+        $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
+        // return $broker_owner;
 
         if ($request->id) {
             LogActivity::addToLog('Update User Details');
@@ -219,7 +220,7 @@ class FunctionSet
 
                 // $user->givePermissionTo($request->permissions[$i]);
                 // $user = User::find($user->is); // returns an instance of \App\User
-
+ 
             }
         } else {
             $role_OPRB = Role::where('name', 'OPRB')->first();
@@ -230,10 +231,12 @@ class FunctionSet
             $user->email = $request->email;
             $user->password = Hash::make($pass);
             $user->status = 'Unverified';
+            $user->local_broker_id = $broker_owner['id'];
             $user->hash = $hash;
             $user->save();
             $user->roles()->attach($role_OPRB);
             $request['id'] = $user->id;
+            $request['hash'] = $hash;
             $request['p'] = $pass;
 
 

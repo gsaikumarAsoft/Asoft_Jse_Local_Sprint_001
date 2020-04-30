@@ -23,7 +23,7 @@
           :per-page="perPage"
           aria-controls="local-brokers"
         ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create Client</b-button>
+        <b-button v-if='permissions.indexOf("create-broker-client") !== -1' v-b-modal.modal-1 @click="create = true">Create Client</b-button>
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
@@ -58,7 +58,7 @@
             >
               <b-form-input
                 id="account-balance-input"
-                v-model="broker.balane"
+                v-model="broker.account_balance"
                 type="number"
                 :state="nameState"
                 required
@@ -79,14 +79,17 @@
   </div>
 </template>
 <script lang="ts">
+import permissionMixin from "./../../mixins/Permissions";
 import axios from "axios";
 import headNav from "./../partials/Nav";
 export default {
+    mixins: [permissionMixin],
   components: {
     headNav
   },
   data() {
     return {
+      permissions: [],
       selected_permissions: [],
       create: false,
       clients: [],
@@ -107,11 +110,11 @@ export default {
         { key: 3, text: "Un-Verified", value: "Un-Verified" }
       ],
       fields: [
-        {
-          key: "local_broker.name",
-          label: "Local Broker",
-          sortable: true
-        },
+        // {
+        //   key: "local_broker.name",
+        //   label: "Local Broker",
+        //   sortable: true
+        // },
         {
           key: "name",
           sortable: true
@@ -124,10 +127,10 @@ export default {
           key: "status",
           sortable: true
         },
-        {
-          key: "types",
-          label: "Access Permissions"
-        }
+        // {
+        //   key: "types",
+        //   label: "Access Permissions"
+        // }
       ],
       modalTitle: "Client Update",
       nameState: null
@@ -180,7 +183,7 @@ export default {
             jcsd: this.broker.jcsd,
             status: "Approved",
             permission: this.selected_permissions,
-            balance: this.broker.balance
+            account_balance: this.broker.account_balance
           });
           this.$swal(`Account created for ${this.broker.email}`);
         } else {
@@ -193,7 +196,7 @@ export default {
             jcsd: this.broker.jcsd,
             status: "Approved",
             permission: this.selected_permissions,
-            balance: this.broker.balance
+            account_balance: this.broker.account_balance
           });
           this.$swal(`Account Updated for ${this.broker.email}`);
         }
@@ -246,7 +249,7 @@ export default {
         for (i = 0; i < this.clients.length; i++) {
           this.clients[i].types = [];
           user_permissions = this.clients[i].permission;
-          console.log(user_permissions);
+          // console.log(user_permissions);
           for (k = 0; k < user_permissions.length; k++) {
             var specific_permission = user_permissions[k].permission;
             this.clients[i].types.push(specific_permission);
@@ -272,6 +275,14 @@ export default {
     }
   },
   mounted() {
+    // //Define Permission On Front And Back End
+    let p = JSON.parse(this.$userPermissions);
+    //Looop through and identify all permission to validate against actions
+    for (let i = 0; i < p.length; i++) {
+      this.permissions.push(p[i].name);
+    }
+
+
     axios.get("trading-accounts").then(response => {
       let local_brokers = response.data;
       let i;
