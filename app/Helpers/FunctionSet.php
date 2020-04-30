@@ -28,7 +28,8 @@ class FunctionSet
 {
 
 
-    function createBrokerOrder($request, $local_broker_id, $status){
+    function createBrokerOrder($request, $local_broker_id, $status)
+    {
         $mytime = Carbon::now();
         $broker_client_order = new BrokerClientOrder();
         $broker_client_order->local_broker_id  = $local_broker_id;
@@ -52,7 +53,6 @@ class FunctionSet
         $broker_client_order->expiration_date = $request->expiration_date;
         $broker_client_order->time_in_force = $request->time_in_force;
         $broker_client_order->save();
-
     }
     function defineLocalBroker($id)
     {
@@ -142,9 +142,12 @@ class FunctionSet
     function createBrokerClient($request)
     {
 
-        
         $local_broker = LocalBroker::with('user')->where('user_id', $request->local_broker_id)->first();
-        
+
+
+
+        $broker_user = $local_broker['user'];
+
         if ($request->id) {
             LogActivity::addToLog('Update Client Details');
             $broker_client = BrokerClient::updateOrCreate(
@@ -175,7 +178,6 @@ class FunctionSet
             // $role_TRDB = Role::where('name', 'TRDB')->first();
             $broker_client = new BrokerClient;
             $broker_client->local_broker_id = $local_broker->id;
-            // $broker_client->user_id = $broker_trader->id;
             $broker_client->name = request('name');
             $broker_client->email = $request->email;
             $broker_client->orders_limit = $request->account_balance;
@@ -189,14 +191,14 @@ class FunctionSet
 
             //Adds Permissions Selected For Sprint Final 
             // $this->HelperClass->addPermission($request->permission, $broker_client->id, 'Broker Client');
-            Mail::to($local_broker->user['email'])->send(new LocalBrokerClient($request));
+            Mail::to($broker_user['email'])->send(new LocalBrokerClient($request));
         }
     }
 
     public function createBrokerUser($request)
     {
 
-        
+
         $local_broker = $this->getUserAll($request->local_broker_id);
         // return $local_broker->email;
 
@@ -234,7 +236,7 @@ class FunctionSet
             $request['id'] = $user->id;
             $request['p'] = $pass;
 
-            
+
             $broker_user = new BrokerUser();
             $broker_user->user_id = $user->id;
             $broker_user->dma_broker_id = $request->local_broker_id;;

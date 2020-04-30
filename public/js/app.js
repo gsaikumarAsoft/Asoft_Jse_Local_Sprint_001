@@ -50701,9 +50701,9 @@ __webpack_require__.r(__webpack_exports__);
         .post("store-broker-client", broker)
         .then(response => {
           // this.getClients();
-          // console.log(response)
-          this.$swal(`Account created`);
-           setTimeout(location.reload.bind(location), 1000);
+          console.log(response)
+          this.$swal(`Client Account created`);
+          this.getClients();
         })
         .catch(error => {
                     if (error.response.data.message.includes("Duplicate entry")) {
@@ -72168,8 +72168,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/jlawrence/10x/software/broker-dma-tool/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/jlawrence/10x/software/broker-dma-tool/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
