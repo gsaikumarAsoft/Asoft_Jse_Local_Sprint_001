@@ -168,7 +168,7 @@ class BrokerController extends Controller
 
         //Trading Account Information
 
-        $trading = BrokerTradingAccount::with('settlement_account')->find($request->client_trading_account)->first();
+        $trading = BrokerTradingAccount::with('settlement_account')->find($request->trading_account)->first();
         
         //Settlement Account Information
 
@@ -186,13 +186,13 @@ class BrokerController extends Controller
 
         if ($settlement_available < $order_value) {
 
-            $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
+            // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
 
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
 
         } else if ($client_available < $order_value) {
 
-            $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
+            // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
 
         } else {

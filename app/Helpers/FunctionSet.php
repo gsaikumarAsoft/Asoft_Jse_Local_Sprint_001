@@ -143,8 +143,7 @@ class FunctionSet
     {
 
         $local_broker = LocalBroker::with('user')->where('user_id', $request->local_broker_id)->first();
-
-
+        // $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
 
         $broker_user = $local_broker['user'];
 
@@ -178,7 +177,7 @@ class FunctionSet
             // $role_TRDB = Role::where('name', 'TRDB')->first();
             $broker_client = new BrokerClient;
             $broker_client->local_broker_id = $local_broker->id;
-            $broker_client->name = request('name');
+            $broker_client->name = $request->name;
             $broker_client->email = $request->email;
             $broker_client->orders_limit = $request->account_balance;
             $broker_client->account_balance = $request->account_balance;

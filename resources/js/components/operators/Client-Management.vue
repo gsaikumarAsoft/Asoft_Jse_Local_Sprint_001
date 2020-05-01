@@ -178,7 +178,7 @@ export default {
           //Exclude ID
           this.storeClient({
             name: this.broker.name,
-            local_broker_id: 1,
+            local_broker_id: parseInt(this.$userId),
             email: this.broker.email,
             jcsd: this.broker.jcsd,
             status: "Approved",
@@ -190,7 +190,7 @@ export default {
           //Include ID
           this.storeClient({
             id: this.broker.id,
-            local_broker_id: 1,
+            local_broker_id: parseInt(this.$userId),
             name: this.broker.name,
             email: this.broker.email,
             jcsd: this.broker.jcsd,
@@ -229,7 +229,11 @@ export default {
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
+          if(this.permissions.indexOf("update-broker-client") !== -1){
           this.$bvModal.show("modal-1");
+          }else{
+            this.$swal("Oops!", "Please request update permissions from your Admin", "success");
+          }
         }
         if (result.dismiss === "cancel") {
           this.destroy(b.id);

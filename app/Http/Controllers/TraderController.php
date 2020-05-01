@@ -29,7 +29,7 @@ class TraderController extends Controller
     function store(Request $request)
     {
 
-        $this->HelperClass->createBrokerClient($request);
+        return $this->HelperClass->createBrokerClient($request);
     }
     function destroy($id)
     {

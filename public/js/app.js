@@ -50687,6 +50687,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     storeBrokerClient(broker) {
+      console.log(this.broker);
       this.$swal.fire({
   title: 'Creating Client Account',
   html: 'One moment while we setup the Client Account',
@@ -53390,7 +53391,7 @@ __webpack_require__.r(__webpack_exports__);
           if (valid) {
             this.$swal(data.errors);
             this.callFix();
-            // setTimeout(location.reload.bind(location), 2000);
+            setTimeout(location.reload.bind(location), 2000);
           } else {
             this.$swal(data.errors);
             setTimeout(location.reload.bind(location), 2000);
@@ -54671,7 +54672,7 @@ __webpack_require__.r(__webpack_exports__);
           //Exclude ID
           this.storeClient({
             name: this.broker.name,
-            local_broker_id: 1,
+            local_broker_id: parseInt(this.$userId),
             email: this.broker.email,
             jcsd: this.broker.jcsd,
             status: "Approved",
@@ -54683,7 +54684,7 @@ __webpack_require__.r(__webpack_exports__);
           //Include ID
           this.storeClient({
             id: this.broker.id,
-            local_broker_id: 1,
+            local_broker_id: parseInt(this.$userId),
             name: this.broker.name,
             email: this.broker.email,
             jcsd: this.broker.jcsd,
@@ -54722,7 +54723,11 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
+          if(this.permissions.indexOf("update-broker-client") !== -1){
           this.$bvModal.show("modal-1");
+          }else{
+            this.$swal("Oops!", "Please request update permissions from your Admin", "success");
+          }
         }
         if (result.dismiss === "cancel") {
           this.destroy(b.id);

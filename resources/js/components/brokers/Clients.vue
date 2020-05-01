@@ -267,6 +267,7 @@ export default {
       });
     },
     storeBrokerClient(broker) {
+      console.log(this.broker);
       this.$swal.fire({
   title: 'Creating Client Account',
   html: 'One moment while we setup the Client Account',
