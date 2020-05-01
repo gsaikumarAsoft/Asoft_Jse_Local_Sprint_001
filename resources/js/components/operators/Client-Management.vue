@@ -23,11 +23,7 @@
           :per-page="perPage"
           aria-controls="local-brokers"
         ></b-pagination>
-        <b-button
-          v-if="permissions.indexOf("create-broker-client") !== -1"
-          v-b-modal.modal-1
-          @click="create = true"
-        >Create Client</b-button>
+        <b-button v-if='permissions.indexOf("create-broker-client") !== -1' v-b-modal.modal-1 @click="create = true">Create Client</b-button>
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
@@ -87,7 +83,7 @@ import permissionMixin from "./../../mixins/Permissions";
 import axios from "axios";
 import headNav from "./../partials/Nav";
 export default {
-  mixins: [permissionMixin],
+    mixins: [permissionMixin],
   components: {
     headNav
   },
@@ -130,7 +126,7 @@ export default {
         {
           key: "status",
           sortable: true
-        }
+        },
         // {
         //   key: "types",
         //   label: "Access Permissions"
@@ -233,17 +229,13 @@ export default {
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
-          if (this.permissions.indexOf("update-broker-client") !== -1) {
-            this.$bvModal.show("modal-1");
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request update permissions from your Admin",
-              "success"
-            );
+          if(this.permissions.indexOf("update-broker-client") !== -1){
+          this.$bvModal.show("modal-1");
+          }else{
+            this.$swal("Oops!", "Please request update permissions from your Admin", "success");
           }
         }
-        if (result.dismiss === "cancel") {
+          if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-client") !== -1) {
             this.destroy(b.id);
             this.$swal("Deleted!", "Client Has Been Removed.", "success");
@@ -301,6 +293,7 @@ export default {
     for (let i = 0; i < p.length; i++) {
       this.permissions.push(p[i].name);
     }
+
 
     axios.get("trading-accounts").then(response => {
       let local_brokers = response.data;
