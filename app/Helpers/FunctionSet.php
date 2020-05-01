@@ -139,12 +139,71 @@ class FunctionSet
         }
     }
 
+    function createOperatorClient($request)
+    {
+
+        $user = auth()->user();
+        $request['local_broker_id'] = $user->local_broker_id;
+
+        $local_broker = LocalBroker::with('user')->where('id', $request->local_broker_id)->first();
+        // $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
+        // return $request['local_broker_id'];
+        $broker_user = $local_broker['user'];
+
+        if ($request->id) {
+            LogActivity::addToLog('Update Client Details');
+            $broker_client = BrokerClient::updateOrCreate(
+                ['id' => $request->id],
+                ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified', 'open_orders' => $request->open_orders, 'jcsd' => $request->jcsd, 'account_balance' => $request->account_balance]
+
+            );
+        } else {
+
+
+            // For future Sprint
+            // $broker_trader = new User();
+
+            // $broker_trader->local_broker_id = $request->local_broker_id;
+            // $broker_trader->name = $request->name;
+            // $broker_trader->email = $request->email;
+            // $broker_trader->password = bcrypt('password');
+            // $broker_trader->status = 'Un-Verified';
+            // $broker_trader->save();
+            // $request['id'] = $broker_trader->id;
+            // $broker_trader->roles()->attach($role_TRDB);
+            // ========================================
+
+
+            //Create Broker Client
+
+            // return $local_broker['id'];
+            // $role_TRDB = Role::where('name', 'TRDB')->first();
+            $broker_client = new BrokerClient;
+            $broker_client->local_broker_id = $local_broker->id;
+            $broker_client->name = $request->name;
+            $broker_client->email = $request->email;
+            $broker_client->orders_limit = $request->account_balance;
+            $broker_client->account_balance = $request->account_balance;
+            $broker_client->open_orders = '0';
+            $broker_client->jcsd = $request->jcsd;
+            $broker_client->status = 'Un-verified';
+            $broker_client->save();
+            // $broker_client->roles()->attach($role_TRDB);
+            $request['id'] = $broker_client->id;
+
+            //Adds Permissions Selected For Sprint Final 
+            // $this->HelperClass->addPermission($request->permission, $broker_client->id, 'Broker Client');
+            Mail::to($broker_user['email'])->send(new LocalBrokerClient($request));
+        }
+    }
+
     function createBrokerClient($request)
     {
 
         $local_broker = LocalBroker::with('user')->where('user_id', $request->local_broker_id)->first();
         // $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
-
+        // return $request['local_broker_id'];
+        return $local_broker;
         $broker_user = $local_broker['user'];
 
         if ($request->id) {

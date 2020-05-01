@@ -15,6 +15,7 @@
       <li>email: <b>{{$user['email']}}</b></li>
       <li>Password: <b>{{$user['p']}}</b></li>
 <br>
+<a href="{{env('APP_URL')}}logout">Accept </a><br>
 </body>
 
 </html>
