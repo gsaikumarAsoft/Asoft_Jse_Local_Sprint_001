@@ -167,11 +167,9 @@ class BrokerController extends Controller
 
 
         //Trading Account Information
-
         $trading = BrokerTradingAccount::with('settlement_account')->find($request->trading_account)->first();
         
         //Settlement Account Information
-
         $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
         
         
