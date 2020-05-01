@@ -54576,8 +54576,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
-    mixins: [_mixins_Permissions__WEBPACK_IMPORTED_MODULE_0__["default"]],
+  mixins: [_mixins_Permissions__WEBPACK_IMPORTED_MODULE_0__["default"]],
   components: {
     headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
@@ -54620,7 +54624,7 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: "status",
           sortable: true
-        },
+        }
         // {
         //   key: "types",
         //   label: "Access Permissions"
@@ -54723,15 +54727,27 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
-          if(this.permissions.indexOf("update-broker-client") !== -1){
-          this.$bvModal.show("modal-1");
-          }else{
-            this.$swal("Oops!", "Please request update permissions from your Admin", "success");
+          if (this.permissions.indexOf("update-broker-client") !== -1) {
+            this.$bvModal.show("modal-1");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request update permissions from your Admin",
+              "success"
+            );
           }
         }
         if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "Client Has Been Removed.", "success");
+          if (this.permissions.indexOf("delete-broker-client") !== -1) {
+            this.destroy(b.id);
+            this.$swal("Deleted!", "Client Has Been Removed.", "success");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request delete permissions from your Admin",
+              "success"
+            );
+          }
         }
       });
     },
@@ -54779,7 +54795,6 @@ __webpack_require__.r(__webpack_exports__);
     for (let i = 0; i < p.length; i++) {
       this.permissions.push(p[i].name);
     }
-
 
     axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("trading-accounts").then(response => {
       let local_brokers = response.data;
@@ -58015,26 +58030,9 @@ var render = function() {
               }
             }),
             _vm._v(" "),
-            _vm.permissions.indexOf("create-broker-client") !== -1
-              ? _c(
-                  "b-button",
-                  {
-                    directives: [
-                      {
-                        name: "b-modal",
-                        rawName: "v-b-modal.modal-1",
-                        modifiers: { "modal-1": true }
-                      }
-                    ],
-                    on: {
-                      click: function($event) {
-                        _vm.create = true
-                      }
-                    }
-                  },
-                  [_vm._v("Create Client")]
-                )
-              : _vm._e(),
+            _vm._v(
+              '") !== -1"\n        v-b-modal.modal-1\n        @click="create = true"\n      >Create Client'
+            ),
             _vm._v(" "),
             _c(
               "b-modal",
