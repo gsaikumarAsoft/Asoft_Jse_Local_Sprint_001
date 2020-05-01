@@ -6,7 +6,7 @@ This document is intended to act as a guideline for deployments of the LARAVEL /
 - Run **cd ~/stack/nginx**
 - Run **sudo rm -rf .git**
 - Run **sudo git init**
-- Run **sudo git clone https://github.com/JasonCLawrence/JSE_BROKER_DMA_tool.git**
+- Run **sudo git clone https://github.com/Innovate-10x/JSE_DMA.git**
 - Run **sudo mv html html-old** (Rename the current html folder to something else)
 - Run **sudo mv broker-dma-tool.git/ html/** (Now that the new repository has been cloned lets rename the folder to htmls so nginx recognizes it)
 - Run **cd html**
