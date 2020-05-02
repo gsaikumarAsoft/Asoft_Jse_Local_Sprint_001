@@ -27,7 +27,7 @@ class UserController extends Controller
         $user = auth()->user();
         // return $user;
         $a = BrokerUser::with('user')->where('dma_broker_id', $user->id)->get();
-
+        // return $a;
         foreach ($a as $key => $user) {
 
             $user = $a[$key]->user;
@@ -37,6 +37,7 @@ class UserController extends Controller
             $broker_user[$key]['email'] = $user->email;
             $broker_user[$key]['status'] = $user->status;
             $broker_user[$key]['permissions'] = $user->permissions;
+            $broker_user[$key]['broker_trading_account_id'] = (int)$a[$key]->broker_trading_account_id;
           
         }
         return $broker_user;

@@ -32,7 +32,7 @@ class TraderController extends Controller
     }
     function storeOperatorClient(Request $request)
     {
-        return $this->HelperClass->createOperatorClient($request);
+        $this->HelperClass->createOperatorClient($request);
     }
     function destroy($id)
     {

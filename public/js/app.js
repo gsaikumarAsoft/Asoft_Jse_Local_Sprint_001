@@ -54311,6 +54311,7 @@ __webpack_require__.r(__webpack_exports__);
           //Exclude ID
           this.storeBrokerUser({
             local_broker_id: parseInt(this.$userId),
+            broker_trading_account_id: this.broker.broker_trading_account_id,
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
@@ -54322,6 +54323,7 @@ __webpack_require__.r(__webpack_exports__);
           this.storeBrokerUser({
             id: this.broker.id,
             local_broker_id: parseInt(this.$userId),
+            broker_trading_account_id: this.broker.broker_trading_account_id,
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
@@ -54413,6 +54415,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     storeBrokerUser(broker) {
+      console.log(broker)
       this.$swal
         .fire({
           title: "Creating User Account",
@@ -57863,11 +57866,15 @@ var render = function() {
                             options: _vm.broker_trading_account_options
                           },
                           model: {
-                            value: _vm.broker.trading_account,
+                            value: _vm.broker.broker_trading_account_id,
                             callback: function($$v) {
-                              _vm.$set(_vm.broker, "trading_account", $$v)
+                              _vm.$set(
+                                _vm.broker,
+                                "broker_trading_account_id",
+                                $$v
+                              )
                             },
-                            expression: "broker.trading_account"
+                            expression: "broker.broker_trading_account_id"
                           }
                         })
                       ],

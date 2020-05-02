@@ -257,6 +257,8 @@ class FunctionSet
     {
 
 
+        // return $request;
+        
         $local_broker = $this->getUserAll($request->local_broker_id);
         $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
         // return $broker_owner;
@@ -300,7 +302,8 @@ class FunctionSet
 
             $broker_user = new BrokerUser();
             $broker_user->user_id = $user->id;
-            $broker_user->dma_broker_id = $request->local_broker_id;;
+            $broker_user->dma_broker_id = $request->local_broker_id;
+            $broker_user->broker_trading_account_id = $request->broker_trading_account_id;
             $broker_user->save();
 
 

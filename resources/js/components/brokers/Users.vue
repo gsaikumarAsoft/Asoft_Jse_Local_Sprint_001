@@ -48,7 +48,7 @@
                 label-for="Trading Account-input"
                 invalid-feedback="A Trading is required"
                 sm
-                v-model="broker.trading_account"
+                v-model="broker.broker_trading_account_id"
                 :options="broker_trading_account_options"
               ></b-form-select>
             </b-form-group>
@@ -247,6 +247,7 @@ export default {
           //Exclude ID
           this.storeBrokerUser({
             local_broker_id: parseInt(this.$userId),
+            broker_trading_account_id: this.broker.broker_trading_account_id,
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
@@ -258,6 +259,7 @@ export default {
           this.storeBrokerUser({
             id: this.broker.id,
             local_broker_id: parseInt(this.$userId),
+            broker_trading_account_id: this.broker.broker_trading_account_id,
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
@@ -349,6 +351,7 @@ export default {
       });
     },
     storeBrokerUser(broker) {
+      console.log(broker)
       this.$swal
         .fire({
           title: "Creating User Account",

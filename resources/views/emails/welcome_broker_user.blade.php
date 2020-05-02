@@ -5,7 +5,6 @@
 </head>
 <body>
 
-
     <p>Hello {{$user['name']}},</p>
 
     <p>The following Account was created for you on JSE DMA platform:</p>
@@ -15,7 +14,9 @@
       <li>email: <b>{{$user['email']}}</b></li>
       <li>Password: <b>{{$user['p']}}</b></li>
 <br>
-<a href="{{env('APP_URL')}}logout">Accept </a><br>
+    <a href="{{env('APP_URL')}}verify/{{$user['hash']}}/accept">Accept Request </a>
+    <a href="{{env('APP_URL')}}verify/{{$user['hash']}}/reject">Reject </><br>
+    
 </body>
 
 </html>
