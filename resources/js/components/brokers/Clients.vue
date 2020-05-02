@@ -282,7 +282,7 @@ export default {
         .post("store-broker-client", broker)
         .then(response => {
           // this.getClients();
-          console.log(response)
+          
           this.$swal(`Client Account created`);
           this.getClients();
         })
