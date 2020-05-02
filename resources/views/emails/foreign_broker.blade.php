@@ -17,7 +17,6 @@ Registered user-temporary-password is <b>{{$pass}}</b>
 <p>Please use the links below to verify or reject the updated information</p>
 <a href="{{env('APP_URL')}}verify/{{$user['hash']}}/accept">Accept Request </a><a>
 <a href="{{env('APP_URL')}}verify/{{$user['hash']}}/reject">Reject </a><br>
-    <p>Please use the links below to verify or reject the updated information</p>
 
     
     
