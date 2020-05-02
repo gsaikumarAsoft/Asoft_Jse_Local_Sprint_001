@@ -54729,7 +54729,7 @@ __webpack_require__.r(__webpack_exports__);
           if(this.permissions.indexOf("update-broker-client") !== -1){
           this.$bvModal.show("modal-1");
           }else{
-            this.$swal("Oops!", "Please request update permissions from your Admin", "success");
+            this.$swal("Oops!", "Please request update permissions from your Admin", "error");
           }
         }
           if (result.dismiss === "cancel") {
@@ -54789,6 +54789,7 @@ __webpack_require__.r(__webpack_exports__);
     //Looop through and identify all permission to validate against actions
     for (let i = 0; i < p.length; i++) {
       this.permissions.push(p[i].name);
+     
     }
 
 
@@ -55162,6 +55163,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -55171,6 +55176,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
+      permissions: [],
       order_template_data: [],
       file: "",
       order_option_input: false,
@@ -57228,11 +57234,27 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
+          if (this.permissions.indexOf("update-broker-order") !== -1) {
+            this.$bvModal.show("jse-new-order");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request update permissions from your Admin to proceed",
+              "error"
+            );
+          }
         }
-        if (result.dismiss === "cancel") {
-          // this.destroy(o.id);
-          this.$swal("Canceled!", "User Order Has Been Cancelled.", "success");
-          // window.location.reload();
+          if (result.dismiss === "cancel") {
+          if (this.permissions.indexOf("delete-broker-order") !== -1) {
+            this.destroy(b.id);
+            this.$swal("Deleted!", "Client Order Has Cancelled.", "success");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request delete permissions from your Admin",
+              "error"
+            );
+          }
         }
       });
     },
@@ -57490,6 +57512,13 @@ __webpack_require__.r(__webpack_exports__);
     // var order_data = /
     var client_accounts_data = JSON.parse(this.client_accounts);
     this.client_trading_account_options = client_accounts_data;
+
+    // //Define Permission On Front And Back End
+    let p = JSON.parse(this.$userPermissions);
+    //Looop through and identify all permission to validate against actions
+    for (let i = 0; i < p.length; i++) {
+      this.permissions.push(p[i].name);
+    }
 
     // var local = JSON.parse(this.local_brokers);
     // let i;
@@ -61755,24 +61784,26 @@ var render = function() {
               }
             }),
             _vm._v(" "),
-            _c(
-              "b-button",
-              {
-                directives: [
+            _vm.permissions.indexOf("create-broker-order") !== -1
+              ? _c(
+                  "b-button",
                   {
-                    name: "b-modal",
-                    rawName: "v-b-modal.jse-new-order",
-                    modifiers: { "jse-new-order": true }
-                  }
-                ],
-                on: {
-                  click: function($event) {
-                    _vm.create = true
-                  }
-                }
-              },
-              [_vm._v("Create New Order")]
-            )
+                    directives: [
+                      {
+                        name: "b-modal",
+                        rawName: "v-b-modal.jse-new-order",
+                        modifiers: { "jse-new-order": true }
+                      }
+                    ],
+                    on: {
+                      click: function($event) {
+                        _vm.create = true
+                      }
+                    }
+                  },
+                  [_vm._v("Create New Order")]
+                )
+              : _vm._e()
           ],
           1
         )

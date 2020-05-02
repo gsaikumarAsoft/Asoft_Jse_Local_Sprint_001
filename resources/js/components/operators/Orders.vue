@@ -325,7 +325,11 @@
           :per-page="perPage"
           aria-controls="orders-table"
         ></b-pagination>
-        <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button>
+        <b-button
+          v-if='permissions.indexOf("create-broker-order") !== -1'
+          v-b-modal.jse-new-order
+          @click="create = true"
+        >Create New Order</b-button>
       </div>
     </div>
   </div>
@@ -344,6 +348,7 @@ export default {
   },
   data() {
     return {
+      permissions: [],
       order_template_data: [],
       file: "",
       order_option_input: false,
@@ -2401,11 +2406,27 @@ export default {
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
+          if (this.permissions.indexOf("update-broker-order") !== -1) {
+            this.$bvModal.show("jse-new-order");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request update permissions from your Admin to proceed",
+              "error"
+            );
+          }
         }
-        if (result.dismiss === "cancel") {
-          // this.destroy(o.id);
-          this.$swal("Canceled!", "User Order Has Been Cancelled.", "success");
-          // window.location.reload();
+          if (result.dismiss === "cancel") {
+          if (this.permissions.indexOf("delete-broker-order") !== -1) {
+            this.destroy(b.id);
+            this.$swal("Deleted!", "Client Order Has Cancelled.", "success");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request delete permissions from your Admin",
+              "error"
+            );
+          }
         }
       });
     },
@@ -2663,6 +2684,13 @@ export default {
     // var order_data = /
     var client_accounts_data = JSON.parse(this.client_accounts);
     this.client_trading_account_options = client_accounts_data;
+
+    // //Define Permission On Front And Back End
+    let p = JSON.parse(this.$userPermissions);
+    //Looop through and identify all permission to validate against actions
+    for (let i = 0; i < p.length; i++) {
+      this.permissions.push(p[i].name);
+    }
 
     // var local = JSON.parse(this.local_brokers);
     // let i;

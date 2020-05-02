@@ -63,10 +63,6 @@ class OperatorController extends Controller
             $clients[] = $json_decoded->id;
             $orders = BrokerClientOrder::whereIn('broker_client_id', $clients)->get();
         }
-        // return $orders;
-        // return $orders;
-        // $filter = array_filter($orders);
-        // $orders = json_encode($filter);
         return view('operators.order')->with('orders', $orders)->with('client_accounts', $client_accounts);
     }
 

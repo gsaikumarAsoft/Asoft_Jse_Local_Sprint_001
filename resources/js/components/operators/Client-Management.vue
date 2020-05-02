@@ -232,7 +232,7 @@ export default {
           if(this.permissions.indexOf("update-broker-client") !== -1){
           this.$bvModal.show("modal-1");
           }else{
-            this.$swal("Oops!", "Please request update permissions from your Admin", "success");
+            this.$swal("Oops!", "Please request update permissions from your Admin", "error");
           }
         }
           if (result.dismiss === "cancel") {
@@ -292,6 +292,7 @@ export default {
     //Looop through and identify all permission to validate against actions
     for (let i = 0; i < p.length; i++) {
       this.permissions.push(p[i].name);
+     
     }
 
 
