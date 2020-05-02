@@ -2556,10 +2556,10 @@ export default {
           if (valid) {
             this.$swal(data.errors);
             this.callFix();
-            // setTimeout(location.reload.bind(location), 2000);
+            setTimeout(location.reload.bind(location), 2000);
           } else {
             this.$swal(data.errors);
-            // setTimeout(location.reload.bind(location), 2000);
+            setTimeout(location.reload.bind(location), 2000);
           }
         });
       }
