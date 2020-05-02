@@ -26,6 +26,7 @@
 
       <b-navbar-nav v-if="user_role === 'OPRB'">
         <b-nav-item href="/operator">Home</b-nav-item>
+        <!-- <b-nav-item href="/operator/users">User Management</b-nav-item> -->
         <b-nav-item href="/operator/clients">Client Management</b-nav-item>
         <b-nav-item href="/operator/orders">Orders</b-nav-item>
         <!-- <b-nav-item href="/jse-admin/settlements/">Broker Settlement Account</b-nav-item> -->

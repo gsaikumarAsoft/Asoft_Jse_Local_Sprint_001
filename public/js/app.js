@@ -2100,6 +2100,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -57246,8 +57247,8 @@ __webpack_require__.r(__webpack_exports__);
         }
           if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(b.id);
-            this.$swal("Deleted!", "Client Order Has Cancelled.", "success");
+            // this.destroy(o.id);
+            this.$swal("Cancelled!", "Client Order Has Been Cancelled.", "error");
           } else {
             this.$swal(
               "Oops!",

@@ -2418,8 +2418,8 @@ export default {
         }
           if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(b.id);
-            this.$swal("Deleted!", "Client Order Has Cancelled.", "success");
+            // this.destroy(o.id);
+            this.$swal("Cancelled!", "Client Order Has Been Cancelled.", "error");
           } else {
             this.$swal(
               "Oops!",
