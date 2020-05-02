@@ -78,6 +78,23 @@ class BrokerController extends Controller
         return $broker;
     }
 
+    public function operatorTradingAccounts()
+    {
+
+        $user = auth()->user();
+
+        //Local Broker Owner for trading account
+        $local_broker_id = $user->local_broker_id;
+
+        $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $local_broker_id)
+            ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_trading_accounts.id')
+            ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
+            ->join('users', 'foreign_brokers.user_id', 'users.id')
+            ->get();
+        return $broker;
+    }
+
     public function users()
     {
 
@@ -157,7 +174,8 @@ class BrokerController extends Controller
     }
     public function clientOrder(Request $request)
     {
-
+        
+        
 
         //Define The Broker Making The Order
         $user = auth()->user();
@@ -215,7 +233,7 @@ class BrokerController extends Controller
                 ['open_orders' => $client_open_orders]
             );
 
-            $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted');
+            $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
         }
     }

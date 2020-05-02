@@ -98,10 +98,12 @@ Route::group(['prefix' => '/operator', 'middleware' => ['App\Http\Middleware\Loc
     Route::get('/operator-clients', 'OperatorController@clientList');
     Route::get('/trading-accounts', 'OperatorController@traderList');
     Route::post('/store-broker-trader', "TraderController@storeOperatorClient");
+    Route::post('/store-operator-client-order', "OperatorController@operatorClientOrder");
     Route::get('/broker-users', 'UserController@index');
     Route::delete('/client-broker-delete/{id}', 'ClientController@destroy');
+    Route::get('/broker-trading-accounts', 'BrokerController@operatorTradingAccounts');
     // Route::get('/orders', "BrokerTraderController@orderList");
-    Route::get('/orders', 'BrokerController@orders');
+    Route::get('/orders', 'OperatorController@orders');
 });
 
 Route::group(['prefix' => '/trader-broker', 'middleware' => ['App\Http\Middleware\LocalBrokerTraderMiddleware']], function () {

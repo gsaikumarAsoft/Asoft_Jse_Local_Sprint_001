@@ -9,7 +9,8 @@ class BrokerUser extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'user_id',
-        'local_broker_id'
+        'dma_broker_id',
+        'broker_trading_account_id',
     ];
 
     public function local_broker()

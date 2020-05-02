@@ -43,6 +43,7 @@ Vue.component('broker-settlements', require('./components/brokers/SettlementAcco
 
 Vue.component('operator-home', require('./components/operators/Index.vue').default);
 Vue.component('operator-client', require('./components/operators/Client-Management.vue').default);
+Vue.component('operator-order', require('./components/operators/Orders.vue').default);
 
 
 

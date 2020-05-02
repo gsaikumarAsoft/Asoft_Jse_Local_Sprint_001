@@ -28,7 +28,7 @@ class FunctionSet
 {
 
 
-    function createBrokerOrder($request, $local_broker_id, $status)
+    function createBrokerOrder($request, $local_broker_id, $status, $client_id)
     {
         $mytime = Carbon::now();
         $broker_client_order = new BrokerClientOrder();
@@ -52,6 +52,7 @@ class FunctionSet
         $broker_client_order->stop_price = $request->stop_price;
         $broker_client_order->expiration_date = $request->expiration_date;
         $broker_client_order->time_in_force = $request->time_in_force;
+        $broker_client_order->broker_client_id = $client_id;
         $broker_client_order->save();
     }
     function defineLocalBroker($id)
@@ -256,8 +257,7 @@ class FunctionSet
     public function createBrokerUser($request)
     {
 
-
-        // return $request;
+        
         
         $local_broker = $this->getUserAll($request->local_broker_id);
         $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
@@ -268,6 +268,12 @@ class FunctionSet
             $broker = User::updateOrCreate(
                 ['id' => $request->id],
                 ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified']
+
+            );
+
+            $broker_user = BrokerUser::updateOrCreate(
+                ['user_id' => $request->id],
+                ['broker_trading_account_id' => $request->broker_trading_account_id]
 
             );
 
