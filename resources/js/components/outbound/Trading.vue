@@ -3,14 +3,14 @@
     <head-nav></head-nav>
     <div class="container">
       <div class="content">
-        <h1>Settlement View For Foreign Broker</h1>
+        <h1>Trading Account View For Foreign Broker</h1>
         <b-table
           striped
           hover
           show-empty
-          :empty-text="'No Settlement Accounts have been created'"
+          :empty-text="'No Trading Accounts have been created'"
           id="foreign-brokers"
-          :items="broker_settlement_account"
+          :items="broker_trading_account"
           :fields="fields"
           :per-page="perPage"
           :current-page="currentPage"
@@ -19,9 +19,9 @@
           v-model="currentPage"
           :total-rows="rows"
           :per-page="perPage"
-          aria-controls="foreign-settlements"
+          aria-controls="foreign-tradings"
         ></b-pagination>
-        <!-- <b-button v-b-modal.modal-1 @click="create = true">Create Settlement Account</b-button> -->
+        <!-- <b-button v-b-modal.modal-1 @click="create = true">Create Trading Account</b-button> -->
         <!-- <b-button @click="exportBalances">Export Balances</b-button> -->
       </div>
     </div>
@@ -40,58 +40,53 @@ export default {
   data() {
     return {
       create: false,
-      broker_settlement_account: JSON.parse(this.accounts),
-      settlement_account: {},
+      broker_trading_account: JSON.parse(this.accounts),
+      trading_account: {},
       local_brokers: [],
       foreign_brokers: [],
       perPage: 5,
       currentPage: 1,
       fields: [
         {
-          key: "foreign_broker.name",
-          label: "Foreign Broker",
+          key: "umir",
+          //   label: "Foreign Broker",
           sortable: true
         },
         {
-          key: "bank_name",
-          label: "Settlement Agent",
+          key: "target_comp_id",
+          //   label: "Foreign Broker",
           sortable: true
         },
         {
-          key: "account",
+          key: "sender_comp_id",
+          //   label: "Trading Agent",
           sortable: true
         },
         {
-          key: "email",
+          key: "socket",
           sortable: true
         },
         {
-          key: "account_balance",
+          key: "port",
           sortable: true
         },
         {
-          key: "amount_allocated",
-          sortable: true
-        },
-        {
-          key: "currency",
-          sortable: true
-        },
-        {
-          key: "status",
+          key: "created_at",
           sortable: true
         }
       ],
-      modalTitle: "Create Broker Settlement Account",
+      modalTitle: "Create Broker Trading Account",
       nameState: null
     };
   },
   computed: {
     rows() {
-      return this.broker_settlement_account.length;
+      return this.broker_trading_account.length;
     }
   },
   methods: {},
-  mounted() {}
+  mounted() {
+    // console.log(this.broker_trading_account);
+  }
 };
 </script>

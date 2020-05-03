@@ -51,6 +51,7 @@ Vue.component('trader-home', require('./components/trader/Index.vue').default);
 
 Vue.component('outbound-home', require('./components/outbound/Index.vue').default);
 Vue.component('outbound-settlements', require('./components/outbound/Settlements.vue').default);
+Vue.component('outbound-trading', require('./components/outbound/Trading.vue').default);
 
 Vue.component('account-profile', require('./components/profile/Index').default);
 

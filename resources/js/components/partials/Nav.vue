@@ -41,7 +41,7 @@
             <b-navbar-nav v-show="user_role === 'BRKF'">
         <b-nav-item href="/foreign-broker">Home</b-nav-item>
         <b-nav-item href="/foreign-broker/settlements">Settlement Accounts</b-nav-item>
-        <b-nav-item href="#">Trading Accounts</b-nav-item>
+        <b-nav-item href="/foreign-broker/tradings">Trading Accounts</b-nav-item>
         <!-- <b-nav-item href="/jse-admin/settlements/">Broker Settlement Account</b-nav-item> -->
       </b-navbar-nav>
 

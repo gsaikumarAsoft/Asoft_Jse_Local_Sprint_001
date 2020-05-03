@@ -114,6 +114,7 @@ Route::group(['prefix' => '/trader-broker', 'middleware' => ['App\Http\Middlewar
 Route::group(['prefix' => '/foreign-broker', 'middleware' => ['App\Http\Middleware\ForeignBrokerAdminMiddleware']], function () {
     Route::get('/', "OutboundBrokerController@index");
     Route::get('/settlements', "OutboundBrokerController@settlements");
+    Route::get('/tradings', "OutboundBrokerController@trading");
 });
 
 
