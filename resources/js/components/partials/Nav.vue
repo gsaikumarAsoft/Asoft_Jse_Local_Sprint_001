@@ -5,6 +5,10 @@
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
     <b-collapse id="nav-collapse" is-nav>
+      <b-navbar-nav v-if="user_role === 'AGTS'">
+        <b-nav-item href="/settlement-agent">Home</b-nav-item>
+        <b-nav-item href="/settlement-agent/transactions">Transactions</b-nav-item>
+      </b-navbar-nav>
       <b-navbar-nav v-if="user_role === 'ADMD'">
         <b-nav-item href="/jse-admin">Home</b-nav-item>
         <b-nav-item href="/jse-admin/foreign-broker-list">Foreign Broker List</b-nav-item>
@@ -38,7 +42,7 @@
         <!-- <b-nav-item href="/jse-admin/settlements/">Broker Settlement Account</b-nav-item> -->
       </b-navbar-nav>
 
-            <b-navbar-nav v-show="user_role === 'BRKF'">
+      <b-navbar-nav v-show="user_role === 'BRKF'">
         <b-nav-item href="/foreign-broker">Home</b-nav-item>
         <b-nav-item href="/foreign-broker/settlements">Settlement Accounts</b-nav-item>
         <b-nav-item href="/foreign-broker/tradings">Trading Accounts</b-nav-item>

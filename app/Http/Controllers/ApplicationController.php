@@ -73,7 +73,8 @@ class ApplicationController extends Controller
                 return redirect('foreign-broker');
                 break;
             case 'AGTS':
-                return 'Configuration Screen For Settlement Agent To Be Designed <a href="/logout">Logout</a>';
+                // return 'Configuration Screen For Settlement Agent To Be Designed <a href="/logout">Logout</a>';
+                return redirect('settlement-agent');
                 break;
             default:
                 return "Login Complete";

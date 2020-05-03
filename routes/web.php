@@ -118,6 +118,11 @@ Route::group(['prefix' => '/foreign-broker', 'middleware' => ['App\Http\Middlewa
 });
 
 
+Route::group(['prefix' => '/settlement-agent', 'middleware' => ['App\Http\Middleware\SettlementAgentMiddleware']], function () {
+    Route::get('/', "SettlementAgentController@index");
+});
+
+
 
 
 Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\AdminMiddleware']], function () {
