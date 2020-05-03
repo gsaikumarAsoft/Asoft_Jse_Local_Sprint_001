@@ -268,7 +268,7 @@ export default {
             this.$swal(
               "Oops!",
               "Please request delete permissions from your Admin",
-              "success"
+              "error"
             );
           }
         }

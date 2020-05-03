@@ -54765,7 +54765,7 @@ __webpack_require__.r(__webpack_exports__);
             this.$swal(
               "Oops!",
               "Please request delete permissions from your Admin",
-              "success"
+              "error"
             );
           }
         }
