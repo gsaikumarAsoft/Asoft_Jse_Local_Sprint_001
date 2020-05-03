@@ -57607,6 +57607,122 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/index.js?!./resources/js/components/outbound/Settlements.vue?vue&type=script&lang=ts&":
+/*!*************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/outbound/Settlements.vue?vue&type=script&lang=ts& ***!
+  \*************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jspdf */ "./node_modules/jspdf/dist/jspdf.min.js");
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var jspdf_autotable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! jspdf-autotable */ "./node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.js");
+/* harmony import */ var jspdf_autotable__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(jspdf_autotable__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["accounts"],
+  components: {
+    "head-nav": _partials_Nav__WEBPACK_IMPORTED_MODULE_3__["default"]
+  },
+  data() {
+    return {
+      create: false,
+      broker_settlement_account: JSON.parse(this.accounts),
+      settlement_account: {},
+      local_brokers: [],
+      foreign_brokers: [],
+      perPage: 5,
+      currentPage: 1,
+      fields: [
+        {
+          key: "foreign_broker.name",
+          label: "Foreign Broker",
+          sortable: true
+        },
+        {
+          key: "bank_name",
+          label: "Settlement Agent",
+          sortable: true
+        },
+        {
+          key: "account",
+          sortable: true
+        },
+        {
+          key: "email",
+          sortable: true
+        },
+        {
+          key: "account_balance",
+          sortable: true
+        },
+        {
+          key: "amount_allocated",
+          sortable: true
+        },
+        {
+          key: "currency",
+          sortable: true
+        },
+        {
+          key: "status",
+          sortable: true
+        }
+      ],
+      modalTitle: "Create Broker Settlement Account",
+      nameState: null
+    };
+  },
+  computed: {
+    rows() {
+      return this.accounts.length;
+    }
+  },
+  methods: {},
+  mounted() {console.log(this.accounts);}
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/B2b.vue?vue&type=template&id=9e86d592&":
 /*!******************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/B2b.vue?vue&type=template&id=9e86d592& ***!
@@ -61975,6 +62091,95 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/outbound/Settlements.vue?vue&type=template&id=628422f6&":
+/*!***********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/outbound/Settlements.vue?vue&type=template&id=628422f6& ***!
+  \***********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    [
+      _c("head-nav"),
+      _vm._v(" "),
+      _c("div", { staticClass: "container" }, [
+        _c(
+          "div",
+          { staticClass: "content" },
+          [
+            _c("h1", [_vm._v("Settlement View For Foreign Broker")]),
+            _vm._v(" "),
+            _c("b-table", {
+              attrs: {
+                striped: "",
+                hover: "",
+                "show-empty": "",
+                "empty-text": "No Settlement Accounts have been created",
+                id: "foreign-brokers",
+                items: _vm.broker_settlement_account,
+                fields: _vm.fields,
+                "per-page": _vm.perPage,
+                "current-page": _vm.currentPage
+              }
+            }),
+            _vm._v(" "),
+            _c("b-pagination", {
+              attrs: {
+                "total-rows": _vm.rows,
+                "per-page": _vm.perPage,
+                "aria-controls": "foreign-settlements"
+              },
+              model: {
+                value: _vm.currentPage,
+                callback: function($$v) {
+                  _vm.currentPage = $$v
+                },
+                expression: "currentPage"
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "b-button",
+              {
+                directives: [
+                  {
+                    name: "b-modal",
+                    rawName: "v-b-modal.modal-1",
+                    modifiers: { "modal-1": true }
+                  }
+                ],
+                on: {
+                  click: function($event) {
+                    _vm.create = true
+                  }
+                }
+              },
+              [_vm._v("Create Settlement Account")]
+            )
+          ],
+          1
+        )
+      ])
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/Nav.vue?vue&type=template&id=1a069951&":
 /*!***************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/Nav.vue?vue&type=template&id=1a069951& ***!
@@ -62121,9 +62326,11 @@ var render = function() {
                 _vm._v("Home")
               ]),
               _vm._v(" "),
-              _c("b-nav-item", { attrs: { href: "#" } }, [
-                _vm._v("Settlement Accounts")
-              ]),
+              _c(
+                "b-nav-item",
+                { attrs: { href: "/foreign-broker/settlements" } },
+                [_vm._v("Settlement Accounts")]
+              ),
               _vm._v(" "),
               _c("b-nav-item", { attrs: { href: "#" } }, [
                 _vm._v("Trading Accounts")
@@ -74648,6 +74855,7 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('operator-client', __webpac
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('operator-order', __webpack_require__(/*! ./components/operators/Orders.vue */ "./resources/js/components/operators/Orders.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('trader-home', __webpack_require__(/*! ./components/trader/Index.vue */ "./resources/js/components/trader/Index.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('outbound-home', __webpack_require__(/*! ./components/outbound/Index.vue */ "./resources/js/components/outbound/Index.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('outbound-settlements', __webpack_require__(/*! ./components/outbound/Settlements.vue */ "./resources/js/components/outbound/Settlements.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('account-profile', __webpack_require__(/*! ./components/profile/Index */ "./resources/js/components/profile/Index.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -75764,6 +75972,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Index_vue_vue_type_template_id_1149fb44___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Index_vue_vue_type_template_id_1149fb44___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/outbound/Settlements.vue":
+/*!**********************************************************!*\
+  !*** ./resources/js/components/outbound/Settlements.vue ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Settlements_vue_vue_type_template_id_628422f6___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Settlements.vue?vue&type=template&id=628422f6& */ "./resources/js/components/outbound/Settlements.vue?vue&type=template&id=628422f6&");
+/* harmony import */ var _Settlements_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Settlements.vue?vue&type=script&lang=ts& */ "./resources/js/components/outbound/Settlements.vue?vue&type=script&lang=ts&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _Settlements_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Settlements_vue_vue_type_template_id_628422f6___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Settlements_vue_vue_type_template_id_628422f6___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/outbound/Settlements.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/outbound/Settlements.vue?vue&type=script&lang=ts&":
+/*!***********************************************************************************!*\
+  !*** ./resources/js/components/outbound/Settlements.vue?vue&type=script&lang=ts& ***!
+  \***********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_index_js_vue_loader_options_Settlements_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib??vue-loader-options!./Settlements.vue?vue&type=script&lang=ts& */ "./node_modules/vue-loader/lib/index.js?!./resources/js/components/outbound/Settlements.vue?vue&type=script&lang=ts&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_vue_loader_lib_index_js_vue_loader_options_Settlements_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/outbound/Settlements.vue?vue&type=template&id=628422f6&":
+/*!*****************************************************************************************!*\
+  !*** ./resources/js/components/outbound/Settlements.vue?vue&type=template&id=628422f6& ***!
+  \*****************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Settlements_vue_vue_type_template_id_628422f6___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./Settlements.vue?vue&type=template&id=628422f6& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/outbound/Settlements.vue?vue&type=template&id=628422f6&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Settlements_vue_vue_type_template_id_628422f6___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Settlements_vue_vue_type_template_id_628422f6___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
