@@ -57713,11 +57713,11 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     rows() {
-      return this.accounts.length;
+      return this.broker_settlement_account.length;
     }
   },
   methods: {},
-  mounted() {console.log(this.accounts);}
+  mounted() {}
 });
 
 
