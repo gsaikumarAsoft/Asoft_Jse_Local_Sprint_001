@@ -74,7 +74,7 @@
               label-for="status-input"
               invalid-feedback="Client status is required"
             >
-              <b-form-select v-model="broker.status" :options="client_status"></b-form-select>
+              <b-form-select v-model="broker.operator_status" :options="client_status"></b-form-select>
             </b-form-group>
             <b-form-group label="Access Permissions:">
               <b-form-checkbox-group
@@ -101,6 +101,7 @@ export default {
   },
   data() {
     return {
+      broker: {status: 'Un-Verified'},
       permissions: [],
       selected_permissions: [],
       create: false,
@@ -185,8 +186,8 @@ export default {
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit() {
-      // Exit when the form isn't valid
+    handleSubmit(b) {
+     // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
@@ -200,6 +201,7 @@ export default {
             email: this.broker.email,
             jcsd: this.broker.jcsd,
             status: this.broker.status,
+            operator_status: this.broker.operator_status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -213,6 +215,7 @@ export default {
             email: this.broker.email,
             jcsd: this.broker.jcsd,
             status: this.broker.status,
+            operator_status: this.broker.operator_status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -291,7 +294,8 @@ export default {
         }
       });
     },
-    storeClient(broker) {
+    storeClient(broker) {console.log(broker);
+
       axios
         .post("store-broker-trader", broker)
         .then(response => {

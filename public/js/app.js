@@ -54598,6 +54598,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
+      broker: {status: 'Un-Verified'},
       permissions: [],
       selected_permissions: [],
       create: false,
@@ -54682,8 +54683,8 @@ __webpack_require__.r(__webpack_exports__);
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit() {
-      // Exit when the form isn't valid
+    handleSubmit(b) {
+     // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
@@ -54697,6 +54698,7 @@ __webpack_require__.r(__webpack_exports__);
             email: this.broker.email,
             jcsd: this.broker.jcsd,
             status: this.broker.status,
+            operator_status: this.broker.operator_status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -54710,6 +54712,7 @@ __webpack_require__.r(__webpack_exports__);
             email: this.broker.email,
             jcsd: this.broker.jcsd,
             status: this.broker.status,
+            operator_status: this.broker.operator_status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -54788,7 +54791,8 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     },
-    storeClient(broker) {
+    storeClient(broker) {console.log(broker);
+
       axios__WEBPACK_IMPORTED_MODULE_1___default.a
         .post("store-broker-trader", broker)
         .then(response => {
@@ -60958,11 +60962,11 @@ var render = function() {
                             _c("b-form-select", {
                               attrs: { options: _vm.client_status },
                               model: {
-                                value: _vm.broker.status,
+                                value: _vm.broker.operator_status,
                                 callback: function($$v) {
-                                  _vm.$set(_vm.broker, "status", $$v)
+                                  _vm.$set(_vm.broker, "operator_status", $$v)
                                 },
-                                expression: "broker.status"
+                                expression: "broker.operator_status"
                               }
                             })
                           ],

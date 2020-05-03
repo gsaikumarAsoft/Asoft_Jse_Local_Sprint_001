@@ -143,9 +143,7 @@ class FunctionSet
     function createOperatorClient($request)
     {
 
-        if(empty($request->status)){
-            $request->status = 'Un-Verified';
-        }
+
         $user = auth()->user();
         $request['local_broker_id'] = $user->local_broker_id;
 
@@ -155,6 +153,13 @@ class FunctionSet
         $broker_user = $local_broker['user'];
 
         if ($request->id) {
+            // If the operator didnt select a status default to unverified
+            if (empty($request->operator_status)) {
+                $request->status = 'Un-Verified';
+            }else{
+                $request->status = $request->operator_status;
+            }
+
             LogActivity::addToLog('Update Client Details');
             $broker_client = BrokerClient::updateOrCreate(
                 ['id' => $request->id],
@@ -259,8 +264,8 @@ class FunctionSet
     public function createBrokerUser($request)
     {
 
-        
-        
+
+
         $local_broker = $this->getUserAll($request->local_broker_id);
         $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
         // return $broker_owner;
@@ -288,7 +293,7 @@ class FunctionSet
 
                 // $user->givePermissionTo($request->permissions[$i]);
                 // $user = User::find($user->is); // returns an instance of \App\User
- 
+
             }
         } else {
             $role_OPRB = Role::where('name', 'OPRB')->first();
