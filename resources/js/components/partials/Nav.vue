@@ -7,7 +7,7 @@
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav v-if="user_role === 'AGTS'">
         <b-nav-item href="/settlement-agent">Home</b-nav-item>
-        <b-nav-item href="/settlement-agent/transactions">Transactions</b-nav-item>
+        <b-nav-item href="#">Transactions</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav v-if="user_role === 'ADMD'">
         <b-nav-item href="/jse-admin">Home</b-nav-item>

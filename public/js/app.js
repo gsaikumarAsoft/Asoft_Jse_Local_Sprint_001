@@ -62409,11 +62409,9 @@ var render = function() {
                     _vm._v("Home")
                   ]),
                   _vm._v(" "),
-                  _c(
-                    "b-nav-item",
-                    { attrs: { href: "/settlement-agent/transactions" } },
-                    [_vm._v("Transactions")]
-                  )
+                  _c("b-nav-item", { attrs: { href: "#" } }, [
+                    _vm._v("Transactions")
+                  ])
                 ],
                 1
               )
