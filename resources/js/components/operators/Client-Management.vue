@@ -23,7 +23,11 @@
           :per-page="perPage"
           aria-controls="local-brokers"
         ></b-pagination>
-        <b-button v-if='permissions.indexOf("create-broker-client") !== -1' v-b-modal.modal-1 @click="create = true">Create Client</b-button>
+        <b-button
+          v-if='permissions.indexOf("create-broker-client") !== -1'
+          v-b-modal.modal-1
+          @click="create = true"
+        >Create Client</b-button>
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
@@ -64,6 +68,14 @@
                 required
               ></b-form-input>
             </b-form-group>
+            <b-form-group
+              v-if='permissions.indexOf("approve-broker-client") !== -1'
+              label="Client Status"
+              label-for="status-input"
+              invalid-feedback="Client status is required"
+            >
+              <b-form-select v-model="broker.status" :options="client_status"></b-form-select>
+            </b-form-group>
             <b-form-group label="Access Permissions:">
               <b-form-checkbox-group
                 id="checkbox-group-1"
@@ -83,7 +95,7 @@ import permissionMixin from "./../../mixins/Permissions";
 import axios from "axios";
 import headNav from "./../partials/Nav";
 export default {
-    mixins: [permissionMixin],
+  mixins: [permissionMixin],
   components: {
     headNav
   },
@@ -97,6 +109,12 @@ export default {
       broker: {},
       perPage: 5,
       currentPage: 1,
+      client_status: [
+        { value: null, text: "Please select a statusx" },
+        { value: "Verified", text: "Verified" },
+        { value: "Un-verified", text: "Rejected" },
+        { value: "Pending", text: "Pending" },
+      ],
       options: [
         { text: "Create", value: "Create" },
         { text: "Read", value: "Read" },
@@ -126,7 +144,7 @@ export default {
         {
           key: "status",
           sortable: true
-        },
+        }
         // {
         //   key: "types",
         //   label: "Access Permissions"
@@ -181,7 +199,7 @@ export default {
             local_broker_id: parseInt(this.$userId),
             email: this.broker.email,
             jcsd: this.broker.jcsd,
-            status: "Approved",
+            status: this.broker.status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -194,7 +212,7 @@ export default {
             name: this.broker.name,
             email: this.broker.email,
             jcsd: this.broker.jcsd,
-            status: "Approved",
+            status: this.broker.status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -229,13 +247,17 @@ export default {
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
-          if(this.permissions.indexOf("update-broker-client") !== -1){
-          this.$bvModal.show("modal-1");
-          }else{
-            this.$swal("Oops!", "Please request update permissions from your Admin", "error");
+          if (this.permissions.indexOf("update-broker-client") !== -1) {
+            this.$bvModal.show("modal-1");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request update permissions from your Admin",
+              "error"
+            );
           }
         }
-          if (result.dismiss === "cancel") {
+        if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-client") !== -1) {
             this.destroy(b.id);
             this.$swal("Deleted!", "Client Has Been Removed.", "success");
@@ -292,9 +314,7 @@ export default {
     //Looop through and identify all permission to validate against actions
     for (let i = 0; i < p.length; i++) {
       this.permissions.push(p[i].name);
-     
     }
-
 
     axios.get("trading-accounts").then(response => {
       let local_brokers = response.data;

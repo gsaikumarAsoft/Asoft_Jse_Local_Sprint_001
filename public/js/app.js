@@ -54579,8 +54579,20 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
-    mixins: [_mixins_Permissions__WEBPACK_IMPORTED_MODULE_0__["default"]],
+  mixins: [_mixins_Permissions__WEBPACK_IMPORTED_MODULE_0__["default"]],
   components: {
     headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
@@ -54594,6 +54606,12 @@ __webpack_require__.r(__webpack_exports__);
       broker: {},
       perPage: 5,
       currentPage: 1,
+      client_status: [
+        { value: null, text: "Please select a statusx" },
+        { value: "Verified", text: "Verified" },
+        { value: "Un-verified", text: "Rejected" },
+        { value: "Pending", text: "Pending" },
+      ],
       options: [
         { text: "Create", value: "Create" },
         { text: "Read", value: "Read" },
@@ -54623,7 +54641,7 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: "status",
           sortable: true
-        },
+        }
         // {
         //   key: "types",
         //   label: "Access Permissions"
@@ -54678,7 +54696,7 @@ __webpack_require__.r(__webpack_exports__);
             local_broker_id: parseInt(this.$userId),
             email: this.broker.email,
             jcsd: this.broker.jcsd,
-            status: "Approved",
+            status: this.broker.status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -54691,7 +54709,7 @@ __webpack_require__.r(__webpack_exports__);
             name: this.broker.name,
             email: this.broker.email,
             jcsd: this.broker.jcsd,
-            status: "Approved",
+            status: this.broker.status,
             permission: this.selected_permissions,
             account_balance: this.broker.account_balance
           });
@@ -54726,13 +54744,17 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
-          if(this.permissions.indexOf("update-broker-client") !== -1){
-          this.$bvModal.show("modal-1");
-          }else{
-            this.$swal("Oops!", "Please request update permissions from your Admin", "error");
+          if (this.permissions.indexOf("update-broker-client") !== -1) {
+            this.$bvModal.show("modal-1");
+          } else {
+            this.$swal(
+              "Oops!",
+              "Please request update permissions from your Admin",
+              "error"
+            );
           }
         }
-          if (result.dismiss === "cancel") {
+        if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-client") !== -1) {
             this.destroy(b.id);
             this.$swal("Deleted!", "Client Has Been Removed.", "success");
@@ -54789,9 +54811,7 @@ __webpack_require__.r(__webpack_exports__);
     //Looop through and identify all permission to validate against actions
     for (let i = 0; i < p.length; i++) {
       this.permissions.push(p[i].name);
-     
     }
-
 
     axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("trading-accounts").then(response => {
       let local_brokers = response.data;
@@ -60923,6 +60943,32 @@ var render = function() {
                       ],
                       1
                     ),
+                    _vm._v(" "),
+                    _vm.permissions.indexOf("approve-broker-client") !== -1
+                      ? _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Client Status",
+                              "label-for": "status-input",
+                              "invalid-feedback": "Client status is required"
+                            }
+                          },
+                          [
+                            _c("b-form-select", {
+                              attrs: { options: _vm.client_status },
+                              model: {
+                                value: _vm.broker.status,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.broker, "status", $$v)
+                                },
+                                expression: "broker.status"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      : _vm._e(),
                     _vm._v(" "),
                     _c(
                       "b-form-group",

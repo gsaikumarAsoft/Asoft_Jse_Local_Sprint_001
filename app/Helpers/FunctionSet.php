@@ -143,6 +143,9 @@ class FunctionSet
     function createOperatorClient($request)
     {
 
+        if(empty($request->status)){
+            $request->status = 'Un-Verified';
+        }
         $user = auth()->user();
         $request['local_broker_id'] = $user->local_broker_id;
 
@@ -155,7 +158,7 @@ class FunctionSet
             LogActivity::addToLog('Update Client Details');
             $broker_client = BrokerClient::updateOrCreate(
                 ['id' => $request->id],
-                ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified', 'open_orders' => $request->open_orders, 'jcsd' => $request->jcsd, 'account_balance' => $request->account_balance]
+                ['name' => $request->name, 'email' => $request->email, 'status' => $request->status, 'jcsd' => $request->jcsd, 'account_balance' => $request->account_balance]
 
             );
         } else {
