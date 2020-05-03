@@ -5,6 +5,7 @@
       <h1>Current Orders</h1>
       <div class="content">
         <b-table
+         v-if='permissions.indexOf("read-broker-order") !== -1'
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
           id="orders-table"

@@ -4,6 +4,7 @@
     <div class="container">
       <div class="content">
         <b-table
+         v-if='permissions.indexOf("read-broker-client") !== -1'
           striped
           hover
           show-empty
