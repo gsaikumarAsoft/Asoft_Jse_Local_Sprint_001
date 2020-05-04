@@ -29,6 +29,7 @@
   </div>
 </template>
 <script lang="ts">
+import moment from 'moment';
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
@@ -115,7 +116,14 @@ export default {
           key: "settlement_account_number",
           formatter: (value, key, item) => {
             var agent = item.settlement_agent;
-            return agent+'-'+value;
+            return agent + "-" + value;
+          }
+        },
+        {
+          key: "messageDate",
+          sortable: true,
+          formatter: (value, key, item) => {
+            return moment(String(value));
           }
         }
         // { key: "settlement_amount_allocated" }
