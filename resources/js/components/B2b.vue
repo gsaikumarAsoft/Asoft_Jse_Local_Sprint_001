@@ -346,7 +346,7 @@ export default {
         .post("/store-settlement-broker", this.settlement_account)
         .then(response => {
           this.getTradingAccountsList();
-           setTimeout(location.reload.bind(location), 1000);
+          //  setTimeout(location.reload.bind(location), 1000);
           this.create = false;
         })
         .catch(error => {});
