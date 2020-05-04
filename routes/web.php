@@ -80,6 +80,8 @@ Route::group(['prefix' => '/broker', 'middleware' => ['App\Http\Middleware\Local
     Route::get('/broker-trading-accounts', 'BrokerController@tradingAccounts');
     Route::get('/settlements', 'BrokerController@settlements');
     Route::get('/orders', 'BrokerController@orders');
+    Route::get('/execution', 'BrokerController@execution');
+    Route::post('/execution-report', 'BrokerController@logExecution');
     Route::get('/approvals', 'BrokerController@approvals');
     Route::post('/store-broker-client-order', "BrokerController@clientOrder");
     Route::delete('/destroy-broker-client-order/{id}', "BrokerController@destroyOrder");

@@ -35,6 +35,7 @@ Vue.component('broker-company', require('./components/brokers/Companies.vue').de
 Vue.component('broker-user', require('./components/brokers/Users.vue').default);
 Vue.component('broker-trader', require('./components/brokers/Clients.vue').default);
 Vue.component('broker-order', require('./components/brokers/Orders.vue').default);
+Vue.component('broker-execution-report', require('./components/brokers/Execution.vue').default);
 Vue.component('broker-request', require('./components/brokers/Requests.vue').default);
 Vue.component('broker-2-broker', require('./components/B2b.vue').default);
 Vue.component('broker-settlements', require('./components/brokers/SettlementAccounts').default);

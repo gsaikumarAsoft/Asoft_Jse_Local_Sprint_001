@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\BrokerClient;
 use App\BrokerClientOrder;
+use App\BrokerOrderExecutionReport;
 use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
 use App\BrokerUser;
@@ -16,6 +17,7 @@ use App\Role;
 use Illuminate\Http\Request;
 use App\User;
 use Carbon\Carbon;
+use CreateBrokerClientOrderExecutionReports;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -140,6 +142,42 @@ class BrokerController extends Controller
         // $list = BrokerClient::with('local_broker')->get();
         // return $list;
     }
+    public function execution()
+    {
+        $execution_reports = BrokerOrderExecutionReport::all();
+        return view('brokers.execution')->with('execution_reports', $execution_reports);
+    }
+
+    public function logExecution(Request $request){
+        $execution_report = $request['executionReports'];
+        BrokerOrderExecutionReport::truncate();
+        foreach($execution_report as $report){
+            $broker_order_execution_report = new BrokerOrderExecutionReport();
+            $broker_order_execution_report->clOrdID = $report['clOrdID'];
+            $broker_order_execution_report->orderID = $report['orderID'];
+            $broker_order_execution_report->text = $report['text'];
+            $broker_order_execution_report->ordRejRes = $report['ordRejRes'];
+            $broker_order_execution_report->status = $report['status'];
+            $broker_order_execution_report->buyorSell = $report['buyorSell'];
+            $broker_order_execution_report->securitySubType = $report['securitySubType'];
+            $broker_order_execution_report->time = $report['time'];
+            $broker_order_execution_report->ordType = $report['ordType'];
+            $broker_order_execution_report->orderQty = $report['orderQty'];
+            $broker_order_execution_report->timeInForce = $report['timeInForce'];
+            $broker_order_execution_report->symbol = $report['symbol'];
+            $broker_order_execution_report->qTradeacc = $report['qTradeacc'];
+            $broker_order_execution_report->price = $report['price'];
+            $broker_order_execution_report->stopPx = $report['stopPx'];
+            $broker_order_execution_report->execType = $report['execType'];
+            $broker_order_execution_report->senderSubID = $report['senderSubID'];
+            $broker_order_execution_report->seqNum = $report['seqNum'];
+            $broker_order_execution_report->sendingTime = $report['sendingTime'];
+            $broker_order_execution_report->messageDate = $report['messageDate'];
+            $broker_order_execution_report->save();
+        }
+
+        
+    }
     public function orders()
     {
         $local_brokers = LocalBroker::all();
@@ -174,8 +212,8 @@ class BrokerController extends Controller
     }
     public function clientOrder(Request $request)
     {
-        
-        
+
+
 
         //Define The Broker Making The Order
         $user = auth()->user();
@@ -186,11 +224,11 @@ class BrokerController extends Controller
 
         //Trading Account Information
         $trading = BrokerTradingAccount::with('settlement_account')->find($request->trading_account)->first();
-        
+
         //Settlement Account Information
         $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
-        
-        
+
+
         // Client Account Information
         $c_account = BrokerClient::find($request['client_trading_account'])->first();
 
@@ -205,12 +243,10 @@ class BrokerController extends Controller
             // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
 
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
-
         } else if ($client_available < $order_value) {
 
             // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
-
         } else {
 
             // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 

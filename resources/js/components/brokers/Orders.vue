@@ -437,7 +437,7 @@ export default {
   },
   data() {
     return {
-      messageDownload: [],
+      // messageDownload: [],
       order_template_data: [],
       file: "",
       order_option_input: false,
@@ -1008,6 +1008,7 @@ export default {
           if (valid) {
             this.$swal(data.errors);
             this.callFix(broker);
+            this.$swal("Order Submitted: Generating Execution Reports");
             // setTimeout(location.reload.bind(location), 2000);
           } else {
             this.$swal(data.errors);
@@ -1106,9 +1107,16 @@ export default {
           }
         });
     },
-    messageDownload() {
+    newMessageDownload() {
       axios.post("/storage/apis/messageDownload.json").then(response => {
-        this.messageDownload = response.data;
+        // this.messageDownload = response.data;
+        this.logExecutionReport(response.data);
+      });
+    },
+    logExecutionReport(d) {
+      axios.post("execution-report",d).then(response => {
+        this.$swal("Execution Reports Generated..");
+        console.log(response);
       });
     },
     getSymbols() {
@@ -1127,7 +1135,7 @@ export default {
         .then(response => {
           // console.log(response);
           // This api endpoint is currently empty so we will resort to using test data provided
-          this.messageDownload(); //Get message download
+          this.newMessageDownload(); //Get message download
         });
     },
     add() {

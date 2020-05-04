@@ -24,6 +24,7 @@
         <b-nav-item href="/broker/settlements">Settlement Accounts</b-nav-item>
         <b-nav-item href="/broker/traders">Client Accounts</b-nav-item>
         <b-nav-item href="/broker/orders">Orders</b-nav-item>
+        <b-nav-item href="/broker/execution">Order Execution Reports</b-nav-item>
         <!-- <b-nav-item href="/broker/spprovals">Approval Request List</b-nav-item> -->
         <!-- <b-nav-item href="/broker/log">Audit Log List</b-nav-item> -->
       </b-navbar-nav>
