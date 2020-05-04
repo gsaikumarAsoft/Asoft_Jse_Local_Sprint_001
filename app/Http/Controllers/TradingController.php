@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
@@ -28,10 +29,14 @@ class TradingController extends Controller
     public function store(Request $request)
     {
 
-        // return $request;
+       
 
-        $foreign_broker = $this->HelperClass->getForeignBrokerById($request->foreign_broker_id);
-        $local_broker = $this->HelperClass->defineLocalBroker($request->local_broker_id);
+        $settlement = BrokerSettlementAccount::find($request->settlement_account_number);
+        $settlement_local_broker = $settlement->local_broker_id;
+        $settlement_foreign_broker = $settlement->foreign_broker_id;
+        
+        $foreign_broker = $this->HelperClass->getUserAll($settlement_foreign_broker);
+        $local_broker = $this->HelperClass->getUserAll($settlement_local_broker);
         $settlement_data = $this->HelperClass->getSettlementData($request->settlement_account_number);
         // return $settlement_data;
         // return $foreign_broker;
@@ -55,7 +60,7 @@ class TradingController extends Controller
             $broker->port =   $request->port;
             $broker->save();
 
-            $request['broker_name'] = $foreign_broker[0]->name;
+            $request['broker_name'] = $foreign_broker->name;
             $request['local_broker_name'] = $local_broker->name;
             $request['settlement_agent'] = $settlement_data['bank_name'];
             $request['settlement_account_number'] = $settlement_data['account'];
@@ -69,7 +74,7 @@ class TradingController extends Controller
 
             // return $request;
             
-            Mail::to($foreign_broker[0]->email)->send(new TradingAccount($request));
+            Mail::to($foreign_broker->email)->send(new TradingAccount($request));
         }
     }
     public function destroy($id)

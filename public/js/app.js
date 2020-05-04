@@ -56399,69 +56399,6 @@ var render = function() {
                       "b-form-group",
                       {
                         attrs: {
-                          sm: "",
-                          label: "Local Broker",
-                          "label-for": "name-input",
-                          "invalid-feedback": "Name is required"
-                        }
-                      },
-                      [
-                        _c("b-form-select", {
-                          attrs: {
-                            label: "Local Broker",
-                            "label-for": "localBroker-input",
-                            "invalid-feedback": "A Local Broker is required",
-                            sm: "",
-                            options: _vm.local_brokers
-                          },
-                          model: {
-                            value: _vm.settlement_account.local_broker_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "local_broker_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.local_broker_id"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Foreign Broker",
-                          "label-for": "foreign-input",
-                          "invalid-feedback": "Foreign Broker is required"
-                        }
-                      },
-                      [
-                        _c("b-form-select", {
-                          attrs: { Socket: "", options: _vm.foreign_brokers },
-                          model: {
-                            value: _vm.settlement_account.foreign_broker_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "foreign_broker_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.foreign_broker_id"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
                           label: "Settlement Account Number",
                           "label-for": "Settlement-Account-Number-input",
                           "invalid-feedback":

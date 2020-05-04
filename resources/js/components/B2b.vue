@@ -27,7 +27,7 @@
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
-            <b-form-group
+            <!-- <b-form-group
               sm
               label="Local Broker"
               label-for="name-input"
@@ -52,7 +52,7 @@
                 Socket
                 :options="foreign_brokers"
               ></b-form-select>
-            </b-form-group>
+            </b-form-group> -->
             <b-form-group
               label="Settlement Account Number"
               label-for="Settlement-Account-Number-input"
