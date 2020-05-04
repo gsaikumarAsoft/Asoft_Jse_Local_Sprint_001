@@ -52055,7 +52055,7 @@ __webpack_require__.r(__webpack_exports__);
             // setTimeout(location.reload.bind(location), 2000);
           } else {
             this.$swal(data.errors);
-            // setTimeout(location.reload.bind(location), 2000);
+            setTimeout(location.reload.bind(location), 2000);
           }
         });
       }
@@ -52160,6 +52160,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("execution-report",d).then(response => {
         this.$swal("Execution Reports Generated..");
         console.log(response);
+        setTimeout(location.reload.bind(location), 2000);
       });
     },
     getSymbols() {

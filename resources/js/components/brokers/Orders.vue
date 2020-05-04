@@ -1012,7 +1012,7 @@ export default {
             // setTimeout(location.reload.bind(location), 2000);
           } else {
             this.$swal(data.errors);
-            // setTimeout(location.reload.bind(location), 2000);
+            setTimeout(location.reload.bind(location), 2000);
           }
         });
       }
@@ -1117,6 +1117,7 @@ export default {
       axios.post("execution-report",d).then(response => {
         this.$swal("Execution Reports Generated..");
         console.log(response);
+        setTimeout(location.reload.bind(location), 2000);
       });
     },
     getSymbols() {
