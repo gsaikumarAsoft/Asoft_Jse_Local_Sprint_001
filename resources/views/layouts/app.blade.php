@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no, user-scalable=0"/>
-    <meta name="description" content="An Innovate 10x Product : Clive Beckford | Jason Lawrence">
+    <meta name="description" content="An Innovate 10x Product : We are an engine of creativity for the rapid digital disruption that drives transformation, growth and sustainable development for our clients, partners and colleagues in the Caribbean.">
     <meta name="author" content="Jason Lawrence Innovate 10x">
         <meta name="csrf-token" content="{{ csrf_token() }}">  
         @if(Auth::user())         
