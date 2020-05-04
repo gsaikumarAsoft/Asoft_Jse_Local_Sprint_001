@@ -69,12 +69,12 @@ class ApplicationController extends Controller
                 return redirect('trader-broker');
                 break;
             case 'BRKF':
-                // return 'Configuration Screen For Outbound Foreign Broker To Be Designed';
-                return redirect('foreign-broker');
+                return 'Configuration Screen For Outbound Foreign Broker To Be Designed <a href="/logout">Logout</a>';
+                // return redirect('foreign-broker');
                 break;
             case 'AGTS':
-                // return 'Configuration Screen For Settlement Agent To Be Designed <a href="/logout">Logout</a>';
-                return redirect('settlement-agent');
+                return 'Configuration Screen For Settlement Agent To Be Designed <a href="/logout">Logout</a>';
+                // return redirect('settlement-agent');
                 break;
             default:
                 return "Login Complete";
