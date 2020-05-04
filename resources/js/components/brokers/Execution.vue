@@ -3,7 +3,7 @@
     <head-nav></head-nav>
     <div class="container" style="margin-top: 100px;">
       <h1>Execution Order Reports</h1>
-      <div class="content">
+      <div class="content table-responsive">
         <b-table
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
@@ -16,15 +16,15 @@
           :fields="fields"
           @row-clicked="brokerOrderHandler"
         ></b-table>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="orders-table"
-        ></b-pagination>
-        <b-button @click="exportBalances">Export Balances</b-button>
         <!-- <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button> -->
       </div>
+      <b-pagination
+        v-model="currentPage"
+        :total-rows="rows"
+        :per-page="perPage"
+        aria-controls="orders-table"
+      ></b-pagination>
+      <b-button @click="exportBalances">Export Balances</b-button>
     </div>
   </div>
 </template>
@@ -139,7 +139,7 @@ export default {
           this.report_data[i].stopPx,
           // this.report_data[i].execType,
           this.report_data[i].senderSub,
-          this.report_data[i].seqNum,
+          this.report_data[i].seqNum
           // this.report_data[i].sendingTime,
           // this.report_data[i].messageDate
         ]);
@@ -173,7 +173,7 @@ export default {
             "stopPx",
             // "execType",
             "senderSubID",
-            "seqNum",
+            "seqNum"
             // "sendingTime",
             // "messageDate"
           ]

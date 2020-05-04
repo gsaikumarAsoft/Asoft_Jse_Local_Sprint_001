@@ -50975,7 +50975,7 @@ __webpack_require__.r(__webpack_exports__);
           this.report_data[i].stopPx,
           // this.report_data[i].execType,
           this.report_data[i].senderSub,
-          this.report_data[i].seqNum,
+          this.report_data[i].seqNum
           // this.report_data[i].sendingTime,
           // this.report_data[i].messageDate
         ]);
@@ -51009,7 +51009,7 @@ __webpack_require__.r(__webpack_exports__);
             "stopPx",
             // "execType",
             "senderSubID",
-            "seqNum",
+            "seqNum"
             // "sendingTime",
             // "messageDate"
           ]
@@ -57980,7 +57980,7 @@ var render = function() {
           _vm._v(" "),
           _c(
             "div",
-            { staticClass: "content" },
+            { staticClass: "content table-responsive" },
             [
               _c("b-table", {
                 ref: "selectedOrder",
@@ -57996,30 +57996,31 @@ var render = function() {
                   fields: _vm.fields
                 },
                 on: { "row-clicked": _vm.brokerOrderHandler }
-              }),
-              _vm._v(" "),
-              _c("b-pagination", {
-                attrs: {
-                  "total-rows": _vm.rows,
-                  "per-page": _vm.perPage,
-                  "aria-controls": "orders-table"
-                },
-                model: {
-                  value: _vm.currentPage,
-                  callback: function($$v) {
-                    _vm.currentPage = $$v
-                  },
-                  expression: "currentPage"
-                }
-              }),
-              _vm._v(" "),
-              _c("b-button", { on: { click: _vm.exportBalances } }, [
-                _vm._v("Export Balances")
-              ])
+              })
             ],
             1
-          )
-        ]
+          ),
+          _vm._v(" "),
+          _c("b-pagination", {
+            attrs: {
+              "total-rows": _vm.rows,
+              "per-page": _vm.perPage,
+              "aria-controls": "orders-table"
+            },
+            model: {
+              value: _vm.currentPage,
+              callback: function($$v) {
+                _vm.currentPage = $$v
+              },
+              expression: "currentPage"
+            }
+          }),
+          _vm._v(" "),
+          _c("b-button", { on: { click: _vm.exportBalances } }, [
+            _vm._v("Export Balances")
+          ])
+        ],
+        1
       )
     ],
     1
