@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
+use App\ForeignBroker;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
+use App\LocalBroker;
 use App\Mail\TradingAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -35,11 +37,14 @@ class TradingController extends Controller
         $settlement_local_broker = $settlement->local_broker_id;
         $settlement_foreign_broker = $settlement->foreign_broker_id;
         
+        $request_local_broker = LocalBroker::where('user_id',$settlement_local_broker)->first();
+        $request_foreign_broker = ForeignBroker::where('user_id',$settlement_foreign_broker)->first();
+
         $foreign_broker = $this->HelperClass->getUserAll($settlement_foreign_broker);
         $local_broker = $this->HelperClass->getUserAll($settlement_local_broker);
         $settlement_data = $this->HelperClass->getSettlementData($request->settlement_account_number);
-        // return $settlement_data;
-        // return $foreign_broker;
+
+
         if ($request->id) {
             LogActivity::addToLog('Update Broker Trading Account Details');
             BrokerTradingAccount::updateOrCreate(
@@ -49,8 +54,8 @@ class TradingController extends Controller
             );
         } else {
             $broker = new BrokerTradingAccount();
-            $broker->local_broker_id =   $request->local_broker_id;
-            $broker->foreign_broker_id =   $request->foreign_broker_id;
+            $broker->local_broker_id =   $request_local_broker['id'];
+            $broker->foreign_broker_id =  $request_foreign_broker['id'];
             $broker->umir =   $request->umir;
             $broker->trading_account_number =   $request->trading_account_number;
             $broker->broker_settlement_account_id =   $request->settlement_account_number;
