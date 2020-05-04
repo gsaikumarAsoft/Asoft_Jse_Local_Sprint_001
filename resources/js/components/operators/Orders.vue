@@ -1060,7 +1060,7 @@ export default {
     },
     handleSubmit() {},
         getSymbols() {
-      axios.post("/storage/apis/symbols.json").then(response => {
+      axios.post("/apis/symbols.json").then(response => {
         this.symbols = response.data;
       });
     },

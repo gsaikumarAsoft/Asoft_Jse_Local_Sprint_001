@@ -1108,7 +1108,7 @@ export default {
         });
     },
     newMessageDownload() {
-      axios.post("/storage/apis/messageDownload.json").then(response => {
+      axios.post("/apis/messageDownload.json").then(response => {
         // this.messageDownload = response.data;
         this.logExecutionReport(response.data);
       });
@@ -1121,7 +1121,7 @@ export default {
       });
     },
     getSymbols() {
-      axios.post("/storage/apis/symbols.json").then(response => {
+      axios.post("/apis/symbols.json").then(response => {
         this.symbols = response.data;
       });
     },
