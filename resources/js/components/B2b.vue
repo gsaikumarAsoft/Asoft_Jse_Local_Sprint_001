@@ -325,7 +325,8 @@ export default {
     getTradingAccountsList() {
       axios.get("trader-list").then(response => {
         let data = response.data;
-        // console.log(data);
+        console.log(response);
+        this.trading_accounts = [];
         this.trading_accounts = data;
       });
     },
