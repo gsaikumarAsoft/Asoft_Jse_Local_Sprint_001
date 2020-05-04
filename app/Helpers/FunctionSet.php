@@ -48,6 +48,7 @@ class FunctionSet
         $broker_client_order->side = $request->side;
         $broker_client_order->status_time = $mytime->toDateTimeString();
         $broker_client_order->client_order_number = $request->client_order_number;
+        $broker_client_order->clordid = $request->client_order_number;
         $broker_client_order->market_order_number = $request->market_order_number;
         $broker_client_order->stop_price = $request->stop_price;
         $broker_client_order->expiration_date = $request->expiration_date;

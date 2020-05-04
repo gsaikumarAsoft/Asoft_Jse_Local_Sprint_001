@@ -44,8 +44,75 @@ export default {
     return {
       report_data: JSON.parse(this.execution_reports),
       fields: [
-        // { ket: "handling_instructions", sortable: true },
-        // { key: "order_date", sortable: true },
+        { key: "clordid", sortable: true, label: "Order Number" },
+        { key: "qTradeacc", sortable: true, label: "Client Account" },
+        {
+          key: "status",
+          sortable: true,
+          formatter: (value, key, item) => {
+            // return value;
+            if (value === "0") {
+              return "New";
+            }
+            if (value === "1") {
+              return "Partially Filled";
+            }
+            if (value === "2") {
+              return "Filled";
+            }
+            if (value === "4") {
+              return "Cancelled";
+            }
+            if (value === "5") {
+              return "Replaced";
+            }
+            if (value === "C") {
+              return "Expired";
+            }
+            if (value === "Z") {
+              return "Private";
+            }
+            if (value === "U") {
+              return "Unplaced; order is not in the orderbook (Nasdaq defined)";
+            }
+            if (value === "x") {
+              return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+            }
+          }
+        },
+        {
+          key: "buyorSell",
+          sortable: true,
+          formatter: (value, key, item) => {
+            // return value;
+            if (value === "1") {
+              return "Buy";
+            }
+            if (value === "2") {
+              return "Sell";
+            }
+            if (value === "5") {
+              return "Sell Short";
+            }
+            if (value === "6") {
+              return "Sell Short Exempt";
+            }
+            if (value === "8") {
+              return "Cross";
+            }
+            if (value === "9") {
+              return "Short Cross";
+            }
+            if (value === "X") {
+              return "BuyCross (Fill for the Buy side of a Cross)";
+            }
+            if (value === "Y") {
+              return "SellCross (Fill for the Sell side of a Cross)";
+            }
+          }
+        },
+        { key: "settlement_account_balance" },
+        { key: "settlement_amount_allocated" }
         // {
         //   key: "order_type.text",
         //   label: "Order Type",
@@ -56,60 +123,13 @@ export default {
         //     return order.text;
         //   }
         // },
-        // {
-        //   key: "symbol.text",
-        //   label: "Symbol",
-        //   sortable: true,
-        //   formatter: (value, key, item) => {
-        //     var data = JSON.parse(item.symbol);
-        //     var s = data;
-        //     return s.text;
-        //     // return symbol.text;
-        //   }
-        // },
-        // {
-        //   key: "time_in_force.text",
-        //   label: "Time In Force",
-        //   sortable: true,
-        //   formatter: (value, key, item) => {
-        //     var data = JSON.parse(item.time_in_force);
-        //     var s = data;
-        //     return s.text;
-        //     // return symbol.text;
-        //   }
-        // },
-        // {
-        //   key: "currency.text",
-        //   label: "Currency",
-        //   sortable: true,
-        //   formatter: (value, key, item) => {
-        //     var data = JSON.parse(item.currency);
-        //     var s = data;
-        //     return s.text;
-        //     // return symbol.text;
-        //   }
-        // },
-        // {
-        //   key: "side.text",
-        //   label: "Side",
-        //   sortable: true,
-        //   formatter: (value, key, item) => {
-        //     var data = JSON.parse(item.side);
-        //     var s = data;
-        //     return s.text;
-        //     // return symbol.text;
-        //   }
-        // },
-        // { key: "order_quantity", sortable: true },
-        // { key: "price", sortable: true },
-        // { key: "order_status", sortable: true }
-        // // { key: "foreign_broker", sortable: true }
       ],
       broker_client_orders: [],
       broker: {},
       perPage: 5,
       currentPage: 1,
       nameState: null
+      
     };
   },
   computed: {

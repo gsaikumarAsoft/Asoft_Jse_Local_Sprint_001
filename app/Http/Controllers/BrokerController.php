@@ -144,7 +144,15 @@ class BrokerController extends Controller
     }
     public function execution()
     {
-        $execution_reports = BrokerOrderExecutionReport::all();
+        // $execution_reports = BrokerOrderExecutionReport::all();
+        $execution_reports = DB::table('broker_client_order_execution_reports')
+                            ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account_balance as settlement_account_balance', 'broker_settlement_accounts.amount_allocated as settlement_amount_allocated')
+                            ->join('broker_trading_accounts', 'broker_client_order_execution_reports.senderSubID', 'broker_trading_accounts.trading_account_number')
+                            ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+                            ->get();
+
+
+        // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 
