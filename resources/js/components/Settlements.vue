@@ -381,13 +381,13 @@ export default {
       const tableData = [];
       for (var i = 0; i < this.broker_settlement_account.length; i++) {
         tableData.push([
-          this.broker_settlement_account[0].local_broker["name"],
-          this.broker_settlement_account[0].foreign_broker["name"],
-          this.broker_settlement_account[0].bank_name,
-          this.broker_settlement_account[0].account,
-          this.broker_settlement_account[0].email,
-          this.broker_settlement_account[0].account_balance,
-          this.broker_settlement_account[0].amount_allocated
+          this.broker_settlement_account[i].local_broker["name"],
+          this.broker_settlement_account[i].foreign_broker["name"],
+          this.broker_settlement_account[i].bank_name,
+          this.broker_settlement_account[i].account,
+          this.broker_settlement_account[i].email,
+          this.broker_settlement_account[i].account_balance,
+          this.broker_settlement_account[i].amount_allocated
         ]);
       }
 

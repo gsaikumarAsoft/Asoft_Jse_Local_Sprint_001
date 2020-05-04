@@ -2547,7 +2547,7 @@ export default {
     createBrokerClientOrder(broker) {
       if (!broker.trading_account || !broker.client_trading_account) {
         this.$swal(
-          "You need to select a Trading Account & Client Accont to continue"
+          "You need to select Both a Trading Account & Client Account to continue"
         );
       } else {
         this.$swal("Processing your order..");
