@@ -50832,6 +50832,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! jspdf */ "./node_modules/jspdf/dist/jspdf.min.js");
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_4__);
 
 
 
@@ -50866,7 +50868,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// import jsonfile from 'jsonfile';
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["execution_reports"],
   components: {
@@ -50896,7 +50899,6 @@ __webpack_require__.r(__webpack_exports__);
         //   formatter: (value, key, item) => {
         //     var data = JSON.parse(item.symbol);
         //     var s = data;
-
         //     return s.text;
         //     // return symbol.text;
         //   }
@@ -50908,7 +50910,6 @@ __webpack_require__.r(__webpack_exports__);
         //   formatter: (value, key, item) => {
         //     var data = JSON.parse(item.time_in_force);
         //     var s = data;
-
         //     return s.text;
         //     // return symbol.text;
         //   }
@@ -50920,7 +50921,6 @@ __webpack_require__.r(__webpack_exports__);
         //   formatter: (value, key, item) => {
         //     var data = JSON.parse(item.currency);
         //     var s = data;
-
         //     return s.text;
         //     // return symbol.text;
         //   }
@@ -50932,7 +50932,6 @@ __webpack_require__.r(__webpack_exports__);
         //   formatter: (value, key, item) => {
         //     var data = JSON.parse(item.side);
         //     var s = data;
-
         //     return s.text;
         //     // return symbol.text;
         //   }
@@ -50954,9 +50953,73 @@ __webpack_require__.r(__webpack_exports__);
       return this.report_data.length;
     }
   },
-  methods: {},
-  mounted() {
-  }
+  methods: {
+    exportBalances() {
+      const tableData = [];
+      for (var i = 0; i < this.report_data.length; i++) {
+        tableData.push([
+          // this.report_data[i].clOrdID,
+          this.report_data[i].orderID,
+          // this.report_data[i].text,
+          // this.report_data[i].ordRejRes,
+          // this.report_data[i].status,
+          this.report_data[i].buyorSell,
+          this.report_data[i].securitySubType,
+          // this.report_data[i].time,
+          this.report_data[i].ordType,
+          this.report_data[i].orderQty,
+          this.report_data[i].timeInForce,
+          this.report_data[i].symbol,
+          // this.report_data[i].qTradeacc,
+          this.report_data[i].price,
+          this.report_data[i].stopPx,
+          // this.report_data[i].execType,
+          this.report_data[i].senderSub,
+          this.report_data[i].seqNum,
+          // this.report_data[i].sendingTime,
+          // this.report_data[i].messageDate
+        ]);
+      }
+
+      // console.log(this.broker_settlement_account[i])
+      // tableData.push(this.broker_settlement_account[i]);
+
+      var doc = new jspdf__WEBPACK_IMPORTED_MODULE_4___default.a();
+      //   // It can parse html:
+      //   doc.autoTable({ html: "#foreign-brokers" });
+
+      // Or use javascript directly:
+      doc.autoTable({
+        head: [
+          [
+            // "clOrdID",
+            "orderID",
+            // "text",
+            // "ordRejRes",
+            // "status",
+            "buyorSell",
+            "securitySubType",
+            // "time",
+            "ordType",
+            "orderQty",
+            "timeInForce",
+            "symbol",
+            // "qTradeacc",
+            "price",
+            "stopPx",
+            // "execType",
+            "senderSubID",
+            "seqNum",
+            // "sendingTime",
+            // "messageDate"
+          ]
+        ],
+        body: tableData
+      });
+      doc.save("JSE-ORDER-EXECUTION-REPORT.pdf");
+    }
+  },
+  mounted() {}
 });
 
 
@@ -57948,7 +58011,11 @@ var render = function() {
                   },
                   expression: "currentPage"
                 }
-              })
+              }),
+              _vm._v(" "),
+              _c("b-button", { on: { click: _vm.exportBalances } }, [
+                _vm._v("Export Balances")
+              ])
             ],
             1
           )
