@@ -335,7 +335,7 @@ export default {
         let i;
         for (i = 0; i < data.length; i++) {
           this.broker_settlement_accounts.push({
-            text: data[i].bank_name + "-" + data[i].account,
+            text: data[i].foreign_broker['name'] + "-" + data[i].local_broker['name'] + "-" +data[i].bank_name + "-" + data[i].account,
             value: data[i].id
           });
         }
