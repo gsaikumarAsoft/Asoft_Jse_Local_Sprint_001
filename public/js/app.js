@@ -50947,8 +50947,14 @@ __webpack_require__.r(__webpack_exports__);
             }
           }
         },
-        { key: "settlement_account_balance" },
-        { key: "settlement_amount_allocated" }
+        {
+          key: "settlement_account_number",
+          formatter: (value, key, item) => {
+            var agent = item.settlement_agent;
+            return agent+'-'+value;
+          }
+        }
+        // { key: "settlement_amount_allocated" }
         // {
         //   key: "order_type.text",
         //   label: "Order Type",
@@ -50965,7 +50971,6 @@ __webpack_require__.r(__webpack_exports__);
       perPage: 5,
       currentPage: 1,
       nameState: null
-      
     };
   },
   computed: {
