@@ -52171,7 +52171,7 @@ __webpack_require__.r(__webpack_exports__);
         });
     },
     newMessageDownload() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("/apis/messageDownload.json").then(response => {
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/messageDownload.json").then(response => {
         // this.messageDownload = response.data;
         this.logExecutionReport(response.data);
       });
@@ -52184,7 +52184,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     getSymbols() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("/apis/symbols.json").then(response => {
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json").then(response => {
         this.symbols = response.data;
       });
     },
@@ -54644,7 +54644,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     handleSubmit() {},
         getSymbols() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("/apis/symbols.json").then(response => {
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json").then(response => {
         this.symbols = response.data;
       });
     },
