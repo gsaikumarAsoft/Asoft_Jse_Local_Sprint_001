@@ -14,17 +14,17 @@ class AddMissingFieldsForExecutionReportToBrokerClientOrdersTable extends Migrat
     public function up()
     {
         Schema::table('broker_client_orders', function (Blueprint $table) {
-            $table->bigInteger('execID');                                                          
-			$table->string('text');
-			$table->string('ordRejRes');
-			$table->string('securitySubType');
-			$table->string('time');
-			$table->string('qTradeacc');
-			$table->string('execType');
-			$table->string('senderSubID');
-			$table->string('seqNum');
-			$table->string('sendingTime');
-			$table->string('messageDate');
+            // $table->bigInteger('execID');                                                          
+			// $table->string('text');
+			// $table->string('ordRejRes');
+			// $table->string('securitySubType');
+			// $table->string('time');
+			// $table->string('qTradeacc');
+			// $table->string('execType');
+			// $table->string('senderSubID');
+			// $table->string('seqNum');
+			// $table->string('sendingTime');
+			// $table->string('messageDate');
         });
     }
 
