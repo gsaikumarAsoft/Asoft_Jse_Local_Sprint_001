@@ -49394,7 +49394,6 @@ __webpack_require__.r(__webpack_exports__);
     getTradingAccountsList() {
       axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trader-list").then(response => {
         let data = response.data;
-        console.log(response);
         this.trading_accounts = [];
         this.trading_accounts = data;
       });
