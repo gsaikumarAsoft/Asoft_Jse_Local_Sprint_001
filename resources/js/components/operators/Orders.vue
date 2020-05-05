@@ -5,7 +5,7 @@
       <h1>Current Orders</h1>
       <div class="content">
         <b-table
-          v-if="permissions.indexOf("read-broker-order") !== -1"
+          v-if='permissions.indexOf("read-broker-order") !== -1'
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
           id="orders-table"
@@ -327,7 +327,7 @@
           aria-controls="orders-table"
         ></b-pagination>
         <b-button
-          v-if="permissions.indexOf("create-broker-order") !== -1"
+          v-if='permissions.indexOf("create-broker-order") !== -1'
           v-b-modal.jse-new-order
           @click="create = true"
         >Create New Order</b-button>
@@ -797,12 +797,7 @@ export default {
         }
         if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            // this.destroy(o.id);
-            this.$swal(
-              "Cancelled!",
-              "Client Order Has Been Cancelled.",
-              "error"
-            );
+            this.destroy(o.id);
           } else {
             this.$swal(
               "Oops!",
@@ -1032,7 +1027,65 @@ export default {
       this.order_option_inputs.splice(index, 1);
     },
     destroy(id) {
-      axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
+      this.$swal("Proccessing Order Cancellation");
+      // axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
+      let order_sample = {
+        BeginString: "FIX.4.2",
+
+        TargetCompID: "CIBC_TST",
+
+        SenderCompID: "JSE_TST",
+
+        SenderSubID: "JMMB",
+
+        Host: "10.246.7.212",
+
+        Port: 27102,
+
+        UserName: "FC4",
+
+        Password: "password",
+
+        OrderID: "JMMB000004",
+
+        BuyorSell: "1",
+
+        OrdType: "4",
+
+        OrderQty: "2",
+
+        TimeInForce: "6",
+
+        Symbol: "AAPL",
+
+        Account: "1466267",
+
+        Price: "224.99",
+
+        Side: "5",
+
+        Strategy: 1000,
+
+        StopPx: 230.0,
+
+        ExDestination: "CNQ",
+
+        ClientID: "JMMB_TRADER1"
+      };
+
+      console.log(order_sample);
+
+      // Fix Wrapper
+      axios
+        .post(
+          "https://cors-anywhere.herokuapp.com/" +
+            "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest",
+          order_sample,
+          { crossDomain: true }
+        )
+        .then(response => {
+          this.$swal("Order Cancelled");
+        });
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
@@ -1059,11 +1112,11 @@ export default {
       this.order = {};
     },
     handleSubmit() {},
-        getSymbols() {
+    getSymbols() {
       axios.get("/apis/symbols.json").then(response => {
         this.symbols = response.data;
       });
-    },
+    }
   },
   mounted() {
     this.getBrokers();

@@ -177,66 +177,79 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 
 
 Route::get('download-bai/', function () {
+
+    $data = [
+        
+           "trader_account_number" => "324234-432432-4324",
+           "trader_balance" =>  832748.00,
+           "date_captured"  =>  "2012-03-29T10:05:45-06:00"
+    
+      
+    ];
+
+    return $data;
+    
+    //Simulate Bai File 
+
+    // $host = "44.232.220.186";
      
-    $host = "44.232.220.186";
+    // $port = 22;
      
-    $port = 22;
+    // $username = "rbc";
      
-    $username = "rbc";
+    // $password = "rbc23sftp";
      
-    $password = "rbc23sftp";
+    // $connection = NULL;
      
-    $connection = NULL;
+    // $remote_file_path = "/upload/BAI320200429.001";
      
-    $remote_file_path = "/upload/BAI320200429.001";
+    // try {
      
-    try {
+    //    $connection = ssh2_connect($host, $port);
      
-       $connection = ssh2_connect($host, $port);
+    //    if(!$connection){
      
-       if(!$connection){
+    //        throw new \Exception("Could not connect to $host on port $port");
      
-           throw new \Exception("Could not connect to $host on port $port");
+    //    }
      
-       }
+    //    $auth  = ssh2_auth_password($connection, $username, $password);
      
-       $auth  = ssh2_auth_password($connection, $username, $password);
+    //    if(!$auth){
      
-       if(!$auth){
+    //        throw new \Exception("Could not authenticate with username $username and password ");  
      
-           throw new \Exception("Could not authenticate with username $username and password ");  
+    //    }
      
-       }
+    //    $sftp = ssh2_sftp($connection);
      
-       $sftp = ssh2_sftp($connection);
+    //    if(!$sftp){
      
-       if(!$sftp){
+    //        throw new \Exception("Could not initialize SFTP subsystem.");  
      
-           throw new \Exception("Could not initialize SFTP subsystem.");  
+    //    }
      
-       }
+    //    $stream = fopen("ssh2.sftp://".$sftp.$remote_file_path, 'r');
      
-       $stream = fopen("ssh2.sftp://".$sftp.$remote_file_path, 'r');
+    //    if (! $stream) {
      
-       if (! $stream) {
+    //        throw new \Exception("Could not open file: ");
      
-           throw new \Exception("Could not open file: ");
+    //    }
      
-       }
+    //    $contents = stream_get_contents($stream);
+    // //    echo "<pre>"; print_r($contents); echo "</pre>";
+    //     file_put_contents("documents/rbc.csv",$contents);
      
-       $contents = stream_get_contents($stream);
-    //    echo "<pre>"; print_r($contents); echo "</pre>";
-        file_put_contents("documents/rbc.csv",$contents);
+    //    @fclose($stream);
      
-       @fclose($stream);
+    //    $connection = NULL;
      
-       $connection = NULL;
+    // } catch (Exception $e) {
      
-    } catch (Exception $e) {
+    //    echo "Error due to :".$e->getMessage();
      
-       echo "Error due to :".$e->getMessage();
-     
-    }
+    // }
     
 });
 

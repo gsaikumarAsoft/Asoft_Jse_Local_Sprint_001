@@ -454,7 +454,7 @@ export default {
       order: {},
       fields: [
         // { key: "handling_instructions", sortable: true, },
-        { key: "order_date", sortable: true, },
+        { key: "order_date", sortable: true },
         {
           key: "order_type.text",
           label: "Order Type",
@@ -843,7 +843,7 @@ export default {
         this.order_option_input = false;
       }
     },
-    brokerOrderHandler(o) {
+    brokerOrderHandler(o){
       this.order = {};
       this.order = o;
       //Check if we already parsed to json if we didnt do so now.
@@ -873,10 +873,11 @@ export default {
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
+          this.$bvModal.show('jse-new-order');
         }
         if (result.dismiss === "cancel") {
-          // this.destroy(o.id);
-          this.$swal("Canceled!", "User Order Has Been Cancelled.", "success");
+          this.destroy(o.id);
+          // this.$swal("Canceled!", "User Order Has Been Cancelled.", "success");
           // window.location.reload();
         }
       });
@@ -1114,7 +1115,7 @@ export default {
       });
     },
     logExecutionReport(d) {
-      axios.post("execution-report",d).then(response => {
+      axios.post("execution-report", d).then(response => {
         this.$swal("Execution Reports Generated..");
         console.log(response);
         // setTimeout(location.reload.bind(location), 2000);
@@ -1149,8 +1150,67 @@ export default {
     removeOption(index) {
       this.order_option_inputs.splice(index, 1);
     },
+
     destroy(id) {
-      axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
+      this.$swal("Proccessing Order Cancellation");
+      // axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
+      let order_sample = {
+        BeginString: "FIX.4.2",
+
+        TargetCompID: "CIBC_TST",
+
+        SenderCompID: "JSE_TST",
+
+        SenderSubID: "JMMB",
+
+        Host: "10.246.7.212",
+
+        Port: 27102,
+
+        UserName: "FC4",
+
+        Password: "password",
+
+        OrderID: "JMMB000004",
+
+        BuyorSell: "1",
+
+        OrdType: "4",
+
+        OrderQty: "2",
+
+        TimeInForce: "6",
+
+        Symbol: "AAPL",
+
+        Account: "1466267",
+
+        Price: "224.99",
+
+        Side: "5",
+
+        Strategy: 1000,
+
+        StopPx: 230.0,
+
+        ExDestination: "CNQ",
+
+        ClientID: "JMMB_TRADER1"
+      };
+
+      console.log(order_sample);
+
+      // Fix Wrapper
+      axios
+        .post(
+          "https://cors-anywhere.herokuapp.com/" +
+            "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest",
+          order_sample,
+          { crossDomain: true }
+        )
+        .then(response => {
+          this.$swal("Order Cancelled");
+        });
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
