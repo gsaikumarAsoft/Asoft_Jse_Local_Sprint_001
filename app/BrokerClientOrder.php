@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BrokerClientOrder extends Model
 {
     protected $guarded = ['id'];
+    // protected $primaryKey = 'id';
     // protected $casts = ['handling_instructions' => 'array'];
 
     protected $fillable = [

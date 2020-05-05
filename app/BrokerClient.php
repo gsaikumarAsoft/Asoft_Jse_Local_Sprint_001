@@ -16,6 +16,7 @@ class BrokerClient extends Model
         'orders_limit',
         'account_balance',
         'open_orders',
+        'filled_orders',
         'jcsd',
         'status'
     ];

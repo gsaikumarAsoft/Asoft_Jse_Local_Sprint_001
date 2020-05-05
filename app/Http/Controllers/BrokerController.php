@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use App\User;
 use Carbon\Carbon;
 use CreateBrokerClientOrderExecutionReports;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -157,9 +158,12 @@ class BrokerController extends Controller
     }
 
     public function logExecution(Request $request){
-        $execution_report = $request['executionReports'];
+        $execution_report = $request->executionReports;
         BrokerOrderExecutionReport::truncate();
         foreach($execution_report as $report){
+            $clients[] = $report;
+
+            
             $broker_order_execution_report = new BrokerOrderExecutionReport();
             $broker_order_execution_report->clOrdID = $report['clOrdID'];
             $broker_order_execution_report->orderID = $report['orderID'];
@@ -182,7 +186,12 @@ class BrokerController extends Controller
             $broker_order_execution_report->sendingTime = $report['sendingTime'];
             $broker_order_execution_report->messageDate = $report['messageDate'];
             $broker_order_execution_report->save();
+
+            
         }
+
+        
+        return $this->HelperClass->executionBalanceUpdate($clients);
 
         
     }
@@ -242,9 +251,13 @@ class BrokerController extends Controller
 
         // Calculations Before Creating A New Order
         $order_value = $request->price * $request->quantity;
-        $settlement_available = $settlement->account_balance - $settlement->amount_allocated;
-        $client_available = $c_account->account_balance - $c_account->open_orders;
-        //==================================================
+        // $settlement_available = $settlement->account_balance - $settlement->amount_allocated;
+
+
+        //Beta 2
+        $settlement_available = $settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
+        $client_available = $c_account->account_balance - ($c_account->open_orders + $c_account->filled_orders);
+        //=========================================================================
 
         if ($settlement_available < $order_value) {
 
@@ -264,7 +277,7 @@ class BrokerController extends Controller
             $client_open_orders = $c_account->open_orders + $order_value;
 
 
-            // Update Settlement ACcount Balances
+            // Update Settlement Account Balances
             BrokerSettlementAccount::updateOrCreate(
                 ['id' => $trading->broker_settlement_account_id],
                 ['amount_allocated' => $settlement_allocated]

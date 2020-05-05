@@ -157,7 +157,7 @@ class FunctionSet
             // If the operator didnt select a status default to unverified
             if (empty($request->operator_status)) {
                 $request->status = 'Un-Verified';
-            }else{
+            } else {
                 $request->status = $request->operator_status;
             }
 
@@ -351,5 +351,100 @@ class FunctionSet
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    public function orderStatus($id)
+    {
+
+        // check current broker client order status
+        $status = BrokerClientOrder::select('order_status')->where('id', $id)->first();
+        return $status;
+    }
+
+    public function executionBalanceUpdate($account)
+    {
+        foreach ($account as $key => $value) {
+            $order_number =  $account[$key]['clOrdID'];
+            $sender_sub_id = $account[$key]['senderSubID'];
+            $price = $account[$key]['price'];
+            $quantity = $account[$key]['orderQty'];
+            $status = $account[$key]['status'];
+            $jcsd = $account[$key]['qTradeacc'];
+
+            // Define The broker client 
+            // $broker_client = BrokerClientOrder::where('client_order_number', $order_number)->first();
+            $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
+
+            //Find the broker order linked to this execution report (account number)
+            $order = BrokerClientOrder::where('client_order_number', $order_number)->first();
+            //Find the broker settlement account linked to this execution report (account number (senderSubID)
+            $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $sender_sub_id)
+                ->select('broker_trading_accounts.broker_settlement_account_id as trading_id',  'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
+                ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+                ->get();
+            $array = json_decode(json_encode($settlement_account), true);
+            // return 
+            if ($order) {
+                $od = $order;
+                $bc = $broker_client;
+                // return $bc;
+                if ($od->id) {
+                    $o = $this->orderStatus($od->id);
+                    // Define the open order amount
+                    $op_or = $bc->open_orders - ($quantity * $price);
+                    $fil_or = $bc->filled_orders + ($quantity * $price);
+                    $sa = $array[0];
+
+
+
+                    $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
+                    $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
+                    //If offer is (Rejected, Cancelled, Expired)
+                    if ($status == "C" || $status == "4" || $status == "8") {
+
+                        // Check if the order is open
+                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" &&  $o->order_status != "2") {
+
+                            // ===========================================================
+                            // Set Status To $account[$key]['status]
+                            DB::table('broker_client_orders')
+                                ->where('id', $od->id)
+                                ->update(['order_status' => $status]);
+                        }
+                    } else if ($status == "1") {
+
+                        //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
+                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                            //Update Broker Client Order Status
+                            DB::table('broker_client_orders')
+                                ->where('id', $od->id)
+                                ->update(['order_status' => 1]);
+
+                            DB::table('broker_clients')
+                                ->where('id', $bc->id)
+                                ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
+                        }
+                    } else {
+                        //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
+                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                            //The order has been filled
+                            // Update Database with required value
+                            DB::table('broker_clients')
+                                ->where('id', $bc->id)
+                                ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
+
+                            //Update Broker Settlement account once the order is filled
+                            DB::table('broker_settlement_accounts')
+                                ->where('id', $sa['id'])
+                                ->update(['amount_allocated' => $settlement_allocated], ['filled_orders', $settlement_fil_ord]);
+
+                            DB::table('broker_client_orders')
+                                ->where('id', $od->id)
+                                ->update(['order_status' => 2]);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

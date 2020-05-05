@@ -453,8 +453,8 @@ export default {
       create: false,
       order: {},
       fields: [
-        { ket: "handling_instructions", sortable: true },
-        { key: "order_date", sortable: true },
+        // { key: "handling_instructions", sortable: true, },
+        { key: "order_date", sortable: true, },
         {
           key: "order_type.text",
           label: "Order Type",
@@ -1117,7 +1117,7 @@ export default {
       axios.post("execution-report",d).then(response => {
         this.$swal("Execution Reports Generated..");
         console.log(response);
-        setTimeout(location.reload.bind(location), 2000);
+        // setTimeout(location.reload.bind(location), 2000);
       });
     },
     getSymbols() {
@@ -1179,6 +1179,7 @@ export default {
     handleSubmit() {}
   },
   mounted() {
+    this.newMessageDownload();
     this.getSymbols();
     // this.messageDownload();
     this.getBrokers();

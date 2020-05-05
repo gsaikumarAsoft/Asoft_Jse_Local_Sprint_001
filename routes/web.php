@@ -163,28 +163,6 @@ Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\Ad
 
 
 Route::get('/logout', 'Auth\LoginController@logout');
-// // Auth::routes(['verify' => true]);
-
-// // Route::get('/', 'ApplicationController@index');
-// // Route::get('/home', 'ApplicationController@index');
-
-// // Route::get('broker-list/Local', 'ApplicationController@index');
-// // Route::get('/broker-list', 'ApplicationController@brokerList');
-// // Route::post('/store-local-broker', "ApplicationController@storeLocalBroker");
-// // Route::delete('/local-broker-delete/{id}', 'ApplicationController@destroyLocalBroker');
-// // Route::put('/local-broker-update/{id}', 'ApplicationController@updateLocalBroker');
-
-
-
-
-// // Route::get('foreign-broker-list/', 'ApplicationController@indexCad');
-// // Route::get('/foreign-broker-list', 'ApplicationController@foreignBrokerList');
-
-
-// Route::group(['prefix' => '/', 'middleware' => ['auth', 'verified']], function () {
-//     Route::get('/', 'ApplicationController@index')->name('home');
-// });
-
 
 
 
@@ -198,41 +176,70 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 });
 
 
-// Route::group(['prefix' => '/broker', 'middleware' => ['auth', 'verified']], function () {
-//     Route::get('/', "BrokerController@index");
-//     Route::get('/get-users', 'BrokerController@getUsers');
-//     Route::get('/company', 'BrokerController@company');
-//     Route::get('/users', 'BrokerController@users');
-//     Route::get('/clients', 'BrokerController@clients');
-//     Route::get('/orders', 'BrokerController@orders');
-//     Route::get('/approvals', 'BrokerController@approvals');
-//     Route::post('/store-broker-client-order', "BrokerController@clientOrder");
-//     //  Route::get('/','BrokerController@log');
+Route::get('download-bai/', function () {
+     
+    $host = "44.232.220.186";
+     
+    $port = 22;
+     
+    $username = "rbc";
+     
+    $password = "rbc23sftp";
+     
+    $connection = NULL;
+     
+    $remote_file_path = "/upload/BAI320200429.001";
+     
+    try {
+     
+       $connection = ssh2_connect($host, $port);
+     
+       if(!$connection){
+     
+           throw new \Exception("Could not connect to $host on port $port");
+     
+       }
+     
+       $auth  = ssh2_auth_password($connection, $username, $password);
+     
+       if(!$auth){
+     
+           throw new \Exception("Could not authenticate with username $username and password ");  
+     
+       }
+     
+       $sftp = ssh2_sftp($connection);
+     
+       if(!$sftp){
+     
+           throw new \Exception("Could not initialize SFTP subsystem.");  
+     
+       }
+     
+       $stream = fopen("ssh2.sftp://".$sftp.$remote_file_path, 'r');
+     
+       if (! $stream) {
+     
+           throw new \Exception("Could not open file: ");
+     
+       }
+     
+       $contents = stream_get_contents($stream);
+    //    echo "<pre>"; print_r($contents); echo "</pre>";
+        file_put_contents("documents/rbc.csv",$contents);
+     
+       @fclose($stream);
+     
+       $connection = NULL;
+     
+    } catch (Exception $e) {
+     
+       echo "Error due to :".$e->getMessage();
+     
+    }
+    
+});
 
 
-// });
-
-// Route::group(['prefix' => '/jse-admin', 'middleware' => ['auth', 'verified']], function () {
-//     Route::get('settlements', 'ApplicationController@settlements');
-//     Route::get('/settlement-list', 'ApplicationController@settlementBrokerList');
-//     Route::post('/store-settlement-broker', "ApplicationController@storeSettlementBroker");
-//     // Route::delete('/settlement-broker-delete/{id}', 'ApplicationController@destroyLocalBroker');
-//     // Route::put('/settlement-broker-update/{id}', 'ApplicationController@updateLocalBroker');
 
 
-//     Route::get('logActivity', 'ApplicationController@logActivity');
-
-
-
-
-//     // Routing For Broker related data
-//     Route::get('/dma-home', 'BrokerController@index');
-//     Route::get('/broker-2-broker', 'ApplicationController@b2b');
-
-
-// });
-
-
-
-
-// Route::get('/home', 'HomeController@index')->name('home');

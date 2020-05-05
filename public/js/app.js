@@ -69136,8 +69136,8 @@ __webpack_require__.r(__webpack_exports__);
       create: false,
       order: {},
       fields: [
-        { ket: "handling_instructions", sortable: true },
-        { key: "order_date", sortable: true },
+        // { key: "handling_instructions", sortable: true, },
+        { key: "order_date", sortable: true, },
         {
           key: "order_type.text",
           label: "Order Type",
@@ -69800,7 +69800,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("execution-report",d).then(response => {
         this.$swal("Execution Reports Generated..");
         console.log(response);
-        setTimeout(location.reload.bind(location), 2000);
+        // setTimeout(location.reload.bind(location), 2000);
       });
     },
     getSymbols() {
@@ -69862,6 +69862,7 @@ __webpack_require__.r(__webpack_exports__);
     handleSubmit() {}
   },
   mounted() {
+    this.newMessageDownload();
     this.getSymbols();
     // this.messageDownload();
     this.getBrokers();
@@ -70025,6 +70026,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+
 
 
 
@@ -75141,6 +75143,7 @@ var render = function() {
                 "per-page": _vm.perPage,
                 "current-page": _vm.currentPage
               },
+              on: { "row-clicked": _vm.settlmentAccountHandler },
               scopedSlots: _vm._u([
                 {
                   key: "index",
