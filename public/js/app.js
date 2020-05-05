@@ -69526,7 +69526,7 @@ __webpack_require__.r(__webpack_exports__);
         this.order_option_input = false;
       }
     },
-    brokerOrderHandler(o){
+    brokerOrderHandler(o) {
       this.order = {};
       this.order = o;
       //Check if we already parsed to json if we didnt do so now.
@@ -69556,7 +69556,7 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
-          this.$bvModal.show('jse-new-order');
+          this.$bvModal.show("jse-new-order");
         }
         if (result.dismiss === "cancel") {
           this.destroy(o.id);
@@ -69791,17 +69791,18 @@ __webpack_require__.r(__webpack_exports__);
           }
         });
     },
-    newMessageDownload() {
+    newMessageDownload(action) {
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/messageDownload.json").then(response => {
         // this.messageDownload = response.data;
-        this.logExecutionReport(response.data);
+        this.logExecutionReport(response.data, action);
       });
     },
-    logExecutionReport(d) {
+    logExecutionReport(d, action) {
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("execution-report", d).then(response => {
-        this.$swal("Execution Reports Generated..");
-        console.log(response);
-        // setTimeout(location.reload.bind(location), 2000);
+        if (action != "no-refresh") {
+          this.$swal("Execution Reports Generated..");
+          setTimeout(location.reload.bind(location), 2000);
+        }
       });
     },
     getSymbols() {
@@ -69922,7 +69923,7 @@ __webpack_require__.r(__webpack_exports__);
     handleSubmit() {}
   },
   mounted() {
-    this.newMessageDownload();
+    this.newMessageDownload("no-refresh");
     this.getSymbols();
     // this.messageDownload();
     this.getBrokers();

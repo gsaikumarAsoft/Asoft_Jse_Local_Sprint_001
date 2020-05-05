@@ -843,7 +843,7 @@ export default {
         this.order_option_input = false;
       }
     },
-    brokerOrderHandler(o){
+    brokerOrderHandler(o) {
       this.order = {};
       this.order = o;
       //Check if we already parsed to json if we didnt do so now.
@@ -873,7 +873,7 @@ export default {
         cancelButtonAriaLabel: "cancel"
       }).then(result => {
         if (result.value) {
-          this.$bvModal.show('jse-new-order');
+          this.$bvModal.show("jse-new-order");
         }
         if (result.dismiss === "cancel") {
           this.destroy(o.id);
@@ -1108,17 +1108,18 @@ export default {
           }
         });
     },
-    newMessageDownload() {
+    newMessageDownload(action) {
       axios.get("/apis/messageDownload.json").then(response => {
         // this.messageDownload = response.data;
-        this.logExecutionReport(response.data);
+        this.logExecutionReport(response.data, action);
       });
     },
-    logExecutionReport(d) {
+    logExecutionReport(d, action) {
       axios.post("execution-report", d).then(response => {
-        this.$swal("Execution Reports Generated..");
-        console.log(response);
-        // setTimeout(location.reload.bind(location), 2000);
+        if (action != "no-refresh") {
+          this.$swal("Execution Reports Generated..");
+          setTimeout(location.reload.bind(location), 2000);
+        }
       });
     },
     getSymbols() {
@@ -1239,7 +1240,7 @@ export default {
     handleSubmit() {}
   },
   mounted() {
-    this.newMessageDownload();
+    this.newMessageDownload("no-refresh");
     this.getSymbols();
     // this.messageDownload();
     this.getBrokers();
