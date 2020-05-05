@@ -384,7 +384,7 @@ class FunctionSet
                 ->get();
             $array = json_decode(json_encode($settlement_account), true);
             // return 
-            if ($order) {
+            if ($order && $broker_client) {
                 $od = $order;
                 $bc = $broker_client;
                 // return $bc;
