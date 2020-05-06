@@ -71,8 +71,8 @@ Route::group(['prefix' => '/broker', 'middleware' => ['App\Http\Middleware\Local
     Route::get('/get-users', 'BrokerController@getUsers');
     Route::get('/local-brokers', 'ApplicationController@brokerList');
     Route::get('/company', 'BrokerController@company');
-    Route::get('/users', 'BrokerController@users'); 
-    Route::get('/get-users', 'BrokerController@brokerUsers'); 
+    Route::get('/users', 'BrokerController@users');
+    Route::get('/get-users', 'BrokerController@brokerUsers');
     Route::get('/broker-users', 'UserController@index');
     Route::get('/broker-clients', 'ClientController@index');
     Route::get('/traders', 'BrokerController@traders');
@@ -171,7 +171,7 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 
     $user = Auth::user();
     // return $user;
-    $user = User::with('roles','broker')->find($user->id);
+    $user = User::with('roles', 'broker')->find($user->id);
     return $user;
 });
 
@@ -179,78 +179,82 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 Route::get('get-rbc-bai', function () {
 
     $data = [
-        
-           "trader_account_number" => "324234-432432-4324",
-           "trader_balance" =>  832748.00,
-           "date_captured"  =>  "2012-03-29T10:05:45-06:00"
+        [
+            "trader_account_number" => "324234-432432-4324",
+            "trader_balance" =>  832748.00,
+            "date_captured"  =>  date("Y-m-d h:m:s")
+        ],
+        [
+            "trader_account_number" => "324234-432432-4324",
+            "trader_balance" =>  832748.00,
+            "date_captured"  =>  date("Y-m-d h:m:s")
+        ],
+        [
+            "status" => 'Updated',
+        ]
+
+
     ];
 
     return $data;
-    
-    //Simulate Bai File 
 
-    // $host = "44.232.220.186";
-     
-    // $port = 22;
-     
-    // $username = "rbc";
-     
-    // $password = "rbc23sftp";
-     
-    // $connection = NULL;
-     
+    // Simulate Bai File 
+
+
+    $file_date = date('Ymd');
+    $host = env('BAI_HOST');
+    $port = 22;
+
+    $username = "rbc";
+
+    $password = "rbc23sftp";
+
+    $connection = NULL;
+
     // $remote_file_path = "/upload/BAI320200429.001";
-     
-    // try {
-     
-    //    $connection = ssh2_connect($host, $port);
-     
-    //    if(!$connection){
-     
-    //        throw new \Exception("Could not connect to $host on port $port");
-     
-    //    }
-     
-    //    $auth  = ssh2_auth_password($connection, $username, $password);
-     
-    //    if(!$auth){
-     
-    //        throw new \Exception("Could not authenticate with username $username and password ");  
-     
-    //    }
-     
-    //    $sftp = ssh2_sftp($connection);
-     
-    //    if(!$sftp){
-     
-    //        throw new \Exception("Could not initialize SFTP subsystem.");  
-     
-    //    }
-     
-    //    $stream = fopen("ssh2.sftp://".$sftp.$remote_file_path, 'r');
-     
-    //    if (! $stream) {
-     
-    //        throw new \Exception("Could not open file: ");
-     
-    //    }
-     
-    //    $contents = stream_get_contents($stream);
-    // //    echo "<pre>"; print_r($contents); echo "</pre>";
-    //     file_put_contents("documents/rbc.csv",$contents);
-     
-    //    @fclose($stream);
-     
-    //    $connection = NULL;
-     
-    // } catch (Exception $e) {
-     
-    //    echo "Error due to :".$e->getMessage();
-     
-    // }
-    
+    $remote_file_path = "/upload/BALTRN3_" . $file_date . ".001";
+
+    try {
+
+        $connection = ssh2_connect($host, $port);
+
+        if (!$connection) {
+
+            throw new \Exception("Could not connect to $host on port $port");
+        }
+
+        $auth  = ssh2_auth_password($connection, $username, $password);
+
+        if (!$auth) {
+
+            throw new \Exception("Could not authenticate with username $username and password ");
+        }
+
+        $sftp = ssh2_sftp($connection);
+
+        if (!$sftp) {
+
+            throw new \Exception("Could not initialize SFTP subsystem.");
+        }
+
+        $stream = fopen("ssh2.sftp://" . $sftp . $remote_file_path, 'r');
+
+        if (!$stream) {
+
+            throw new \Exception("Could not open file: ");
+        }
+
+        $contents = stream_get_contents($stream);
+        echo "<pre>";
+        print_r($contents);
+        echo "</pre>";
+        // file_put_contents("documents/rbc.csv",$contents);
+
+        @fclose($stream);
+
+        $connection = NULL;
+    } catch (Exception $e) {
+
+        echo "Error due to :" . $e->getMessage();
+    }
 });
-
-
-
-
