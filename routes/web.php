@@ -179,21 +179,23 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 Route::get('get-rbc-bai', function () {
 
     $data = [
-        [
-            "trader_account_number" => "324234-432432-4324",
-            "trader_balance" =>  832748.00,
-            "date_captured"  =>  date("Y-m-d h:m:s")
-        ],
-        [
-            "trader_account_number" => "324234-432432-4324",
-            "trader_balance" =>  832748.00,
-            "date_captured"  =>  date("Y-m-d h:m:s")
-        ],
-        [
-            "status" => 'Updated',
+
+        "accounts" => [
+            [
+                "trader_account_number" => "324234-432432-4324",
+                "trader_balance" =>  832748.00,
+                "date_captured"  =>  date("Y-m-d h:m:s")
+            ],
+            [
+                "trader_account_number" => "324234-432432-4324",
+                "trader_balance" =>  832748.00,
+                "date_captured"  =>  date("Y-m-d h:m:s")
+            ],
+            [
+                "status" => 'Updated',
+            ]
+
         ]
-
-
     ];
 
     return $data;
