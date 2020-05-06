@@ -176,15 +176,13 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 });
 
 
-Route::get('download-bai/', function () {
+Route::get('get-rbc-bai', function () {
 
     $data = [
         
            "trader_account_number" => "324234-432432-4324",
            "trader_balance" =>  832748.00,
            "date_captured"  =>  "2012-03-29T10:05:45-06:00"
-    
-      
     ];
 
     return $data;

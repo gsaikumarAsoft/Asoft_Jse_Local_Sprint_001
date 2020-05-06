@@ -286,6 +286,7 @@ export default {
               .broker_settlement_account
           });
           this.$swal(`Account created`);
+          
         } else {
           //Include ID
           this.storeTradingAccount({
@@ -304,7 +305,9 @@ export default {
               .broker_settlement_account
           });
           this.$swal(`Account Updated`);
+          
         }
+         setTimeout(location.reload.bind(location), 1000);
         this.getTradingAccountsList();
         this.resetModal();
         this.$nextTick(() => {

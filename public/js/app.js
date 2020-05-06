@@ -70215,6 +70215,7 @@ __webpack_require__.r(__webpack_exports__);
               .broker_settlement_account
           });
           this.$swal(`Account created`);
+          
         } else {
           //Include ID
           this.storeTradingAccount({
@@ -70233,7 +70234,9 @@ __webpack_require__.r(__webpack_exports__);
               .broker_settlement_account
           });
           this.$swal(`Account Updated`);
+          
         }
+         setTimeout(location.reload.bind(location), 1000);
         this.getTradingAccountsList();
         this.resetModal();
         this.$nextTick(() => {
