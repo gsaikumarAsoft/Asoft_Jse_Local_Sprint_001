@@ -14,8 +14,8 @@ class AddBrokerClientIdToBrokerClientOrdersTable extends Migration
     public function up()
     {
         Schema::table('broker_client_orders', function (Blueprint $table) {
-            // $table->unsignedBigInteger('broker_client_id');
-            // $table->foreign('broker_client_id')->references('id')->on('broker_clients')->onDelete('cascade');
+            $table->unsignedBigInteger('broker_client_id');
+            $table->foreign('broker_client_id')->references('id')->on('broker_clients')->onDelete('cascade');
         });
     }
 
