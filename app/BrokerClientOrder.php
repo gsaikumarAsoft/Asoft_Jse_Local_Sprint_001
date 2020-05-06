@@ -31,6 +31,7 @@ class BrokerClientOrder extends Model
         'expiration_date',
         'time_in_force',
         'value',
+        'broker_client_id'
         
 
     ];
