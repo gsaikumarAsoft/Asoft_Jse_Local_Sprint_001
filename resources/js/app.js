@@ -19,6 +19,7 @@ Vue.use(VueSweetalert2);
 Vue.use(jsPDF);
 
 Vue.prototype.$userPermissions = document.querySelector("meta[name='user-permissions']").getAttribute('content');
+Vue.prototype.$fixApi = document.querySelector("meta[name='fix-api']").getAttribute('content');
 Vue.prototype.$userId = document.querySelector("meta[name='user-id']").getAttribute('content');
 
 

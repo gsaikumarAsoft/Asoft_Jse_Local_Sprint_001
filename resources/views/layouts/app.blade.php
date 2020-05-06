@@ -8,6 +8,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">  
         @if(Auth::user())         
         <meta name="user-id" content="{{ Auth::user()->id }}">
+        <meta name="fix-api" content="{{ env('FIX_API_URL') }}">
      <meta name="user-permissions" content="{{ Auth::user()->getDirectPermissions() }}">       
 @endif
         

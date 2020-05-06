@@ -1096,7 +1096,7 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle",
+           this.$fixApi+"api/OrderManagement/NewOrderSingle",
           order_sample,
           { crossDomain: true }
         )
@@ -1131,7 +1131,7 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/messagedownload/download",
+           this.$fixApi+"api/messagedownload/download",
           order_sample,
           { crossDomain: true }
         )
@@ -1205,7 +1205,7 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest",
+           this.$fixApi+"api/OrderManagement/OrderCancelRequest",
           order_sample,
           { crossDomain: true }
         )

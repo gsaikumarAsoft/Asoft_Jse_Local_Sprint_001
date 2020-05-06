@@ -73033,7 +73033,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle",
+           this.$fixApi+"api/OrderManagement/NewOrderSingle",
           order_sample,
           { crossDomain: true }
         )
@@ -73068,7 +73068,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/messagedownload/download",
+           this.$fixApi+"api/messagedownload/download",
           order_sample,
           { crossDomain: true }
         )
@@ -73142,7 +73142,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest",
+           this.$fixApi+"api/OrderManagement/OrderCancelRequest",
           order_sample,
           { crossDomain: true }
         )
@@ -75519,7 +75519,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle",
+           this.$fixApi+"api/OrderManagement/NewOrderSingle",
           order_sample,
           { crossDomain: true }
         )
@@ -75534,7 +75534,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/messagedownload/download",
+           this.$fixApi+"api/messagedownload/download",
           order_sample,
           { crossDomain: true }
         )
@@ -75605,7 +75605,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-            "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest",
+           this.$fixApi+"api/OrderManagement/OrderCancelRequest",
           order_sample,
           { crossDomain: true }
         )
@@ -93242,6 +93242,7 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(bootstrap_vue__WEBPACK_IMPORTED_M
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_sweetalert2__WEBPACK_IMPORTED_MODULE_2__["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(jspdf__WEBPACK_IMPORTED_MODULE_3___default.a);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.prototype.$userPermissions = document.querySelector("meta[name='user-permissions']").getAttribute('content');
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.prototype.$fixApi = document.querySelector("meta[name='fix-api']").getAttribute('content');
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.prototype.$userId = document.querySelector("meta[name='user-id']").getAttribute('content');
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('jse-home', __webpack_require__(/*! ./components/Index.vue */ "./resources/js/components/Index.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('foreign', __webpack_require__(/*! ./components/ForeignBrokerList.vue */ "./resources/js/components/ForeignBrokerList.vue")["default"]);
