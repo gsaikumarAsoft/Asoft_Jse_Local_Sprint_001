@@ -332,7 +332,7 @@ class FunctionSet
             }
 
             //Notify Local Broker Admin
-            Mail::to($local_broker->email)->send(new LocalBrokerUser($request));
+            // Mail::to($local_broker->email)->send(new LocalBrokerUser($request));
         }
     }
 

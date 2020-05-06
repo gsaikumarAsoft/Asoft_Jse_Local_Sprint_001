@@ -52,29 +52,31 @@
                 :options="broker_trading_account_options"
               ></b-form-select>
             </b-form-group>
-            <b-form-group label="User Permissions:">
+            <!-- <b-form-group label="User Permissions:">
               <b-form-checkbox-group
                 id="checkbox-group-1"
                 v-model="broker.selected_permissions"
                 :options="broker_user_options"
                 name="flavour-1"
               ></b-form-checkbox-group>
-            </b-form-group>
+            </b-form-group>-->
             <b-form-group label="Client Account Permissions:">
-              <b-form-checkbox-group
-                id="checkbox-group-2"
-                v-model="broker.selected_permissions"
-                :options="broker_client_options"
-                name="flavour-2"
-              ></b-form-checkbox-group>
+              <b-form-checkbox-group v-model="broker.selected_client_permissions" id="checkboxes-r">
+                <b-form-checkbox value="create-broker-client">Create</b-form-checkbox>
+                <b-form-checkbox value="read-broker-client">Read</b-form-checkbox>
+                <b-form-checkbox value="update-broker-client">Update</b-form-checkbox>
+                <b-form-checkbox value="delete-broker-client">Delete</b-form-checkbox>
+                <b-form-checkbox value="approve-broker-client">Approve</b-form-checkbox>
+              </b-form-checkbox-group>
             </b-form-group>
             <b-form-group label="Order Permissions:">
-              <b-form-checkbox-group
-                id="checkbox-group-3"
-                v-model="broker.selected_permissions"
-                :options="broker_order_options"
-                name="flavour-3"
-              ></b-form-checkbox-group>
+              <b-form-checkbox-group v-model="broker.selected_broker_permissions" id="checkboxes-4">
+                <b-form-checkbox value="create-broker-order">Create</b-form-checkbox>
+                <b-form-checkbox value="read-broker-order">Read</b-form-checkbox>
+                <b-form-checkbox value="update-broker-order">Update</b-form-checkbox>
+                <b-form-checkbox value="delete-broker-order">Delete</b-form-checkbox>
+                <b-form-checkbox value="approve-broker-order">Approve</b-form-checkbox>
+              </b-form-checkbox-group>
             </b-form-group>
           </form>
         </b-modal>
@@ -251,7 +253,9 @@ export default {
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
-            permissions: this.broker.selected_permissions,
+            permissions: this.broker.selected_client_permissions.concat(
+              this.broker.selected_broker_permissions
+            ),
             target: this.broker.target
           });
         } else {
@@ -263,7 +267,9 @@ export default {
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
-            permissions: this.broker.selected_permissions,
+            permissions: this.broker.selected_client_permissions.concat(
+              this.broker.selected_broker_permissions
+            ),
             target: this.broker.target
           });
           this.$swal(`Account Updated for ${this.broker.email}`);
@@ -351,7 +357,6 @@ export default {
       });
     },
     storeBrokerUser(broker) {
-      console.log(broker)
       this.$swal
         .fire({
           title: "Creating User Account",

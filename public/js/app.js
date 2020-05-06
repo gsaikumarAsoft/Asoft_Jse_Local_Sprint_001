@@ -73818,6 +73818,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Permissions__WEBPACK_IMPORTED_MODULE_0__["default"]],
   components: {
@@ -73983,7 +73985,9 @@ __webpack_require__.r(__webpack_exports__);
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
-            permissions: this.broker.selected_permissions,
+            permissions: this.broker.selected_client_permissions.concat(
+              this.broker.selected_broker_permissions
+            ),
             target: this.broker.target
           });
         } else {
@@ -73995,7 +73999,9 @@ __webpack_require__.r(__webpack_exports__);
             name: this.broker.name,
             email: this.broker.email,
             status: "Unverified",
-            permissions: this.broker.selected_permissions,
+            permissions: this.broker.selected_client_permissions.concat(
+              this.broker.selected_broker_permissions
+            ),
             target: this.broker.target
           });
           this.$swal(`Account Updated for ${this.broker.email}`);
@@ -74083,7 +74089,6 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     storeBrokerUser(broker) {
-      console.log(broker)
       this.$swal
         .fire({
           title: "Creating User Account",
@@ -78998,44 +79003,57 @@ var render = function() {
                     _vm._v(" "),
                     _c(
                       "b-form-group",
-                      { attrs: { label: "User Permissions:" } },
-                      [
-                        _c("b-form-checkbox-group", {
-                          attrs: {
-                            id: "checkbox-group-1",
-                            options: _vm.broker_user_options,
-                            name: "flavour-1"
-                          },
-                          model: {
-                            value: _vm.broker.selected_permissions,
-                            callback: function($$v) {
-                              _vm.$set(_vm.broker, "selected_permissions", $$v)
-                            },
-                            expression: "broker.selected_permissions"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
                       { attrs: { label: "Client Account Permissions:" } },
                       [
-                        _c("b-form-checkbox-group", {
-                          attrs: {
-                            id: "checkbox-group-2",
-                            options: _vm.broker_client_options,
-                            name: "flavour-2"
+                        _c(
+                          "b-form-checkbox-group",
+                          {
+                            attrs: { id: "checkboxes-r" },
+                            model: {
+                              value: _vm.broker.selected_client_permissions,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.broker,
+                                  "selected_client_permissions",
+                                  $$v
+                                )
+                              },
+                              expression: "broker.selected_client_permissions"
+                            }
                           },
-                          model: {
-                            value: _vm.broker.selected_permissions,
-                            callback: function($$v) {
-                              _vm.$set(_vm.broker, "selected_permissions", $$v)
-                            },
-                            expression: "broker.selected_permissions"
-                          }
-                        })
+                          [
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "create-broker-client" } },
+                              [_vm._v("Create")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "read-broker-client" } },
+                              [_vm._v("Read")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "update-broker-client" } },
+                              [_vm._v("Update")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "delete-broker-client" } },
+                              [_vm._v("Delete")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "approve-broker-client" } },
+                              [_vm._v("Approve")]
+                            )
+                          ],
+                          1
+                        )
                       ],
                       1
                     ),
@@ -79044,20 +79062,55 @@ var render = function() {
                       "b-form-group",
                       { attrs: { label: "Order Permissions:" } },
                       [
-                        _c("b-form-checkbox-group", {
-                          attrs: {
-                            id: "checkbox-group-3",
-                            options: _vm.broker_order_options,
-                            name: "flavour-3"
+                        _c(
+                          "b-form-checkbox-group",
+                          {
+                            attrs: { id: "checkboxes-4" },
+                            model: {
+                              value: _vm.broker.selected_broker_permissions,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.broker,
+                                  "selected_broker_permissions",
+                                  $$v
+                                )
+                              },
+                              expression: "broker.selected_broker_permissions"
+                            }
                           },
-                          model: {
-                            value: _vm.broker.selected_permissions,
-                            callback: function($$v) {
-                              _vm.$set(_vm.broker, "selected_permissions", $$v)
-                            },
-                            expression: "broker.selected_permissions"
-                          }
-                        })
+                          [
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "create-broker-order" } },
+                              [_vm._v("Create")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "read-broker-order" } },
+                              [_vm._v("Read")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "update-broker-order" } },
+                              [_vm._v("Update")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "delete-broker-order" } },
+                              [_vm._v("Delete")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-checkbox",
+                              { attrs: { value: "approve-broker-order" } },
+                              [_vm._v("Approve")]
+                            )
+                          ],
+                          1
+                        )
                       ],
                       1
                     )

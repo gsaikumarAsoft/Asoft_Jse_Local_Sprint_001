@@ -44,7 +44,7 @@ class UserController extends Controller
     }
     function store(Request $request)
     {
-        $this->HelperClass->createBrokerUser($request);
+       return $this->HelperClass->createBrokerUser($request);
     }
     function destroy($id)
     {
