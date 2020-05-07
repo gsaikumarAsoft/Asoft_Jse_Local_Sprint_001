@@ -17,6 +17,11 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 
+Route::get('/home', function () {
+    return redirect('/');
+});
+
+
 Route::group(['prefix' => '/verify'], function () {
     Route::get('/{id}/{action}', 'AccountVerificationController@verifyForeign');
     Route::get('/account/{id}/{action}', 'AccountVerificationController@foreignBrokerUpdate');
@@ -177,28 +182,6 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 
 
 Route::get('get-rbc-bai', function () {
-
-    $data = [
-
-        "accounts" => [
-            [
-                "trader_account_number" => "324234-432432-4324",
-                "trader_balance" =>  832748.00,
-                "date_captured"  =>  date("Y-m-d h:m:s")
-            ],
-            [
-                "trader_account_number" => "324234-432432-4324",
-                "trader_balance" =>  832748.00,
-                "date_captured"  =>  date("Y-m-d h:m:s")
-            ],
-            [
-                "status" => 'Updated',
-            ]
-
-        ]
-    ];
-
-    return $data;
 
     // Simulate Bai File 
 
