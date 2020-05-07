@@ -79392,29 +79392,7 @@ var render = function() {
                           ],
                           1
                         )
-                      : _vm._e(),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      { attrs: { label: "Access Permissions:" } },
-                      [
-                        _c("b-form-checkbox-group", {
-                          attrs: {
-                            id: "checkbox-group-1",
-                            options: _vm.options,
-                            name: "flavour-1"
-                          },
-                          model: {
-                            value: _vm.selected_permissions,
-                            callback: function($$v) {
-                              _vm.selected_permissions = $$v
-                            },
-                            expression: "selected_permissions"
-                          }
-                        })
-                      ],
-                      1
-                    )
+                      : _vm._e()
                   ],
                   1
                 )

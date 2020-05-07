@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\BrokerClient;
 use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
 use App\ForeignBroker;
@@ -160,7 +161,7 @@ class ApplicationController extends Controller
 
 
     function storeSettlementBroker(Request $request)
-    { 
+    {
         $local_broker_name = $this->HelperClass->getUser($request->local_broker_id);
         $foreign_broker_name = $this->HelperClass->getUser($request->foreign_broker_id);
         $pass = $this->HelperClass->rand_pass(8);
@@ -179,7 +180,7 @@ class ApplicationController extends Controller
             // Update The settlement agent password and notify the settlement agent of the change
             User::where('name', $request->bank_name)
                 ->update(['password' => Hash::make($pass)]);
-            
+
             $request['password'] = $pass;
             $request['local_broker'] = $local_broker_name[0]->name;
             $request['foreign_broker'] = $foreign_broker_name[0]->name;
@@ -414,5 +415,21 @@ class ApplicationController extends Controller
         // return $id;
         $settlement_account = BrokerSettlementAccount::find($id);
         $settlement_account->delete();
+    }
+
+    public function updateBalances(Request $request)
+    {
+  
+        //Check for accounts availability
+        $account_exists = BrokerClient::where('jcsd', $request->client_JCSD_number)->first();
+
+        if ($account_exists) {
+            //If the accounts being passed exists, Upload Their Balances based on their JCSD account number
+            $broker_client_account = BrokerClient::updateOrCreate(
+                ['jcsd' => $request->client_JCSD_number],
+                ['account_balance' => $request->client_balance]
+            );
+            // return $broker_client_account;
+        }
     }
 }

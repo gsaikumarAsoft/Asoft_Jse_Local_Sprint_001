@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no, user-scalable=0"/>
     <meta name="description" content="An Innovate 10x Product : We are an engine of creativity for the rapid digital disruption that drives transformation, growth and sustainable development for our clients, partners and colleagues in the Caribbean.">
     <meta name="author" content="Jason Lawrence Innovate 10x">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
         <meta name="csrf-token" content="{{ csrf_token() }}">  
         @if(Auth::user())         
         <meta name="user-id" content="{{ Auth::user()->id }}">

@@ -1,0 +1,14 @@
+﻿{
+	"accounts": [
+		{
+			"client_JCSD_number": "324234",
+			"client_balance": 832748.0,
+			"date_captured": "2012-03-29T10:05:45-06:00"
+		},
+		{
+			"client_JCSD_number": "720932",
+			"client_balance": 726290.0,
+			"date_captured": "2012-03-29T10:05:45-06:00"
+		}
+	]
+}

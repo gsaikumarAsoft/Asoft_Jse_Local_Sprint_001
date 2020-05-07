@@ -15,7 +15,12 @@ use App\Mail\BrokerUserAccountCreated;
 use App\User;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
+
+
+Route::post('/update-balances', 'ApplicationController@updateBalances');
+
 
 Route::get('/home', function () {
     return redirect('/');
@@ -171,7 +176,6 @@ Route::get('/logout', 'Auth\LoginController@logout');
 
 
 
-
 Route::put('nv9w8yp8rbwg4t/', function () {
 
     $user = Auth::user();
@@ -182,9 +186,6 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 
 
 Route::get('get-rbc-bai', function () {
-
-    // Simulate Bai File 
-
 
     $file_date = date('Ymd');
     $host = env('BAI_HOST');
@@ -230,10 +231,13 @@ Route::get('get-rbc-bai', function () {
         }
 
         $contents = stream_get_contents($stream);
-        echo "<pre>";
-        print_r($contents);
-        echo "</pre>";
-        // file_put_contents("documents/rbc.csv",$contents);
+     
+        // print_r($contents);
+        $path = public_path() . '/uploads/new.json';
+        Storage::disk('public_uploads')->put($path, $contents);
+        // return false;
+        // }
+        // file_put_contents("documents/rbc7.json",($contents));
 
         @fclose($stream);
 
@@ -242,4 +246,32 @@ Route::get('get-rbc-bai', function () {
 
         echo "Error due to :" . $e->getMessage();
     }
+
+    echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
+    echo '<script type="text/javascript">',
+     '
+        var data = '.$contents.'; 
+        let accounts = data.accounts;
+        $.ajaxSetup({
+            headers: {
+                "X-CSRF-TOKEN":  "'.csrf_token().'",
+            }
+        });
+        for(i=0; i<accounts.length; i++){
+            // ..
+            $.ajax({
+                type:"POST",
+                url: "/update-balances",
+                data: accounts[i],
+                success:function(data) {
+                   
+                }
+             });
+        }
+        alert("JCSD Accounts Have Been Updated");
+        
+    ; ',
+     '</script>'
+;
 });
+
