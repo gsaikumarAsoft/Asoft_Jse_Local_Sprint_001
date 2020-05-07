@@ -77,14 +77,14 @@
             >
               <b-form-select v-model="broker.operator_status" :options="client_status"></b-form-select>
             </b-form-group>
-            <b-form-group label="Access Permissions:">
-              <b-form-checkbox-group
-                id="checkbox-group-1"
-                v-model="selected_permissions"
-                :options="options"
-                name="flavour-1"
-              ></b-form-checkbox-group>
-            </b-form-group>
+              <!-- <b-form-group label="Access Permissions:">
+                <b-form-checkbox-group
+                  id="checkbox-group-1"
+                  v-model="selected_permissions"
+                  :options="options"
+                  name="flavour-1"
+                ></b-form-checkbox-group>
+              </b-form-group> -->
           </form>
         </b-modal>
       </div>
