@@ -408,7 +408,7 @@ export default {
             "Account",
             "Email",
             "Account Balance",
-            "Account"
+            "Amount Allocated"
           ]
         ],
         body: tableData

@@ -71180,7 +71180,7 @@ __webpack_require__.r(__webpack_exports__);
             "Account",
             "Email",
             "Account Balance",
-            "Account"
+            "Amount Allocated"
           ]
         ],
         body: tableData
@@ -73533,6 +73533,7 @@ __webpack_require__.r(__webpack_exports__);
       const tableData = [];
       for (var i = 0; i < this.broker_settlement_account.length; i++) {
         tableData.push([
+          // this.broker_settlement_account[0].local_broker["name"],
           this.broker_settlement_account[0].foreign_broker["name"],
           this.broker_settlement_account[0].bank_name,
           this.broker_settlement_account[0].account,
@@ -73553,13 +73554,13 @@ __webpack_require__.r(__webpack_exports__);
       doc.autoTable({
         head: [
           [
-            "Local Broker",
+            // "Local Broker",
             "Foreign Broker",
-            "Bank",
+            "Settlement Agent",
             "Account",
             "Email",
             "Account Balance",
-            "Account"
+            "Amount Allocated"
           ]
         ],
         body: tableData
