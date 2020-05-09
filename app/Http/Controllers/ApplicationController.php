@@ -46,39 +46,37 @@ class ApplicationController extends Controller
     {
 
         // return 'test';
-        $user = auth()->user();
-        // return $user;
-        $role = auth()->user()->roles[0]->name;
-
-        // return $user;
-        // return "Test";
+        $login = auth()->user();
         $user = Auth::user()->getRoleNames();
-
-        switch ($user[0]) {
-            case 'ADMB':
-                $local_brokers = LocalBroker::all();
-                // return view('local')->with('local_brokers', $local_brokers);/
-                return redirect('broker');
-                break;
-            case 'ADMD':
-                return redirect('jse-admin');
-                break;
-            case 'OPRB':
-                return redirect('operator');
-                break;
-            case 'TRDB':
-                return redirect('trader-broker');
-                break;
-            case 'BRKF':
-                return 'Configuration Screen For Outbound Foreign Broker To Be Designed <a href="/logout">Logout</a>';
-                // return redirect('foreign-broker');
-                break;
-            case 'AGTS':
-                return 'Configuration Screen For Settlement Agent To Be Designed <a href="/logout">Logout</a>';
-                // return redirect('settlement-agent');
-                break;
-            default:
-                return "Login Complete";
+        if ($user[0] === 'ADMD') {
+            return redirect('jse-admin');
+        }
+        if ($login['status'] === 'Verified' && $user[0] != "ADMD") {
+            switch ($user[0]) {
+                case 'ADMB':
+                    $local_brokers = LocalBroker::all();
+                    // return view('local')->with('local_brokers', $local_brokers);/
+                    return redirect('broker');
+                    break;
+                case 'OPRB':
+                    return redirect('operator');
+                    break;
+                case 'TRDB':
+                    return redirect('trader-broker');
+                    break;
+                case 'BRKF':
+                    return 'Configuration Screen For Outbound Foreign Broker To Be Designed <a href="/logout">Logout</a>';
+                    // return redirect('foreign-broker');
+                    break;
+                case 'AGTS':
+                    return 'Configuration Screen For Settlement Agent To Be Designed <a href="/logout">Logout</a>';
+                    // return redirect('settlement-agent');
+                    break;
+                default:
+                    return "Login Complete";
+            }
+        } else {
+            return view('layouts.unverified');
         }
     }
 
@@ -419,7 +417,7 @@ class ApplicationController extends Controller
 
     public function updateBalances(Request $request)
     {
-  
+
         //Check for accounts availability
         $account_exists = BrokerClient::where('jcsd', $request->client_JCSD_number)->first();
 

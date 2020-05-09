@@ -53,8 +53,8 @@ class AccountVerificationController extends Controller
     }
 
     public function verifyForeign($id, $action)
-{
-    // return $id;
+    {
+        // return $id;
 
 
         switch ($action) {
@@ -71,7 +71,7 @@ class AccountVerificationController extends Controller
                 break;
             case 'reject':
                 User::where('hash', $id)
-                ->update(['status' => 'Rejected']);
+                    ->update(['status' => 'Rejected']);
                 break;
         }
 
@@ -108,13 +108,13 @@ class AccountVerificationController extends Controller
     public function verifySettlement($id, $action)
     {
         // return $id;
-        
+
 
         switch ($action) {
             case 'accept':
 
-               $broker = BrokerSettlementAccount::where('hash', $id)
-                ->update(['settlement_agent_status' => 'Verified']);
+                $broker = BrokerSettlementAccount::where('hash', $id)
+                    ->update(['settlement_agent_status' => 'Verified']);
                 $account = DB::table('broker_settlement_accounts')->where('hash', $id)->get();
                 // return $account;
                 $foreign_broker = $this->HelperClass->getUserAll($account[0]->foreign_broker_id);
@@ -127,35 +127,32 @@ class AccountVerificationController extends Controller
                 break;
             case 'reject':
                 BrokerSettlementAccount::where('hash', $id)
-                ->update(['settlement_agent_status' => 'Rejected']);
+                    ->update(['settlement_agent_status' => 'Rejected']);
                 return view('layouts.rejected');
                 break;
         }
-
-
-        
     }
 
     public function foreignBrokerSettlement($id, $action)
     {
-        
+
 
         switch ($action) {
             case 'accept':
 
-               $broker = BrokerSettlementAccount::where('hash', $id)
-                ->update(['settlement_agent_status' => 'Verified']);
+                $broker = BrokerSettlementAccount::where('hash', $id)
+                    ->update(['settlement_agent_status' => 'Verified']);
                 $account = BrokerSettlementAccount::where('hash', $id)->first();
                 $foreign_broker = $this->HelperClass->getUserAll($account->foreign_broker_id);
                 // $account->lo = $lo;
                 $account->local_broker = $this->HelperClass->getUserAll($account->local_broker_id)['name'];
                 $account->foreign_broker = $this->HelperClass->getUserAll($account->foreign_broker_id)['name'];
                 $account['user_name'] = $account->foreign_broker;
-                  Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
+                Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
                 break;
             case 'reject':
                 BrokerSettlementAccount::where('hash', $id)
-                ->update(['settlement_agent_status' => 'Rejected']);
+                    ->update(['settlement_agent_status' => 'Rejected']);
 
                 break;
         }
@@ -167,18 +164,18 @@ class AccountVerificationController extends Controller
 
     public function verifyB2B($id, $action)
     {
-        
+
 
         switch ($action) {
             case 'accept':
 
-               $broker = BrokerSettlementAccount::where('hash', $id)
-                ->update(['foreign_broker_status' => 'Verified']);
+                $broker = BrokerSettlementAccount::where('hash', $id)
+                    ->update(['foreign_broker_status' => 'Verified']);
                 $account = BrokerSettlementAccount::where('hash', $id)->first();
                 // return $account;
-                $trading = DB::table('broker_trading_accounts')->select('target_comp_id','sender_comp_id')->where('broker_settlement_account_id', $account['id'])->get();
+                $trading = DB::table('broker_trading_accounts')->select('target_comp_id', 'sender_comp_id')->where('broker_settlement_account_id', $account['id'])->get();
                 // return $account;
-                if($account->settlement_agent_status === 'Verified' && $account->foreign_broker_status === 'Verified'){
+                if ($account->settlement_agent_status === 'Verified' && $account->foreign_broker_status === 'Verified') {
                     $local_broker = $this->HelperClass->getUserAll($account->local_broker_id);
                     $account['broker_name'] = $local_broker->name;
                     $account['bank_agent'] = $account['bank_name'];
@@ -186,11 +183,11 @@ class AccountVerificationController extends Controller
                     $account['target_comp_id'] = $trading[0]->target_comp_id;
                     Mail::to($local_broker->email)->send(new LocalBrokerTradingAccountVerification($account));
                 }
-                
+
                 break;
             case 'reject':
                 BrokerSettlementAccount::where('hash', $id)
-                ->update(['foreign_broker_status' => 'Rejected']);
+                    ->update(['foreign_broker_status' => 'Rejected']);
 
                 break;
         }
@@ -210,7 +207,7 @@ class AccountVerificationController extends Controller
                 //Update Status & Create User Account & Email Credentials   
                 $broker = User::updateOrCreate(
                     ['hash' => $id],
-                    ['status' => 'Verified', 'password' => Hash::make($password) ]
+                    ['status' => 'Verified', 'password' => Hash::make($password)]
 
                 );
 
@@ -218,7 +215,7 @@ class AccountVerificationController extends Controller
                 // Find the user we are trying to send credentials to using their hash.
                 $user = User::where('hash', $id)->first();
                 $user['p'] = $password;
-                
+
 
                 // Notify the new broker user with their login credentials
                 Mail::to($user->email)->send(new BrokerUserAccountCreated($user));
@@ -289,5 +286,23 @@ class AccountVerificationController extends Controller
 
 
         return view('layouts.approve');
+    }
+
+    public function jseValidation($id, $action)
+    {
+
+        switch ($action) {
+            case 'accept':
+
+
+                $broker = User::updateOrCreate(
+                    ['hash' => $id],
+                    ['status' => 'Verified']
+
+                );
+
+                return redirect('/');
+                break;
+        }
     }
 }

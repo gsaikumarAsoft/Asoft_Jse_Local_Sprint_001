@@ -32,6 +32,10 @@ Route::group(['prefix' => '/verify'], function () {
     Route::get('/account/{id}/{action}', 'AccountVerificationController@foreignBrokerUpdate');
 });
 
+Route::group(['prefix' => '/jse-validation'], function () {
+    Route::get('/{id}/{action}', 'AccountVerificationController@jseValidation');
+});
+
 Route::group(['prefix' => '/verify-trading-account'], function () {
     Route::get('/{id}/{action}', 'AccountVerificationController@verifyB2B');
     Route::get('/account/{id}/{action}', 'AccountVerificationController@foreignBrokerUpdate');
@@ -57,6 +61,7 @@ Route::group(['prefix' => '/verify-settlement-account', 'middleware' => ['auth',
 
 
 Auth::routes();
+Auth::routes(['verify' => true]);
 
 
 Route::get('/create-user', 'ApplicationController@ok');
@@ -76,7 +81,7 @@ Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], fun
 
 
 
-Route::group(['prefix' => '/broker', 'middleware' => ['App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
+Route::group(['prefix' => '/broker', 'middleware' => ['verified','App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
     Route::get('/', "BrokerController@index");
     Route::get('/get-users', 'BrokerController@getUsers');
     Route::get('/local-brokers', 'ApplicationController@brokerList');
@@ -182,6 +187,14 @@ Route::put('nv9w8yp8rbwg4t/', function () {
     // return $user;
     $user = User::with('roles', 'broker')->find($user->id);
     return $user;
+});
+
+Route::get('unverified', function () {
+    if(auth()->user()){
+        return view('layouts.unverified');
+    }else{
+        return redirect('/login');
+    }
 });
 
 
