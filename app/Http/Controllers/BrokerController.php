@@ -126,7 +126,7 @@ class BrokerController extends Controller
     {
 
         $user = auth()->user();
-        $a = BrokerSettlementAccount::with('foreign_broker')->where('local_broker_id', $user->id)->get();
+        $a = BrokerSettlementAccount::with('foreign_broker')->where('local_broker_id', $user->id)->where('settlement_agent_status', 'Verified')->get();
         // return $a;
         return view('brokers.settlements')->with('accounts', $a);
     }
