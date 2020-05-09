@@ -325,11 +325,25 @@ export default {
         for (i = 0; i < this.local_broker_users.length; i++) {
           // console.log(this.local_broker_users[i].permissions)
           this.local_broker_users[i].types = [];
+          this.local_broker_users[i].selected_client_permissions = [];
+          this.local_broker_users[i].selected_broker_permissions = [];
+
           user_permissions = this.local_broker_users[i].permissions;
           for (k = 0; k < user_permissions.length; k++) {
             var specific_permission = user_permissions[k].name;
-            // console.log(user_permissions[k].name);
             this.local_broker_users[i].types.push(specific_permission);
+
+            if (specific_permission.includes("client")) {
+              this.local_broker_users[i].selected_client_permissions.push(
+                specific_permission
+              );
+            }
+
+            if (specific_permission.includes("order")) {
+              this.local_broker_users[i].selected_broker_permissions.push(
+                specific_permission
+              );
+            }
           }
         }
 
