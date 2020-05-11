@@ -193,7 +193,6 @@ export default {
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
-
         //Determine if a new client is being created or we are updating an existing client
         if (this.create) {
           //Exclude ID
@@ -226,12 +225,6 @@ export default {
           this.$bvModal.hide("modal-1");
         });
       }
-      // Push the name to submitted names
-      // this.submittedNames.push(this.name);
-      // Hide the modal manually
-      // this.$nextTick(() => {
-      //   this.$bvModal.hide("modal-1");
-      // });
     },
     getClients(broker) {
       axios
