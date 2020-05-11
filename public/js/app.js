@@ -71572,6 +71572,7 @@ __webpack_require__.r(__webpack_exports__);
             jcsd: this.broker.jcsd,
             status: "Unverified"
           });
+          this.getClients();
         } else {
           //Include ID
           this.storeBrokerClient({
@@ -71584,6 +71585,7 @@ __webpack_require__.r(__webpack_exports__);
             jcsd: this.broker.jcsd,
             status: "Unverified"
           });
+          this.getClients();
           this.$swal(`Account Updated`);
         }
 

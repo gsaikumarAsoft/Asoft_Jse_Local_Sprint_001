@@ -24,6 +24,7 @@
           aria-controls="foreign-brokers"
         ></b-pagination>
         <b-button v-b-modal.modal-1 @click="create = true">Create Settlement Account</b-button>
+        <b-button @click="importAccounts">Import Accounts</b-button>
         <b-button @click="exportBalances">Export Balances</b-button>
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
@@ -377,6 +378,18 @@ export default {
     }
   },
   methods: {
+    importAccounts(){
+            this.$swal
+        .fire({
+          title: "Importing",
+          html: "One moment while we import new settlement accounts.",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        })
+        .then(result => {});
+    },
     exportBalances() {
       const tableData = [];
       for (var i = 0; i < this.broker_settlement_account.length; i++) {

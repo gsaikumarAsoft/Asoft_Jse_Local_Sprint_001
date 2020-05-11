@@ -25,10 +25,6 @@ This document is intended to act as a guideline for deployments of the LARAVEL /
 - Run **cd /home/bitnami/stack/nginx/html**
 - Run **sudo vim .env** to open the file and change the DBPASSWORD value to the default password received in step (4)
 
-
-
-
-
 ## Jason C Lawrence
 ## Innovate 10x
 ## February - March 2019# JSE_BROKER_DMA_tool
