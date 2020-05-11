@@ -230,6 +230,7 @@ export default {
       axios
         .get("trading-accounts", broker)
         .then(response => {
+          this.local_broker_clients =[];
           var broker = response.data[0];
           this.local_broker_clients = broker.clients;
         })
