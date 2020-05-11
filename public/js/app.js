@@ -70910,6 +70910,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies__WEBPACK_IMPORTED_MODULE_4__["default"]],
   components: {
@@ -71149,6 +71150,18 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
+    importAccounts(){
+            this.$swal
+        .fire({
+          title: "Importing",
+          html: "One moment while we import new settlement accounts.",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        })
+        .then(result => {});
+    },
     exportBalances() {
       const tableData = [];
       for (var i = 0; i < this.broker_settlement_account.length; i++) {
@@ -71547,7 +71560,6 @@ __webpack_require__.r(__webpack_exports__);
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
-
         //Determine if a new client is being created or we are updating an existing client
         if (this.create) {
           //Exclude ID
@@ -71580,17 +71592,13 @@ __webpack_require__.r(__webpack_exports__);
           this.$bvModal.hide("modal-1");
         });
       }
-      // Push the name to submitted names
-      // this.submittedNames.push(this.name);
-      // Hide the modal manually
-      // this.$nextTick(() => {
-      //   this.$bvModal.hide("modal-1");
-      // });
     },
     getClients(broker) {
       axios__WEBPACK_IMPORTED_MODULE_0___default.a
         .get("trading-accounts", broker)
         .then(response => {
+          console.log(response);
+          this.local_broker_clients =[];
           var broker = response.data[0];
           this.local_broker_clients = broker.clients;
         })
@@ -76779,6 +76787,10 @@ var render = function() {
               },
               [_vm._v("Create Settlement Account")]
             ),
+            _vm._v(" "),
+            _c("b-button", { on: { click: _vm.importAccounts } }, [
+              _vm._v("Import Accounts")
+            ]),
             _vm._v(" "),
             _c("b-button", { on: { click: _vm.exportBalances } }, [
               _vm._v("Export Balances")
