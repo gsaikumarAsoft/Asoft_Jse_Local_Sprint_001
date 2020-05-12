@@ -61,8 +61,8 @@ return [
         'sftp' => [
             'driver' => 'sftp',
             'host' => env('BAI_HOST'),
-            'username' => 'rbc',
-            'password' => 'rbc23sftp',
+            'username' => env('BAI_USER'),
+            'password' => env('BAI_PASSWORD'),
             'port' => 22,
         ],
         's3' => [
