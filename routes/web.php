@@ -202,37 +202,54 @@ Route::get('unverified', function () {
 Route::get('get-rbc-bai', function () {
 
 
+     // $path = 'RBC.json';
+            // Storage::disk('public_uploads')->put($path, $file);
 
-    $file_date = date('Ymd');
-    $remote_file_path = "/upload/BALTRN3_" . $file_date . ".001";
-    // $path = 'RBC.json';
-    $contents = Storage::disk('sftp')->get($remote_file_path);
-    // Storage::disk('public_uploads')->put($path, $file);
-    echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
-    echo '<script type="text/javascript">',
-        '
-        var data = ' . $contents . '; 
-        let accounts = data.accounts;
-        $.ajaxSetup({
-            headers: {
-                "X-CSRF-TOKEN":  "' . csrf_token() . '",
-            }
-        });
-        for(i=0; i<accounts.length; i++){
-            // ..
-            $.ajax({
-                type:"POST",
-                url: "/update-balances",
-                data: accounts[i],
-                success:function(data) {
-                   
+
+            
+    //Check if user has been authenticted before running updater
+    if (auth()->user()) {
+
+        //Check if this user is the JSE Admin
+        $user = Auth::user()->getRoleNames();
+
+        if ($user[0] === "ADMD") { //Only run if this is the JSE ADMIN Account
+            $file_date = date('Ymd');
+            $remote_file_path = "/upload/BALTRN3_" . $file_date . ".001";
+            $contents = Storage::disk('sftp')->get($remote_file_path);
+            
+            echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
+            echo '<script type="text/javascript">',
+                '
+                var data = ' . $contents . '; 
+                let accounts = data.accounts;
+                $.ajaxSetup({
+                    headers: {
+                        "X-CSRF-TOKEN":  "' . csrf_token() . '",
+                    }
+                });
+                for(i=0; i<accounts.length; i++){
+                    // alert(accounts[i]);
+                    $.ajax({
+                        type:"POST",
+                        url: "/update-balances",
+                        data: accounts[i],
+                        success:function(data) {
+                           
+                        }
+                     });
                 }
-             });
+                alert("JCSD Accounts Have Been Updated");
+                
+            ; ',
+                '</script>';
+        } else {
+            return "You will need to Login with the JSE Admin account to update balances";
         }
-        alert("JCSD Accounts Have Been Updated");
-        
-    ; ',
-        '</script>';return "done";
+    } else {
+        return "Please Login to update balances <a href='login'>Login</a>";
+    }
+
 
     // try {
 
@@ -298,12 +315,12 @@ Route::get('get-rbc-bai', function () {
     //             url: "/update-balances",
     //             data: accounts[i],
     //             success:function(data) {
-                   
+
     //             }
     //          });
     //     }
     //     alert("JCSD Accounts Have Been Updated");
-        
+
     // ; ',
     //     '</script>';
 });
