@@ -70399,17 +70399,17 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: "user.name",
           sortable: true,
-          label: 'Name'
+          label: "Name"
         },
         {
           key: "user.email",
           sortable: true,
-          label: 'Email'
+          label: "Email"
         },
         {
           key: "user.status",
           sortable: true,
-          label: 'Status'
+          label: "Status"
         }
       ],
       modalTitle: "Foreign Broker Update",
@@ -70514,12 +70514,28 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     storeForeignBroker(broker) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .post("store-foreign-broker", broker)
-        .then(response => {
-          this.getBrokers();
+      this.$swal
+        .fire({
+          title: "Creating Foreign Broker Account",
+          html: "One moment while we setup the Account",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+            axios__WEBPACK_IMPORTED_MODULE_0___default.a
+              .post("store-foreign-broker", broker)
+              .then(response => {
+                this.getBrokers();
+              })
+              .catch(error => {
+                this.$swal(
+                  "Account Created!",
+                  // "Foreign Broker Has Been Removed.",
+                  "success"
+                );
+              });
+          }
         })
-        .catch(error => {});
+        .then(result => {});
     },
     add() {
       this.create = true;
@@ -71642,20 +71658,7 @@ __webpack_require__.r(__webpack_exports__);
 }).then((result) => {
 
 })
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .post("store-broker-client", broker)
-        .then(response => {
-          // this.getClients();
-          this.$swal(`Client Account created`);
-          this.getClients();
-        })
-        .catch(error => {
-                    if (error.response.data.message.includes("Duplicate entry")) {
-            this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
-            );
-          }
-        });
+
     },
     add() {
       this.create = true;

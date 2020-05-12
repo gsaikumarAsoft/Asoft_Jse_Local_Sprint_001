@@ -275,20 +275,7 @@ export default {
 }).then((result) => {
 
 })
-      axios
-        .post("store-broker-client", broker)
-        .then(response => {
-          // this.getClients();
-          this.$swal(`Client Account created`);
-          this.getClients();
-        })
-        .catch(error => {
-                    if (error.response.data.message.includes("Duplicate entry")) {
-            this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
-            );
-          }
-        });
+
     },
     add() {
       this.create = true;

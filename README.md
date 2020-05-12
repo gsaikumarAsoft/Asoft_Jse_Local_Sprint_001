@@ -28,3 +28,12 @@ This document is intended to act as a guideline for deployments of the LARAVEL /
 ## Jason C Lawrence
 ## Innovate 10x
 ## February - March 2019# JSE_BROKER_DMA_tool
+
+30  php artisan migrate
+   31  php artisan migrate:fresh
+   32  php artisan db:seed
+   33  php artisan config:cache
+   34  php artisan config:clear
+   35  chmod -R 777 storage/php artisan  
+
+   

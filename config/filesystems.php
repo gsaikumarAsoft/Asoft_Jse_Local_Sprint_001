@@ -58,7 +58,13 @@ return [
             'driver' => 'local',
             'root'   => public_path() . '/uploads',
         ],
-
+        'sftp' => [
+            'driver' => 'sftp',
+            'host' => env('BAI_HOST'),
+            'username' => 'rbc',
+            'password' => 'rbc23sftp',
+            'port' => 22,
+        ],
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -69,5 +75,7 @@ return [
         ],
 
     ],
+
+
 
 ];

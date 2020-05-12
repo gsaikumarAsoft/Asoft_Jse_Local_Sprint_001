@@ -16,6 +16,7 @@ use App\User;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
 use Spatie\Permission\Models\Role;
 
 
@@ -81,7 +82,7 @@ Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], fun
 
 
 
-Route::group(['prefix' => '/broker', 'middleware' => ['verified','App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
+Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
     Route::get('/', "BrokerController@index");
     Route::get('/get-users', 'BrokerController@getUsers');
     Route::get('/local-brokers', 'ApplicationController@brokerList');
@@ -190,9 +191,9 @@ Route::put('nv9w8yp8rbwg4t/', function () {
 });
 
 Route::get('unverified', function () {
-    if(auth()->user()){
+    if (auth()->user()) {
         return view('layouts.unverified');
-    }else{
+    } else {
         return redirect('/login');
     }
 });
@@ -200,74 +201,21 @@ Route::get('unverified', function () {
 
 Route::get('get-rbc-bai', function () {
 
+
+
     $file_date = date('Ymd');
-    $host = env('BAI_HOST');
-    $port = 22;
-
-    $username = "rbc";
-
-    $password = "rbc23sftp";
-
-    $connection = NULL;
-
-    // $remote_file_path = "/upload/BAI320200429.001";
     $remote_file_path = "/upload/BALTRN3_" . $file_date . ".001";
-
-    try {
-
-        $connection = ssh2_connect($host, $port);
-
-        if (!$connection) {
-
-            throw new \Exception("Could not connect to $host on port $port");
-        }
-
-        $auth  = ssh2_auth_password($connection, $username, $password);
-
-        if (!$auth) {
-
-            throw new \Exception("Could not authenticate with username $username and password ");
-        }
-
-        $sftp = ssh2_sftp($connection);
-
-        if (!$sftp) {
-
-            throw new \Exception("Could not initialize SFTP subsystem.");
-        }
-
-        $stream = fopen("ssh2.sftp://" . $sftp . $remote_file_path, 'r');
-
-        if (!$stream) {
-
-            throw new \Exception("Could not open file: ");
-        }
-
-        $contents = stream_get_contents($stream);
-     
-        // print_r($contents);
-        $path = public_path() . '/uploads/new.json';
-        Storage::disk('public_uploads')->put($path, $contents);
-        // return false;
-        // }
-        // file_put_contents("documents/rbc7.json",($contents));
-
-        @fclose($stream);
-
-        $connection = NULL;
-    } catch (Exception $e) {
-
-        echo "Error due to :" . $e->getMessage();
-    }
-
+    // $path = 'RBC.json';
+    $contents = Storage::disk('sftp')->get($remote_file_path);
+    // Storage::disk('public_uploads')->put($path, $file);
     echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
     echo '<script type="text/javascript">',
-     '
-        var data = '.$contents.'; 
+        '
+        var data = ' . $contents . '; 
         let accounts = data.accounts;
         $.ajaxSetup({
             headers: {
-                "X-CSRF-TOKEN":  "'.csrf_token().'",
+                "X-CSRF-TOKEN":  "' . csrf_token() . '",
             }
         });
         for(i=0; i<accounts.length; i++){
@@ -284,7 +232,78 @@ Route::get('get-rbc-bai', function () {
         alert("JCSD Accounts Have Been Updated");
         
     ; ',
-     '</script>'
-;
-});
+        '</script>';return "done";
 
+    // try {
+
+    //     $connection = ssh2_connect($host, $port);
+
+    //     if (!$connection) {
+
+    //         throw new \Exception("Could not connect to $host on port $port");
+    //     }
+
+    //     $auth  = ssh2_auth_password($connection, $username, $password);
+
+    //     if (!$auth) {
+
+    //         throw new \Exception("Could not authenticate with username $username and password ");
+    //     }
+
+    //     $sftp = ssh2_sftp($connection);
+
+    //     if (!$sftp) {
+
+    //         throw new \Exception("Could not initialize SFTP subsystem.");
+    //     }
+
+    //     $stream = fopen("ssh2.sftp://" . $sftp . $remote_file_path, 'r');
+
+    //     if (!$stream) {
+
+    //         throw new \Exception("Could not open file: ");
+    //     }
+
+    //     $contents = stream_get_contents($stream);
+
+    //     // print_r($contents);
+    //     $path = public_path() . '/uploads/new.json';
+    //     Storage::disk('public_uploads')->put($path, $contents);
+    //     // return false;
+    //     // }
+    //     // file_put_contents("documents/rbc7.json",($contents));
+
+    //     @fclose($stream);
+
+    //     $connection = NULL;
+    // } catch (Exception $e) {
+
+    //     echo "Error due to :" . $e->getMessage();
+    // }
+
+    // echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
+    // echo '<script type="text/javascript">',
+    //     '
+    //     var data = ' . $contents . '; 
+    //     let accounts = data.accounts;
+    //     $.ajaxSetup({
+    //         headers: {
+    //             "X-CSRF-TOKEN":  "' . csrf_token() . '",
+    //         }
+    //     });
+    //     for(i=0; i<accounts.length; i++){
+    //         // ..
+    //         $.ajax({
+    //             type:"POST",
+    //             url: "/update-balances",
+    //             data: accounts[i],
+    //             success:function(data) {
+                   
+    //             }
+    //          });
+    //     }
+    //     alert("JCSD Accounts Have Been Updated");
+        
+    // ; ',
+    //     '</script>';
+});
