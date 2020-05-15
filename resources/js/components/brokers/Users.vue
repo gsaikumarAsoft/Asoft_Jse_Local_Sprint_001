@@ -4,6 +4,7 @@
     <div class="container">
       <div class="content">
         <b-table
+        responsive
           show-empty
           :empty-text="'No Users have been Created. Create a user below.'"
           striped

@@ -5,6 +5,7 @@
       <h1>Current Orders</h1>
       <div class="content">
         <b-table
+        responsive
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
           id="orders-table"

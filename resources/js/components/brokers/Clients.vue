@@ -6,6 +6,7 @@
         <b-table
           striped
           hover
+          responsive
           show-empty
           :empty-text="'No Clients have been Created. Create a Client below.'"
           id="local-brokers"

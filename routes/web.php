@@ -202,9 +202,11 @@ Route::get('unverified', function () {
 Route::get('get-rbc-bai', function () {
 
 
-     // $path = 'RBC.json';
-            // Storage::disk('public_uploads')->put($path, $file);
 
+    //If we intend to store the data before updating the accounts 
+    // $path = 'RBC.json';
+    // Storage::disk('public_uploads')->put($path, $file);
+    // ===========================================================
 
             
     //Check if user has been authenticted before running updater
@@ -226,7 +228,7 @@ Route::get('get-rbc-bai', function () {
                 $.ajaxSetup({
                     headers: {
                         "X-CSRF-TOKEN":  "' . csrf_token() . '",
-                    }
+                    }   
                 });
                 for(i=0; i<accounts.length; i++){
                     // alert(accounts[i]);
@@ -239,7 +241,7 @@ Route::get('get-rbc-bai', function () {
                         }
                      });
                 }
-                alert("JCSD Accounts Have Been Updated");
+                alert("Settlements Accounts Have Been Updated");
                 
             ; ',
                 '</script>';

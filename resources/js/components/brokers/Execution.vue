@@ -216,7 +216,9 @@ export default {
       doc.save("JSE-ORDER-EXECUTION-REPORT.pdf");
     }
   },
-  mounted() {}
+  mounted() {
+    console.log(this);
+  }
 };
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

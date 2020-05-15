@@ -70927,6 +70927,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies__WEBPACK_IMPORTED_MODULE_4__["default"]],
   components: {
@@ -71381,6 +71382,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+
 
 
 
@@ -71929,7 +71931,9 @@ __webpack_require__.r(__webpack_exports__);
       doc.save("JSE-ORDER-EXECUTION-REPORT.pdf");
     }
   },
-  mounted() {}
+  mounted() {
+    console.log(this);
+  }
 });
 
 
@@ -71951,6 +71955,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+
 
 
 
@@ -73746,6 +73751,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+
 
 
 
@@ -76737,6 +76743,7 @@ var render = function() {
           [
             _c("b-table", {
               attrs: {
+                responsive: "",
                 striped: "",
                 hover: "",
                 "show-empty": "",
@@ -77117,6 +77124,7 @@ var render = function() {
               attrs: {
                 striped: "",
                 hover: "",
+                responsive: "",
                 "show-empty": "",
                 "empty-text":
                   "No Clients have been Created. Create a Client below.",
@@ -77554,6 +77562,7 @@ var render = function() {
             _c("b-table", {
               ref: "selectedOrder",
               attrs: {
+                responsive: "",
                 "empty-text":
                   "No Orders have been Created. Create an Order below.",
                 id: "orders-table",
@@ -78864,6 +78873,7 @@ var render = function() {
           [
             _c("b-table", {
               attrs: {
+                responsive: "",
                 "show-empty": "",
                 "empty-text":
                   "No Users have been Created. Create a user below.",

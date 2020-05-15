@@ -417,16 +417,31 @@ class ApplicationController extends Controller
 
     public function updateBalances(Request $request)
     {
-
+        // return $request->settlement_account;
         //Check for accounts availability
-        $account_exists = BrokerClient::where('jcsd', $request->client_JCSD_number)->first();
+        // $account_exists = BrokerClient::where('jcsd', $request->client_JCSD_number)->first();
 
+
+        //Check If Settlement Accounts Exist
+        $account_exists = BrokerSettlementAccount::where('account', $request->settlement_account_number)->first();
+
+        // return $account_exists;
         if ($account_exists) {
-            //If the accounts being passed exists, Upload Their Balances based on their JCSD account number
-            $broker_client_account = BrokerClient::updateOrCreate(
-                ['jcsd' => $request->client_JCSD_number],
-                ['account_balance' => $request->client_balance]
+            //If the accounts being passed exists, Upload Their Balances based on their settlement account number
+            // $broker_client_account = BrokerClient::updateOrCreate(
+            //     ['jcsd' => $request->client_JCSD_number],
+            //     ['account_balance' => $request->client_balance]
+            // );
+
+            $broker_settlement_account = BrokerSettlementAccount::updateOrCreate(
+                ['account' => $request->settlement_account_number],
+                ['account_balance' => $request->settlement_account]
             );
+            //If the accounts being passed exists, Upload Their Balances based on their JCSD account number
+            // $broker_client_account = BrokerClient::updateOrCreate(
+            //     ['jcsd' => $request->client_JCSD_number],
+            //     ['account_balance' => $request->client_balance]
+            // );
             // return $broker_client_account;
         }
     }

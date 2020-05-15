@@ -4,6 +4,7 @@
     <div class="container">
       <div class="content">
         <b-table
+          responsive
           striped
           hover
           show-empty
