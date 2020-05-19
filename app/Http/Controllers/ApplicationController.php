@@ -171,8 +171,10 @@ class ApplicationController extends Controller
 
             $b = BrokerSettlementAccount::find($request->id)->first();
 
-            BrokerSettlementAccount::where('hash', $b['hash'])
-                ->update(['currency' => $request->currency, 'amount_allocated' => (int) $request['amount_allocated'], 'account_balance' => $request['account_balance'], 'bank_name' => $request['bank_name'], 'email' => $request['email'], 'account' => $request['account'], 'settlement_agent_status' => 'Unverified']);
+            BrokerSettlementAccount::updateOrCreate(
+                    ['hash' => $b['hash'] ],
+                    ['currency' => $request->currency, 'amount_allocated' => (int) $request['amount_allocated'], 'account_balance' => $request['account_balance'], 'bank_name' => $request['bank_name'], 'email' => $request['email'], 'account' => $request['account'], 'settlement_agent_status' => 'Unverified']
+            );
 
 
             // Update The settlement agent password and notify the settlement agent of the change
