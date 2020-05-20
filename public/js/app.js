@@ -71241,6 +71241,7 @@ __webpack_require__.r(__webpack_exports__);
         if (this.create) {
           //Exclude ID
           this.storeBrokerSettlementAccount({
+            id: null,
             currency: this.settlement_account.currency,
             account: this.settlement_account.account,
             account_balance: this.settlement_account.account_balance,
@@ -71255,19 +71256,8 @@ __webpack_require__.r(__webpack_exports__);
           this.$swal(`Account created for ${this.settlement_account.email}`);
         } else {
           //Include ID
-          this.storeBrokerSettlementAccount({
-            currency: this.settlement_account.currency,
-            account: this.settlement_account.account,
-            account_balance: this.settlement_account.account_balance,
-            amount_allocated: this.settlement_account.amount_allocated,
-            bank_name: this.settlement_account.bank_name,
-            email: this.settlement_account.email,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            id: this.settlement_account.id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            status: "Unverified",
-            hash: this.settlement_account.hash
-          });
+          console.log(this.settlement_account);
+          this.storeBrokerSettlementAccount(this.settlement_account);
         }
 
         this.resetModal();

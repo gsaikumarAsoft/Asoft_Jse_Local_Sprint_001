@@ -160,6 +160,7 @@ class ApplicationController extends Controller
 
     function storeSettlementBroker(Request $request)
     {
+        // return $request->account;
         $local_broker_name = $this->HelperClass->getUser($request->local_broker_id);
         $foreign_broker_name = $this->HelperClass->getUser($request->foreign_broker_id);
         $pass = $this->HelperClass->rand_pass(8);
@@ -169,23 +170,31 @@ class ApplicationController extends Controller
 
             LogActivity::addToLog('Updated Settlement Account Details');
 
-            $b = BrokerSettlementAccount::find($request->id)->first();
+            $b = BrokerSettlementAccount::find($request->id);
 
-            BrokerSettlementAccount::updateOrCreate(
-                    ['id' => $b['id'] ],
-                    ['currency' => $request->currency, 'amount_allocated' => (int) $request['amount_allocated'], 'account_balance' => $request['account_balance'], 'bank_name' => $request['bank_name'], 'email' => $request['email'], 'account' => $request['account'], 'settlement_agent_status' => 'Unverified']
+            $b->update(
+                [
+
+                    'currency' => $request->currency,
+                    'amount_allocated' => (int) $request->amount_allocated,
+                    'account_balance' => $request->account_balance,
+                    'bank_name' => $request->bank_name,
+                    'email' => $request->email,
+                    'account' => $request->account,
+                    'settlement_agent_status' => 'Unverified'
+                ]
             );
 
 
-            // Update The settlement agent password and notify the settlement agent of the change
-            User::where('name', $request->bank_name)
-                ->update(['password' => Hash::make($pass)]);
+            // // Update The settlement agent password and notify the settlement agent of the change
+            // User::where('name', $request->bank_name)
+            //     ->update(['password' => Hash::make($pass)]);
 
-            $request['password'] = $pass;
-            $request['local_broker'] = $local_broker_name[0]->name;
-            $request['foreign_broker'] = $foreign_broker_name[0]->name;
-            //Notify the bank that the settlement is being updated so they can verify it.
-            Mail::to($request->email)->send(new SettlementAccountUpdated($request, ''));
+            // $request['password'] = $pass;
+            // $request['local_broker'] = $local_broker_name[0]->name;
+            // $request['foreign_broker'] = $foreign_broker_name[0]->name;
+            // //Notify the bank that the settlement is being updated so they can verify it.
+            // Mail::to($request->email)->send(new SettlementAccountUpdated($request, ''));
         } else {
             // Sending A Bank Settlement Account Verification Request Email
             // For each Settlement Account Created or Edited for a Local Broker
