@@ -493,6 +493,7 @@ export default {
     settlmentAccountHandler(b) {
       // console.log(b);
       this.settlement_account = {};
+      console.log(b);
       this.settlement_account = b;
       this.$swal({
         title: "",
