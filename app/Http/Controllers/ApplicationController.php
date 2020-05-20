@@ -172,7 +172,7 @@ class ApplicationController extends Controller
             $b = BrokerSettlementAccount::find($request->id)->first();
 
             BrokerSettlementAccount::updateOrCreate(
-                    ['hash' => $b['hash'] ],
+                    ['id' => $b['id'] ],
                     ['currency' => $request->currency, 'amount_allocated' => (int) $request['amount_allocated'], 'account_balance' => $request['account_balance'], 'bank_name' => $request['bank_name'], 'email' => $request['email'], 'account' => $request['account'], 'settlement_agent_status' => 'Unverified']
             );
 
