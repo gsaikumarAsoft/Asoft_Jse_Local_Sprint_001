@@ -71280,6 +71280,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     settlmentAccountHandler(b) {
       // console.log(b);
+      this.settlement_account = {};
       this.settlement_account = b;
       this.$swal({
         title: "",
