@@ -181,7 +181,7 @@ class ApplicationController extends Controller
                     'bank_name' => $request->bank_name,
                     'email' => $request->email,
                     'account' => $request->account,
-                    'settlement_agent_status' => 'Unverified'
+                    'settlement_agent_status' => 'Unverified',
                 ]
             );
 

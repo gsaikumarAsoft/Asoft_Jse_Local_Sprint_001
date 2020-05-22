@@ -60,7 +60,6 @@
                 required
               ></b-form-input>
             </b-form-group>
-                        </b-form-group>
             <b-form-group
               label="Open Orders"
               label-for="open-orders-input"
@@ -84,7 +83,7 @@
 import axios from "axios";
 import headNav from "./../partials/Nav";
 export default {
-  props:['broker_traders'],
+  props: ["broker_traders"],
   components: {
     headNav
   },
@@ -115,40 +114,39 @@ export default {
           label: "Balance",
           sortable: true,
           formatter: (value, key, item) => {
-          var formatter = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          });
-  
-              var cal =  item.orders_limit;
-              return formatter.format(cal);
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.orders_limit;
+            return formatter.format(cal);
           }
-            
         },
         {
           key: "open_orders",
           label: "Open Orders",
           sortable: true
         },
-                {
+        {
           key: "orders_limit",
           label: "Available",
           sortable: true
         },
-                  {
-            // A virtual column with custom formatter
-            key: 'available',
-            label: 'Available',
-            formatter: (value, key, item) => {
-              var formatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-});
+        {
+          // A virtual column with custom formatter
+          key: "available",
+          label: "Available",
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
 
-              var cal =  item.orders_limit - item.open_orders;
-              return formatter.format(cal);
-            }
-          },
+            var cal = item.orders_limit - item.open_orders;
+            return formatter.format(cal);
+          }
+        },
         {
           key: "jcsd",
           label: "JCSD",
@@ -234,7 +232,7 @@ export default {
         .get("trading-accounts", broker)
         .then(response => {
           console.log(response);
-          this.local_broker_clients =[];
+          this.local_broker_clients = [];
           var broker = response.data[0];
           this.local_broker_clients = broker.clients;
         })
@@ -266,17 +264,29 @@ export default {
     },
     storeBrokerClient(broker) {
       console.log(this.broker);
-      this.$swal.fire({
-  title: 'Creating Client Account',
-  html: 'One moment while we setup the Client Account',
-  timerProgressBar: true,
-  onBeforeOpen: () => {
-    this.$swal.showLoading()
-  },
-}).then((result) => {
-
-})
-
+      this.$swal
+        .fire({
+          title: "Creating Client Account",
+          html: "One moment while we setup the Client Account",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        })
+        .then(result => {});
+      axios
+        .post("store-broker-client", broker)
+        .then(response => {
+          this.$swal(`Account created`);
+          setTimeout(location.reload.bind(location), 1000);
+        })
+        .catch(error => {
+          if (error.response.data.message.includes("Duplicate entry")) {
+            this.$swal(
+              `An Account with this email address already exists. Please try using a different email`
+            );
+          }
+        });
     },
     add() {
       this.create = true;
