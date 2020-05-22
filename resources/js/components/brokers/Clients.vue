@@ -274,9 +274,11 @@ export default {
           }
         })
         .then(result => {});
+        console.log('Storing Broker Client')
       axios
         .post("store-broker-client", broker)
         .then(response => {
+          console.log('Client Stored');
           this.$swal(`Account created`);
           setTimeout(location.reload.bind(location), 1000);
         })
