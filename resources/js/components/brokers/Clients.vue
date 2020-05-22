@@ -204,7 +204,7 @@ export default {
             jcsd: this.broker.jcsd,
             status: "Unverified"
           });
-          this.getClients();
+          // this.getClients();
         } else {
           //Include ID
           this.storeBrokerClient({
@@ -217,7 +217,7 @@ export default {
             jcsd: this.broker.jcsd,
             status: "Unverified"
           });
-          this.getClients();
+          // this.getClients();
           this.$swal(`Account Updated`);
         }
 
