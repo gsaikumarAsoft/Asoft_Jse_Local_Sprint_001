@@ -71458,9 +71458,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props:['broker_traders'],
+  props: ["broker_traders"],
   components: {
     headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
@@ -71491,40 +71490,39 @@ __webpack_require__.r(__webpack_exports__);
           label: "Balance",
           sortable: true,
           formatter: (value, key, item) => {
-          var formatter = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          });
-  
-              var cal =  item.orders_limit;
-              return formatter.format(cal);
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.orders_limit;
+            return formatter.format(cal);
           }
-            
         },
         {
           key: "open_orders",
           label: "Open Orders",
           sortable: true
         },
-                {
+        {
           key: "orders_limit",
           label: "Available",
           sortable: true
         },
-                  {
-            // A virtual column with custom formatter
-            key: 'available',
-            label: 'Available',
-            formatter: (value, key, item) => {
-              var formatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-});
+        {
+          // A virtual column with custom formatter
+          key: "available",
+          label: "Available",
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
 
-              var cal =  item.orders_limit - item.open_orders;
-              return formatter.format(cal);
-            }
-          },
+            var cal = item.orders_limit - item.open_orders;
+            return formatter.format(cal);
+          }
+        },
         {
           key: "jcsd",
           label: "JCSD",
@@ -71582,7 +71580,7 @@ __webpack_require__.r(__webpack_exports__);
             jcsd: this.broker.jcsd,
             status: "Unverified"
           });
-          this.getClients();
+          // this.getClients();
         } else {
           //Include ID
           this.storeBrokerClient({
@@ -71595,7 +71593,7 @@ __webpack_require__.r(__webpack_exports__);
             jcsd: this.broker.jcsd,
             status: "Unverified"
           });
-          this.getClients();
+          // this.getClients();
           this.$swal(`Account Updated`);
         }
 
@@ -71610,7 +71608,7 @@ __webpack_require__.r(__webpack_exports__);
         .get("trading-accounts", broker)
         .then(response => {
           console.log(response);
-          this.local_broker_clients =[];
+          this.local_broker_clients = [];
           var broker = response.data[0];
           this.local_broker_clients = broker.clients;
         })
@@ -71642,17 +71640,31 @@ __webpack_require__.r(__webpack_exports__);
     },
     storeBrokerClient(broker) {
       console.log(this.broker);
-      this.$swal.fire({
-  title: 'Creating Client Account',
-  html: 'One moment while we setup the Client Account',
-  timerProgressBar: true,
-  onBeforeOpen: () => {
-    this.$swal.showLoading()
-  },
-}).then((result) => {
-
-})
-
+      this.$swal
+        .fire({
+          title: "Creating Client Account",
+          html: "One moment while we setup  a new Client Account",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        })
+        .then(result => {});
+      console.log("Storing Broker Client");
+      axios__WEBPACK_IMPORTED_MODULE_0___default.a
+        .post("store-broker-client", broker)
+        .then(response => {
+          console.log("Client Stored");
+          this.$swal(`Account created`);
+          setTimeout(location.reload.bind(location), 1000);
+        })
+        .catch(error => {
+          if (error.response.data.message.includes("Duplicate entry")) {
+            this.$swal(
+              `An Account with this email address already exists. Please try using a different email`
+            );
+          }
+        });
     },
     add() {
       this.create = true;
@@ -73031,7 +73043,7 @@ __webpack_require__.r(__webpack_exports__);
 
         // Side: "5",
 
-        // Strategy: 1000,
+        // Strategy: 1000, 
 
         // StopPx: order.stop_price,
 

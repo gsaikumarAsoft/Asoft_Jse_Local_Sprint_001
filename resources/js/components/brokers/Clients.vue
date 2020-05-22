@@ -267,18 +267,18 @@ export default {
       this.$swal
         .fire({
           title: "Creating Client Account",
-          html: "One moment while we setup the Client Account",
+          html: "One moment while we setup  a new Client Account",
           timerProgressBar: true,
           onBeforeOpen: () => {
             this.$swal.showLoading();
           }
         })
         .then(result => {});
-        console.log('Storing Broker Client')
+      console.log("Storing Broker Client");
       axios
         .post("store-broker-client", broker)
         .then(response => {
-          console.log('Client Stored');
+          console.log("Client Stored");
           this.$swal(`Account created`);
           setTimeout(location.reload.bind(location), 1000);
         })
