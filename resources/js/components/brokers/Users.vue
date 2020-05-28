@@ -4,7 +4,7 @@
     <div class="container">
       <div class="content">
         <b-table
-        responsive
+          responsive
           show-empty
           :empty-text="'No Users have been Created. Create a user below.'"
           striped
@@ -244,7 +244,12 @@ export default {
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
-
+        if (this.broker.selected_client_permissions == null) {
+          this.broker.selected_client_permissions = [];
+        }
+        if (this.broker.selected_broker_permissions == null) {
+          this.broker.selected_broker_permissions = [];
+        }
         //Determine if a new user is being created or we are updating an existing user
         if (this.create) {
           //Exclude ID
