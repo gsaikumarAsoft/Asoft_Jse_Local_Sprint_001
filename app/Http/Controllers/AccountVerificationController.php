@@ -168,15 +168,17 @@ class AccountVerificationController extends Controller
 
         switch ($action) {
             case 'accept':
-
-                $broker = BrokerTradingAccount::where('hash', $id)
-                    ->update(['status' => 'Verified']);
                 $trading = BrokerTradingAccount::where('hash', $id)->first();
-
+                $foreign_broker = BrokerSettlementAccount::where('id', $trading->broker_settlement_account_id)
+                    ->update(['foreign_broker_status' => 'Verified']);
                 $account = BrokerSettlementAccount::where('id', $trading->broker_settlement_account_id)->first();
                 // return $account;
                 $trading = DB::table('broker_trading_accounts')->select('target_comp_id', 'sender_comp_id')->where('broker_settlement_account_id', $account['id'])->get();
                 if ($account->settlement_agent_status === 'Verified' && $account->foreign_broker_status === 'Verified') {
+
+
+                    $broker = BrokerTradingAccount::where('hash', $id)
+                        ->update(['status' => 'Verified']);
                     $local_broker = $this->HelperClass->getUserAll($account->local_broker_id);
                     $account['broker_name'] = $local_broker->name;
                     $account['bank_agent'] = $account['bank_name'];

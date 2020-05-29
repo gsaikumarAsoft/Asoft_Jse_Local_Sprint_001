@@ -56,14 +56,16 @@ class OperatorController extends Controller
 
         // Fetch All Broker Clients that are tied to the operators local broker
         $client_accounts = BrokerClient::where('local_broker_id', $user->local_broker_id)->get();
-
-        //Sort through clients to get their id then search database for order
-        foreach ($client_accounts as $value) {
-            $json_decoded = json_decode($value);
-            $clients[] = $json_decoded->id;
-            $orders = BrokerClientOrder::whereIn('broker_client_id', $clients)->get();
+        if (count($client_accounts) > 0) {
+            // Sort through clients to get their id then search database for order
+            foreach ($client_accounts as $value) {
+                $json_decoded = json_decode($value);
+                $clients[] = $json_decoded->id;
+                $orders = BrokerClientOrder::whereIn('broker_client_id', $clients)->get();
+            }
+        } else {
+            $orders = [];
         }
-
         return view('operators.order')->with('orders', $orders)->with('client_accounts', $client_accounts);
     }
 

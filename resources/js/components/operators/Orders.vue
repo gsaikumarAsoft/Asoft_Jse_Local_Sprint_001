@@ -430,7 +430,7 @@ export default {
         { key: "order_status", sortable: true }
         // { key: "foreign_broker", sortable: true }
       ],
-      broker_client_orders: JSON.parse(this.orders),
+      broker_client_orders: '',
       broker: {},
       perPage: 5,
       currentPage: 1,
@@ -1134,23 +1134,11 @@ export default {
       this.permissions.push(p[i].name);
     }
 
-    // var local = JSON.parse(this.local_brokers);
-    // let i;
-    // for (i = 0; i < local.length; i++) {
-    //   this.local_brokers_list.push({
-    //     text:local[i].name,
-    //      value:local[i].id
-    //   });
-    // }
-
-    // var foreign = JSON.parse(this.foreign_brokers);
-    // let f;
-    // for (f = 0; f < foreign.length; f++) {
-    //   this.foreign_brokers_list.push({
-    //     text:foreign[f].name,
-    //      value:foreign[f].id
-    //   });
-    // }
+    // if there are orders present
+    if(JSON.parse(this.orders).length >= 1){
+      this.broker_client_orders = JSON.parse(this.orders);
+    }
+    
   }
 };
 </script>
