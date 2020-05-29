@@ -20,7 +20,10 @@ class BrokerSettlementAccount extends Model
         'currency',
         'email',
         'account_balance',
-        'amount_allocated'
+        'amount_allocated',
+        'settlement_agent_status',
+        'foreign_broker_status',
+        
     ];
 
     // public $timestamps = false;

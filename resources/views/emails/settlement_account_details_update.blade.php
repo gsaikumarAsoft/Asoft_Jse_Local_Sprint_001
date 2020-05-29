@@ -1,4 +1,4 @@
-blade<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Broker Notification Email</title>

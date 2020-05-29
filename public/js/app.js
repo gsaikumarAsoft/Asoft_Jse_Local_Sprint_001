@@ -70126,7 +70126,7 @@ __webpack_require__.r(__webpack_exports__);
           sortable: true
         },
         {
-          key: "settlement_account.settlement_agent_status",
+          key: "status",
           label: "Status",
           sortable: true
         },

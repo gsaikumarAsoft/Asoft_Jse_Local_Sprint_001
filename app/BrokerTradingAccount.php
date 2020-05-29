@@ -19,6 +19,8 @@ class BrokerTradingAccount extends Model
         'port',
         'trading_account_number',
         'broker_settlement_account_id',
+        'status',
+        'hash'
     ];
     public function local_broker()
     {
