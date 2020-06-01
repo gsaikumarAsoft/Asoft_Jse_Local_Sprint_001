@@ -71479,7 +71479,7 @@ __webpack_require__.r(__webpack_exports__);
           sortable: true
         },
         {
-          key: "orders_limit",
+          key: "account_balance",
           label: "Balance",
           sortable: true,
           formatter: (value, key, item) => {
@@ -71488,7 +71488,7 @@ __webpack_require__.r(__webpack_exports__);
               currency: "USD"
             });
 
-            var cal = item.orders_limit;
+            var cal = item.account_balance;
             return formatter.format(cal);
           }
         },
@@ -71497,11 +71497,11 @@ __webpack_require__.r(__webpack_exports__);
           label: "Open Orders",
           sortable: true
         },
-        {
-          key: "orders_limit",
-          label: "Available",
-          sortable: true
-        },
+        // {
+        //   key: "orders_limit",
+        //   label: "Available",
+        //   sortable: true
+        // },
         {
           // A virtual column with custom formatter
           key: "available",
@@ -71647,9 +71647,8 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_0___default.a
         .post("store-broker-client", broker)
         .then(response => {
-          console.log("Client Stored");
           this.$swal(`Account created`);
-          setTimeout(location.reload.bind(location), 1000);
+          // setTimeout(location.reload.bind(location), 1000);
         })
         .catch(error => {
           if (error.response.data.message.includes("Duplicate entry")) {

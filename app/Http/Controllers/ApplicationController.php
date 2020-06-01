@@ -314,6 +314,8 @@ class ApplicationController extends Controller
 
         if ($request->id) {
 
+            // Next Sprint
+            // $broker = User::find($id);
             $broker = User::updateOrCreate(
                 ['id' => $request->id],
                 ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified']

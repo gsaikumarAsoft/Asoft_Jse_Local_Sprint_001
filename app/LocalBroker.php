@@ -24,7 +24,7 @@ class LocalBroker extends Model
 
     public function clients()
     {
-        return $this->hasMany(BrokerClient::class)->where('status', 'Verified');
+        return $this->hasMany(BrokerClient::class);
     }
 
     public function settlement()

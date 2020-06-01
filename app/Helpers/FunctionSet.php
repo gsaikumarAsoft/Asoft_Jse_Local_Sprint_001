@@ -210,7 +210,7 @@ class FunctionSet
 
     function createBrokerClient($request)
     {
-
+        // return $request;
         $local_broker = LocalBroker::with('user')->where('user_id', $request->local_broker_id)->first();
 
         // $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
@@ -219,12 +219,18 @@ class FunctionSet
 
         if ($request->id) {
             LogActivity::addToLog('Update Client Details');
-            $broker_client = BrokerClient::updateOrCreate(
-                ['id' => $request->id],
-                ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified', 'open_orders' => $request->open_orders, 'jcsd' => $request->jcsd, 'account_balance' => $request->account_balance]
+            $b = BrokerClient::find($request->id);
+            $b->update(
+                [
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'status' => 'Unverified',
+                    'open_orders' => $request->open_orders,
+                    'jcsd' => $request->jcsd,
+                    'account_balance' => $request->account_balance
+                ]
 
             );
-
             //Notify Local Broker that the client update has been done
             Mail::to($local_broker['user']->email)->send(new ClientDetailsUpdate($request));
         } else {

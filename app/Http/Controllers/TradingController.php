@@ -68,7 +68,7 @@ class TradingController extends Controller
             $broker->foreign_broker_id =  $request_foreign_broker['id'];
             $broker->umir =   $request->umir;
             $broker->trading_account_number =   $request->trading_account_number;
-            $broker->broker_settlement_account_id =   $request->settlement_account_number;
+            $broker->broker_settlement_account_id =   $request->settlementPClient_account_number;
             $broker->target_comp_id =   $request->target_comp_id;
             $broker->sender_comp_id =   $request->sender_comp_id;
             $broker->socket =   $request->socket;
