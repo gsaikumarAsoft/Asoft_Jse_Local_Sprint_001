@@ -37,19 +37,36 @@ class BrokerController extends Controller
 
     function storeBrokerClient(Request $request)
     {
-        $broker_settlement_account = new BrokerSettlementAccount();
-        $broker_settlement_account->local_broker_id = $request->local_broker_id;
-        $broker_settlement_account->foreign_broker_id = $request->foreign_broker_id;
-        $broker_settlement_account->bank_name = $request->bank_name;
-        $broker_settlement_account->account = $request->account;
-        $broker_settlement_account->email = $request->email;
-        $broker_settlement_account->account_balance = '50000.00';
-        $broker_settlement_account->amount_allocated = '1200.00';
+        if ($request->id) {
+            // If the operator didnt select a status default to unverified
+            if (empty($request->operator_status)) {
+                $request->status = 'Un-Verified';
+            } else {
+                $request->status = $request->operator_status;
+            }
 
-        // $broker_settlement_account->account_balance = $request->account_balance;
-        // $broker_settlement_account->amount_allocated = $request->amount_allocated;
-        $broker_settlement_account->save();
-        LogActivity::addToLog('Created New Settlement Account');
+            LogActivity::addToLog('Update Client Details');
+            $broker_client = BrokerClient::updateOrCreate(
+                ['id' => $request->id],
+                ['name' => $request->name, 'email' => $request->email, 'status' => $request->status, 'jcsd' => $request->jcsd, 'account_balance' => $request->account_balance]
+
+            );
+        } else {
+
+            $broker_settlement_account = new BrokerSettlementAccount();
+            $broker_settlement_account->local_broker_id = $request->local_broker_id;
+            $broker_settlement_account->foreign_broker_id = $request->foreign_broker_id;
+            $broker_settlement_account->bank_name = $request->bank_name;
+            $broker_settlement_account->account = $request->account;
+            $broker_settlement_account->email = $request->email;
+            $broker_settlement_account->account_balance = '50000.00';
+            $broker_settlement_account->amount_allocated = '1200.00';
+
+            // $broker_settlement_account->account_balance = $request->account_balance;
+            // $broker_settlement_account->amount_allocated = $request->amount_allocated;
+            $broker_settlement_account->save();
+            LogActivity::addToLog('Created New Settlement Account');
+        }
     }
 
 
@@ -147,23 +164,24 @@ class BrokerController extends Controller
     {
         // $execution_reports = BrokerOrderExecutionReport::all();
         $execution_reports = DB::table('broker_client_order_execution_reports')
-                            ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
-                            ->join('broker_trading_accounts', 'broker_client_order_execution_reports.senderSubID', 'broker_trading_accounts.trading_account_number')
-                            ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
-                            ->get();
+            ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
+            ->join('broker_trading_accounts', 'broker_client_order_execution_reports.senderSubID', 'broker_trading_accounts.trading_account_number')
+            ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            ->get();
 
 
         // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 
-    public function logExecution(Request $request){
+    public function logExecution(Request $request)
+    {
         $execution_report = $request->executionReports;
         BrokerOrderExecutionReport::truncate();
-        foreach($execution_report as $report){
+        foreach ($execution_report as $report) {
             $clients[] = $report;
 
-            
+
             $broker_order_execution_report = new BrokerOrderExecutionReport();
             $broker_order_execution_report->clOrdID = $report['clOrdID'];
             $broker_order_execution_report->orderID = $report['orderID'];
@@ -186,14 +204,10 @@ class BrokerController extends Controller
             $broker_order_execution_report->sendingTime = $report['sendingTime'];
             $broker_order_execution_report->messageDate = $report['messageDate'];
             $broker_order_execution_report->save();
-
-            
         }
 
-        
-        return $this->HelperClass->executionBalanceUpdate($clients);
 
-        
+        return $this->HelperClass->executionBalanceUpdate($clients);
     }
     public function orders()
     {
@@ -210,6 +224,7 @@ class BrokerController extends Controller
         $orders = LocalBroker::with('user', 'order')->where('user_id', $user['id'])->get();
         // return $orders;
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
+        // return $broker_traders;
         return view('brokers.order')->with('orders', $orders)->with('client_accounts', $broker_traders);
     }
     public function approvals()

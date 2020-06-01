@@ -29,8 +29,8 @@ class BrokerClient extends Model
     {
         return $this->hasMany(BrokerClientPermission::class);
     }
-    public function order(){
+    public function order()
+    {
         return $this->hasMany(BrokerClientOrder::class);
     }
 }
- 
