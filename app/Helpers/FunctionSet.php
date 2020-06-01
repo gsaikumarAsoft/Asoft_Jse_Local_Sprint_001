@@ -14,6 +14,7 @@ use App\ForeignBroker;
 use App\LocalBroker;
 use Request;
 use App\LogActivity as LogActivityModel;
+use App\Mail\ClientDetailsUpdate;
 use App\Mail\LocalBrokerClient;
 use App\Mail\LocalBrokerTrader;
 use App\Mail\LocalBrokerUser;
@@ -211,6 +212,7 @@ class FunctionSet
     {
 
         $local_broker = LocalBroker::with('user')->where('user_id', $request->local_broker_id)->first();
+
         // $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
         // return $request['local_broker_id'];
         $broker_user = $local_broker['user'];
@@ -222,6 +224,9 @@ class FunctionSet
                 ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified', 'open_orders' => $request->open_orders, 'jcsd' => $request->jcsd, 'account_balance' => $request->account_balance]
 
             );
+
+            //Notify Local Broker that the client update has been done
+            Mail::to($local_broker['user']->email)->send(new ClientDetailsUpdate($request));
         } else {
 
 

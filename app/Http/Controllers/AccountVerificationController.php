@@ -265,6 +265,34 @@ class AccountVerificationController extends Controller
         return view('layouts.approve');
     }
 
+    public function verifyClientDetails($id, $action)
+    {
+
+        switch ($action) {
+            case 'accept':
+
+
+                $broker = BrokerClient::updateOrCreate(
+                    ['jcsd' => $id],
+                    ['status' => 'Verified']
+
+                );
+                return view('layouts.approve');
+                break;
+            case 'reject':
+                $broker = BrokerClient::updateOrCreate(
+                    ['jcsd' => $id],
+                    ['status' => 'Rejected']
+
+                );
+                return view('layouts.rejected');
+                break;
+        }
+
+
+        
+    }
+
 
     public function saveB2B($id, $action)
     {
@@ -278,6 +306,7 @@ class AccountVerificationController extends Controller
                     ['status' => 'Verified']
 
                 );
+                return view('layouts.approve');
                 break;
             case 'reject':
                 $broker = BrokerSettlementAccount::updateOrCreate(
@@ -285,10 +314,12 @@ class AccountVerificationController extends Controller
                     ['status' => 'Denied']
 
                 );
+                return view('layouts.rejected');
+            break;
         }
 
 
-        return view('layouts.approve');
+        
     }
 
     public function jseValidation($id, $action)

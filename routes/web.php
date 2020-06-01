@@ -31,6 +31,7 @@ Route::get('/home', function () {
 Route::group(['prefix' => '/verify'], function () {
     Route::get('/{id}/{action}', 'AccountVerificationController@verifyForeign');
     Route::get('/account/{id}/{action}', 'AccountVerificationController@foreignBrokerUpdate');
+    Route::get('/client/{jcsd}/{action}', 'AccountVerificationController@verifyClientDetails');
 });
 
 Route::group(['prefix' => '/jse-validation'], function () {
