@@ -28,7 +28,7 @@ class TraderController extends Controller
     }
     function store(Request $request)
     {
-      return $this->HelperClass->createBrokerClient($request);
+        $this->HelperClass->createBrokerClient($request);
     }
     function storeOperatorClient(Request $request)
     {
