@@ -122,7 +122,7 @@ class AccountVerificationController extends Controller
                 $account->local_broker = $this->HelperClass->getUserAll($account[0]->local_broker_id)['name'];
                 $account->foreign_broker = $this->HelperClass->getUserAll($account[0]->foreign_broker_id)['name'];
                 $account['user_name'] = $account->foreign_broker;
-                //   Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
+                Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
                 return view('layouts.approve');
                 break;
             case 'reject':
@@ -288,9 +288,6 @@ class AccountVerificationController extends Controller
                 return view('layouts.rejected');
                 break;
         }
-
-
-        
     }
 
 
@@ -315,11 +312,8 @@ class AccountVerificationController extends Controller
 
                 );
                 return view('layouts.rejected');
-            break;
+                break;
         }
-
-
-        
     }
 
     public function jseValidation($id, $action)
