@@ -57,7 +57,8 @@ class TradingController extends Controller
                     'target_comp_id' =>   $request->target_comp_id,
                     'sender_comp_id' =>   $request->sender_comp_id,
                     'socket' =>   $request->socket, 
-                    'port' =>   $request->port
+                    'port' =>   $request->port,
+                    'status' => 'Unverified'
                 ]
 
             );
