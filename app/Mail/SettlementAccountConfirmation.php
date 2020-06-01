@@ -14,16 +14,16 @@ class SettlementAccountConfirmation extends Mailable
 
 
     public $user;
-    public $account;
+    // public $account;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($user, $account)
+    public function __construct($user)
     {
         $this->user = $user;
-        $this->account = $account;
+        // $this->account = $account;
     }
 
     /**

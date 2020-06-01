@@ -12,9 +12,9 @@
         <li>Foreign Broker: <b>{{$user['foreign_broker']}}</b></li>
         <li>Local Broker: <b>{{$user['local_broker']}}</b></li>
         
-        <p>Credentials to verify:</p>
+        {{-- <p>Credentials to verify:</p>
 <li>Username: <b>{{$user['email']}}</b></li>
-<li>Password: <b>{{$user['password']}}</b></li>
+<li>Password: <b>{{$user['password']}}</b></li> --}}
 <br>
        <p> Please provide your verification of these settings using the links below:</p>
        <a href="{{env('APP_URL')}}verify-settlement-account/{{$user['hash']}}/accept">Accept </a><br>

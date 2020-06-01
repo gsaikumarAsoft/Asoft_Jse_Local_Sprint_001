@@ -107,7 +107,6 @@ class AccountVerificationController extends Controller
 
     public function verifySettlement($id, $action)
     {
-        // return $id;
 
 
         switch ($action) {
@@ -116,13 +115,17 @@ class AccountVerificationController extends Controller
                 $broker = BrokerSettlementAccount::where('hash', $id)
                     ->update(['settlement_agent_status' => 'Verified']);
                 $account = DB::table('broker_settlement_accounts')->where('hash', $id)->get();
-                // return $account;
+                $account['account'] = $account[0]->account;
+  
+
                 $foreign_broker = $this->HelperClass->getUserAll($account[0]->foreign_broker_id);
                 // $account->lo = $lo;
-                $account->local_broker = $this->HelperClass->getUserAll($account[0]->local_broker_id)['name'];
-                $account->foreign_broker = $this->HelperClass->getUserAll($account[0]->foreign_broker_id)['name'];
-                $account['user_name'] = $account->foreign_broker;
-                Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
+                $account['local_broker'] = $this->HelperClass->getUserAll($account[0]->local_broker_id)['name'];
+                $account['foreign_broker'] = $this->HelperClass->getUserAll($account[0]->foreign_broker_id)['name'];
+                $account['hash'] = $id;
+                
+                $account['user_name'] = $account['foreign_broker'];
+                Mail::to($foreign_broker['email'])->send(new SettlementAccountConfirmation($account));
                 return view('layouts.approve');
                 break;
             case 'reject':
