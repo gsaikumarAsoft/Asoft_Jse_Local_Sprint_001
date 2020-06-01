@@ -2018,13 +2018,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -74327,7 +74320,7 @@ __webpack_require__.r(__webpack_exports__);
       perPage: 5,
       currentPage: 1,
       client_status: [
-        { value: null, text: "Please select a statusx" },
+        { value: null, text: "Please select a status" },
         { value: "Verified", text: "Verified" },
         { value: "Un-verified", text: "Rejected" },
         { value: "Pending", text: "Pending" },
@@ -79473,16 +79466,25 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("h4", [
-        _vm._v("\n      Welcome Local Broker Operator\n      "),
+    return _c(
+      "div",
+      { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+      [
+        _c("h4", [_vm._v("Welcome Local Broker Operator")]),
+        _vm._v(" "),
         _c("p", [
           _vm._v(
-            "\n        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\n        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad\n        minim veniam, quis nostrud exercitation ullamco laboris nisi ut\n        aliquip ex ea commodo consequat. Duis aute irure dolor in\n        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla\n        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in\n        culpa qui officia deserunt mollit anim id est laborum.\n      "
+            "Use the menus available here to perform the following functions:"
           )
-        ])
-      ])
-    ])
+        ]),
+        _vm._v(" "),
+        _c("li", [_vm._v("Manage CLIENT ACCOUNTS")]),
+        _vm._v(" "),
+        _c("li", [_vm._v("ManageZ FOREIGN MARKET ORDERS")]),
+        _vm._v(" "),
+        _c("li", [_vm._v("Manage your PROFILE")])
+      ]
+    )
   }
 ]
 render._withStripped = true

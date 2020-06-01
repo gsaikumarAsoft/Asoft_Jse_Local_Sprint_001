@@ -112,7 +112,7 @@ export default {
       perPage: 5,
       currentPage: 1,
       client_status: [
-        { value: null, text: "Please select a statusx" },
+        { value: null, text: "Please select a status" },
         { value: "Verified", text: "Verified" },
         { value: "Un-verified", text: "Rejected" },
         { value: "Pending", text: "Pending" },

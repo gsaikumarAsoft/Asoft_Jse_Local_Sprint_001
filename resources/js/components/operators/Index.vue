@@ -1,19 +1,12 @@
 <template>
   <div>
     <toplinks></toplinks>
-    <div class="container">
-      <h4>
-        Welcome Local Broker Operator
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </h4>
+    <div class="container" style="margin-top: 100px;">
+      <h4>Welcome Local Broker Operator</h4>
+      <p>Use the menus available here to perform the following functions:</p>
+      <li>Manage CLIENT ACCOUNTS</li>
+      <li>ManageZ FOREIGN MARKET ORDERS</li>
+      <li>Manage your PROFILE</li>
     </div>
   </div>
 </template>
