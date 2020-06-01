@@ -47,9 +47,18 @@ class TradingController extends Controller
 
         if ($request->id) {
             LogActivity::addToLog('Update Broker Trading Account Details');
-            BrokerTradingAccount::updateOrCreate(
-                ['id' => $request->id, 'local_broker_id' =>   $request->local_broker_id],
-                ['umir' =>   $request->umir, 'trading_account_number' =>   $request->trading_account_number, 'broker_settlement_account_id' =>   $request->settlement_account_number, 'target_comp_id' =>   $request->target_comp_id, 'sender_comp_id' =>   $request->sender_comp_id, ' socket' =>   $request->socket, 'port' =>   $request->port]
+
+            $b2b = BrokerTradingAccount::find($request->id);
+            $b2b->update(
+                [
+                    'umir' =>   $request->umir,
+                    'trading_account_number' =>   $request->trading_account_number,
+                    'broker_settlement_account_id' =>   $request->settlement_account_number,
+                    'target_comp_id' =>   $request->target_comp_id,
+                    'sender_comp_id' =>   $request->sender_comp_id,
+                    'socket' =>   $request->socket, 
+                    'port' =>   $request->port
+                ]
 
             );
         } else {
