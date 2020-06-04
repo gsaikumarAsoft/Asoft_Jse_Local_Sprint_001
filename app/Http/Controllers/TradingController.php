@@ -31,7 +31,7 @@ class TradingController extends Controller
     public function store(Request $request)
     {
 
-
+        // return $request;
         $b2b_hash = $this->HelperClass->generateRandomString(20);
         $settlement = BrokerSettlementAccount::find($request->settlement_account_number);
         $settlement_local_broker = $settlement->local_broker_id;
@@ -64,11 +64,11 @@ class TradingController extends Controller
             );
         } else {
             $broker = new BrokerTradingAccount();
-            $broker->local_broker_id =   $request_local_broker['id'];
-            $broker->foreign_broker_id =  $request_foreign_broker['id'];
+            $broker->local_broker_id =   $request_local_broker->id;
+            $broker->foreign_broker_id =  $request_foreign_broker->id;
             $broker->umir =   $request->umir;
             $broker->trading_account_number =   $request->trading_account_number;
-            $broker->broker_settlement_account_id =   $request->settlementPClient_account_number;
+            $broker->broker_settlement_account_id =   $request->settlement_account_number;
             $broker->target_comp_id =   $request->target_comp_id;
             $broker->sender_comp_id =   $request->sender_comp_id;
             $broker->socket =   $request->socket;
@@ -88,10 +88,6 @@ class TradingController extends Controller
              that is assigned to a trading account
              is notified via email when it is added
             */
-            // return $foreign_broker;
-
-            // return $request;
-
             Mail::to($foreign_broker->email)->send(new TradingAccount($request));
         }
     }

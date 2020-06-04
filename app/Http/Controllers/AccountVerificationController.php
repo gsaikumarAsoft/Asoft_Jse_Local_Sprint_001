@@ -123,15 +123,19 @@ class AccountVerificationController extends Controller
                 $account['local_broker'] = $this->HelperClass->getUserAll($account[0]->local_broker_id)['name'];
                 $account['foreign_broker'] = $this->HelperClass->getUserAll($account[0]->foreign_broker_id)['name'];
                 $account['hash'] = $id;
+
+   
                 
                 $account['user_name'] = $account['foreign_broker'];
-                Mail::to($foreign_broker['email'])->send(new SettlementAccountConfirmation($account));
+                $account['level'] = 'Foreign';
+                // return $account;
+                Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
                 return view('layouts.approve');
                 break;
             case 'reject':
                 BrokerSettlementAccount::where('hash', $id)
                     ->update(['settlement_agent_status' => 'Rejected']);
-                return view('layouts.rejected');
+                
                 break;
         }
     }
@@ -144,24 +148,26 @@ class AccountVerificationController extends Controller
             case 'accept':
 
                 $broker = BrokerSettlementAccount::where('hash', $id)
-                    ->update(['settlement_agent_status' => 'Verified']);
+                    ->update(['foreign_broker_status' => 'Verified']);
                 $account = BrokerSettlementAccount::where('hash', $id)->first();
                 $foreign_broker = $this->HelperClass->getUserAll($account->foreign_broker_id);
                 // $account->lo = $lo;
                 $account->local_broker = $this->HelperClass->getUserAll($account->local_broker_id)['name'];
                 $account->foreign_broker = $this->HelperClass->getUserAll($account->foreign_broker_id)['name'];
                 $account['user_name'] = $account->foreign_broker;
-                Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
+                $account['level'] = 'Foreign';
+                // Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
+                return view('layouts.approve');
                 break;
             case 'reject':
                 BrokerSettlementAccount::where('hash', $id)
-                    ->update(['settlement_agent_status' => 'Rejected']);
-
+                    ->update(['foreign_broker_status' => 'Rejected']);
+                    return view('layouts.rejected');
                 break;
         }
 
 
-        return view('layouts.approve');
+      
     }
 
 

@@ -206,11 +206,11 @@ class ApplicationController extends Controller
             if (count($this->HelperClass->getSettlementUserByEmail($request->email)) > 0) {
                 // if the user exists update password and send new email
                 $u = $this->HelperClass->getSettlementUserByEmail($request->email);
-                $user = $u[0];
-                // return $user;
-
-                User::updateOrCreate(
-                    ['email' => $user->email],
+                // return $u;
+                $u = $u[0];
+           
+               User::updateOrCreate(
+                    ['email' => $u->email],
                     ['password' =>  Hash::make($pass)]
 
                 );
@@ -233,17 +233,18 @@ class ApplicationController extends Controller
                 $broker_settlement_account->amount_allocated = $request->amount_allocated;
                 $broker_settlement_account->save();
 
-                $data = [];
-                $data['password'] = $pass;
-                $data['local_broker'] = $local_broker_name[0]->name;
-                $data['foreign_broker'] = $foreign_broker_name[0]->name;
-                $data['user_name'] = $request->bank_name;
-                $data['account'] = $request->account;
-                $data['id'] = $broker_settlement_account->id;
-                $data['hash'] = $settlement_hash;
-                $data['email'] = $request->email;
+                // $data = [];
+                $user['password'] = $pass;
+                $user['local_broker'] = $local_broker_name[0]->name;
+                $user['foreign_broker'] = $foreign_broker_name[0]->name;
+                $user['user_name'] = $request->bank_name;
+                $user['account'] = $request->account;
+                $user['id'] = $broker_settlement_account->id;
+                $user['hash'] = $settlement_hash;
+                $user['email'] = $request->email;
+                // return $data;
                 //Notify the bank that the settlement is being created so they can verify it.
-                Mail::to($request->email)->send(new SettlementAccountConfirmation($data, $user));
+                Mail::to($request->email)->send(new SettlementAccountConfirmation($user));
             } else {
 
                 $settlement_hash = $this->HelperClass->generateRandomString(20);

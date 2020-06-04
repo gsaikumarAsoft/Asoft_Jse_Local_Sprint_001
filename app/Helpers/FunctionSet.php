@@ -82,7 +82,7 @@ class FunctionSet
     {
 
         // return $id;
-        $user = BrokerSettlementAccount::where('email', $email)->get();
+        $user = User::where('email', $email)->get();
         return $user;
     }
 

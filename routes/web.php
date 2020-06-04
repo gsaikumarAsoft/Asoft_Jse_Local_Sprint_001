@@ -60,6 +60,10 @@ Route::group(['prefix' => '/verify-settlement-account', 'middleware' => ['auth',
     Route::get('/{id}/{action}', 'AccountVerificationController@verifySettlement');
 });
 
+Route::group(['prefix' => '/verify-settlement-account-foreign', 'middleware' => ['auth', 'verified']], function () {
+    Route::get('/{id}/{action}', 'AccountVerificationController@foreignBrokerSettlement');
+});
+
 
 
 Auth::routes();
