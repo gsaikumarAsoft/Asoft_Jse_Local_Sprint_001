@@ -5,7 +5,7 @@
       <h1>Current Orders</h1>
       <div class="content">
         <b-table
-        responsive
+          responsive
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
           id="orders-table"
@@ -154,7 +154,6 @@
                         v-model="order.value"
                         :state="nameState"
                         type="number"
-
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -171,7 +170,6 @@
                         v-model="order.stop_price"
                         :state="nameState"
                         type="number"
-
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -187,11 +185,7 @@
                     invalid-feedback="Quantity is required"
                   >
                     <b-input-group size="md">
-                      <b-form-input
-                        id="quantity-input"
-                        v-model="order.quantity"
-                        :state="nameState"
-                      ></b-form-input>
+                      <b-form-input id="quantity-input" v-model="order.quantity" :state="nameState"></b-form-input>
                     </b-input-group>
                   </b-form-group>
                 </b-col>
@@ -1001,19 +995,30 @@ export default {
         );
       } else {
         this.$swal("Processing your order..");
-        axios.post("store-broker-client-order", broker).then(response => {
-          let data = response.data;
-          let valid = data.isvalid;
-          if (valid) {
-            this.$swal(data.errors);
-            this.callFix(broker);
-            this.$swal("Order Submitted: Generating Execution Reports");
-            // setTimeout(location.reload.bind(location), 2000);
-          } else {
-            this.$swal(data.errors);
-            setTimeout(location.reload.bind(location), 2000);
-          }
-        });
+        axios
+          .post("store-broker-client-order", broker)
+          .then(response => {
+            let data = response.data;
+            let valid = data.isvalid;
+            if (valid) {
+              this.$swal(data.errors);
+              this.callFix(broker);
+              this.$swal("Order Submitted: Generating Execution Reports");
+              // setTimeout(location.reload.bind(location), 2000);
+            } else {
+              this.$swal(data.errors);
+              setTimeout(location.reload.bind(location), 2000);
+            }
+          })
+          .catch(error => {
+            var s = error.response.data.message;
+            var field = s.match(/'([^']+)'/)[1];
+            if (error.response.data.message.includes("cannot be null")) {
+              this.$swal(
+                `When creating an order ${field} cannot be null. Please try creating the order again.`
+              );
+            }
+          });
       }
     },
     callFix(order) {
@@ -1079,7 +1084,7 @@ export default {
 
         // Side: "5",
 
-        // Strategy: 1000, 
+        // Strategy: 1000,
 
         // StopPx: order.stop_price,
 
@@ -1094,7 +1099,8 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/OrderManagement/NewOrderSingle",
+            this.$fixApi +
+            "api/OrderManagement/NewOrderSingle",
           order_sample,
           { crossDomain: true }
         )
@@ -1129,7 +1135,8 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/messagedownload/download",
+            this.$fixApi +
+            "api/messagedownload/download",
           order_sample,
           { crossDomain: true }
         )
@@ -1203,7 +1210,8 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/OrderManagement/OrderCancelRequest",
+            this.$fixApi +
+            "api/OrderManagement/OrderCancelRequest",
           order_sample,
           { crossDomain: true }
         )

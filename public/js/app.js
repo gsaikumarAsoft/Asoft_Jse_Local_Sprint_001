@@ -72377,12 +72377,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -72958,19 +72952,30 @@ __webpack_require__.r(__webpack_exports__);
         );
       } else {
         this.$swal("Processing your order..");
-        axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("store-broker-client-order", broker).then(response => {
-          let data = response.data;
-          let valid = data.isvalid;
-          if (valid) {
-            this.$swal(data.errors);
-            this.callFix(broker);
-            this.$swal("Order Submitted: Generating Execution Reports");
-            // setTimeout(location.reload.bind(location), 2000);
-          } else {
-            this.$swal(data.errors);
-            setTimeout(location.reload.bind(location), 2000);
-          }
-        });
+        axios__WEBPACK_IMPORTED_MODULE_2___default.a
+          .post("store-broker-client-order", broker)
+          .then(response => {
+            let data = response.data;
+            let valid = data.isvalid;
+            if (valid) {
+              this.$swal(data.errors);
+              this.callFix(broker);
+              this.$swal("Order Submitted: Generating Execution Reports");
+              // setTimeout(location.reload.bind(location), 2000);
+            } else {
+              this.$swal(data.errors);
+              setTimeout(location.reload.bind(location), 2000);
+            }
+          })
+          .catch(error => {
+            var s = error.response.data.message;
+            var field = s.match(/'([^']+)'/)[1];
+            if (error.response.data.message.includes("cannot be null")) {
+              this.$swal(
+                `When creating an order ${field} cannot be null. Please try creating the order again.`
+              );
+            }
+          });
       }
     },
     callFix(order) {
@@ -73036,7 +73041,7 @@ __webpack_require__.r(__webpack_exports__);
 
         // Side: "5",
 
-        // Strategy: 1000, 
+        // Strategy: 1000,
 
         // StopPx: order.stop_price,
 
@@ -73051,7 +73056,8 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/OrderManagement/NewOrderSingle",
+            this.$fixApi +
+            "api/OrderManagement/NewOrderSingle",
           order_sample,
           { crossDomain: true }
         )
@@ -73086,7 +73092,8 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/messagedownload/download",
+            this.$fixApi +
+            "api/messagedownload/download",
           order_sample,
           { crossDomain: true }
         )
@@ -73160,7 +73167,8 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/OrderManagement/OrderCancelRequest",
+            this.$fixApi +
+            "api/OrderManagement/OrderCancelRequest",
           order_sample,
           { crossDomain: true }
         )
