@@ -70207,13 +70207,11 @@ __webpack_require__.r(__webpack_exports__);
             settlement_account_number: this.settlement_account
               .broker_settlement_account
           });
-          this.$swal(`Account created`);
-          
+          this.$swal(`Creating Account`);
         } else {
           //Include ID
           this.storeTradingAccount({
             id: this.settlement_account.id,
-            // local_broker_id: 1,
             local_broker_id: this.settlement_account.local_broker_id,
             foreign_broker_id: this.settlement_account.foreign_broker_id,
             umir: this.settlement_account.umir,
@@ -70226,11 +70224,8 @@ __webpack_require__.r(__webpack_exports__);
             settlement_account_number: this.settlement_account
               .broker_settlement_account
           });
-          this.$swal(`Account Updated`);
-          
+          this.$swal(`Updating Account`);
         }
-         setTimeout(location.reload.bind(location), 1000);
-        this.getTradingAccountsList();
         this.resetModal();
         this.$nextTick(() => {
           this.$bvModal.hide("modal-1");
@@ -70238,11 +70233,13 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     storeTradingAccount(account) {
-      // console.log(account);
+      this.$bvModal.hide("modal-1");
       axios__WEBPACK_IMPORTED_MODULE_0___default.a
         .post("store-trading-account", account)
         .then(response => {
-          this.getTradingAccounts();
+          this.getTradingAccountsList();
+          this.$swal(`Account setup complete`);
+          // setTimeout(location.reload.bind(location), 2000);
         })
         .catch(error => {});
     },
@@ -70260,7 +70257,14 @@ __webpack_require__.r(__webpack_exports__);
         let i;
         for (i = 0; i < data.length; i++) {
           this.broker_settlement_accounts.push({
-            text: data[i].foreign_broker['name'] + "-" + data[i].local_broker['name'] + "-" +data[i].bank_name + "-" + data[i].account,
+            text:
+              data[i].foreign_broker["name"] +
+              "-" +
+              data[i].local_broker["name"] +
+              "-" +
+              data[i].bank_name +
+              "-" +
+              data[i].account,
             value: data[i].id
           });
         }
@@ -70271,7 +70275,7 @@ __webpack_require__.r(__webpack_exports__);
         .post("/store-settlement-broker", this.settlement_account)
         .then(response => {
           this.getTradingAccountsList();
-           setTimeout(location.reload.bind(location), 1000);
+          setTimeout(location.reload.bind(location), 1000);
           this.create = false;
         })
         .catch(error => {});
@@ -71951,9 +71955,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
-
-
-
 
 
 
@@ -77799,7 +77800,6 @@ var render = function() {
                                       attrs: {
                                         id: "input-1",
                                         type: "text",
-                                        required: "",
                                         placeholder: "Enter Market Order Number"
                                       },
                                       model: {
@@ -77878,8 +77878,7 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a currency",
                                         label: "text",
-                                        options: _vm.currencies,
-                                        required: ""
+                                        options: _vm.currencies
                                       },
                                       model: {
                                         value: _vm.order.currency,
@@ -77917,8 +77916,7 @@ var render = function() {
                                           attrs: {
                                             id: "value-input1",
                                             state: _vm.nameState,
-                                            type: "number",
-                                            required: ""
+                                            type: "number"
                                           },
                                           model: {
                                             value: _vm.order.value,
@@ -77959,8 +77957,7 @@ var render = function() {
                                           attrs: {
                                             id: "value-input",
                                             state: _vm.nameState,
-                                            type: "number",
-                                            required: ""
+                                            type: "number"
                                           },
                                           model: {
                                             value: _vm.order.stop_price,
@@ -78017,8 +78014,7 @@ var render = function() {
                                         _c("b-form-input", {
                                           attrs: {
                                             id: "quantity-input",
-                                            state: _vm.nameState,
-                                            required: ""
+                                            state: _vm.nameState
                                           },
                                           model: {
                                             value: _vm.order.quantity,

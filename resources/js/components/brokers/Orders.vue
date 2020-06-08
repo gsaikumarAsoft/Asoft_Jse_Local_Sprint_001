@@ -107,7 +107,6 @@
                       id="input-1"
                       v-model="order.market_order_number"
                       type="text"
-                      required
                       placeholder="Enter Market Order Number"
                     ></b-form-input>
                   </b-form-group>
@@ -140,7 +139,6 @@
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
-                      required
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -156,7 +154,7 @@
                         v-model="order.value"
                         :state="nameState"
                         type="number"
-                        required
+
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -173,7 +171,7 @@
                         v-model="order.stop_price"
                         :state="nameState"
                         type="number"
-                        required
+
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -193,7 +191,6 @@
                         id="quantity-input"
                         v-model="order.quantity"
                         :state="nameState"
-                        required
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>

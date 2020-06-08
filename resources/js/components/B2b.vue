@@ -52,7 +52,7 @@
                 Socket
                 :options="foreign_brokers"
               ></b-form-select>
-            </b-form-group> -->
+            </b-form-group>-->
             <b-form-group
               label="Settlement Account Number"
               label-for="Settlement-Account-Number-input"
@@ -285,13 +285,11 @@ export default {
             settlement_account_number: this.settlement_account
               .broker_settlement_account
           });
-          this.$swal(`Account created`);
-          
+          this.$swal(`Creating Account`);
         } else {
           //Include ID
           this.storeTradingAccount({
             id: this.settlement_account.id,
-            // local_broker_id: 1,
             local_broker_id: this.settlement_account.local_broker_id,
             foreign_broker_id: this.settlement_account.foreign_broker_id,
             umir: this.settlement_account.umir,
@@ -304,11 +302,8 @@ export default {
             settlement_account_number: this.settlement_account
               .broker_settlement_account
           });
-          this.$swal(`Account Updated`);
-          
+          this.$swal(`Updating Account`);
         }
-         setTimeout(location.reload.bind(location), 1000);
-        this.getTradingAccountsList();
         this.resetModal();
         this.$nextTick(() => {
           this.$bvModal.hide("modal-1");
@@ -316,11 +311,13 @@ export default {
       }
     },
     storeTradingAccount(account) {
-      // console.log(account);
+      this.$bvModal.hide("modal-1");
       axios
         .post("store-trading-account", account)
         .then(response => {
-          this.getTradingAccounts();
+          this.getTradingAccountsList();
+          this.$swal(`Account setup complete`);
+          // setTimeout(location.reload.bind(location), 2000);
         })
         .catch(error => {});
     },
@@ -338,7 +335,14 @@ export default {
         let i;
         for (i = 0; i < data.length; i++) {
           this.broker_settlement_accounts.push({
-            text: data[i].foreign_broker['name'] + "-" + data[i].local_broker['name'] + "-" +data[i].bank_name + "-" + data[i].account,
+            text:
+              data[i].foreign_broker["name"] +
+              "-" +
+              data[i].local_broker["name"] +
+              "-" +
+              data[i].bank_name +
+              "-" +
+              data[i].account,
             value: data[i].id
           });
         }
@@ -349,7 +353,7 @@ export default {
         .post("/store-settlement-broker", this.settlement_account)
         .then(response => {
           this.getTradingAccountsList();
-           setTimeout(location.reload.bind(location), 1000);
+          setTimeout(location.reload.bind(location), 1000);
           this.create = false;
         })
         .catch(error => {});
