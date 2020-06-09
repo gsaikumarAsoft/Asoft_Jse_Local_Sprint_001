@@ -17,6 +17,7 @@
           :fields="fields"
           @row-clicked="brokerOrderHandler"
         ></b-table>
+        <!-- <pre>{{broker_client_orders}}</pre> -->
         <div v-if="!create"></div>
         <b-modal
           id="jse-new-order"
@@ -92,7 +93,7 @@
                       id="input-10"
                       v-model="order.client_order_number"
                       type="text"
-                      required
+                    
                       placeholder="Enter Client Order Number"
                     ></b-form-input>
                   </b-form-group>
@@ -107,7 +108,7 @@
                       id="input-1"
                       v-model="order.market_order_number"
                       type="text"
-                      required
+                    
                       placeholder="Enter Market Order Number"
                     ></b-form-input>
                   </b-form-group>
@@ -140,7 +141,7 @@
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
-                      required
+                    
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -156,7 +157,7 @@
                         v-model="order.value"
                         :state="nameState"
                         type="number"
-                        required
+                      
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -173,7 +174,7 @@
                         v-model="order.stop_price"
                         :state="nameState"
                         type="number"
-                        required
+                      
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -193,7 +194,7 @@
                         id="quantity-input"
                         v-model="order.quantity"
                         :state="nameState"
-                        required
+                      
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -210,7 +211,7 @@
                         v-model="order.price"
                         :state="nameState"
                         type="number"
-                        required
+                      
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -365,7 +366,7 @@ export default {
       create: false,
       order: {},
       fields: [
-        { ket: "handling_instructions", sortable: true },
+        // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
         {
           key: "order_type.text",
@@ -390,38 +391,50 @@ export default {
           }
         },
         {
-          key: "time_in_force.text",
+          key: "time_in_force",
           label: "Time In Force",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.time_in_force);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.time_in_force);
+              var s = data;
 
-            return s.text;
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
         {
-          key: "currency.text",
+          key: "currency",
           label: "Currency",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.currency);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.currency);
+              var s = data;
 
-            return s.text;
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
         {
-          key: "side.text",
+          key: "side",
           label: "Side",
           sortable: true,
           formatter: (value, key, item) => {
+  if(value){
             var data = JSON.parse(item.side);
             var s = data;
 
             return s.text;
+  }  else{
+    return "N/A";
+  }
             // return symbol.text;
           }
         },

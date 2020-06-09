@@ -72375,8 +72375,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -72427,38 +72425,50 @@ __webpack_require__.r(__webpack_exports__);
           }
         },
         {
-          key: "time_in_force.text",
+          key: "time_in_force",
           label: "Time In Force",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.time_in_force);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.time_in_force);
+              var s = data;
 
-            return s.text;
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
         {
-          key: "currency.text",
+          key: "currency",
           label: "Currency",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.currency);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.currency);
+              var s = data;
 
-            return s.text;
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
         {
-          key: "side.text",
+          key: "side",
           label: "Side",
           sortable: true,
           formatter: (value, key, item) => {
+  if(value){
             var data = JSON.parse(item.side);
             var s = data;
 
             return s.text;
+  }  else{
+    return "N/A";
+  }
             // return symbol.text;
           }
         },
@@ -72979,12 +72989,6 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     callFix(order) {
-      console.log(order);
-      let side = JSON.parse(order.side);
-      let ortype = JSON.parse(order.order_type);
-      let time_in_force = JSON.parse(order.time_in_force);
-      let symbol = JSON.parse(order.symbol);
-
       let order_sample = {
         BeginString: "FIX.4.2",
         TargetCompID: "CIBC_TST",
@@ -73007,47 +73011,6 @@ __webpack_require__.r(__webpack_exports__);
         StopPx: 5.79,
         ExDestination: "TSX",
         ClientID: "JSE_TRADER1"
-        // BeginString: "FIX.4.2",
-
-        // TargetCompID: "CIBC_TST",
-
-        // SenderCompID: "JSE_TST",
-
-        // SenderSubID: "JMMB",
-
-        // Host: "10.246.7.212",
-
-        // Port: 27102,
-
-        // UserName: "FC4",
-
-        // Password: "password",
-
-        // OrderID: "JMMB000004",
-
-        // BuyorSell: side["fix_value"],
-
-        // OrdType: ortype["fix_value"],
-
-        // OrderQty: order.quantity,
-
-        // TimeInForce: time_in_force["fix_value"],
-
-        // Symbol: symbol["text"].split(/\s(.+)/)[0],
-
-        // Account: "1466267",
-
-        // Price: String(order.price),
-
-        // Side: "5",
-
-        // Strategy: 1000,
-
-        // StopPx: order.stop_price,
-
-        // ExDestination: "CNQ",
-
-        // ClientID: "JMMB_TRADER1"
       };
 
       console.log(order_sample);
@@ -74912,6 +74875,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -74937,7 +74901,7 @@ __webpack_require__.r(__webpack_exports__);
       create: false,
       order: {},
       fields: [
-        { ket: "handling_instructions", sortable: true },
+        // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
         {
           key: "order_type.text",
@@ -74962,38 +74926,50 @@ __webpack_require__.r(__webpack_exports__);
           }
         },
         {
-          key: "time_in_force.text",
+          key: "time_in_force",
           label: "Time In Force",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.time_in_force);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.time_in_force);
+              var s = data;
 
-            return s.text;
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
         {
-          key: "currency.text",
+          key: "currency",
           label: "Currency",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.currency);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.currency);
+              var s = data;
 
-            return s.text;
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
         {
-          key: "side.text",
+          key: "side",
           label: "Side",
           sortable: true,
           formatter: (value, key, item) => {
+  if(value){
             var data = JSON.parse(item.side);
             var s = data;
 
             return s.text;
+  }  else{
+    return "N/A";
+  }
             // return symbol.text;
           }
         },
@@ -77769,7 +77745,6 @@ var render = function() {
                                       attrs: {
                                         id: "input-10",
                                         type: "text",
-                                        required: "",
                                         placeholder: "Enter Client Order Number"
                                       },
                                       model: {
@@ -78067,8 +78042,7 @@ var render = function() {
                                           attrs: {
                                             id: "price-input",
                                             state: _vm.nameState,
-                                            type: "number",
-                                            required: ""
+                                            type: "number"
                                           },
                                           model: {
                                             value: _vm.order.price,
@@ -79736,7 +79710,6 @@ var render = function() {
                                       attrs: {
                                         id: "input-10",
                                         type: "text",
-                                        required: "",
                                         placeholder: "Enter Client Order Number"
                                       },
                                       model: {
@@ -79775,7 +79748,6 @@ var render = function() {
                                       attrs: {
                                         id: "input-1",
                                         type: "text",
-                                        required: "",
                                         placeholder: "Enter Market Order Number"
                                       },
                                       model: {
@@ -79854,8 +79826,7 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a currency",
                                         label: "text",
-                                        options: _vm.currencies,
-                                        required: ""
+                                        options: _vm.currencies
                                       },
                                       model: {
                                         value: _vm.order.currency,
@@ -79893,8 +79864,7 @@ var render = function() {
                                           attrs: {
                                             id: "value-input1",
                                             state: _vm.nameState,
-                                            type: "number",
-                                            required: ""
+                                            type: "number"
                                           },
                                           model: {
                                             value: _vm.order.value,
@@ -79935,8 +79905,7 @@ var render = function() {
                                           attrs: {
                                             id: "value-input",
                                             state: _vm.nameState,
-                                            type: "number",
-                                            required: ""
+                                            type: "number"
                                           },
                                           model: {
                                             value: _vm.order.stop_price,
@@ -79993,8 +79962,7 @@ var render = function() {
                                         _c("b-form-input", {
                                           attrs: {
                                             id: "quantity-input",
-                                            state: _vm.nameState,
-                                            required: ""
+                                            state: _vm.nameState
                                           },
                                           model: {
                                             value: _vm.order.quantity,
@@ -80039,8 +80007,7 @@ var render = function() {
                                           attrs: {
                                             id: "price-input",
                                             state: _vm.nameState,
-                                            type: "number",
-                                            required: ""
+                                            type: "number"
                                           },
                                           model: {
                                             value: _vm.order.price,

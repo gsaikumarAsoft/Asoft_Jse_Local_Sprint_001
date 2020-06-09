@@ -17,12 +17,12 @@ class CreateBrokerClientOrders extends Migration
             $table->bigIncrements('id');
             $table->integer('local_broker_id')->unsigned();
             $table->integer('foreign_broker_id')->unsigned();
-            $table->text('handling_instructions');
-            $table->integer('order_quantity');
-            $table->string('order_type');
-            $table->string('order_status');
+            $table->text('handling_instructions')->nullable();
+            $table->integer('order_quantity')->nullable();
+            $table->string('order_type')->nullable();
+            $table->string('order_status')->nullable();
             $table->date('order_date');
-            $table->string('currency');
+            $table->string('currency')->nullable();
             $table->string('client_order_number')->nullable();
             $table->string('market_order_number')->nullable();
             $table->string('stop_price')->nullable();
