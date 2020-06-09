@@ -279,7 +279,7 @@ export default {
         .post("store-broker-client", broker)
         .then(response => {
           this.$swal(`Account created`);
-          // setTimeout(location.reload.bind(location), 1000);
+          setTimeout(location.reload.bind(location), 1000);
         })
         .catch(error => {
           if (error.response.data.message.includes("Duplicate entry")) {
