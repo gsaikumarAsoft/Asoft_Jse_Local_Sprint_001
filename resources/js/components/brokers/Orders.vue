@@ -89,6 +89,7 @@
                     label-for="input-1-client-order-number"
                   >
                     <b-form-input
+                    disabled
                       id="input-10"
                       v-model="order.client_order_number"
                       type="text"
@@ -308,8 +309,46 @@
               </b-row>
             </b-container>
             <b-container class="bv-example-row">
+              <label>Iceberg Options</label>
               <b-row>
                 <b-col>
+                  <!-- Iceberg Options -->
+                  <!-- [ Display Range ] -->
+                  <b-form-group
+                    label="Display Range"
+                    label-for="order-input"
+                    invalid-feedback="Display Range is required"
+                  >
+                    <b-input-group size="md" prepend="+-">
+                      <b-form-input
+                        id="display_range-input"
+                        v-model="order.display_range"
+                        :state="nameState"
+                        type="number"
+                      ></b-form-input>
+                    </b-input-group>
+                  </b-form-group>
+                </b-col>
+                <b-col>
+                  <!-- Iceberg Options -->
+                  <!-- [ Display Range ] -->
+                  <b-form-group
+                    label="Max Floor"
+                    label-for="order-input"
+                    invalid-feedback="Max Floor is required"
+                  >
+                    <b-input-group size="md" prepend="^">
+                      <b-form-input
+                        id="max_floor-input"
+                        v-model="order.max_floor"
+                        :state="nameState"
+                        type="number"
+                      ></b-form-input>
+                    </b-input-group>
+                  </b-form-group>
+                </b-col>
+                <b-col>
+                  <!-- [ Max Floor ] -->
                   <!-- <b-card title="Order Options">
                     <p v-if="order_option_inputs.length < 1">
                       <b>Create New Option</b>
@@ -408,7 +447,7 @@
           :per-page="perPage"
           aria-controls="orders-table"
         ></b-pagination>
-        <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button>
+        <b-button v-b-modal.jse-new-order @click="add">Create New Order</b-button>
       </div>
     </div>
   </div>
@@ -504,14 +543,14 @@ export default {
           label: "Side",
           sortable: true,
           formatter: (value, key, item) => {
-  if(value){
-            var data = JSON.parse(item.side);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.side);
+              var s = data;
 
-            return s.text;
-  }  else{
-    return "N/A";
-  }
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
@@ -614,47 +653,47 @@ export default {
         { text: "Cross short", value: "Cross short", fix_value: "9" }
       ],
       order_types: [
-        { text: "Market", value: "Market", fix_value: "1" },
+        // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
-        { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
-        { text: "Market on close", value: "Market on close", fix_value: "5" },
-        { text: "With or without", value: "With or without", fix_value: "6" },
-        { text: "Limit or better", value: "Limit or better", fix_value: "7" },
-        {
-          text: "Limit with or without",
-          value: "Limit with or without",
-          fix_value: "8"
-        },
-        { text: "On basis", value: "On basis", fix_value: "9" },
-        { text: "On close", value: "On close", fix_value: "A" },
-        { text: "Limit on close", value: "Limit on close", fix_value: "B" },
-        { text: "Forex - Market", value: "Forex - Market", fix_value: "C" },
-        {
-          text: "Previously quoted",
-          value: "Previously quoted",
-          fix_value: "D"
-        },
-        {
-          text: "Previously indicated",
-          value: "Previously indicated",
-          fix_value: "E"
-        },
-        { text: "Forex - Limit", value: "Forex - Limit", fix_value: "F" },
-        { text: "Forex - Swap", value: "Forex - Swap", fix_value: "G" },
-        {
-          text: "Forex - Previously Quoted",
-          value: "Forex - Previously Quoted",
-          fix_value: "H"
-        },
-        {
-          text:
-            "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
-          value:
-            "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
-          fix_value: "I"
-        },
-        { text: "Pegged", value: "Pegged", fix_value: "J" }
+        // { text: "Stop", value: "Stop", fix_value: "3" },
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
+        // { text: "Market on close", value: "Market on close", fix_value: "5" },
+        // { text: "With or without", value: "With or without", fix_value: "6" },
+        // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
+        // {
+        //   text: "Limit with or without",
+        //   value: "Limit with or without",
+        //   fix_value: "8"
+        // },
+        // { text: "On basis", value: "On basis", fix_value: "9" },
+        // { text: "On close", value: "On close", fix_value: "A" },
+        // { text: "Limit on close", value: "Limit on close", fix_value: "B" },
+        // { text: "Forex - Market", value: "Forex - Market", fix_value: "C" },
+        // {
+        //   text: "Previously quoted",
+        //   value: "Previously quoted",
+        //   fix_value: "D"
+        // },
+        // {
+        //   text: "Previously indicated",
+        //   value: "Previously indicated",
+        //   fix_value: "E"
+        // },
+        // { text: "Forex - Limit", value: "Forex - Limit", fix_value: "F" },
+        // { text: "Forex - Swap", value: "Forex - Swap", fix_value: "G" },
+        // {
+        //   text: "Forex - Previously Quoted",
+        //   value: "Forex - Previously Quoted",
+        //   fix_value: "H"
+        // },
+        // {
+        //   text:
+        //     "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
+        //   value:
+        //     "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
+        //   fix_value: "I"
+        // },
+        // { text: "Pegged", value: "Pegged", fix_value: "J" }
       ],
       symbols: [],
       currencies: [
@@ -999,61 +1038,97 @@ export default {
       // });
     },
     createBrokerClientOrder(broker) {
-      if (!broker.trading_account || !broker.client_trading_account) {
-        this.$swal(
-          "You need to select a Trading Account & Client Accont to continue"
-        );
-      } else {
-        this.$swal("Processing your order..");
-        axios
-          .post("store-broker-client-order", broker)
-          .then(response => {
-            let data = response.data;
-            let valid = data.isvalid;
-            if (valid) {
-              this.$swal(data.errors);
-              this.callFix(broker);
-              this.$swal("Order Submitted: Generating Execution Reports");
-              // setTimeout(location.reload.bind(location), 2000);
-            } else {
-              this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
-            }
-          })
-          .catch(error => {
-            var s = error.response.data.message;
-            var field = s.match(/'([^']+)'/)[1];
-            if (error.response.data.message.includes("cannot be null")) {
-              this.$swal(
-                `When creating an order ${field} cannot be null. Please try creating the order again.`
-              );
-            }
-          });
+      var order_type, OrderID, x;
+      //Notes:
+      // •	The “OrderID” must be unique per request submitted. Format = "OrderID": "ORD 20200611 N001'
+
+      console.log(x);
+
+      // •	The “Price” indicates the highest price to be used to buy the stocks.
+      // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
+      // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
+
+      if (broker.max_floor && broker.display_range) {
+        order_type = "Iceberg";
       }
+
+      // console.log();
+
+      //   if (!broker.trading_account || !broker.client_trading_account) {
+      //     this.$swal(
+      //       "You need to select a Trading Account & Client Accont to continue"
+      //     );
+      //   } else {
+      //     this.$swal("Processing your order..");
+      //     axios
+      //       .post("store-broker-client-order", broker)
+      //       .then(response => {
+      //         let data = response.data;
+      //         let valid = data.isvalid;
+      //         if (valid) {
+      //           // this.$swal(data.errors);
+      //           this.callFix(broker);
+      //           this.$swal("Order Submitted: Generating Execution Reports");
+      //           // setTimeout(location.reload.bind(location), 2000);
+      //         } else {
+      //           this.$swal(data.errors);
+      //           // setTimeout(location.reload.bind(location), 2000);
+      //         }
+      //       })
+      //       .catch(error => {
+      //         var s = error.response.data.message;
+      //         var field = s.match(/'([^']+)'/)[1];
+      //         if (error.response.data.message.includes("cannot be null")) {
+      //           this.$swal(
+      //             `When creating an order ${field} cannot be null. Please try creating the order again.`
+      //           );
+      //         }
+      //       });
+      //   }
     },
     callFix(order) {
+      // let order_sample = {
+      //   BeginString: "FIX.4.2",
+      //   TargetCompID: "CIBC_TST",
+      //   SenderCompID: "JSE_TST",
+      //   SenderSubID: "JMMB",
+      //   Host: "20.156.185.101",
+      //   Port: 6544,
+      //   UserName: "",
+      //   Password: "",
+      //   OrderID: "CLIVE00001",
+      //   BuyorSell: "1",
+      //   OrdType: "2",
+      //   OrderQty: "2",
+      //   TimeInForce: "6",
+      //   ExpireTime: "2020-05-29T06:05:00.000234",
+      //   Symbol: "BB",
+      //   Account: "JCSD1234567",
+      //   Price: "5.74",
+      //   Side: "1",
+      //   StopPx: 5.79,
+      //   ExDestination: "TSX",
+      //   ClientID: "JSE_TRADER1"
+      // };
+
       let order_sample = {
         BeginString: "FIX.4.2",
-        TargetCompID: "CIBC_TST",
-        SenderCompID: "JSE_TST",
-        SenderSubID: "JMMB",
+        TargetCompID: "CIBC_TEST",
+        SenderCompID: "JSE_TST2",
+        SenderSubID: "BARITA",
         Host: "20.156.185.101",
         Port: 6544,
-        UserName: "",
-        Password: "",
-        OrderID: "CLIVE00001",
+        OrderID: "ORD20200611N001",
         BuyorSell: "1",
         OrdType: "2",
-        OrderQty: "2",
-        TimeInForce: "6",
-        ExpireTime: "2020-05-29T06:05:00.000234",
+        OrderQty: "100",
+        TimeInForce: "0",
         Symbol: "BB",
         Account: "JCSD1234567",
         Price: "5.74",
-        Side: "1",
-        StopPx: 5.79,
-        ExDestination: "TSX",
-        ClientID: "JSE_TRADER1"
+        ClientID: "JSE_TRADER3",
+        HandlInst: "1",
+        AccountType: "CL"
       };
 
       console.log(order_sample);
@@ -1077,15 +1152,18 @@ export default {
     },
     newMessageDownload(action) {
       axios.get("/apis/messageDownload.json").then(response => {
+        // console.l;
         // this.messageDownload = response.data;
         this.logExecutionReport(response.data, action);
       });
     },
     logExecutionReport(d, action) {
       axios.post("execution-report", d).then(response => {
+        console.log("Log Execution Report");
+        console.log(response);
         if (action != "no-refresh") {
           this.$swal("Execution Reports Generated..");
-          setTimeout(location.reload.bind(location), 2000);
+          // setTimeout(location.reload.bind(location), 2000);
         }
       });
     },
@@ -1104,13 +1182,25 @@ export default {
           { crossDomain: true }
         )
         .then(response => {
-          // console.log(response);
+          console.log(response);
           // This api endpoint is currently empty so we will resort to using test data provided
           this.newMessageDownload(); //Get message download
         });
     },
     add() {
       this.create = true;
+      // alert("Here");
+      // Dynamically Create An Order ID
+      var dt = new Date();
+      this.order.client_order_number =
+        "ORD" +
+        dt.getFullYear() +
+        "" +
+        (dt.getMonth() + 1).toString().padStart(2, "0") +
+        "" +
+       (dt.getDate()).toString().padStart(2, "0") +"N"+("" + Math.random()).substring(2, 5);
+
+      console.log(this.order.client_order_number);
     },
     addOption(index) {
       // this.order_option_inputs.push({ option_type: "", option:_ value:"" });

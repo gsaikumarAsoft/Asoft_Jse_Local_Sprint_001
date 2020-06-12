@@ -2,4 +2,4 @@
 
 @section('title', __('Page Expired'))
 @section('code', '419')
-@section('message', __('Page Expired Logout'))
+@section('message', __('Page Expired <a href="/logout">Start New Session</a>'))
