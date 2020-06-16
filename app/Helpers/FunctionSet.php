@@ -530,8 +530,7 @@ class FunctionSet
         $account = $request['executionReports'];
 
          //Store Execution reports for above sender_Sub_id to database before updating account balances
-        return $request;
-        //  $this->logExecution($request);
+         $this->logExecution($request);
  
         // iterate through all reports and update accounts as required
         foreach ($account as $key => $value) {
