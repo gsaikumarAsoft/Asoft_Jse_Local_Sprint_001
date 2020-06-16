@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 100px;">
       <h1>Execution Order Reports</h1>
       <div class="content table-responsive">
         <b-table
@@ -47,6 +47,7 @@ export default {
       fields: [
         { key: "clordid", sortable: true, label: "Order Number" },
         { key: "qTradeacc", sortable: true, label: "Client Account" },
+        { key: "text", sortable: true, label: "Description" },
         {
           key: "status",
           sortable: true,

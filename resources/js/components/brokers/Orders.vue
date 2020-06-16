@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container">
+    <div class="container-fluid">
       <h1>Current Orders</h1>
       <div class="content">
         <b-table
@@ -1098,7 +1098,7 @@ export default {
 
       if (!broker.trading_account || !broker.client_trading_account) {
         this.$swal(
-          "You need to select a Trading Account & Client Accont to continue"
+          "You need to select a Trading Account & Client Account to continue"
         );
       } else {
         this.$swal("Processing your order..");
@@ -1188,6 +1188,7 @@ export default {
     getSymbols() {
       axios.get("/apis/symbols.json").then(response => {
         this.symbols = response.data;
+
       });
     },
     messageDownload(order_sample) {
@@ -1202,7 +1203,7 @@ export default {
         .then(response => {
           console.log(response);
           // This api endpoint is currently empty so we will resort to using test data provided
-          this.newMessageDownload(); //Get message download
+        this.logExecutionReport(response.data);
         });
     },
     add() {

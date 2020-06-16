@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container">
+    <div class="container-fluid">
       <div class="content">
         <h1>Settlement View For Foreign Broker</h1>
         <b-table

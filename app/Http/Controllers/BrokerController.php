@@ -177,6 +177,8 @@ class BrokerController extends Controller
     public function logExecution(Request $request)
     {
         $execution_report = $request->executionReports;
+
+        // return $request;
         BrokerOrderExecutionReport::truncate();
         foreach ($execution_report as $report) {
             $clients[] = $report;
@@ -189,7 +191,7 @@ class BrokerController extends Controller
             $broker_order_execution_report->ordRejRes = $report['ordRejRes'];
             $broker_order_execution_report->status = $report['status'];
             $broker_order_execution_report->buyorSell = $report['buyorSell'];
-            $broker_order_execution_report->securitySubType = $report['securitySubType'];
+            $broker_order_execution_report->securitySubType = 0;
             $broker_order_execution_report->time = $report['time'];
             $broker_order_execution_report->ordType = $report['ordType'];
             $broker_order_execution_report->orderQty = $report['orderQty'];

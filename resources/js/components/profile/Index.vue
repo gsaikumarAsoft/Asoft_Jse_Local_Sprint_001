@@ -1,7 +1,7 @@
 <template>
   <div>
     <toplinks></toplinks>
-    <div class="container" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 100px;">
       <h4>User Profile</h4>
       <p v-if="role === 'ADMD'">You may update and validate your account details below</p>
       <p v-if="role != 'ADMD'">You may update your account password below</p>

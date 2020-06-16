@@ -71762,6 +71762,7 @@ __webpack_require__.r(__webpack_exports__);
       fields: [
         { key: "clordid", sortable: true, label: "Order Number" },
         { key: "qTradeacc", sortable: true, label: "Client Account" },
+        { key: "text", sortable: true, label: "Description" },
         {
           key: "status",
           sortable: true,
@@ -73055,7 +73056,7 @@ __webpack_require__.r(__webpack_exports__);
 
       if (!broker.trading_account || !broker.client_trading_account) {
         this.$swal(
-          "You need to select a Trading Account & Client Accont to continue"
+          "You need to select a Trading Account & Client Account to continue"
         );
       } else {
         this.$swal("Processing your order..");
@@ -73145,6 +73146,7 @@ __webpack_require__.r(__webpack_exports__);
     getSymbols() {
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json").then(response => {
         this.symbols = response.data;
+
       });
     },
     messageDownload(order_sample) {
@@ -73159,7 +73161,7 @@ __webpack_require__.r(__webpack_exports__);
         .then(response => {
           console.log(response);
           // This api endpoint is currently empty so we will resort to using test data provided
-          this.newMessageDownload(); //Get message download
+        this.logExecutionReport(response.data);
         });
     },
     add() {
@@ -76052,7 +76054,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -76399,7 +76401,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -76583,7 +76585,10 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+        {
+          staticClass: "container-fluid",
+          staticStyle: { "margin-top": "100px" }
+        },
         [
           _c("h4", [_vm._v("Welcome JSE Admin")]),
           _vm._v(" "),
@@ -76640,7 +76645,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -76822,7 +76827,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -77201,7 +77206,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -77506,7 +77511,10 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+        {
+          staticClass: "container-fluid",
+          staticStyle: { "margin-top": "100px" }
+        },
         [
           _c("h1", [_vm._v("Execution Order Reports")]),
           _vm._v(" "),
@@ -77589,7 +77597,10 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c(
       "div",
-      { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+      {
+        staticClass: "container-fluid",
+        staticStyle: { "margin-top": "100px" }
+      },
       [
         _c("h4", [_vm._v("Welcome Local Broker Admin")]),
         _vm._v(" "),
@@ -77638,7 +77649,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c("h1", [_vm._v("Current Orders")]),
         _vm._v(" "),
         _c(
@@ -78730,7 +78741,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -79054,7 +79065,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -79386,7 +79397,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -79666,7 +79677,10 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c(
       "div",
-      { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+      {
+        staticClass: "container-fluid",
+        staticStyle: { "margin-top": "100px" }
+      },
       [
         _c("h4", [_vm._v("Welcome Local Broker Operator")]),
         _vm._v(" "),
@@ -79711,7 +79725,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c("h1", [_vm._v("Current Orders")]),
         _vm._v(" "),
         _c(
@@ -80522,7 +80536,10 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+        {
+          staticClass: "container-fluid",
+          staticStyle: { "margin-top": "100px" }
+        },
         [
           _c("h4", [_vm._v("Welcome Outbound Broker")]),
           _vm._v(" "),
@@ -80577,7 +80594,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -80647,7 +80664,7 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "container-fluid" }, [
         _c(
           "div",
           { staticClass: "content" },
@@ -80947,7 +80964,10 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+        {
+          staticClass: "container-fluid",
+          staticStyle: { "margin-top": "100px" }
+        },
         [
           _c("h4", [_vm._v("User Profile")]),
           _vm._v(" "),
@@ -81119,7 +81139,10 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "container", staticStyle: { "margin-top": "100px" } },
+        {
+          staticClass: "container-fluid",
+          staticStyle: { "margin-top": "100px" }
+        },
         [
           _c("h4", [_vm._v("Welcome Settlement Agent")]),
           _vm._v(" "),

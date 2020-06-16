@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container">
+    <div class="container-fluid">
       <h1>Current Orders</h1>
       <div class="content">
         <b-table

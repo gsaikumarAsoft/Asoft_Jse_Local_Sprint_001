@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container">
+    <div class="container-fluid">
       <div class="content">
         <b-table
          v-if='permissions.indexOf("read-broker-client") !== -1'
