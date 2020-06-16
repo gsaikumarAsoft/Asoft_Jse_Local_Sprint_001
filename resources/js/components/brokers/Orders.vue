@@ -189,7 +189,7 @@
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
-                </b-col> -->
+                </b-col>-->
               </b-row>
             </b-container>
             <b-container class="bv-example-row">
@@ -660,7 +660,7 @@ export default {
           text: "Good Till Crossing (GTX)",
           value: "Good Till Crossing (GTX)",
           fix_value: "5"
-        },
+        }
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
@@ -1111,10 +1111,9 @@ export default {
             if (valid) {
               this.$swal(data.errors);
               this.messageDownload(order_sample);
-              // setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
-              // setTimeout(location.reload.bind(location), 2000);
+              setTimeout(location.reload.bind(location), 2000);
             }
           })
           .catch(error => {
@@ -1130,23 +1129,23 @@ export default {
     },
     // callFix(order) {
     //   let order_sample = {
-        // BeginString: "FIX.4.2",
-        // TargetCompID: "CIBC_TEST",
-        // SenderCompID: "JSE_TST2",
-        // SenderSubID: "BARITA",
-        // Host: "20.156.185.101",
-        // Port: 6544,
-        // OrderID: "ORD20200611N001",
-        // BuyorSell: "1",
-        // OrdType: "2",
-        // OrderQty: "100",
-        // TimeInForce: "0",
-        // Symbol: "BB",
-        // Account: "JCSD1234567",
-        // Price: "5.74",
-        // ClientID: "JSE_TRADER3",
-        // HandlInst: "1",
-        // AccountType: "CL"
+    // BeginString: "FIX.4.2",
+    // TargetCompID: "CIBC_TEST",
+    // SenderCompID: "JSE_TST2",
+    // SenderSubID: "BARITA",
+    // Host: "20.156.185.101",
+    // Port: 6544,
+    // OrderID: "ORD20200611N001",
+    // BuyorSell: "1",
+    // OrdType: "2",
+    // OrderQty: "100",
+    // TimeInForce: "0",
+    // Symbol: "BB",
+    // Account: "JCSD1234567",
+    // Price: "5.74",
+    // ClientID: "JSE_TRADER3",
+    // HandlInst: "1",
+    // AccountType: "CL"
     //   };
 
     //   console.log(order_sample);
@@ -1181,14 +1180,13 @@ export default {
         console.log(response);
         if (action != "no-refresh") {
           this.$swal("Execution Reports Generated..");
-          // setTimeout(location.reload.bind(location), 2000);
+          setTimeout(location.reload.bind(location), 2000);
         }
       });
     },
     getSymbols() {
       axios.get("/apis/symbols.json").then(response => {
         this.symbols = response.data;
-
       });
     },
     messageDownload(order_sample) {
@@ -1201,9 +1199,7 @@ export default {
           { crossDomain: true }
         )
         .then(response => {
-          console.log(response);
-          // This api endpoint is currently empty so we will resort to using test data provided
-        this.logExecutionReport(response.data);
+          this.logExecutionReport(response.data);
         });
     },
     add() {
