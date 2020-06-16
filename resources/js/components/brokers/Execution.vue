@@ -29,7 +29,7 @@
   </div>
 </template>
 <script lang="ts">
-import moment from 'moment';
+import moment from "moment";
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
@@ -79,6 +79,9 @@ export default {
             }
             if (value === "x") {
               return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+            }
+            if (value === "8") {
+              return "Rejected";
             }
           }
         },

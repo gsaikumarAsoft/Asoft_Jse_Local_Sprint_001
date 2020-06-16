@@ -71795,6 +71795,9 @@ __webpack_require__.r(__webpack_exports__);
             if (value === "x") {
               return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
             }
+            if (value === "8") {
+              return "Rejected";
+            }
           }
         },
         {
