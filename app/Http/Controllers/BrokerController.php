@@ -163,6 +163,7 @@ class BrokerController extends Controller
     public function execution()
     {
         // $execution_reports = BrokerOrderExecutionReport::all();
+        return $this->HelperClass->executionBalanceUpdate("BARITA"); //Download Execution Reports
         $execution_reports = DB::table('broker_client_order_execution_reports')
             ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
             ->join('broker_trading_accounts', 'broker_client_order_execution_reports.senderSubID', 'broker_trading_accounts.trading_account_number')
