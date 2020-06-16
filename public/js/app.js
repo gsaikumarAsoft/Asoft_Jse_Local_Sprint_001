@@ -72414,6 +72414,22 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -72424,6 +72440,7 @@ __webpack_require__.r(__webpack_exports__);
   data() {
     return {
       // messageDownload: [],
+      expiration: false,
       order_template_data: [],
       file: "",
       order_option_input: false,
@@ -72578,6 +72595,11 @@ __webpack_require__.r(__webpack_exports__);
           fix_value: "1"
         },
         {
+          text: "Good Till Date (GTD)",
+          value: "Good Till Date (GTD)",
+          fix_value: "6"
+        },
+        {
           text: "At the Opening (OPG)",
           value: "At the Opening (OPG)",
           fix_value: "2"
@@ -72596,7 +72618,6 @@ __webpack_require__.r(__webpack_exports__);
           value: "Good Till Crossing (GTX)",
           fix_value: "5"
         },
-        { text: "Good Till Date", value: "Good Till Date", fix_value: "6" }
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
@@ -72833,6 +72854,18 @@ __webpack_require__.r(__webpack_exports__);
       return this.broker_client_orders.length;
     }
   },
+  watch: {
+    "order.time_in_force": function(d) {
+      var fix_value = d.fix_value;
+      this.expiration = false;
+      if (fix_value === "6") {
+        // console.log(TIF.fix_value);
+        // Show the Expiration date input for this order
+        this.expiration = true;
+      }
+      console.log(this.expiration);
+    }
+  },
   methods: {
     showOptionValueInput() {
       if (this.order_option_input === false) {
@@ -72995,78 +73028,10 @@ __webpack_require__.r(__webpack_exports__);
       // });
     },
     createBrokerClientOrder(broker) {
-      var order_type, OrderID, x;
       //Notes:
-      // •	The “OrderID” must be unique per request submitted. Format = "OrderID": "ORD 20200611 N001'
-
-      console.log(x);
-
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
-
-      if (broker.max_floor && broker.display_range) {
-        order_type = "Iceberg";
-      }
-
-      // console.log();
-
-      //   if (!broker.trading_account || !broker.client_trading_account) {
-      //     this.$swal(
-      //       "You need to select a Trading Account & Client Accont to continue"
-      //     );
-      //   } else {
-      //     this.$swal("Processing your order..");
-      //     axios
-      //       .post("store-broker-client-order", broker)
-      //       .then(response => {
-      //         let data = response.data;
-      //         let valid = data.isvalid;
-      //         if (valid) {
-      //           // this.$swal(data.errors);
-      //           this.callFix(broker);
-      //           this.$swal("Order Submitted: Generating Execution Reports");
-      //           // setTimeout(location.reload.bind(location), 2000);
-      //         } else {
-      //           this.$swal(data.errors);
-      //           // setTimeout(location.reload.bind(location), 2000);
-      //         }
-      //       })
-      //       .catch(error => {
-      //         var s = error.response.data.message;
-      //         var field = s.match(/'([^']+)'/)[1];
-      //         if (error.response.data.message.includes("cannot be null")) {
-      //           this.$swal(
-      //             `When creating an order ${field} cannot be null. Please try creating the order again.`
-      //           );
-      //         }
-      //       });
-      //   }
-    },
-    callFix(order) {
-      // let order_sample = {
-      //   BeginString: "FIX.4.2",
-      //   TargetCompID: "CIBC_TST",
-      //   SenderCompID: "JSE_TST",
-      //   SenderSubID: "JMMB",
-      //   Host: "20.156.185.101",
-      //   Port: 6544,
-      //   UserName: "",
-      //   Password: "",
-      //   OrderID: "CLIVE00001",
-      //   BuyorSell: "1",
-      //   OrdType: "2",
-      //   OrderQty: "2",
-      //   TimeInForce: "6",
-      //   ExpireTime: "2020-05-29T06:05:00.000234",
-      //   Symbol: "BB",
-      //   Account: "JCSD1234567",
-      //   Price: "5.74",
-      //   Side: "1",
-      //   StopPx: 5.79,
-      //   ExDestination: "TSX",
-      //   ClientID: "JSE_TRADER1"
-      // };
 
       let order_sample = {
         BeginString: "FIX.4.2",
@@ -73075,7 +73040,7 @@ __webpack_require__.r(__webpack_exports__);
         SenderSubID: "BARITA",
         Host: "20.156.185.101",
         Port: 6544,
-        OrderID: "ORD20200611N001",
+        OrderID: broker.client_order_number,
         BuyorSell: "1",
         OrdType: "2",
         OrderQty: "100",
@@ -73088,30 +73053,83 @@ __webpack_require__.r(__webpack_exports__);
         AccountType: "CL"
       };
 
-      console.log(order_sample);
-
-      // Fix Wrapper
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-            this.$fixApi +
-            "api/OrderManagement/NewOrderSingle",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then(response => {
-          let status = response.status;
-          console.log(response);
-          if (status === 200) {
-            this.messageDownload(order_sample);
-          }
-        });
+      if (!broker.trading_account || !broker.client_trading_account) {
+        this.$swal(
+          "You need to select a Trading Account & Client Accont to continue"
+        );
+      } else {
+        this.$swal("Processing your order..");
+        axios__WEBPACK_IMPORTED_MODULE_2___default.a
+          .post("store-broker-client-order", broker)
+          .then(response => {
+            let data = response.data;
+            let valid = data.isvalid;
+            console.log(data);
+            if (valid) {
+              this.$swal(data.errors);
+              this.messageDownload(order_sample);
+              // setTimeout(location.reload.bind(location), 2000);
+            } else {
+              this.$swal(data.errors);
+              // setTimeout(location.reload.bind(location), 2000);
+            }
+          })
+          .catch(error => {
+            var s = error.response.data.message;
+            var field = s.match(/'([^']+)'/)[1];
+            if (error.response.data.message.includes("cannot be null")) {
+              this.$swal(
+                `When creating an order ${field} cannot be null. Please try creating the order again.`
+              );
+            }
+          });
+      }
     },
-    newMessageDownload(action) {
+    // callFix(order) {
+    //   let order_sample = {
+        // BeginString: "FIX.4.2",
+        // TargetCompID: "CIBC_TEST",
+        // SenderCompID: "JSE_TST2",
+        // SenderSubID: "BARITA",
+        // Host: "20.156.185.101",
+        // Port: 6544,
+        // OrderID: "ORD20200611N001",
+        // BuyorSell: "1",
+        // OrdType: "2",
+        // OrderQty: "100",
+        // TimeInForce: "0",
+        // Symbol: "BB",
+        // Account: "JCSD1234567",
+        // Price: "5.74",
+        // ClientID: "JSE_TRADER3",
+        // HandlInst: "1",
+        // AccountType: "CL"
+    //   };
+
+    //   console.log(order_sample);
+
+    //   // Fix Wrapper
+    //   axios
+    //     .post(
+    //       "https://cors-anywhere.herokuapp.com/" +
+    //         this.$fixApi +
+    //         "api/OrderManagement/NewOrderSingle",
+    //       order_sample,
+    //       { crossDomain: true }
+    //     )
+    //     .then(response => {
+    //       let status = response.status;
+    //       console.log(response);
+    //       if (status === 200) {
+    //         this.messageDownload(order_sample);
+    //       }
+    //     });
+    // },
+    newMessageDownload() {
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/messageDownload.json").then(response => {
         // console.l;
         // this.messageDownload = response.data;
-        this.logExecutionReport(response.data, action);
+        // this.logExecutionReport(response.data, action);
       });
     },
     logExecutionReport(d, action) {
@@ -73146,18 +73164,22 @@ __webpack_require__.r(__webpack_exports__);
     },
     add() {
       this.create = true;
-      // alert("Here");
-      // Dynamically Create An Order ID
       var dt = new Date();
+
+      // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         "ORD" +
         dt.getFullYear() +
         "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
         "" +
-       (dt.getDate()).toString().padStart(2, "0") +"N"+("" + Math.random()).substring(2, 5);
-
-      console.log(this.order.client_order_number);
+        dt
+          .getDate()
+          .toString()
+          .padStart(2, "0") +
+        "N" +
+        ("" + Math.random()).substring(2, 5);
+      // ===============================================/
     },
     addOption(index) {
       // this.order_option_inputs.push({ option_type: "", option:_ value:"" });
@@ -78279,34 +78301,6 @@ var render = function() {
                               "b-col",
                               [
                                 _c(
-                                  "label",
-                                  { attrs: { for: "example-datepicker" } },
-                                  [_vm._v("Expiration Date")]
-                                ),
-                                _vm._v(" "),
-                                _c("b-form-datepicker", {
-                                  staticClass: "mb-2",
-                                  attrs: { id: "example-datepicker" },
-                                  model: {
-                                    value: _vm.order.expiration_date,
-                                    callback: function($$v) {
-                                      _vm.$set(
-                                        _vm.order,
-                                        "expiration_date",
-                                        $$v
-                                      )
-                                    },
-                                    expression: "order.expiration_date"
-                                  }
-                                })
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
                                   "b-form-group",
                                   {
                                     attrs: {
@@ -78340,6 +78334,44 @@ var render = function() {
                                   ],
                                   1
                                 )
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-col",
+                              {
+                                directives: [
+                                  {
+                                    name: "show",
+                                    rawName: "v-show",
+                                    value: _vm.expiration,
+                                    expression: "expiration"
+                                  }
+                                ]
+                              },
+                              [
+                                _c(
+                                  "label",
+                                  { attrs: { for: "example-datepicker" } },
+                                  [_vm._v("Expiration Date")]
+                                ),
+                                _vm._v(" "),
+                                _c("b-form-datepicker", {
+                                  staticClass: "mb-2",
+                                  attrs: { id: "example-datepicker" },
+                                  model: {
+                                    value: _vm.order.expiration_date,
+                                    callback: function($$v) {
+                                      _vm.$set(
+                                        _vm.order,
+                                        "expiration_date",
+                                        $$v
+                                      )
+                                    },
+                                    expression: "order.expiration_date"
+                                  }
+                                })
                               ],
                               1
                             )

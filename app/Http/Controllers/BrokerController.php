@@ -305,8 +305,12 @@ class BrokerController extends Controller
                 ['open_orders' => $client_open_orders]
             );
 
-            $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
-            return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
+
+            // Create the order in our databases and send order server side using curl
+            return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
+            
+            // return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
+
         }
     }
-}
+}   

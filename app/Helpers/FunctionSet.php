@@ -24,38 +24,149 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
+
 
 class FunctionSet
 {
+    function jsonStrip($value, $field)
+    {
+        $jsonStr = json_encode($value);
 
+        //Decode the JSON string using json_decode
+        $jsonDecoded = json_decode($jsonStr, true);
+
+        //Print out the value we want.
+        return $jsonDecoded[$field];
+    }
 
     function createBrokerOrder($request, $local_broker_id, $status, $client_id)
     {
-        $mytime = Carbon::now();
-        $broker_client_order = new BrokerClientOrder();
-        $broker_client_order->local_broker_id  = $local_broker_id;
-        $broker_client_order->foreign_broker_id = '1';
-        $broker_client_order->handling_instructions = $request->handling_instructions;
-        $broker_client_order->order_quantity = $request->quantity;
-        $broker_client_order->order_type = $request->order_type;
-        $broker_client_order->order_status = $status;
-        $broker_client_order->order_date = $mytime->toDateTimeString();
-        $broker_client_order->currency = $request->currency;
-        $broker_client_order->symbol = $request->symbol;
-        $broker_client_order->price = $request->price;
-        $broker_client_order->value = $request->value;
-        $broker_client_order->quantity = $request->quantity;
-        $broker_client_order->country = 'Jamaica';
-        $broker_client_order->side = $request->side;
-        $broker_client_order->status_time = $mytime->toDateTimeString();
-        $broker_client_order->client_order_number = $request->client_order_number;
-        $broker_client_order->clordid = $request->client_order_number;
-        $broker_client_order->market_order_number = $request->market_order_number;
-        $broker_client_order->stop_price = $request->stop_price;
-        $broker_client_order->expiration_date = $request->expiration_date;
-        $broker_client_order->time_in_force = $request->time_in_force;
-        $broker_client_order->broker_client_id = $client_id;
-        $broker_client_order->save();
+        // return $request;
+        $type = json_decode($request->order_type); //Predefine Order Type For JSON ENCODE
+
+
+        //Locate the Broker Trading Account For This Order
+        $trading = BrokerTradingAccount::find($request->trading_account);
+
+        // Locate the broker client for this order
+        $client = BrokerClient::find($client_id);
+
+
+        // Store Order to our databases
+        // $mytime = Carbon::now();
+        // $broker_client_order = new BrokerClientOrder();
+        // $broker_client_order->local_broker_id  = $local_broker_id;
+        // $broker_client_order->foreign_broker_id = '1';
+        // $broker_client_order->handling_instructions = $request->handling_instructions;
+        // $broker_client_order->order_quantity = $request->quantity;
+        // $broker_client_order->order_type = $request->order_type;
+        // $broker_client_order->order_status = $status;
+        // $broker_client_order->order_date = $mytime->toDateTimeString();
+        // $broker_client_order->currency = $request->currency;
+        // $broker_client_order->symbol = $request->symbol;
+        // $broker_client_order->price = $request->price;
+        // $broker_client_order->value = $request->value;
+        // $broker_client_order->quantity = $request->quantity;
+        // $broker_client_order->country = 'Jamaica';
+        // $broker_client_order->side = $request->side;
+        // $broker_client_order->status_time = $mytime->toDateTimeString();
+        // $broker_client_order->client_order_number = $request->client_order_number;
+        // $broker_client_order->clordid = $request->client_order_number;
+        // $broker_client_order->market_order_number = $request->market_order_number;
+        // $broker_client_order->stop_price = $request->stop_price;
+        // $broker_client_order->expiration_date = $request->expiration_date;
+        // $broker_client_order->time_in_force = $request->time_in_force;
+        // $broker_client_order->broker_client_id = $client_id;
+        // $broker_client_order->save();
+
+        // Send customer order to FIX 4.2 Switch
+
+        //API Beta Fix Swith PHP Post 4.23
+        // Private: 172.26.0.184
+        // Port: 8020, 80, 22, 6544
+        // $url = "http://35.155.69.248:8020/api/messagedownload/download";
+        $url = "http://172.26.0.184:8020/api/OrderManagement/NewOrderSingle";
+        $data = array(
+            'BeginString' => 'FIX.4.2',
+            // 'TargetCompID' => $trading->target_comp_id,
+            // 'SenderCompID' => $trading->sender_comp_id,
+            // 'SenderSubID' => $trading->trading_account_number,
+            // 'Host' => $trading->socket,
+            // 'Port' => $trading->port,
+            // =======================================================================================
+            "TargetCompID" => "CIBC_TEST",
+            "SenderCompID" => "JSE_TST2",
+            "SenderSubID" => "BARITA",
+            "Host" => "20.156.185.101",
+            "Port" => 6544,
+            // ========================================================================================
+            'OrderID' => $request->client_order_number,
+            'BuyorSell' => $this->jsonStrip(json_decode($request->side, true), 'fix_value'),
+            'OrdType' => $this->jsonStrip(json_decode($type, true), 'fix_value'),
+            'Symbol' => $this->jsonStrip(json_decode($request->side, true), 'text'),
+            'Account' => 'JCSD' . $client->jcsd,
+            'ClientID' => $trading->trading_account_number,
+            'AccountType' => 'CL',
+        );
+
+
+        //Check if this is an iceberg order
+        if ($request->has('max_floor') && $request->has('display_range')) {
+            $data['maxFloor'] = $request->max_floor;
+            $data['displayRange'] = $request->display_range;
+        }
+        if ($request->has('expiration_date')) {
+            $data['expireDate'] = $request->expiration_date;
+        }
+
+        if ($request->has('stop_price')) {
+            $data['stopPx'] = (int)$request->stop_price;
+        }
+
+
+
+        if ($request->has('quantity')) {
+            $data['OrderQty'] = $request->quantity;
+        }
+
+        if ($request->has('time_in_force')) {
+            $data['TimeInForce']  = $this->jsonStrip(json_decode($request->time_in_force, true), 'fix_value');
+        }
+
+
+
+        if ($request->has('price')) {
+            $data['Price'] = $request->price;
+        }
+
+
+        if ($request->has('handling_instructions')) {
+            $data['HandlInst'] = $this->jsonStrip(json_decode($request->handling_instructions, true), 'fix_value');
+        }
+
+
+        $postdata = json_encode($data);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        // return $result;
+        $fix_status = json_decode($result, true);
+
+
+        if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
+            return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
+        } else {
+            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Unable To Place!']);
+        }
     }
     function defineLocalBroker($id)
     {
