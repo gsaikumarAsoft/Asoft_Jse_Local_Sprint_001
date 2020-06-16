@@ -1075,27 +1075,6 @@ export default {
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
-
-      let order_sample = {
-        BeginString: "FIX.4.2",
-        TargetCompID: "CIBC_TEST",
-        SenderCompID: "JSE_TST2",
-        SenderSubID: "BARITA",
-        Host: "20.156.185.101",
-        Port: 6544,
-        OrderID: broker.client_order_number,
-        BuyorSell: "1",
-        OrdType: "2",
-        OrderQty: "100",
-        TimeInForce: "0",
-        Symbol: "BB",
-        Account: "JCSD1234567",
-        Price: "5.74",
-        ClientID: "JSE_TRADER3",
-        HandlInst: "1",
-        AccountType: "CL"
-      };
-
       if (!broker.trading_account || !broker.client_trading_account) {
         this.$swal(
           "You need to select a Trading Account & Client Account to continue"
@@ -1109,8 +1088,9 @@ export default {
             let valid = data.isvalid;
             console.log(data);
             if (valid) {
+              console.log(data);
               this.$swal(data.errors);
-              this.messageDownload(order_sample);
+              setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
               setTimeout(location.reload.bind(location), 2000);
@@ -1127,80 +1107,10 @@ export default {
           });
       }
     },
-    // callFix(order) {
-    //   let order_sample = {
-    // BeginString: "FIX.4.2",
-    // TargetCompID: "CIBC_TEST",
-    // SenderCompID: "JSE_TST2",
-    // SenderSubID: "BARITA",
-    // Host: "20.156.185.101",
-    // Port: 6544,
-    // OrderID: "ORD20200611N001",
-    // BuyorSell: "1",
-    // OrdType: "2",
-    // OrderQty: "100",
-    // TimeInForce: "0",
-    // Symbol: "BB",
-    // Account: "JCSD1234567",
-    // Price: "5.74",
-    // ClientID: "JSE_TRADER3",
-    // HandlInst: "1",
-    // AccountType: "CL"
-    //   };
-
-    //   console.log(order_sample);
-
-    //   // Fix Wrapper
-    //   axios
-    //     .post(
-    //       "https://cors-anywhere.herokuapp.com/" +
-    //         this.$fixApi +
-    //         "api/OrderManagement/NewOrderSingle",
-    //       order_sample,
-    //       { crossDomain: true }
-    //     )
-    //     .then(response => {
-    //       let status = response.status;
-    //       console.log(response);
-    //       if (status === 200) {
-    //         this.messageDownload(order_sample);
-    //       }
-    //     });
-    // },
-    newMessageDownload() {
-      axios.get("/apis/messageDownload.json").then(response => {
-        // console.l;
-        // this.messageDownload = response.data;
-        // this.logExecutionReport(response.data, action);
-      });
-    },
-    logExecutionReport(d, action) {
-      axios.post("execution-report", d).then(response => {
-        console.log("Log Execution Report");
-        console.log(response);
-        if (action != "no-refresh") {
-          this.$swal("Execution Reports Generated..");
-          setTimeout(location.reload.bind(location), 2000);
-        }
-      });
-    },
     getSymbols() {
       axios.get("/apis/symbols.json").then(response => {
         this.symbols = response.data;
       });
-    },
-    messageDownload(order_sample) {
-      axios
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-            this.$fixApi +
-            "api/messagedownload/download",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then(response => {
-          this.logExecutionReport(response.data);
-        });
     },
     add() {
       this.create = true;
@@ -1318,12 +1228,9 @@ export default {
     handleSubmit() {}
   },
   mounted() {
-    this.newMessageDownload("no-refresh");
     this.getSymbols();
-    // this.messageDownload();
     this.getBrokers();
     this.tradingAccounts();
-    // console.log(this.client_accounts);
     var order_data = JSON.parse(this.orders);
     var client_accounts_data = JSON.parse(this.client_accounts);
     var orders = order_data[0]["order"];

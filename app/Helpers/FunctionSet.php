@@ -6,6 +6,7 @@ namespace App\Helpers;
 use App\BrokerClient;
 use App\BrokerClientOrder;
 use App\BrokerClientPermission;
+use App\BrokerOrderExecutionReport;
 use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
 use App\BrokerUser;
@@ -119,13 +120,9 @@ class FunctionSet
         if ($request->has('expiration_date')) {
             $data['expireDate'] = $request->expiration_date;
         }
-
         if ($request->has('stop_price')) {
             $data['stopPx'] = (int) $request->stop_price;
         }
-
-
-
         if ($request->has('quantity')) {
             $data['OrderQty'] = $request->quantity;
         }
@@ -133,14 +130,9 @@ class FunctionSet
         if ($request->has('time_in_force')) {
             $data['TimeInForce']  = $this->jsonStrip(json_decode($request->time_in_force, true), 'fix_value');
         }
-
-
-
         if ($request->has('price')) {
             $data['Price'] = $request->price;
         }
-
-
         if ($request->has('handling_instructions')) {
             $data['HandlInst'] = $this->jsonStrip(json_decode($request->handling_instructions, true), 'fix_value');
         }
@@ -163,9 +155,42 @@ class FunctionSet
 
 
         if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
+            $this->executionBalanceUpdate('BARITA'); //BARITA to be changed to any subsender id that comes into the application later
             return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
         } else {
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Unable To Place!']);
+        }
+      
+    }
+    public function logExecution($request)
+    {
+        $execution_report = $request['executionReports'];
+        BrokerOrderExecutionReport::truncate();
+        foreach ($execution_report as $report) {
+            $clients[] = $report;
+
+            $broker_order_execution_report = new BrokerOrderExecutionReport();
+            $broker_order_execution_report->clOrdID = $report['clOrdID'];
+            $broker_order_execution_report->orderID = $report['orderID'];
+            $broker_order_execution_report->text = $report['text'];
+            $broker_order_execution_report->ordRejRes = $report['ordRejRes'];
+            $broker_order_execution_report->status = $report['status'];
+            $broker_order_execution_report->buyorSell = $report['buyorSell'];
+            $broker_order_execution_report->securitySubType = 0;
+            $broker_order_execution_report->time = $report['time'];
+            $broker_order_execution_report->ordType = $report['ordType'];
+            $broker_order_execution_report->orderQty = $report['orderQty'];
+            $broker_order_execution_report->timeInForce = $report['timeInForce'];
+            $broker_order_execution_report->symbol = $report['symbol'];
+            $broker_order_execution_report->qTradeacc = $report['qTradeacc'];
+            $broker_order_execution_report->price = $report['price'];
+            $broker_order_execution_report->stopPx = $report['stopPx'];
+            $broker_order_execution_report->execType = $report['execType'];
+            $broker_order_execution_report->senderSubID = $report['senderSubID'];
+            $broker_order_execution_report->seqNum = $report['seqNum'];
+            $broker_order_execution_report->sendingTime = $report['sendingTime'];
+            $broker_order_execution_report->messageDate = $report['messageDate'];
+            $broker_order_execution_report->save();
         }
     }
     function defineLocalBroker($id)
@@ -342,11 +367,7 @@ class FunctionSet
                 ]
 
             );
-            //Notify Local Broker that the client update has been done
-            Mail::to($local_broker['user']->email)->send(new ClientDetailsUpdate($request));
-        } else {
-
-
+            //Notify Local Broker that 
             // For future Sprint
             // $broker_trader = new User();
 
@@ -483,16 +504,44 @@ class FunctionSet
         return $status;
     }
 
-    public function executionBalanceUpdate($account)
+    public function executionBalanceUpdate($sender_sub_id)
     {
+        // Call fix and return excutiun report for the required SensderSubID
+        $url = "http://35.155.69.248:8020/api/messagedownload/download";
+        $data = array(
+            'BeginString' => 'FIX.4.2',
+            "SenderSubID" => $sender_sub_id,
+            "seqNum" => 0,
+        );
+        $postdata = json_encode($data);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        $request = json_decode($result, true);
+        $account = $request['executionReports'];
+
+         //Store Execution reports for above sender_Sub_id to database before updating account balances
+         $this->logExecution($request);
+ 
+        // iterate through all reports and update accounts as required
         foreach ($account as $key => $value) {
+           
             $order_number =  $account[$key]['clOrdID'];
             $sender_sub_id = $account[$key]['senderSubID'];
             $price = $account[$key]['price'];
             $quantity = $account[$key]['orderQty'];
             $status = $account[$key]['status'];
             $jcsd = $account[$key]['qTradeacc'];
-
+            
             // Define The broker client 
             // $broker_client = BrokerClientOrder::where('client_order_number', $order_number)->first();
             $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
