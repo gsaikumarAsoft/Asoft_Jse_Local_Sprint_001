@@ -44,12 +44,15 @@ class FunctionSet
 
     function createBrokerOrder($request, $local_broker_id, $status, $client_id)
     {
-        // return $request;
+        
+
         $type = json_decode($request->order_type); //Predefine Order Type For JSON ENCODE
 
 
         //Locate the Broker Trading Account For This Order
         $trading = BrokerTradingAccount::find($request->trading_account);
+
+        $foreign_broker_id = $this->getForeignBrokerById($trading->foreign_broker_id);
 
         // Locate the broker client for this order
         $client = BrokerClient::find($client_id);
@@ -59,7 +62,7 @@ class FunctionSet
         $mytime = Carbon::now();
         $broker_client_order = new BrokerClientOrder();
         $broker_client_order->local_broker_id  = $local_broker_id;
-        $broker_client_order->foreign_broker_id = '1';
+        $broker_client_order->foreign_broker_id = $foreign_broker_id[0]->id;
         $broker_client_order->handling_instructions = $request->handling_instructions;
         $broker_client_order->order_quantity = $request->quantity;
         $broker_client_order->order_type = $request->order_type;

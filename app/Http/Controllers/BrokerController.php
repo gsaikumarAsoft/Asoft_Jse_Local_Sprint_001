@@ -90,7 +90,7 @@ class BrokerController extends Controller
         $user_definition  = LocalBroker::where('user_id', $user->id)->first();
 
         $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition['id'])
-            ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_trading_accounts.id')
+            ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_trading_accounts.id', 'broker_settlement_accounts.currency')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
             ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
             ->join('users', 'foreign_brokers.user_id', 'users.id')

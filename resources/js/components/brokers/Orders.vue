@@ -24,7 +24,7 @@
           ref="modal"
           @ok="handleJSEOrder"
           @hidden="resetModal"
-          title="New Order"
+          :title="modalTitle"
         >
           <form ref="form">
             <b-container class="bv-example-row">
@@ -483,6 +483,7 @@ export default {
   data() {
     return {
       // messageDownload: [],
+      modalTitle: "New Order",
       expiration: false,
       order_template_data: [],
       file: "",
@@ -949,6 +950,7 @@ export default {
       }
     },
     brokerOrderHandler(o) {
+      console.log(o);
       this.order = {};
       this.order = o;
       //Check if we already parsed to json if we didnt do so now.
@@ -976,7 +978,8 @@ export default {
       }).then(result => {
         if (result.value) {
           this.$bvModal.show("jse-new-order");
-          alert("Editting");
+          this.setRradingAccount();
+          this.modalTitle = `Updating Order ${o.clordid}`;
         }
         if (result.dismiss === "cancel") {
           this.destroy(o.id);
@@ -1071,6 +1074,29 @@ export default {
         }
       });
     },
+    setTradingAccounts() {
+      axios.get("broker-trading-accounts").then(response => {
+        let data = response.data;
+        console.log
+        console.log(data);
+        let i;
+        for (i = 0; i < data.length; i++) {
+          //console.log(data[i]);
+          // this.broker_trading_account_options.push({
+          //   text:
+          //     data[i].foreign_broker +
+          //     " : " +
+          //     data[i].bank +
+          //     "-" +
+          //     data[i].trading_account_number +
+          //     " : " +
+          //     data[i].account,
+          //   value: data[i].id,
+          //   data: data[i]
+          // });
+        }
+      });
+    },
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
@@ -1130,10 +1156,10 @@ export default {
             if (valid) {
               console.log(data);
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             }
           })
           .catch(error => {
@@ -1153,6 +1179,7 @@ export default {
       });
     },
     add() {
+      this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
 

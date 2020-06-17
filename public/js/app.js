@@ -72444,6 +72444,7 @@ __webpack_require__.r(__webpack_exports__);
   data() {
     return {
       // messageDownload: [],
+      modalTitle: "New Order",
       expiration: false,
       order_template_data: [],
       file: "",
@@ -72910,6 +72911,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     brokerOrderHandler(o) {
+      console.log(o);
       this.order = {};
       this.order = o;
       //Check if we already parsed to json if we didnt do so now.
@@ -72937,7 +72939,8 @@ __webpack_require__.r(__webpack_exports__);
       }).then(result => {
         if (result.value) {
           this.$bvModal.show("jse-new-order");
-          alert("Editting");
+          this.setRradingAccount();
+          this.modalTitle = `Updating Order ${o.clordid}`;
         }
         if (result.dismiss === "cancel") {
           this.destroy(o.id);
@@ -73032,6 +73035,29 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     },
+    setTradingAccounts() {
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-trading-accounts").then(response => {
+        let data = response.data;
+        console.log
+        console.log(data);
+        let i;
+        for (i = 0; i < data.length; i++) {
+          //console.log(data[i]);
+          // this.broker_trading_account_options.push({
+          //   text:
+          //     data[i].foreign_broker +
+          //     " : " +
+          //     data[i].bank +
+          //     "-" +
+          //     data[i].trading_account_number +
+          //     " : " +
+          //     data[i].account,
+          //   value: data[i].id,
+          //   data: data[i]
+          // });
+        }
+      });
+    },
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
@@ -73091,10 +73117,10 @@ __webpack_require__.r(__webpack_exports__);
             if (valid) {
               console.log(data);
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             }
           })
           .catch(error => {
@@ -73114,6 +73140,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     add() {
+      this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
 
@@ -77625,7 +77652,11 @@ var render = function() {
               "b-modal",
               {
                 ref: "modal",
-                attrs: { id: "jse-new-order", size: "xl", title: "New Order" },
+                attrs: {
+                  id: "jse-new-order",
+                  size: "xl",
+                  title: _vm.modalTitle
+                },
                 on: { ok: _vm.handleJSEOrder, hidden: _vm.resetModal }
               },
               [
