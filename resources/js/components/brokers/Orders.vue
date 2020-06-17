@@ -501,6 +501,7 @@ export default {
       fields: [
         // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
+        { key: "clordid", label: "Order#", sortable: true },
         {
           key: "order_type.text",
           label: "Order Type",
@@ -573,7 +574,36 @@ export default {
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
-        { key: "order_status", sortable: true }
+        {
+          key: "order_status",
+          sortable: true,
+          formatter: (value, key, item) => {
+            // return value;
+            if (value === "0") {
+              return "New";
+            } else if (value === "1") {
+              return "Partially Filled";
+            } else if (value === "2") {
+              return "Filled";
+            } else if (value === "4") {
+              return "Cancelled";
+            } else if (value === "5") {
+              return "Replaced";
+            } else if (value === "C") {
+              return "Expired";
+            } else if (value === "Z") {
+              return "Private";
+            } else if (value === "U") {
+              return "Unplaced; order is not in the orderbook (Nasdaq defined)";
+            } else if (value === "x") {
+              return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+            } else if (value === "8") {
+              return "Rejected";
+            } else {
+              return "Submitted";
+            }
+          }
+        }
         // { key: "foreign_broker", sortable: true }
       ],
       broker_client_orders: [],
@@ -642,25 +672,26 @@ export default {
           value: "Good Till Date (GTD)",
           fix_value: "6"
         },
-        {
-          text: "At the Opening (OPG)",
-          value: "At the Opening (OPG)",
-          fix_value: "2"
-        },
+        // {
+        //   text: "At the Opening (OPG)",
+        //   value: "At the Opening (OPG)",
+        //   fix_value: "2"
+        // },
         {
           text: "Immediate or Cancel (IOC)",
-          value: "Immediate or Cancel (IOC), fix_value: '3'"
+          value: "Immediate or Cancel (IOC)",
+          fix_value: "3"
         },
         {
           text: "Fill or Kill (FOK)",
           value: "Fill or Kill (FOK)",
           fix_value: "4"
-        },
-        {
-          text: "Good Till Crossing (GTX)",
-          value: "Good Till Crossing (GTX)",
-          fix_value: "5"
         }
+        // {
+        //   text: "Good Till Crossing (GTX)",
+        //   value: "Good Till Crossing (GTX)",
+        //   fix_value: "5"
+        // }
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
@@ -934,20 +965,18 @@ export default {
       // this.$refs.selectedOrder.clearSelected();
       // =============================================================================================
       this.$swal({
-        title: "",
-        icon: "info",
-        html: `Select Ok to View Or Cancel the following order`,
-        showCloseButton: true,
+        title: o.clordid,
+        text: "The Options for the current order are.",
+        icon: "warning",
         showCancelButton: true,
-        // focusConfirm: true,
-        cancelButtonColor: "#DD6B55",
-        confirmButtontext: "View",
-        confirmButtonAriaLabel: "cancel",
-        cancelButtontext: "Cancel Order",
-        cancelButtonAriaLabel: "cancel"
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "View Order",
+        footer: "<a href='orders' >Exit</a>"
       }).then(result => {
         if (result.value) {
           this.$bvModal.show("jse-new-order");
+          alert("Editting");
         }
         if (result.dismiss === "cancel") {
           this.destroy(o.id);
@@ -1072,6 +1101,18 @@ export default {
     },
     createBrokerClientOrder(broker) {
       //Notes:
+
+      this.$swal
+        .fire({
+          title: "Creating Client Order",
+          html: "One moment while we setup the current order",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        })
+        .then(result => {});
+
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
@@ -1080,7 +1121,6 @@ export default {
           "You need to select a Trading Account & Client Account to continue"
         );
       } else {
-        this.$swal("Processing your order..");
         axios
           .post("store-broker-client-order", broker)
           .then(response => {
@@ -1141,65 +1181,65 @@ export default {
 
     destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-      // axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
-      let order_sample = {
-        BeginString: "FIX.4.2",
+      // // axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
+      // let order_sample = {
+      //   BeginString: "FIX.4.2",
 
-        TargetCompID: "CIBC_TST",
+      //   TargetCompID: "CIBC_TST",
 
-        SenderCompID: "JSE_TST",
+      //   SenderCompID: "JSE_TST",
 
-        SenderSubID: "JMMB",
+      //   SenderSubID: "JMMB",
 
-        Host: "10.246.7.212",
+      //   Host: "10.246.7.212",
 
-        Port: 27102,
+      //   Port: 27102,
 
-        UserName: "FC4",
+      //   UserName: "FC4",
 
-        Password: "password",
+      //   Password: "password",
 
-        OrderID: "JMMB000004",
+      //   OrderID: "JMMB000004",
 
-        BuyorSell: "1",
+      //   BuyorSell: "1",
 
-        OrdType: "4",
+      //   OrdType: "4",
 
-        OrderQty: "2",
+      //   OrderQty: "2",
 
-        TimeInForce: "6",
+      //   TimeInForce: "6",
 
-        Symbol: "AAPL",
+      //   Symbol: "AAPL",
 
-        Account: "1466267",
+      //   Account: "1466267",
 
-        Price: "224.99",
+      //   Price: "224.99",
 
-        Side: "5",
+      //   Side: "5",
 
-        Strategy: 1000,
+      //   Strategy: 1000,
 
-        StopPx: 230.0,
+      //   StopPx: 230.0,
 
-        ExDestination: "CNQ",
+      //   ExDestination: "CNQ",
 
-        ClientID: "JMMB_TRADER1"
-      };
+      //   ClientID: "JMMB_TRADER1"
+      // };
 
-      console.log(order_sample);
+      // console.log(order_sample);
 
-      // Fix Wrapper
-      axios
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-            this.$fixApi +
-            "api/OrderManagement/OrderCancelRequest",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then(response => {
-          this.$swal("Order Cancelled");
-        });
+      // // Fix Wrapper
+      // axios
+      //   .post(
+      //     "https://cors-anywhere.herokuapp.com/" +
+      //       this.$fixApi +
+      //       "api/OrderManagement/OrderCancelRequest",
+      //     order_sample,
+      //     { crossDomain: true }
+      //   )
+      //   .then(response => {
+      //     this.$swal("Order Cancelled");
+      //   });
     },
     handleJSEOrder() {
       // Exit when the form isn't valid

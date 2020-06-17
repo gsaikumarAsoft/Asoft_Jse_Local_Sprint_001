@@ -22,6 +22,7 @@ use App\Mail\LocalBrokerUser;
 use App\Role;
 use App\User;
 use Carbon\Carbon;
+use CreateBrokerClientOrderExecutionReports;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -92,13 +93,13 @@ class FunctionSet
             'BeginString' => 'FIX.4.2',
             // 'TargetCompID' => $trading->target_comp_id,
             // 'SenderCompID' => $trading->sender_comp_id,
-            // 'SenderSubID' => $trading->trading_account_number,
+            'SenderSubID' => $trading->trading_account_number,
             // 'Host' => $trading->socket,
             // 'Port' => $trading->port,
             // =======================================================================================
             "TargetCompID" => "CIBC_TEST",
             "SenderCompID" => "JSE_TST2",
-            "SenderSubID" => "BARITA",
+            // "SenderSubID" => "BARITA",
             "Host" => "20.156.185.101",
             "Port" => 6544,
             // ========================================================================================
@@ -113,7 +114,7 @@ class FunctionSet
 
 
         //Check if this is an iceberg order
-        if ($request->has('max_floor') && $request->has('display_range')) {
+        if ($request->has('max_floor') && $request->has('display_range')){
             $data['maxFloor'] = $request->max_floor;
             $data['displayRange'] = $request->display_range;
         }
@@ -155,7 +156,7 @@ class FunctionSet
 
 
         if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
-            $this->executionBalanceUpdate('BARITA'); //BARITA to be changed to any subsender id that comes into the application later
+            $this->executionBalanceUpdate($trading->trading_account_number); //BARITA to be changed to any subsender id that comes into the application later
             return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
         } else {
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Unable To Place!']);
@@ -528,20 +529,31 @@ class FunctionSet
 
         $request = json_decode($result, true);
         $account = $request['executionReports'];
-
+        $total_reports = count($account);
+        // return 
+        // return $request;
          //Store Execution reports for above sender_Sub_id to database before updating account balances
          $this->logExecution($request);
+
+
+         //Find the very last exucution sequence number for this particular broker
+         $seq_last = DB::table('broker_client_order_execution_reports')->orderBy('id', 'desc')->limit(1)->get();
+     
+        // Check latest sequence number coming from the fix
+        //  $incomingSeq =  $account[$total_reports]['seqNum'];     
+
+        //  if($seq_last){
+        //      return $seq_last[0]->seqNum.' = '.$incomingSeq;
+        //  }
  
         // iterate through all reports and update accounts as required
         foreach ($account as $key => $value) {
-           
             $order_number =  $account[$key]['clOrdID'];
             $sender_sub_id = $account[$key]['senderSubID'];
             $price = $account[$key]['price'];
             $quantity = $account[$key]['orderQty'];
             $status = $account[$key]['status'];
-            $jcsd = $account[$key]['qTradeacc'];
-            
+            $jcsd = str_replace('JCSD', "", $account[$key]['qTradeacc']);
             // Define The broker client 
             // $broker_client = BrokerClientOrder::where('client_order_number', $order_number)->first();
             $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
@@ -554,11 +566,10 @@ class FunctionSet
                 ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
                 ->get();
             $array = json_decode(json_encode($settlement_account), true);
-            // return 
             if ($order && $broker_client) {
+                // return $order;
                 $od = $order;
                 $bc = $broker_client;
-                // return $bc;
                 if ($od->id) {
                     $o = $this->orderStatus($od->id);
                     // Define the open order amount
@@ -566,14 +577,10 @@ class FunctionSet
                     $fil_or = $bc->filled_orders + ($quantity * $price);
                     if ($array  ) {
                         $sa = $array[0];
-
-
-
                         $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
                         $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
                         //If offer is (Rejected, Cancelled, Expired)
                         if ($status == "C" || $status == "4" || $status == "8") {
-
                             // Check if the order is open
                             if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" &&  $o->order_status != "2") {
 
