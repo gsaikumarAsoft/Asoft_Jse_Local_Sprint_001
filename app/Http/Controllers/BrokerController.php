@@ -242,8 +242,15 @@ class BrokerController extends Controller
 
     public function destroyOrder($id)
     {
-        $order = BrokerClientOrder::find($id);
-        $order->delete();
+
+        BrokerClientOrder::updateOrCreate(
+            ['clordid' => $id],
+            ['order_status' => 4]
+        );
+
+        //Find the trading account linked to this order
+        
+
     }
     public function clientOrder(Request $request)
     {

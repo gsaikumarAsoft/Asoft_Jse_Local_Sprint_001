@@ -979,13 +979,10 @@ export default {
       }).then(result => {
         if (result.value) {
           this.$bvModal.show("jse-new-order");
-          // this.setTradingAccount();
           this.modalTitle = `Updating Order ${o.clordid}`;
         }
         if (result.dismiss === "cancel") {
-          this.destroy(o.id);
-          // this.$swal("Canceled!", "User Order Has Been Cancelled.", "success");
-          // window.location.reload();
+          this.destroy(o.clordid);
         }
       });
     },
@@ -1209,65 +1206,11 @@ export default {
 
     destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-      // // axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
-      // let order_sample = {
-      //   BeginString: "FIX.4.2",
+    axios.delete(`destroy-broker-client-order/${id}`).then(response => {
+      this.$swal("Cancelled");
+      setTimeout(location.reload.bind(location), 1000);
+    });
 
-      //   TargetCompID: "CIBC_TST",
-
-      //   SenderCompID: "JSE_TST",
-
-      //   SenderSubID: "JMMB",
-
-      //   Host: "10.246.7.212",
-
-      //   Port: 27102,
-
-      //   UserName: "FC4",
-
-      //   Password: "password",
-
-      //   OrderID: "JMMB000004",
-
-      //   BuyorSell: "1",
-
-      //   OrdType: "4",
-
-      //   OrderQty: "2",
-
-      //   TimeInForce: "6",
-
-      //   Symbol: "AAPL",
-
-      //   Account: "1466267",
-
-      //   Price: "224.99",
-
-      //   Side: "5",
-
-      //   Strategy: 1000,
-
-      //   StopPx: 230.0,
-
-      //   ExDestination: "CNQ",
-
-      //   ClientID: "JMMB_TRADER1"
-      // };
-
-      // console.log(order_sample);
-
-      // // Fix Wrapper
-      // axios
-      //   .post(
-      //     "https://cors-anywhere.herokuapp.com/" +
-      //       this.$fixApi +
-      //       "api/OrderManagement/OrderCancelRequest",
-      //     order_sample,
-      //     { crossDomain: true }
-      //   )
-      //   .then(response => {
-      //     this.$swal("Order Cancelled");
-      //   });
     },
     handleJSEOrder() {
       // Exit when the form isn't valid

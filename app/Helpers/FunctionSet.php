@@ -41,7 +41,7 @@ class FunctionSet
         //Print out the value we want.
         return $jsonDecoded[$field];
     }
-
+    function cancelOrder(){}
     function createBrokerOrder($request, $local_broker_id, $status, $client_id)
     {
         
