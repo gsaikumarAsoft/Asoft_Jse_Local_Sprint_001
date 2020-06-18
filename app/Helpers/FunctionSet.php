@@ -94,17 +94,17 @@ class FunctionSet
         $url = "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle";
         $data = array(
             'BeginString' => 'FIX.4.2',
-            // 'TargetCompID' => $trading->target_comp_id,
-            // 'SenderCompID' => $trading->sender_comp_id,
+            'TargetCompID' => $trading->target_comp_id,
+            'SenderCompID' => $trading->sender_comp_id,
             'SenderSubID' => $trading->trading_account_number,
-            // 'Host' => $trading->socket,
-            // 'Port' => $trading->port,
+            'Host' => $trading->socket,
+            'Port' => $trading->port,
             // =======================================================================================
-            "TargetCompID" => "CIBC_TEST",
-            "SenderCompID" => "JSE_TST2",
-            // "SenderSubID" => "BARITA",
-            "Host" => "20.156.185.101",
-            "Port" => 6544,
+            // "TargetCompID" => "CIBC_TEST",
+            // "SenderCompID" => "JSE_TST2",
+            // // "SenderSubID" => "BARITA",
+            // "Host" => "20.156.185.101",
+            // "Port" => 6544,
             // ========================================================================================
             'OrderID' => $request->client_order_number,
             'BuyorSell' => $this->jsonStrip(json_decode($request->side, true), 'fix_value'),

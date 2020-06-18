@@ -299,8 +299,6 @@ class BrokerController extends Controller
                 // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
-                return "Ready";
-
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 
                 $settlement_allocated = $settlement->amount_allocated + $order_value;
 
