@@ -696,7 +696,7 @@ export default {
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
-        { text: "Sell", value: "Sell", fix_value: "2" },
+        { text: "Sell", value: "Sell", fix_value: "2" }
         // { text: "Buy minus", value: "Buy minus", fix_value: "3" },
         // { text: "Sell plus", value: "Sell plus", fix_value: "4" },
         // { text: "Sell short", value: "Sell short", fix_value: "5" },
@@ -969,11 +969,12 @@ export default {
       this.$swal({
         title: o.clordid,
         text: "The Options for the current order are.",
-        icon: "warning",
+        icon: "question",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
+        cancelButtonText: "Cancel Order",
         footer: "<a href='orders' >Exit</a>"
       }).then(result => {
         if (result.value) {
@@ -1077,7 +1078,7 @@ export default {
     setTradingAccounts() {
       axios.get("broker-trading-accounts").then(response => {
         let data = response.data;
-        console.log
+        console.log;
         console.log(data);
         let i;
         for (i = 0; i < data.length; i++) {
