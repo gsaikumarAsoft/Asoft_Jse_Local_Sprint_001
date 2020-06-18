@@ -276,44 +276,52 @@ class BrokerController extends Controller
         $settlement_available = $settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
         $client_available = $c_account->account_balance - ($c_account->open_orders + $c_account->filled_orders);
         //=========================================================================
+        // return $settlement_available ."=". $order_value;
 
-        if ($settlement_available < $order_value) {
+        $side = json_decode($request->side, true);
 
-            // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
+        // If SIDE = BUY
+        if ($side['fix_value'] === '1') {
+            if ($settlement_available < $order_value) {
 
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
-        } else if ($client_available < $order_value) {
+                // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
 
-            // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
-        } else {
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
+            } else if ($client_available < $order_value) {
 
-            // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 
-            $settlement_allocated = $settlement->amount_allocated + $order_value;
+                // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
+            } else {
+                return "Ready";
 
-            // [Client Open Orders] = [Client Open Orders] + [Order Value]
-            $client_open_orders = $c_account->open_orders + $order_value;
+                // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 
+                $settlement_allocated = $settlement->amount_allocated + $order_value;
 
-
-            // Update Settlement Account Balances
-            BrokerSettlementAccount::updateOrCreate(
-                ['id' => $trading->broker_settlement_account_id],
-                ['amount_allocated' => $settlement_allocated]
-            );
-
-
-            // Update Broker Clients Open Orders
-            BrokerClient::updateOrCreate(
-                ['id' => $request['client_trading_account']],
-                ['open_orders' => $client_open_orders]
-            );
+                // [Client Open Orders] = [Client Open Orders] + [Order Value]
+                $client_open_orders = $c_account->open_orders + $order_value;
 
 
+                // Update Settlement Account Balances
+                BrokerSettlementAccount::updateOrCreate(
+                    ['id' => $trading->broker_settlement_account_id],
+                    ['amount_allocated' => $settlement_allocated]
+                );
+
+
+                // Update Broker Clients Open Orders
+                BrokerClient::updateOrCreate(
+                    ['id' => $request['client_trading_account']],
+                    ['open_orders' => $client_open_orders]
+                );
+
+
+                // Create the order in our databases and send order server side using curl
+                return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
+            }
+        } else if ($side['fix_value'] === '2') {
+            // if side is = SELL
             // Create the order in our databases and send order server side using curl
             return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
-            
-            // return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
-
         }
     }
-}   
+}
