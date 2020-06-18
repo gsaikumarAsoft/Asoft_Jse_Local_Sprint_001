@@ -979,7 +979,7 @@ export default {
       }).then(result => {
         if (result.value) {
           this.$bvModal.show("jse-new-order");
-          this.setRradingAccount();
+          // this.setTradingAccount();
           this.modalTitle = `Updating Order ${o.clordid}`;
         }
         if (result.dismiss === "cancel") {
