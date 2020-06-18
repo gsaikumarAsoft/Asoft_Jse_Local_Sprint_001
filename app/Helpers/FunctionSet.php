@@ -98,7 +98,7 @@ class FunctionSet
             'SenderCompID' => $trading->sender_comp_id,
             'SenderSubID' => $trading->trading_account_number,
             'Host' => $trading->socket,
-            'Port' => $trading->port,
+            'Port' => (int)$trading->port,
             // =======================================================================================
             // "TargetCompID" => "CIBC_TEST",
             // "SenderCompID" => "JSE_TST2",
@@ -157,6 +157,8 @@ class FunctionSet
         // return $result;
         $fix_status = json_decode($result, true);
 
+        // return $fix_status;
+        // return $trading;
 
         if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
             $this->executionBalanceUpdate($trading->trading_account_number); //BARITA to be changed to any subsender id that comes into the application later
