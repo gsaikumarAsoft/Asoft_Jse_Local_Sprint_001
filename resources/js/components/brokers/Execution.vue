@@ -2,7 +2,7 @@
   <div>
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top: 100px;">
-      <h1>Execution Order Reports</h1>
+      <h1>Order Execution Reports</h1>
       <div class="content table-responsive">
         <b-table
           ref="selectedOrder"

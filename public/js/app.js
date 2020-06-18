@@ -77433,7 +77433,7 @@ var render = function() {
           staticStyle: { "margin-top": "100px" }
         },
         [
-          _c("h1", [_vm._v("Execution Order Reports")]),
+          _c("h1", [_vm._v("Order Execution Reports")]),
           _vm._v(" "),
           _c(
             "div",

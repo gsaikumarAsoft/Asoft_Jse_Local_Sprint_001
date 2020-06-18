@@ -41,10 +41,52 @@ class FunctionSet
         //Print out the value we want.
         return $jsonDecoded[$field];
     }
-    function cancelOrder(){}
+    function cancelOrder($order)
+    {
+        $mytime = Carbon::now();
+        $cancel_cordid = "ORD" . $mytime->format('YmdH') . "N" . rand(100, 1000); //Create a New cancel order id
+
+        //Trading Account Information
+        $trading = BrokerTradingAccount::with('settlement_account')->find($order->trading_account_id)->first();
+
+        //Settlement Account Information
+        $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
+        $url = "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest";
+        $data = array(
+            'BeginString' => 'FIX.4.2',
+            'TargetCompID' => $trading->target_comp_id,
+            'SenderCompID' => $trading->sender_comp_id,
+            'SenderSubID' => $trading->trading_account_number,
+            'Host' => $trading->socket,
+            'OrderID' => $cancel_cordid,
+            "OrigClOrdID" => $order->clordid,
+            "OrderQty" => $order->quantity,
+            'BuyorSell' => $this->jsonStrip(json_decode($order->side, true), 'fix_value'),
+            "ClientID" => $trading->trading_account_number,
+            'Port' => (int) $trading->port,
+            'Symbol' => $this->jsonStrip(json_decode($order->symbol, true), 'text'),
+            'ClientID' => $trading->trading_account_number,
+            'AccountType' => 'CL',
+        );
+
+
+        $postdata = json_encode($data);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        // return $result;
+    }
     function createBrokerOrder($request, $local_broker_id, $status, $client_id)
     {
-        
+
 
         $type = json_decode($request->order_type); //Predefine Order Type For JSON ENCODE
 
@@ -83,6 +125,7 @@ class FunctionSet
         $broker_client_order->expiration_date = $request->expiration_date;
         $broker_client_order->time_in_force = $request->time_in_force;
         $broker_client_order->broker_client_id = $client_id;
+        $broker_client_order->trading_account_id = $request->client_trading_account;
         $broker_client_order->save();
 
         // Send customer order to FIX 4.2 Switch
@@ -98,7 +141,7 @@ class FunctionSet
             'SenderCompID' => $trading->sender_comp_id,
             'SenderSubID' => $trading->trading_account_number,
             'Host' => $trading->socket,
-            'Port' => (int)$trading->port,
+            'Port' => (int) $trading->port,
             // =======================================================================================
             // "TargetCompID" => "CIBC_TEST",
             // "SenderCompID" => "JSE_TST2",
@@ -117,7 +160,7 @@ class FunctionSet
 
 
         //Check if this is an iceberg order
-        if ($request->has('max_floor') && $request->has('display_range')){
+        if ($request->has('max_floor') && $request->has('display_range')) {
             $data['maxFloor'] = $request->max_floor;
             $data['displayRange'] = $request->display_range;
         }
@@ -154,7 +197,7 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
         curl_close($ch);
-        // return $result;
+      
         $fix_status = json_decode($result, true);
 
 
@@ -164,7 +207,6 @@ class FunctionSet
         } else {
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Unable To Place!']);
         }
-      
     }
     public function logExecution($request)
     {
@@ -535,20 +577,20 @@ class FunctionSet
         $total_reports = count($account);
         // return 
         // return $request;
-         //Store Execution reports for above sender_Sub_id to database before updating account balances
-         $this->logExecution($request);
+        //Store Execution reports for above sender_Sub_id to database before updating account balances
+        $this->logExecution($request);
 
 
-         //Find the very last exucution sequence number for this particular broker
-         $seq_last = DB::table('broker_client_order_execution_reports')->orderBy('id', 'desc')->limit(1)->get();
-     
+        //Find the very last exucution sequence number for this particular broker
+        $seq_last = DB::table('broker_client_order_execution_reports')->orderBy('id', 'desc')->limit(1)->get();
+
         // Check latest sequence number coming from the fix
         //  $incomingSeq =  $account[$total_reports]['seqNum'];     
 
         //  if($seq_last){
         //      return $seq_last[0]->seqNum.' = '.$incomingSeq;
         //  }
- 
+
         // iterate through all reports and update accounts as required
         foreach ($account as $key => $value) {
             $order_number =  $account[$key]['clOrdID'];
@@ -578,7 +620,7 @@ class FunctionSet
                     // Define the open order amount
                     $op_or = $bc->open_orders - ($quantity * $price);
                     $fil_or = $bc->filled_orders + ($quantity * $price);
-                    if ($array  ) {
+                    if ($array) {
                         $sa = $array[0];
                         $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
                         $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
@@ -622,7 +664,7 @@ class FunctionSet
 
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
-                                    ->update(['order_status' => 2]);
+                                    ->update(['order_status' => $o->order_status]);
                             }
                         }
                     }
