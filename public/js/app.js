@@ -72658,13 +72658,13 @@ __webpack_require__.r(__webpack_exports__);
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
         { text: "Sell", value: "Sell", fix_value: "2" },
-        { text: "Buy minus", value: "Buy minus", fix_value: "3" },
-        { text: "Sell plus", value: "Sell plus", fix_value: "4" },
-        { text: "Sell short", value: "Sell short", fix_value: "5" },
-        { text: "Sell short exempt", value: "Sell short ", fix_value: "6" },
-        { text: "Undisclosed", value: "Undisclosed", fix_value: "7" },
-        { text: "Cross", value: "Cross", fix_value: "8" },
-        { text: "Cross short", value: "Cross short", fix_value: "9" }
+        // { text: "Buy minus", value: "Buy minus", fix_value: "3" },
+        // { text: "Sell plus", value: "Sell plus", fix_value: "4" },
+        // { text: "Sell short", value: "Sell short", fix_value: "5" },
+        // { text: "Sell short exempt", value: "Sell short ", fix_value: "6" },
+        // { text: "Undisclosed", value: "Undisclosed", fix_value: "7" },
+        // { text: "Cross", value: "Cross", fix_value: "8" },
+        // { text: "Cross short", value: "Cross short", fix_value: "9" }
       ],
       order_types: [
         // { text: "Market", value: "Market", fix_value: "1" },
