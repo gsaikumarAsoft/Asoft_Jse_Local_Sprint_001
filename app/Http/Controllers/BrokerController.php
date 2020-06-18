@@ -286,7 +286,7 @@ class BrokerController extends Controller
         // return $settlement_available ."=". $order_value;
 
         $side = json_decode($request->side, true);
-
+        
         // If SIDE = BUY
         if ($side['fix_value'] === '1') {
             if ($settlement_available < $order_value) {
