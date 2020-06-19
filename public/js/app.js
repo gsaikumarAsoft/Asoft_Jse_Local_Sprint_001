@@ -72434,6 +72434,27 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -72882,7 +72903,8 @@ __webpack_require__.r(__webpack_exports__);
         { value: "ZMW", text: "ZMW:  Zambian Kwacha" },
         { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" }
       ],
-      nameState: null
+      nameState: null,
+      disabled: 0
     };
   },
   computed: {
@@ -72895,7 +72917,7 @@ __webpack_require__.r(__webpack_exports__);
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
-        // console.log(TIF.fix_value);
+        // console.log(TIF.fix_valu:disabled="validated == 1"e);
         // Show the Expiration date input for this order
         this.expiration = true;
       }
@@ -72911,9 +72933,27 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     brokerOrderHandler(o) {
-      console.log(o);
+      this.disabled = 1;
       this.order = {};
       this.order = o;
+
+      //Pre Select Client And Trading Accounts
+      var data = JSON.parse(this.orders);
+      var clients = data[0].clients;
+      var trading = data[0].trading;
+      let i, j;
+      for (i = 0; i < clients.length; i++) {
+        if (o.broker_client_id === clients[i].id) {
+          this.order.client_trading_account = clients[i].id;
+        }
+      }
+      for (j = 0; j < trading.length; j++) {
+        // console.log(trading[j].id);
+        if (parseInt(o.trading_account_id) === trading[j].id) {
+          this.order.trading_account = trading[j].id;
+        }
+      }
+      // =============================================================
       //Check if we already parsed to json if we didnt do so now.
       if (typeof o.time_in_force === "string") {
         // Parse stringified data from database back to json for viewing in the multiselect dropdown
@@ -73138,6 +73178,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     add() {
+      this.disabled = 0;
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
@@ -73167,11 +73208,10 @@ __webpack_require__.r(__webpack_exports__);
 
     destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`).then(response => {
-      this.$swal("Cancelled");
-      setTimeout(location.reload.bind(location), 1000);
-    });
-
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`).then(response => {
+        this.$swal("Cancelled");
+        setTimeout(location.reload.bind(location), 1000);
+      });
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
@@ -77635,7 +77675,8 @@ var render = function() {
                                       staticClass: "mb-3",
                                       attrs: {
                                         options:
-                                          _vm.broker_trading_account_options
+                                          _vm.broker_trading_account_options,
+                                        disabled: _vm.disabled == 1
                                       },
                                       scopedSlots: _vm._u([
                                         {
@@ -77701,7 +77742,8 @@ var render = function() {
                                         attrs: {
                                           options:
                                             _vm.client_trading_account_options
-                                              .trading_account
+                                              .trading_account,
+                                          disabled: _vm.disabled == 1
                                         },
                                         scopedSlots: _vm._u([
                                           {
@@ -77792,7 +77834,9 @@ var render = function() {
                                         disabled: "",
                                         id: "input-10",
                                         type: "text",
-                                        placeholder: "Enter Client Order Number"
+                                        placeholder:
+                                          "Enter Client Order Number",
+                                        disabled: 1 || false
                                       },
                                       model: {
                                         value: _vm.order.client_order_number,
@@ -77830,7 +77874,9 @@ var render = function() {
                                       attrs: {
                                         id: "input-1",
                                         type: "text",
-                                        placeholder: "Enter Market Order Number"
+                                        placeholder:
+                                          "Enter Market Order Number",
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.market_order_number,
@@ -77874,7 +77920,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a symbol",
                                         label: "text",
-                                        options: _vm.symbols
+                                        options: _vm.symbols,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.symbol,
@@ -77908,7 +77955,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a currency",
                                         label: "text",
-                                        options: _vm.currencies
+                                        options: _vm.currencies,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.currency,
@@ -77946,7 +77994,8 @@ var render = function() {
                                           attrs: {
                                             id: "value-input1",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.value,
@@ -77987,7 +78036,8 @@ var render = function() {
                                           attrs: {
                                             id: "value-input",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.stop_price,
@@ -78044,7 +78094,8 @@ var render = function() {
                                         _c("b-form-input", {
                                           attrs: {
                                             id: "quantity-input",
-                                            state: _vm.nameState
+                                            state: _vm.nameState,
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.quantity,
@@ -78089,7 +78140,8 @@ var render = function() {
                                           attrs: {
                                             id: "price-input",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.price,
@@ -78126,7 +78178,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a Side",
                                         label: "text",
-                                        options: _vm.side_options
+                                        options: _vm.side_options,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.side,
@@ -78161,7 +78214,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select an Order Type",
                                         label: "text",
-                                        options: _vm.order_types
+                                        options: _vm.order_types,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.order_type,
@@ -78209,7 +78263,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select an Instruction",
                                         label: "text",
-                                        options: _vm.handling_options
+                                        options: _vm.handling_options,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.handling_instructions,
@@ -78251,7 +78306,8 @@ var render = function() {
                                         order:
                                           "order_option_inputs[][option_type]",
                                         label: "text",
-                                        options: _vm.time_in_force
+                                        options: _vm.time_in_force,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.time_in_force,
@@ -78293,7 +78349,10 @@ var render = function() {
                                 _vm._v(" "),
                                 _c("b-form-datepicker", {
                                   staticClass: "mb-2",
-                                  attrs: { id: "example-datepicker" },
+                                  attrs: {
+                                    id: "example-datepicker",
+                                    disabled: _vm.disabled == 1
+                                  },
                                   model: {
                                     value: _vm.order.expiration_date,
                                     callback: function($$v) {
@@ -78347,7 +78406,8 @@ var render = function() {
                                           attrs: {
                                             id: "display_range-input",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.display_range,
@@ -78393,7 +78453,8 @@ var render = function() {
                                           attrs: {
                                             id: "max_floor-input",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.max_floor,

@@ -39,6 +39,7 @@
                       v-model="order.trading_account"
                       :options="broker_trading_account_options"
                       class="mb-3"
+                      :disabled="disabled == 1"
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
@@ -64,6 +65,7 @@
                       v-model="order.client_trading_account"
                       :options="client_trading_account_options.trading_account"
                       class="mb-3"
+                      :disabled="disabled == 1"
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
@@ -94,6 +96,7 @@
                       v-model="order.client_order_number"
                       type="text"
                       placeholder="Enter Client Order Number"
+                      :disabled="1 || 3"
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -108,6 +111,7 @@
                       v-model="order.market_order_number"
                       type="text"
                       placeholder="Enter Market Order Number"
+                      :disabled="disabled == 1"
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -124,6 +128,7 @@
                       v-model="order.symbol"
                       label="text"
                       :options="symbols"
+                      :disabled="disabled == 1"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -139,6 +144,7 @@
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
+                      :disabled="disabled == 1"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -154,6 +160,7 @@
                         v-model="order.value"
                         :state="nameState"
                         type="number"
+                        :disabled="disabled == 1"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -170,6 +177,7 @@
                         v-model="order.stop_price"
                         :state="nameState"
                         type="number"
+                        :disabled="disabled == 1"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -201,7 +209,12 @@
                     invalid-feedback="Quantity is required"
                   >
                     <b-input-group size="md">
-                      <b-form-input id="quantity-input" v-model="order.quantity" :state="nameState"></b-form-input>
+                      <b-form-input
+                        id="quantity-input"
+                        v-model="order.quantity"
+                        :state="nameState"
+                        :disabled="disabled == 1"
+                      ></b-form-input>
                     </b-input-group>
                   </b-form-group>
                 </b-col>
@@ -217,6 +230,7 @@
                         v-model="order.price"
                         :state="nameState"
                         type="number"
+                        :disabled="disabled == 1"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -232,6 +246,7 @@
                       v-model="order.side"
                       label="text"
                       :options="side_options"
+                      :disabled="disabled == 1"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -246,6 +261,7 @@
                       v-model="order.order_type"
                       label="text"
                       :options="order_types"
+                      :disabled="disabled == 1"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -264,6 +280,7 @@
                       v-model="order.handling_instructions"
                       label="text"
                       :options="handling_options"
+                      :disabled="disabled == 1"
                     ></multiselect>
                     <!-- <b-form-select
                       v-model="order.local_broker"
@@ -311,6 +328,7 @@
                       order="order_option_inputs[][option_type]"
                       label="text"
                       :options="time_in_force"
+                      :disabled="disabled == 1"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -320,6 +338,7 @@
                     id="example-datepicker"
                     v-model="order.expiration_date"
                     class="mb-2"
+                    :disabled="disabled == 1"
                   ></b-form-datepicker>
                 </b-col>
               </b-row>
@@ -341,6 +360,7 @@
                         v-model="order.display_range"
                         :state="nameState"
                         type="number"
+                        :disabled="disabled == 1"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -359,6 +379,7 @@
                         v-model="order.max_floor"
                         :state="nameState"
                         type="number"
+                        :disabled="disabled == 1"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -921,7 +942,8 @@ export default {
         { value: "ZMW", text: "ZMW:  Zambian Kwacha" },
         { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" }
       ],
-      nameState: null
+      nameState: null,
+      disabled: 0
     };
   },
   computed: {
@@ -934,7 +956,7 @@ export default {
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
-        // console.log(TIF.fix_value);
+        // console.log(TIF.fix_valu:disabled="validated == 1"e);
         // Show the Expiration date input for this order
         this.expiration = true;
       }
@@ -950,9 +972,27 @@ export default {
       }
     },
     brokerOrderHandler(o) {
-      console.log(o);
+      this.disabled = 1;
       this.order = {};
       this.order = o;
+
+      //Pre Select Client And Trading Accounts
+      var data = JSON.parse(this.orders);
+      var clients = data[0].clients;
+      var trading = data[0].trading;
+      let i, j;
+      for (i = 0; i < clients.length; i++) {
+        if (o.broker_client_id === clients[i].id) {
+          this.order.client_trading_account = clients[i].id;
+        }
+      }
+      for (j = 0; j < trading.length; j++) {
+        // console.log(trading[j].id);
+        if (parseInt(o.trading_account_id) === trading[j].id) {
+          this.order.trading_account = trading[j].id;
+        }
+      }
+      // =============================================================
       //Check if we already parsed to json if we didnt do so now.
       if (typeof o.time_in_force === "string") {
         // Parse stringified data from database back to json for viewing in the multiselect dropdown
@@ -1177,6 +1217,7 @@ export default {
       });
     },
     add() {
+      this.disabled = 0;
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
@@ -1206,11 +1247,10 @@ export default {
 
     destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-    axios.delete(`destroy-broker-client-order/${id}`).then(response => {
-      this.$swal("Cancelled");
-      setTimeout(location.reload.bind(location), 1000);
-    });
-
+      axios.delete(`destroy-broker-client-order/${id}`).then(response => {
+        this.$swal("Cancelled");
+        setTimeout(location.reload.bind(location), 1000);
+      });
     },
     handleJSEOrder() {
       // Exit when the form isn't valid

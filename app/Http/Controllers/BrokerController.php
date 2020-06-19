@@ -224,7 +224,7 @@ class BrokerController extends Controller
         //     ->get();
         $user = auth()->user();
         // return $user;
-        $orders = LocalBroker::with('user', 'order')->where('user_id', $user['id'])->get();
+        $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->get();
         // return $orders;
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
         // return $broker_traders;
