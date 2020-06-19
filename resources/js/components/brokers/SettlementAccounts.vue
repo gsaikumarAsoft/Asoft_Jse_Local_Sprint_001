@@ -280,6 +280,8 @@ export default {
     },
     settlmentAccountHandler(b) {
       // console.log(b);
+      this.settlement_account = {};
+      console.log(b);
       this.settlement_account = b;
       this.$swal({
         title: "",
@@ -317,7 +319,7 @@ export default {
       //   // this.broker_settlement_account = broker_settlement_accounts;
       //   // console.log(this.broker_settlement_account);
       // });
-      setTimeout(location.reload.bind(location));
+      // setTimeout(location.reload.bind(location));
     },
     storeBrokerSettlementAccount(account) {
       // console.log(account);
@@ -345,28 +347,28 @@ export default {
     }
   },
   mounted() {
-    // axios.get("../local-brokers").then(response => {
-    //   let local_brokers = response.data;
-    //   let i;
-    //   for (i = 0; i < local_brokers.length; i++) {
-    //     this.local_brokers.push({
-    //       text: local_brokers[i].user.name,
-    //       value: local_brokers[i].user.id
-    //     });
-    //   }
-    // });
-    // axios.get("../foreign-brokers").then(response => {
-    //   let foreign_brokers = response.data;
-    //   let i;
-    //   for (i = 0; i < foreign_brokers.length; i++) {
-    //     // console.log(foreign_brokers[i].user );
-    //     let data = foreign_brokers[i].user;
-    //     this.foreign_brokers.push({
-    //       text: data.name,
-    //       value: data.id
-    //     });
-    //   }
-    // });
+    axios.get("local-brokers").then(response => {
+      let local_brokers = response.data;
+      let i;
+      for (i = 0; i < local_brokers.length; i++) {
+        this.local_brokers.push({
+          text: local_brokers[i].user.name,
+          value: local_brokers[i].user.id
+        });
+      }
+    });
+    axios.get("foreign-broker-list").then(response => {
+      let foreign_brokers = response.data;
+      let i;
+      for (i = 0; i < foreign_brokers.length; i++) {
+        // console.log(foreign_brokers[i].user );
+        let data = foreign_brokers[i].user;
+        this.foreign_brokers.push({
+          text: data.name,
+          value: data.id
+        });
+      }
+    });
     // this.getSettlementList();
   }
 };
