@@ -197,7 +197,7 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
         curl_close($ch);
-      
+        // return $result;
         $fix_status = json_decode($result, true);
 
 
@@ -413,6 +413,7 @@ class FunctionSet
                 ]
 
             );
+        } else {
             //Notify Local Broker that 
             // For future Sprint
             // $broker_trader = new User();
@@ -598,18 +599,21 @@ class FunctionSet
             $price = $account[$key]['price'];
             $quantity = $account[$key]['orderQty'];
             $status = $account[$key]['status'];
+            // return $order_number;
             $jcsd = str_replace('JCSD', "", $account[$key]['qTradeacc']);
             // Define The broker client 
             // $broker_client = BrokerClientOrder::where('client_order_number', $order_number)->first();
             $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
 
             //Find the broker order linked to this execution report (account number)
-            $order = BrokerClientOrder::where('client_order_number', $order_number)->first();
+            $order = BrokerClientOrder::where('clordid', $order_number)->first();
+
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
             $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $sender_sub_id)
                 ->select('broker_trading_accounts.broker_settlement_account_id as trading_id',  'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
                 ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
                 ->get();
+
             $array = json_decode(json_encode($settlement_account), true);
             if ($order && $broker_client) {
                 // return $order;
@@ -625,7 +629,9 @@ class FunctionSet
                         $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
                         $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
                         //If offer is (Rejected, Cancelled, Expired)
-                        if ($status == "C" || $status == "4" || $status == "8") {
+                        // return $status;
+                        if ($status === "C" || $status === "4" || $status === "8") {
+
                             // Check if the order is open
                             if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" &&  $o->order_status != "2") {
 
@@ -635,7 +641,7 @@ class FunctionSet
                                     ->where('id', $od->id)
                                     ->update(['order_status' => $status]);
                             }
-                        } else if ($status == "1") {
+                        } else if ($status === "1") {
 
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
                             if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
@@ -649,6 +655,7 @@ class FunctionSet
                                     ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
                             }
                         } else {
+
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
                             if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
                                 //The order has been filled
@@ -664,7 +671,8 @@ class FunctionSet
 
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
-                                    ->update(['order_status' => $o->order_status]);
+                                    // ->update(['order_status' => $o->order_status]);
+                                    ->update(['order_status' => 2]);
                             }
                         }
                     }

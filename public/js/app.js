@@ -72562,7 +72562,7 @@ __webpack_require__.r(__webpack_exports__);
             } else if (value === "8") {
               return "Rejected";
             } else {
-              return "Submitted";
+              return value;
             }
           }
         }

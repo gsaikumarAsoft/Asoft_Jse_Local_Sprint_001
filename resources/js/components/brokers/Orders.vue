@@ -601,7 +601,7 @@ export default {
             } else if (value === "8") {
               return "Rejected";
             } else {
-              return "Submitted";
+              return value;
             }
           }
         }
