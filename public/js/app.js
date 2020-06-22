@@ -72455,6 +72455,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -72980,7 +72981,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(result => {
         if (result.value) {
           this.$bvModal.show("jse-new-order");
-          this.modalTitle = `Updating Order ${o.clordid}`;
+          this.modalTitle = `Viewing Order ${o.clordid}`;
         }
         if (result.dismiss === "cancel") {
           this.destroy(o.clordid);
@@ -74949,6 +74950,165 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -74958,6 +75118,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
+      expiration: false,
+      disabled: 0,
+      modalTitle: 'New Order',
       permissions: [],
       order_template_data: [],
       file: "",
@@ -74976,6 +75139,7 @@ __webpack_require__.r(__webpack_exports__);
       fields: [
         // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
+        { key: "clordid", label: "Order#", sortable: true },
         {
           key: "order_type.text",
           label: "Order Type",
@@ -75035,20 +75199,49 @@ __webpack_require__.r(__webpack_exports__);
           label: "Side",
           sortable: true,
           formatter: (value, key, item) => {
-  if(value){
-            var data = JSON.parse(item.side);
-            var s = data;
+            if (value) {
+              var data = JSON.parse(item.side);
+              var s = data;
 
-            return s.text;
-  }  else{
-    return "N/A";
-  }
+              return s.text;
+            } else {
+              return "N/A";
+            }
             // return symbol.text;
           }
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
-        { key: "order_status", sortable: true }
+        {
+          key: "order_status",
+          sortable: true,
+          formatter: (value, key, item) => {
+            // return value;
+            if (value === "0") {
+              return "New";
+            } else if (value === "1") {
+              return "Partially Filled";
+            } else if (value === "2") {
+              return "Filled";
+            } else if (value === "4") {
+              return "Cancelled";
+            } else if (value === "5") {
+              return "Replaced";
+            } else if (value === "C") {
+              return "Expired";
+            } else if (value === "Z") {
+              return "Private";
+            } else if (value === "U") {
+              return "Unplaced; order is not in the orderbook (Nasdaq defined)";
+            } else if (value === "x") {
+              return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+            } else if (value === "8") {
+              return "Rejected";
+            } else {
+              return value;
+            }
+          }
+        }
         // { key: "foreign_broker", sortable: true }
       ],
       broker_client_orders: '',
@@ -75377,8 +75570,27 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     brokerOrderHandler(o) {
+      this.disabled = 1;
       this.order = {};
       this.order = o;
+
+      // //Pre Select Client And Trading Accounts
+      // var data = JSON.parse(this.orders);
+      // var clients = data[0].clients;
+      // var trading = data[0].trading;
+      // let i, j;
+      // for (i = 0; i < clients.length; i++) {
+      //   if (o.broker_client_id === clients[i].id) {
+      //     this.order.client_trading_account = clients[i].id;
+      //   }
+      // }
+      // for (j = 0; j < trading.length; j++) {
+      //   // console.log(trading[j].id);
+      //   if (parseInt(o.trading_account_id) === trading[j].id) {
+      //     this.order.trading_account = trading[j].id;
+      //   }
+      // }
+      // // =============================================================
       //Check if we already parsed to json if we didnt do so now.
       if (typeof o.time_in_force === "string") {
         // Parse stringified data from database back to json for viewing in the multiselect dropdown
@@ -75390,24 +75602,22 @@ __webpack_require__.r(__webpack_exports__);
         this.order.order_type = JSON.parse(JSON.parse(o.order_type));
         this.order.time_in_force = JSON.parse(o.time_in_force);
       }
-      // this.$refs.selectedOrder.clearSelected();
-      // =============================================================================================
+      // this.$refs.selectedOrder.clearSelected();==============================================
       this.$swal({
-        title: "",
-        icon: "info",
-        html: `Select Ok to View Or Cancel the following order`,
-        showCloseButton: true,
+        title: o.clordid,
+        text: "The Options for the current order are.",
+        icon: "question",
         showCancelButton: true,
-        // focusConfirm: true,
-        cancelButtonColor: "#DD6B55",
-        confirmButtontext: "View",
-        confirmButtonAriaLabel: "cancel",
-        cancelButtontext: "Cancel Order",
-        cancelButtonAriaLabel: "cancel"
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "View Order",
+        cancelButtonText: "Cancel Order",
+        footer: "<a href='orders' >Exit</a>"
       }).then(result => {
         if (result.value) {
           if (this.permissions.indexOf("update-broker-order") !== -1) {
             this.$bvModal.show("jse-new-order");
+            this.modalTitle = `Viewing Order ${o.clordid}`;
           } else {
             this.$swal(
               "Oops!",
@@ -75543,24 +75753,51 @@ __webpack_require__.r(__webpack_exports__);
       // });
     },
     createBrokerClientOrder(broker) {
+      //Notes:
+
+      this.$swal
+        .fire({
+          title: "Creating Client Order",
+          html: "One moment while we setup the current order",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        })
+        .then(result => {});
+
+      // •	The “Price” indicates the highest price to be used to buy the stocks.
+      // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
+      // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
       if (!broker.trading_account || !broker.client_trading_account) {
         this.$swal(
-          "You need to select Both a Trading Account & Client Account to continue"
+          "You need to select a Trading Account & Client Account to continue"
         );
       } else {
-        this.$swal("Processing your order..");
-        axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("store-operator-client-order", broker).then(response => {
-          let data = response.data;
-          let valid = data.isvalid;
-          if (valid) {
-            this.$swal(data.errors);
-            this.callFix();
-            setTimeout(location.reload.bind(location), 2000);
-          } else {
-            this.$swal(data.errors);
-            setTimeout(location.reload.bind(location), 2000);
-          }
-        });
+        axios__WEBPACK_IMPORTED_MODULE_2___default.a
+          .post("store-operator-client-order", broker)
+          .then(response => {
+            let data = response.data;
+            let valid = data.isvalid;
+            console.log(data);
+            if (valid) {
+              console.log(data);
+              this.$swal(data.errors);
+              setTimeout(location.reload.bind(location), 2000);
+            } else {
+              this.$swal(data.errors);
+              setTimeout(location.reload.bind(location), 2000);
+            }
+          })
+          .catch(error => {
+            var s = error.response.data.message;
+            var field = s.match(/'([^']+)'/)[1];
+            if (error.response.data.message.includes("cannot be null")) {
+              this.$swal(
+                `When creating an order ${field} cannot be null. Please try creating the order again.`
+              );
+            }
+          });
       }
     },
     callFix() {
@@ -75638,7 +75875,26 @@ __webpack_require__.r(__webpack_exports__);
         });
     },
     add() {
+      this.disabled = 0;
+      this.modalTitle = "New Order";
       this.create = true;
+      var dt = new Date();
+      console.log(dt);
+
+      // The “OrderID” must be unique per request submitted.
+      this.order.client_order_number =
+        "ORD" +
+        dt.getFullYear() +
+        "" +
+        (dt.getMonth() + 1).toString().padStart(2, "0") +
+        "" +
+        dt
+          .getDate()
+          .toString()
+          .padStart(2, "0") +
+        "N" +
+        ("" + Math.random()).substring(2, 5);
+      // ===============================================/
     },
     addOption(index) {
       // this.order_option_inputs.push({ option_type: "", option:_ value:"" });
@@ -75648,65 +75904,18 @@ __webpack_require__.r(__webpack_exports__);
       this.order_option_inputs.splice(index, 1);
     },
     destroy(id) {
-      this.$swal("Proccessing Order Cancellation");
-      // axios.delete(`destroy-broker-client-order/${id}`).then(response => {});
-      let order_sample = {
-        BeginString: "FIX.4.2",
-
-        TargetCompID: "CIBC_TST",
-
-        SenderCompID: "JSE_TST",
-
-        SenderSubID: "JMMB",
-
-        Host: "10.246.7.212",
-
-        Port: 27102,
-
-        UserName: "FC4",
-
-        Password: "password",
-
-        OrderID: "JMMB000004",
-
-        BuyorSell: "1",
-
-        OrdType: "4",
-
-        OrderQty: "2",
-
-        TimeInForce: "6",
-
-        Symbol: "AAPL",
-
-        Account: "1466267",
-
-        Price: "224.99",
-
-        Side: "5",
-
-        Strategy: 1000,
-
-        StopPx: 230.0,
-
-        ExDestination: "CNQ",
-
-        ClientID: "JMMB_TRADER1"
-      };
-
-      console.log(order_sample);
-
-      // Fix Wrapper
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/OrderManagement/OrderCancelRequest",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then(response => {
-          this.$swal("Order Cancelled");
-        });
+      // this.$swal("Proccessing Order Cancellation");
+      // // Fix Wrapper
+      // axios
+      //   .post(
+      //     "https://cors-anywhere.herokuapp.com/" +
+      //      this.$fixApi+"api/OrderManagement/OrderCancelRequest",
+      //     order_sample,
+      //     { crossDomain: true }
+      //   )
+      //   .then(response => {
+      //     this.$swal("Order Cancelled");
+      //   });
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
@@ -77639,6 +77848,7 @@ var render = function() {
               {
                 ref: "modal",
                 attrs: {
+                  "hide-footer": !_vm.create,
                   id: "jse-new-order",
                   size: "xl",
                   title: _vm.modalTitle
@@ -79740,7 +79950,12 @@ var render = function() {
               "b-modal",
               {
                 ref: "modal",
-                attrs: { id: "jse-new-order", size: "xl", title: "New Order" },
+                attrs: {
+                  "hide-footer": !_vm.create,
+                  id: "jse-new-order",
+                  size: "xl",
+                  title: _vm.modalTitle
+                },
                 on: { ok: _vm.handleJSEOrder, hidden: _vm.resetModal }
               },
               [
@@ -79773,7 +79988,8 @@ var render = function() {
                                       staticClass: "mb-3",
                                       attrs: {
                                         options:
-                                          _vm.broker_trading_account_options
+                                          _vm.broker_trading_account_options,
+                                        disabled: _vm.disabled == 1
                                       },
                                       scopedSlots: _vm._u([
                                         {
@@ -79782,12 +79998,7 @@ var render = function() {
                                             return [
                                               _c(
                                                 "b-form-select-option",
-                                                {
-                                                  attrs: {
-                                                    value: null,
-                                                    disabled: ""
-                                                  }
-                                                },
+                                                { attrs: { value: null } },
                                                 [
                                                   _vm._v(
                                                     "\n                        -- Please select a Trading\n                        Account--\n                      "
@@ -79839,7 +80050,8 @@ var render = function() {
                                         attrs: {
                                           options:
                                             _vm.client_trading_account_options
-                                              .trading_account
+                                              .trading_account,
+                                          disabled: _vm.disabled == 1
                                         },
                                         scopedSlots: _vm._u([
                                           {
@@ -79848,12 +80060,7 @@ var render = function() {
                                               return [
                                                 _c(
                                                   "b-form-select-option",
-                                                  {
-                                                    attrs: {
-                                                      value: null,
-                                                      disabled: ""
-                                                    }
-                                                  },
+                                                  { attrs: { value: null } },
                                                   [
                                                     _vm._v(
                                                       "\n                        -- Please select a Client\n                        Account--\n                      "
@@ -79929,7 +80136,9 @@ var render = function() {
                                       attrs: {
                                         id: "input-10",
                                         type: "text",
-                                        placeholder: "Enter Client Order Number"
+                                        placeholder:
+                                          "Enter Client Order Number",
+                                        disabled: 1 || false
                                       },
                                       model: {
                                         value: _vm.order.client_order_number,
@@ -79967,7 +80176,9 @@ var render = function() {
                                       attrs: {
                                         id: "input-1",
                                         type: "text",
-                                        placeholder: "Enter Market Order Number"
+                                        placeholder:
+                                          "Enter Market Order Number",
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.market_order_number,
@@ -80011,7 +80222,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a symbol",
                                         label: "text",
-                                        options: _vm.symbols
+                                        options: _vm.symbols,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.symbol,
@@ -80045,7 +80257,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a currency",
                                         label: "text",
-                                        options: _vm.currencies
+                                        options: _vm.currencies,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.currency,
@@ -80083,7 +80296,8 @@ var render = function() {
                                           attrs: {
                                             id: "value-input1",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.value,
@@ -80124,7 +80338,8 @@ var render = function() {
                                           attrs: {
                                             id: "value-input",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.stop_price,
@@ -80181,7 +80396,8 @@ var render = function() {
                                         _c("b-form-input", {
                                           attrs: {
                                             id: "quantity-input",
-                                            state: _vm.nameState
+                                            state: _vm.nameState,
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.quantity,
@@ -80226,7 +80442,8 @@ var render = function() {
                                           attrs: {
                                             id: "price-input",
                                             state: _vm.nameState,
-                                            type: "number"
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
                                           },
                                           model: {
                                             value: _vm.order.price,
@@ -80263,7 +80480,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select a Side",
                                         label: "text",
-                                        options: _vm.side_options
+                                        options: _vm.side_options,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.side,
@@ -80298,7 +80516,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select an Order Type",
                                         label: "text",
-                                        options: _vm.order_types
+                                        options: _vm.order_types,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.order_type,
@@ -80346,7 +80565,8 @@ var render = function() {
                                       attrs: {
                                         placeholder: "Select an Instruction",
                                         label: "text",
-                                        options: _vm.handling_options
+                                        options: _vm.handling_options,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.handling_instructions,
@@ -80372,34 +80592,6 @@ var render = function() {
                               "b-col",
                               [
                                 _c(
-                                  "label",
-                                  { attrs: { for: "example-datepicker" } },
-                                  [_vm._v("Expiration Date")]
-                                ),
-                                _vm._v(" "),
-                                _c("b-form-datepicker", {
-                                  staticClass: "mb-2",
-                                  attrs: { id: "example-datepicker" },
-                                  model: {
-                                    value: _vm.order.expiration_date,
-                                    callback: function($$v) {
-                                      _vm.$set(
-                                        _vm.order,
-                                        "expiration_date",
-                                        $$v
-                                      )
-                                    },
-                                    expression: "order.expiration_date"
-                                  }
-                                })
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
                                   "b-form-group",
                                   {
                                     attrs: {
@@ -80416,7 +80608,8 @@ var render = function() {
                                         order:
                                           "order_option_inputs[][option_type]",
                                         label: "text",
-                                        options: _vm.time_in_force
+                                        options: _vm.time_in_force,
+                                        disabled: _vm.disabled == 1
                                       },
                                       model: {
                                         value: _vm.order.time_in_force,
@@ -80435,7 +80628,159 @@ var render = function() {
                                 )
                               ],
                               1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-col",
+                              {
+                                directives: [
+                                  {
+                                    name: "show",
+                                    rawName: "v-show",
+                                    value: _vm.expiration,
+                                    expression: "expiration"
+                                  }
+                                ]
+                              },
+                              [
+                                _c(
+                                  "label",
+                                  { attrs: { for: "example-datepicker" } },
+                                  [_vm._v("Expiration Date")]
+                                ),
+                                _vm._v(" "),
+                                _c("b-form-datepicker", {
+                                  staticClass: "mb-2",
+                                  attrs: {
+                                    id: "example-datepicker",
+                                    disabled: _vm.disabled == 1
+                                  },
+                                  model: {
+                                    value: _vm.order.expiration_date,
+                                    callback: function($$v) {
+                                      _vm.$set(
+                                        _vm.order,
+                                        "expiration_date",
+                                        $$v
+                                      )
+                                    },
+                                    expression: "order.expiration_date"
+                                  }
+                                })
+                              ],
+                              1
                             )
+                          ],
+                          1
+                        )
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "b-container",
+                      { staticClass: "bv-example-row" },
+                      [
+                        _c("label", [_vm._v("Iceberg Options")]),
+                        _vm._v(" "),
+                        _c(
+                          "b-row",
+                          [
+                            _c(
+                              "b-col",
+                              [
+                                _c(
+                                  "b-form-group",
+                                  {
+                                    attrs: {
+                                      label: "Display Range",
+                                      "label-for": "order-input",
+                                      "invalid-feedback":
+                                        "Display Range is required"
+                                    }
+                                  },
+                                  [
+                                    _c(
+                                      "b-input-group",
+                                      { attrs: { size: "md", prepend: "+-" } },
+                                      [
+                                        _c("b-form-input", {
+                                          attrs: {
+                                            id: "display_range-input",
+                                            state: _vm.nameState,
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
+                                          },
+                                          model: {
+                                            value: _vm.order.display_range,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "display_range",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "order.display_range"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-col",
+                              [
+                                _c(
+                                  "b-form-group",
+                                  {
+                                    attrs: {
+                                      label: "Max Floor",
+                                      "label-for": "order-input",
+                                      "invalid-feedback":
+                                        "Max Floor is required"
+                                    }
+                                  },
+                                  [
+                                    _c(
+                                      "b-input-group",
+                                      { attrs: { size: "md", prepend: "^" } },
+                                      [
+                                        _c("b-form-input", {
+                                          attrs: {
+                                            id: "max_floor-input",
+                                            state: _vm.nameState,
+                                            type: "number",
+                                            disabled: _vm.disabled == 1
+                                          },
+                                          model: {
+                                            value: _vm.order.max_floor,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "max_floor",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "order.max_floor"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c("b-col")
                           ],
                           1
                         )
@@ -80474,11 +80819,7 @@ var render = function() {
                         modifiers: { "jse-new-order": true }
                       }
                     ],
-                    on: {
-                      click: function($event) {
-                        _vm.create = true
-                      }
-                    }
+                    on: { click: _vm.add }
                   },
                   [_vm._v("Create New Order")]
                 )

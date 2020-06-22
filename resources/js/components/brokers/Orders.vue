@@ -19,6 +19,7 @@
         ></b-table>
         <div v-if="!create"></div>
         <b-modal
+        :hide-footer="!create"
           id="jse-new-order"
           size="xl"
           ref="modal"
@@ -1019,7 +1020,7 @@ export default {
       }).then(result => {
         if (result.value) {
           this.$bvModal.show("jse-new-order");
-          this.modalTitle = `Updating Order ${o.clordid}`;
+          this.modalTitle = `Viewing Order ${o.clordid}`;
         }
         if (result.dismiss === "cancel") {
           this.destroy(o.clordid);
