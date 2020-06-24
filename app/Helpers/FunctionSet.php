@@ -207,7 +207,7 @@ class FunctionSet
 
         $fix_status = json_decode($result, true);
 
-
+        
         if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
             $this->LogActivity->addToLog('Order Successfull');
             $this->executionBalanceUpdate($trading->trading_account_number); //BARITA to be changed to any subsender id that comes into the application later
@@ -223,32 +223,36 @@ class FunctionSet
     public function logExecution($request)
     {
         $execution_report = $request['executionReports'];
-        BrokerOrderExecutionReport::truncate();
+        // BrokerOrderExecutionReport::truncate();
         foreach ($execution_report as $report) {
             $clients[] = $report;
 
-            $broker_order_execution_report = new BrokerOrderExecutionReport();
-            $broker_order_execution_report->clOrdID = $report['clOrdID'];
-            $broker_order_execution_report->orderID = $report['orderID'];
-            $broker_order_execution_report->text = $report['text'];
-            $broker_order_execution_report->ordRejRes = $report['ordRejRes'];
-            $broker_order_execution_report->status = $report['status'];
-            $broker_order_execution_report->buyorSell = $report['buyorSell'];
-            $broker_order_execution_report->securitySubType = 0;
-            $broker_order_execution_report->time = $report['time'];
-            $broker_order_execution_report->ordType = $report['ordType'];
-            $broker_order_execution_report->orderQty = $report['orderQty'];
-            $broker_order_execution_report->timeInForce = $report['timeInForce'];
-            $broker_order_execution_report->symbol = $report['symbol'];
-            $broker_order_execution_report->qTradeacc = $report['qTradeacc'];
-            $broker_order_execution_report->price = $report['price'];
-            $broker_order_execution_report->stopPx = $report['stopPx'];
-            $broker_order_execution_report->execType = $report['execType'];
-            $broker_order_execution_report->senderSubID = $report['senderSubID'];
-            $broker_order_execution_report->seqNum = $report['seqNum'];
-            $broker_order_execution_report->sendingTime = $report['sendingTime'];
-            $broker_order_execution_report->messageDate = $report['messageDate'];
-            $broker_order_execution_report->save();
+            $broker_order_execution_report = BrokerOrderExecutionReport::updateOrCreate(
+                ['clOrdID' => $report['clOrdID'] ],
+                ['orderID' => $report['orderID'], 'text' => $report['text'], 'ordRejRes' => $report['ordRejRes'], 'status' => $report['status'],'buyorSell' => $report['buyorSell'],'securitySubType' => 0,'time' => $report['time'],'ordType' => $report['ordType'],'orderQty' => $report['orderQty'], 'timeInForce' => $report['timeInForce'], 'symbol' => $report['symbol'], 'qTradeacc' => $report['qTradeacc'], 'price' => $report['price'], 'stopPx' => $report['stopPx'], 'execType' => $report['execType'], 'senderSubID' => $report['senderSubID'], 'seqNum' => $report['seqNum'], 'sendingTime' => $report['sendingTime'], 'messageDate' => $report['messageDate'] ]
+            );
+            // $broker_order_execution_report = new BrokerOrderExecutionReport();
+            // $broker_order_execution_report->clOrdID = $report['clOrdID'];
+            // $broker_order_execution_report->orderID = $report['orderID'];
+            // $broker_order_execution_report->text = $report['text'];
+            // $broker_order_execution_report->ordRejRes = $report['ordRejRes'];
+            // $broker_order_execution_report->status = $report['status'];
+            // $broker_order_execution_report->buyorSell = $report['buyorSell'];
+            // $broker_order_execution_report->securitySubType = 0;
+            // $broker_order_execution_report->time = $report['time'];
+            // $broker_order_execution_report->ordType = $report['ordType'];
+            // $broker_order_execution_report->orderQty = $report['orderQty'];
+            // $broker_order_execution_report->timeInForce = $report['timeInForce'];
+            // $broker_order_execution_report->symbol = $report['symbol'];
+            // $broker_order_execution_report->qTradeacc = $report['qTradeacc'];
+            // $broker_order_execution_report->price = $report['price'];
+            // $broker_order_execution_report->stopPx = $report['stopPx'];
+            // $broker_order_execution_report->execType = $report['execType'];
+            // $broker_order_execution_report->senderSubID = $report['senderSubID'];
+            // $broker_order_execution_report->seqNum = $report['seqNum'];
+            // $broker_order_execution_report->sendingTime = $report['sendingTime'];
+            // $broker_order_execution_report->messageDate = $report['messageDate'];
+            // $broker_order_execution_report->save();
         }
     }
     function defineLocalBroker($id)
@@ -589,7 +593,7 @@ class FunctionSet
         $account = $request['executionReports'];
         $total_reports = count($account);
         // return 
-        // return $request;
+
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
 
