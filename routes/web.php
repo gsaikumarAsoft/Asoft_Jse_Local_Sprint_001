@@ -104,7 +104,7 @@ Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Midd
     Route::get('/execution', 'BrokerController@execution');
     Route::post('/execution-report', 'BrokerController@logExecution');
     Route::get('/approvals', 'BrokerController@approvals');
-    // Route::post('/store-broker-client-order', "BrokerController@clientOrder");
+    Route::post('/store-broker-client-order', "BrokerController@clientOrder");
     Route::delete('/destroy-broker-client-order/{id}', "BrokerController@destroyOrder");
     Route::post('/store-broker', "UserController@store");
     Route::delete('/user-broker-delete/{id}', 'UserController@destroy');
