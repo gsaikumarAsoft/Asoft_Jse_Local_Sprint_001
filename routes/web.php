@@ -104,7 +104,7 @@ Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Midd
     Route::get('/execution', 'BrokerController@execution');
     Route::post('/execution-report', 'BrokerController@logExecution');
     Route::get('/approvals', 'BrokerController@approvals');
-    Route::post('/store-broker-client-order', "BrokerController@clientOrder");
+    // Route::post('/store-broker-client-order', "BrokerController@clientOrder");
     Route::delete('/destroy-broker-client-order/{id}', "BrokerController@destroyOrder");
     Route::post('/store-broker', "UserController@store");
     Route::delete('/user-broker-delete/{id}', 'UserController@destroy');
@@ -118,6 +118,7 @@ Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Midd
 Route::group(['prefix' => '/operator', 'middleware' => ['App\Http\Middleware\LocalBrokerOperatorMiddleware']], function () {
     Route::get('/', "OperatorController@index");
     Route::get('/clients', 'OperatorController@clients');
+    Route::get('/execution', 'BrokerController@execution');
     Route::get('/operator-clients', 'OperatorController@clientList');
     Route::get('/trading-accounts', 'OperatorController@traderList');
     Route::post('/store-broker-trader', "TraderController@storeOperatorClient");

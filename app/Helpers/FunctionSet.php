@@ -31,6 +31,13 @@ use Illuminate\Support\Facades\Http;
 
 class FunctionSet
 {
+    public function __construct()
+    {
+
+
+        $this->LogActivity = new LogActivity;
+
+    }
     function jsonStrip($value, $field)
     {
         $jsonStr = json_encode($value);
@@ -202,9 +209,11 @@ class FunctionSet
 
 
         if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
+            $this->LogActivity->addToLog('Order Successfull');
             $this->executionBalanceUpdate($trading->trading_account_number); //BARITA to be changed to any subsender id that comes into the application later
             return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
         } else {
+            $this->LogActivity->addToLog('Order Failed');
             $order = DB::table('broker_client_orders')
                 ->where('id', $broker_client_order->id)
                 ->update(['order_status' => 'Failed']);

@@ -2137,6 +2137,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -75141,17 +75142,18 @@ __webpack_require__.r(__webpack_exports__);
         { key: "order_date", sortable: true },
         { key: "clordid", label: "Order#", sortable: true },
         {
-          key: "order_type.text",
+          key: "order_type",
           label: "Order Type",
           sortable: true,
           formatter: (value, key, item) => {
             var type = JSON.parse(item.order_type);
-            var order = JSON.parse(type);
-            return order.text;
+            var order = JSON.parse(value);
+            var d = JSON.parse(order);
+            return d['text'];
           }
         },
         {
-          key: "symbol.text",
+          key: "symbol",
           label: "Symbol",
           sortable: true,
           formatter: (value, key, item) => {
@@ -75306,79 +75308,84 @@ __webpack_require__.r(__webpack_exports__);
           fix_value: "1"
         },
         {
-          text: "At the Opening (OPG)",
-          value: "At the Opening (OPG)",
-          fix_value: "2"
+          text: "Good Till Date (GTD)",
+          value: "Good Till Date (GTD)",
+          fix_value: "6"
         },
+        // {
+        //   text: "At the Opening (OPG)",
+        //   value: "At the Opening (OPG)",
+        //   fix_value: "2"
+        // },
         {
           text: "Immediate or Cancel (IOC)",
-          value: "Immediate or Cancel (IOC), fix_value: '3'"
+          value: "Immediate or Cancel (IOC)",
+          fix_value: "3"
         },
         {
           text: "Fill or Kill (FOK)",
           value: "Fill or Kill (FOK)",
           fix_value: "4"
-        },
-        {
-          text: "Good Till Crossing (GTX)",
-          value: "Good Till Crossing (GTX)",
-          fix_value: "5"
-        },
-        { text: "Good Till Date", value: "Good Till Date", fix_value: "6" }
+        }
+        // {
+        //   text: "Good Till Crossing (GTX)",
+        //   value: "Good Till Crossing (GTX)",
+        //   fix_value: "5"
+        // }
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
         { text: "Sell", value: "Sell", fix_value: "2" },
-        { text: "Buy minus", value: "Buy minus", fix_value: "3" },
-        { text: "Sell plus", value: "Sell plus", fix_value: "4" },
-        { text: "Sell short", value: "Sell short", fix_value: "5" },
-        { text: "Sell short exempt", value: "Sell short ", fix_value: "6" },
-        { text: "Undisclosed", value: "Undisclosed", fix_value: "7" },
-        { text: "Cross", value: "Cross", fix_value: "8" },
-        { text: "Cross short", value: "Cross short", fix_value: "9" }
+        // { text: "Buy minus", value: "Buy minus", fix_value: "3" },
+        // { text: "Sell plus", value: "Sell plus", fix_value: "4" },
+        // { text: "Sell short", value: "Sell short", fix_value: "5" },
+        // { text: "Sell short exempt", value: "Sell short ", fix_value: "6" },
+        // { text: "Undisclosed", value: "Undisclosed", fix_value: "7" },
+        // { text: "Cross", value: "Cross", fix_value: "8" },
+        // { text: "Cross short", value: "Cross short", fix_value: "9" }
       ],
       order_types: [
-        { text: "Market", value: "Market", fix_value: "1" },
+        // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
-        { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
-        { text: "Market on close", value: "Market on close", fix_value: "5" },
-        { text: "With or without", value: "With or without", fix_value: "6" },
-        { text: "Limit or better", value: "Limit or better", fix_value: "7" },
-        {
-          text: "Limit with or without",
-          value: "Limit with or without",
-          fix_value: "8"
-        },
-        { text: "On basis", value: "On basis", fix_value: "9" },
-        { text: "On close", value: "On close", fix_value: "A" },
-        { text: "Limit on close", value: "Limit on close", fix_value: "B" },
-        { text: "Forex - Market", value: "Forex - Market", fix_value: "C" },
-        {
-          text: "Previously quoted",
-          value: "Previously quoted",
-          fix_value: "D"
-        },
-        {
-          text: "Previously indicated",
-          value: "Previously indicated",
-          fix_value: "E"
-        },
-        { text: "Forex - Limit", value: "Forex - Limit", fix_value: "F" },
-        { text: "Forex - Swap", value: "Forex - Swap", fix_value: "G" },
-        {
-          text: "Forex - Previously Quoted",
-          value: "Forex - Previously Quoted",
-          fix_value: "H"
-        },
-        {
-          text:
-            "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
-          value:
-            "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
-          fix_value: "I"
-        },
-        { text: "Pegged", value: "Pegged", fix_value: "J" }
+        // { text: "Stop", value: "Stop", fix_value: "3" },
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
+        // { text: "Market on close", value: "Market on close", fix_value: "5" },
+        // { text: "With or without", value: "With or without", fix_value: "6" },
+        // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
+        // {
+        //   text: "Limit with or without",
+        //   value: "Limit with or without",
+        //   fix_value: "8"
+        // },
+        // { text: "On basis", value: "On basis", fix_value: "9" },
+        // { text: "On close", value: "On close", fix_value: "A" },
+        // { text: "Limit on close", value: "Limit on close", fix_value: "B" },
+        // { text: "Forex - Market", value: "Forex - Market", fix_value: "C" },
+        // {
+        //   text: "Previously quoted",
+        //   value: "Previously quoted",
+        //   fix_value: "D"
+        // },
+        // {
+        //   text: "Previously indicated",
+        //   value: "Previously indicated",
+        //   fix_value: "E"
+        // },
+        // { text: "Forex - Limit", value: "Forex - Limit", fix_value: "F" },
+        // { text: "Forex - Swap", value: "Forex - Swap", fix_value: "G" },
+        // {
+        //   text: "Forex - Previously Quoted",
+        //   value: "Forex - Previously Quoted",
+        //   fix_value: "H"
+        // },
+        // {
+        //   text:
+        //     "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
+        //   value:
+        //     "Funari (Limit Day Order with unexecuted portion handled as Market On Close. e.g. Japan)",
+        //   fix_value: "I"
+        // },
+        // { text: "Pegged", value: "Pegged", fix_value: "J" }
       ],
       symbols: [],
       currencies: [
@@ -75574,8 +75581,9 @@ __webpack_require__.r(__webpack_exports__);
       this.order = {};
       this.order = o;
 
-      // //Pre Select Client And Trading Accounts
-      // var data = JSON.parse(this.orders);
+      //Pre Select Client And Trading Accounts
+      var data = JSON.parse(this.orders);
+      console.log(data);
       // var clients = data[0].clients;
       // var trading = data[0].trading;
       // let i, j;
@@ -75953,21 +75961,22 @@ __webpack_require__.r(__webpack_exports__);
     this.getSymbols();
     this.tradingAccounts();
     // console.log(this.client_accounts);
-    // var order_data = /
     var client_accounts_data = JSON.parse(this.client_accounts);
     this.client_trading_account_options = client_accounts_data;
 
     // //Define Permission On Front And Back End
     let p = JSON.parse(this.$userPermissions);
-    //Looop through and identify all permission to validate against actions
+    this.permissions = [];
+    // Looop through and identify all permission to validate against actions
     for (let i = 0; i < p.length; i++) {
       this.permissions.push(p[i].name);
     }
 
     // if there are orders present
-    if(JSON.parse(this.orders).length >= 1){
+    // if(JSON.parse(this.orders).length >= 1){
       this.broker_client_orders = JSON.parse(this.orders);
-    }
+      console.log(this.broker_client_orders);
+    // }
     
   }
 });
@@ -81164,6 +81173,10 @@ var render = function() {
                   _vm._v(" "),
                   _c("b-nav-item", { attrs: { href: "/operator/orders" } }, [
                     _vm._v("Orders")
+                  ]),
+                  _vm._v(" "),
+                  _c("b-nav-item", { attrs: { href: "/operator/execution" } }, [
+                    _vm._v("Order Execution Reports")
                   ])
                 ],
                 1

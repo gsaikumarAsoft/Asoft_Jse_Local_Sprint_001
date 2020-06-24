@@ -34,6 +34,7 @@
         <!-- <b-nav-item href="/operator/users">User Management</b-nav-item> -->
         <b-nav-item href="/operator/clients">Client Management</b-nav-item>
         <b-nav-item href="/operator/orders">Orders</b-nav-item>
+        <b-nav-item href="/operator/execution">Order Execution Reports</b-nav-item>
         <!-- <b-nav-item href="/jse-admin/settlements/">Broker Settlement Account</b-nav-item> -->
       </b-navbar-nav>
 
