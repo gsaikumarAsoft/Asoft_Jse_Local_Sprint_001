@@ -993,7 +993,7 @@ export default {
           this.order.trading_account = trading[j].id;
         }
       }
-      // =============================================================
+      // ============================================================================================
       //Check if we already parsed to json if we didnt do so now.
       if (typeof o.time_in_force === "string") {
         // Parse stringified data from database back to json for viewing in the multiselect dropdown

@@ -157,7 +157,9 @@ class ApplicationController extends Controller
 
     }
 
-
+    public function logActivity(){
+        return $this->LogActivity->addToLog('Update');
+    }
     function storeSettlementBroker(Request $request)
     {
         // return $request->account;

@@ -197,7 +197,7 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
         curl_close($ch);
-        // return $result;
+
         $fix_status = json_decode($result, true);
 
 
@@ -205,6 +205,9 @@ class FunctionSet
             $this->executionBalanceUpdate($trading->trading_account_number); //BARITA to be changed to any subsender id that comes into the application later
             return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
         } else {
+            $order = DB::table('broker_client_orders')
+                ->where('id', $broker_client_order->id)
+                ->update(['order_status' => 'Failed']);
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Unable To Place!']);
         }
     }
