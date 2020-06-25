@@ -207,7 +207,6 @@ class FunctionSet
 
         $fix_status = json_decode($result, true);
 
-        
         if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
             $this->LogActivity->addToLog('Order Successfull');
             $this->executionBalanceUpdate($trading->trading_account_number); //BARITA to be changed to any subsender id that comes into the application later
@@ -687,8 +686,8 @@ class FunctionSet
 
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
-                                    // ->update(['order_status' => $o->order_status]);
-                                    ->update(['order_status' => 2]);
+                                    ->update(['order_status' => $o->order_status]);
+                                    // ->update(['order_status' => 2]);
                             }
                         }
                     }
