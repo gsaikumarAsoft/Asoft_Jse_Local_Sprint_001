@@ -1177,10 +1177,10 @@ export default {
             if (valid) {
               console.log(data);
               this.$swal(data.errors);
-              // setTimeout(location.reload.bind(location), 2000);
+              setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
-              // setTimeout(location.reload.bind(location), 2000);
+              setTimeout(location.reload.bind(location), 2000);
             }
           })
           .catch(error => {
