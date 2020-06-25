@@ -75109,7 +75109,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -79987,9 +79986,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Trading Account",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Trading Account is required"
+                                      "label-for": "broker-input"
                                     }
                                   },
                                   [
@@ -80292,8 +80289,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Value",
-                                      "label-for": "order-input",
-                                      "invalid-feedback": "value is required"
+                                      "label-for": "order-input"
                                     }
                                   },
                                   [
@@ -80334,8 +80330,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Stop Price",
-                                      "label-for": "limit-input",
-                                      "invalid-feedback": "Limit is required"
+                                      "label-for": "limit-input"
                                     }
                                   },
                                   [
@@ -80393,8 +80388,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Quantity",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback": "Quantity is required"
+                                      "label-for": "broker-input"
                                     }
                                   },
                                   [
@@ -80438,8 +80432,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Price",
-                                      "label-for": "order-input",
-                                      "invalid-feedback": "Price is required"
+                                      "label-for": "order-input"
                                     }
                                   },
                                   [
@@ -80480,8 +80473,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Side",
-                                      "label-for": "type-input",
-                                      "invalid-feedback": "Side is required"
+                                      "label-for": "type-input"
                                     }
                                   },
                                   [
@@ -80515,9 +80507,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Order Type",
-                                      "label-for": "type-input",
-                                      "invalid-feedback":
-                                        "Order Type is required"
+                                      "label-for": "type-input"
                                     }
                                   },
                                   [
@@ -80564,9 +80554,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Handling Instructions",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Handling Instructions is required"
+                                      "label-for": "broker-input"
                                     }
                                   },
                                   [
@@ -80605,9 +80593,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Time In Force",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Option Type is required"
+                                      "label-for": "broker-input"
                                     }
                                   },
                                   [
@@ -80703,9 +80689,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Display Range",
-                                      "label-for": "order-input",
-                                      "invalid-feedback":
-                                        "Display Range is required"
+                                      "label-for": "order-input"
                                     }
                                   },
                                   [
@@ -80750,9 +80734,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Max Floor",
-                                      "label-for": "order-input",
-                                      "invalid-feedback":
-                                        "Max Floor is required"
+                                      "label-for": "order-input"
                                     }
                                   },
                                   [

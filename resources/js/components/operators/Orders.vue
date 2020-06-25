@@ -35,7 +35,6 @@
                   <b-form-group
                     label="Trading Account"
                     label-for="broker-input"
-                    invalid-feedback="Trading Account is required"
                   >
                     <b-form-select
                       v-model="order.trading_account"
@@ -154,7 +153,7 @@
                   <b-form-group
                     label="Value"
                     label-for="order-input"
-                    invalid-feedback="value is required"
+                  
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
@@ -171,7 +170,7 @@
                   <b-form-group
                     label="Stop Price"
                     label-for="limit-input"
-                    invalid-feedback="Limit is required"
+                  
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
@@ -208,7 +207,7 @@
                   <b-form-group
                     label="Quantity"
                     label-for="broker-input"
-                    invalid-feedback="Quantity is required"
+                  
                   >
                     <b-input-group size="md">
                       <b-form-input
@@ -224,7 +223,7 @@
                   <b-form-group
                     label="Price"
                     label-for="order-input"
-                    invalid-feedback="Price is required"
+                  
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
@@ -241,7 +240,7 @@
                   <b-form-group
                     label="Side"
                     label-for="type-input"
-                    invalid-feedback="Side is required"
+                  
                   >
                     <multiselect
                       placeholder="Select a Side"
@@ -256,7 +255,7 @@
                   <b-form-group
                     label="Order Type"
                     label-for="type-input"
-                    invalid-feedback="Order Type is required"
+                  
                   >
                     <multiselect
                       placeholder="Select an Order Type"
@@ -275,7 +274,7 @@
                   <b-form-group
                     label="Handling Instructions"
                     label-for="broker-input"
-                    invalid-feedback="Handling Instructions is required"
+                  
                   >
                     <multiselect
                       placeholder="Select an Instruction"
@@ -322,7 +321,7 @@
                   <b-form-group
                     label="Time In Force"
                     label-for="broker-input"
-                    invalid-feedback="Option Type is required"
+                  
                   >
                     <multiselect
                       placeholder="Select a Time In Force"
@@ -354,7 +353,7 @@
                   <b-form-group
                     label="Display Range"
                     label-for="order-input"
-                    invalid-feedback="Display Range is required"
+                  
                   >
                     <b-input-group size="md" prepend="+-">
                       <b-form-input
@@ -373,7 +372,7 @@
                   <b-form-group
                     label="Max Floor"
                     label-for="order-input"
-                    invalid-feedback="Max Floor is required"
+                  
                   >
                     <b-input-group size="md" prepend="^">
                       <b-form-input
