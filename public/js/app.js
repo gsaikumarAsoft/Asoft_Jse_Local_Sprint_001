@@ -75106,9 +75106,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -75635,7 +75632,7 @@ __webpack_require__.r(__webpack_exports__);
         }
         if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(o.id);
+            this.destroy(o.id);brokerOr
           } else {
             this.$swal(
               "Oops!",
@@ -75790,10 +75787,10 @@ __webpack_require__.r(__webpack_exports__);
             if (valid) {
               console.log(data);
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             }
           })
           .catch(error => {
@@ -75882,12 +75879,10 @@ __webpack_require__.r(__webpack_exports__);
         });
     },
     add() {
-      this.disabled = 0;
+      this.disabled = '0';
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
-      console.log(dt);
-
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         "ORD" +
@@ -75926,8 +75921,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
+      // if (!this.checkFormValidity()) {
+      // } else {
         this.$bvModal.hide("jse-new-order"); //Close the m  odal if it is open
         var new_order = {};
         this.order["handling_instructions"] = JSON.stringify(
@@ -75941,7 +75936,7 @@ __webpack_require__.r(__webpack_exports__);
         this.order["option_type"] = JSON.stringify(this.order.option_type);
         this.order["order_type"] = JSON.stringify(this.order.order_type);
         this.createBrokerClientOrder(this.order);
-      }
+      // }
     },
     resetModal() {
       this.create = false;
@@ -79938,6 +79933,7 @@ var render = function() {
               ? _c("b-table", {
                   ref: "selectedOrder",
                   attrs: {
+                    responsiveS: "",
                     "empty-text":
                       "No Orders have been Created. Create an Order below.",
                     id: "orders-table",
@@ -80043,9 +80039,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Client Account",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Client Account is required"
+                                      "label-for": "broker-input"
                                     }
                                   },
                                   [
@@ -80219,8 +80213,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Symbol",
-                                      "label-for": "order-input",
-                                      "invalid-feedback": "Symbol is required"
+                                      "label-for": "order-input"
                                     }
                                   },
                                   [
@@ -80254,8 +80247,7 @@ var render = function() {
                                   {
                                     attrs: {
                                       label: "Currency",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback": "Currency is required"
+                                      "label-for": "broker-input"
                                     }
                                   },
                                   [

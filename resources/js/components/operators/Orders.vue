@@ -5,6 +5,7 @@
       <h1>Current Orders</h1>
       <div class="content">
         <b-table
+        responsiveS
           v-if='permissions.indexOf("read-broker-order") !== -1'
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
@@ -60,7 +61,6 @@
                   <b-form-group
                     label="Client Account"
                     label-for="broker-input"
-                    invalid-feedback="Client Account is required"
                   >
                     <b-form-select
                       v-model="order.client_trading_account"
@@ -122,7 +122,6 @@
                   <b-form-group
                     label="Symbol"
                     label-for="order-input"
-                    invalid-feedback="Symbol is required"
                   >
                     <multiselect
                       placeholder="Select a symbol"
@@ -138,7 +137,6 @@
                   <b-form-group
                     label="Currency"
                     label-for="broker-input"
-                    invalid-feedback="Currency is required"
                   >
                     <multiselect
                       placeholder="Select a currency"
@@ -153,7 +151,6 @@
                   <b-form-group
                     label="Value"
                     label-for="order-input"
-                  
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
@@ -1025,7 +1022,7 @@ export default {
         }
         if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(o.id);
+            this.destroy(o.id);brokerOr
           } else {
             this.$swal(
               "Oops!",
@@ -1180,10 +1177,10 @@ export default {
             if (valid) {
               console.log(data);
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             }
           })
           .catch(error => {
@@ -1272,12 +1269,10 @@ export default {
         });
     },
     add() {
-      this.disabled = 0;
+      this.disabled = '0';
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
-      console.log(dt);
-
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         "ORD" +
@@ -1316,8 +1311,8 @@ export default {
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
+      // if (!this.checkFormValidity()) {
+      // } else {
         this.$bvModal.hide("jse-new-order"); //Close the m  odal if it is open
         var new_order = {};
         this.order["handling_instructions"] = JSON.stringify(
@@ -1331,7 +1326,7 @@ export default {
         this.order["option_type"] = JSON.stringify(this.order.option_type);
         this.order["order_type"] = JSON.stringify(this.order.order_type);
         this.createBrokerClientOrder(this.order);
-      }
+      // }
     },
     resetModal() {
       this.create = false;
