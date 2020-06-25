@@ -73217,8 +73217,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
+      // if (!this.checkFormValidity()) {
+      // } else {
         this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
         var new_order = {};
         this.order["handling_instructions"] = JSON.stringify(
@@ -73232,7 +73232,7 @@ __webpack_require__.r(__webpack_exports__);
         this.order["option_type"] = JSON.stringify(this.order.option_type);
         this.order["order_type"] = JSON.stringify(this.order.order_type);
         this.createBrokerClientOrder(this.order);
-      }
+      // }
     },
     resetModal() {
       this.create = false;
