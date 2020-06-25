@@ -686,7 +686,7 @@ class FunctionSet
 
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
-                                    ->update(['order_status' => $o->order_status]);
+                                    ->update(['order_status' => $status]);
                                     // ->update(['order_status' => 2]);
                             }
                         }
