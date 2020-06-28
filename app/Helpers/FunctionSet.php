@@ -1,44 +1,34 @@
 <?php
 
-
 namespace App\Helpers;
 
 use App\BrokerClient;
 use App\BrokerClientOrder;
-use App\BrokerClientPermission;
 use App\BrokerOrderExecutionReport;
 use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
 use App\BrokerUser;
-use App\BrokerUserPermission;
 use App\ForeignBroker;
 use App\LocalBroker;
-use Request;
-use App\LogActivity as LogActivityModel;
-use App\Mail\ClientDetailsUpdate;
 use App\Mail\LocalBrokerClient;
-use App\Mail\LocalBrokerTrader;
 use App\Mail\LocalBrokerUser;
 use App\Role;
 use App\User;
 use Carbon\Carbon;
-use CreateBrokerClientOrderExecutionReports;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Http;
-
 
 class FunctionSet
 {
+
     public function __construct()
     {
-
 
         $this->LogActivity = new LogActivity;
 
     }
-    function jsonStrip($value, $field)
+    public function jsonStrip($value, $field)
     {
         $jsonStr = json_encode($value);
 
@@ -48,7 +38,14 @@ class FunctionSet
         //Print out the value we want.
         return $jsonDecoded[$field];
     }
-    function cancelOrder($order)
+
+    //set fix wrapper url
+    public function fix_wrapper_url($path)
+    {
+        return config('fixwrapper.base_url') + $path; //"api/OrderManagement/OrderCancelRequest";
+    }
+
+    public function cancelOrder($order)
     {
         $mytime = Carbon::now();
         $cancel_cordid = "ORD" . $mytime->format('YmdH') . "N" . rand(100, 1000); //Create a New cancel order id
@@ -58,7 +55,8 @@ class FunctionSet
 
         //Settlement Account Information
         $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
-        $url = "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest";
+        //$url =  "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest";
+        $url = this . fix_wrapper_url("api/OrderManagement/OrderCancelRequest");
         $data = array(
             'BeginString' => 'FIX.4.2',
             'TargetCompID' => $trading->target_comp_id,
@@ -76,7 +74,6 @@ class FunctionSet
             'AccountType' => 'CL',
         );
 
-
         $postdata = json_encode($data);
 
         $ch = curl_init($url);
@@ -91,12 +88,10 @@ class FunctionSet
         curl_close($ch);
         // return $result;
     }
-    function createBrokerOrder($request, $local_broker_id, $status, $client_id)
+    public function createBrokerOrder($request, $local_broker_id, $status, $client_id)
     {
 
-
         $type = json_decode($request->order_type); //Predefine Order Type For JSON ENCODE
-
 
         //Locate the Broker Trading Account For This Order
         $trading = BrokerTradingAccount::find($request->trading_account);
@@ -106,11 +101,10 @@ class FunctionSet
         // Locate the broker client for this order
         $client = BrokerClient::find($client_id);
 
-
         // Store Order to our databases
         $mytime = Carbon::now();
         $broker_client_order = new BrokerClientOrder();
-        $broker_client_order->local_broker_id  = $local_broker_id;
+        $broker_client_order->local_broker_id = $local_broker_id;
         $broker_client_order->foreign_broker_id = $foreign_broker_id[0]->id;
         $broker_client_order->handling_instructions = $request->handling_instructions;
         $broker_client_order->order_quantity = $request->quantity;
@@ -141,7 +135,8 @@ class FunctionSet
         // Private: 172.26.0.184
         // Port: 8020, 80, 22, 6544
         // $url = "http://35.155.69.248:8020/api/messagedownload/download";
-        $url = "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle";
+        //$url = "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle";
+        $url = this . fix_wrapper_url("api/OrderManagement/NewOrderSingle");
         $data = array(
             'BeginString' => 'FIX.4.2',
             'TargetCompID' => $trading->target_comp_id,
@@ -165,7 +160,6 @@ class FunctionSet
             'AccountType' => 'CL',
         );
 
-
         //Check if this is an iceberg order
         if ($request->has('max_floor') && $request->has('display_range')) {
             $data['maxFloor'] = $request->max_floor;
@@ -182,7 +176,7 @@ class FunctionSet
         }
 
         if ($request->has('time_in_force')) {
-            $data['TimeInForce']  = $this->jsonStrip(json_decode($request->time_in_force, true), 'fix_value');
+            $data['TimeInForce'] = $this->jsonStrip(json_decode($request->time_in_force, true), 'fix_value');
         }
         if ($request->has('price')) {
             $data['Price'] = $request->price;
@@ -190,7 +184,6 @@ class FunctionSet
         if ($request->has('handling_instructions')) {
             $data['HandlInst'] = $this->jsonStrip(json_decode($request->handling_instructions, true), 'fix_value');
         }
-
 
         $postdata = json_encode($data);
 
@@ -227,8 +220,8 @@ class FunctionSet
             $clients[] = $report;
 
             $broker_order_execution_report = BrokerOrderExecutionReport::updateOrCreate(
-                ['clOrdID' => $report['clOrdID'] ],
-                ['orderID' => $report['orderID'], 'text' => $report['text'], 'ordRejRes' => $report['ordRejRes'], 'status' => $report['status'],'buyorSell' => $report['buyorSell'],'securitySubType' => 0,'time' => $report['time'],'ordType' => $report['ordType'],'orderQty' => $report['orderQty'], 'timeInForce' => $report['timeInForce'], 'symbol' => $report['symbol'], 'qTradeacc' => $report['qTradeacc'], 'price' => $report['price'], 'stopPx' => $report['stopPx'], 'execType' => $report['execType'], 'senderSubID' => $report['senderSubID'], 'seqNum' => $report['seqNum'], 'sendingTime' => $report['sendingTime'], 'messageDate' => $report['messageDate'] ]
+                ['clOrdID' => $report['clOrdID']],
+                ['orderID' => $report['orderID'], 'text' => $report['text'], 'ordRejRes' => $report['ordRejRes'], 'status' => $report['status'], 'buyorSell' => $report['buyorSell'], 'securitySubType' => 0, 'time' => $report['time'], 'ordType' => $report['ordType'], 'orderQty' => $report['orderQty'], 'timeInForce' => $report['timeInForce'], 'symbol' => $report['symbol'], 'qTradeacc' => $report['qTradeacc'], 'price' => $report['price'], 'stopPx' => $report['stopPx'], 'execType' => $report['execType'], 'senderSubID' => $report['senderSubID'], 'seqNum' => $report['seqNum'], 'sendingTime' => $report['sendingTime'], 'messageDate' => $report['messageDate']]
             );
             // $broker_order_execution_report = new BrokerOrderExecutionReport();
             // $broker_order_execution_report->clOrdID = $report['clOrdID'];
@@ -254,20 +247,19 @@ class FunctionSet
             // $broker_order_execution_report->save();
         }
     }
-    function defineLocalBroker($id)
+    public function defineLocalBroker($id)
     {
         $b = LocalBroker::find($id)->with('user')->first();
         return $b['user'];
     }
-    function getUserRole($id)
+    public function getUserRole($id)
     {
 
         $user = User::with('roles')->find($id);
         return $user;
     }
 
-
-    function getUser($id)
+    public function getUser($id)
     {
 
         // return $id;
@@ -275,7 +267,7 @@ class FunctionSet
         return $user;
     }
 
-    function getSettlementUserByEmail($email)
+    public function getSettlementUserByEmail($email)
     {
 
         // return $id;
@@ -283,7 +275,7 @@ class FunctionSet
         return $user;
     }
 
-    function getUserAll($id)
+    public function getUserAll($id)
     {
 
         // return $id;
@@ -291,25 +283,24 @@ class FunctionSet
         return $user;
     }
 
-
-    function getLocalBrokerById($id)
+    public function getLocalBrokerById($id)
     {
         $broker = User::find($id)->first();
         return $broker;
     }
-    function getSettlementData($id)
+    public function getSettlementData($id)
     {
         $settlement = BrokerSettlementAccount::find($id);
         return $settlement;
     }
 
-    function getForeignBrokerById($id)
+    public function getForeignBrokerById($id)
     {
         $broker = ForeignBroker::find($id);
         $user = User::where('id', $broker->user_id)->get();
         return $user;
     }
-    function createBrokerTradingAccount($account_details)
+    public function createBrokerTradingAccount($account_details)
     {
         $broker_trading_account = new BrokerTradingAccount();
         $broker_trading_account->local_broker_id = $account_details->local_broker_id;
@@ -323,9 +314,8 @@ class FunctionSet
         $broker_trading_account->save();
     }
 
-    function addPermission($account_id, $permissions, $target)
+    public function addPermission($account_id, $permissions, $target)
     {
-
 
         // return $user;
         // $user->givePermissionTo('create-broker-user');
@@ -339,9 +329,8 @@ class FunctionSet
         }
     }
 
-    function createOperatorClient($request)
+    public function createOperatorClient($request)
     {
-
 
         $user = auth()->user();
         $request['local_broker_id'] = $user->local_broker_id;
@@ -367,7 +356,6 @@ class FunctionSet
             );
         } else {
 
-
             // For future Sprint
             // $broker_trader = new User();
 
@@ -380,7 +368,6 @@ class FunctionSet
             // $request['id'] = $broker_trader->id;
             // $broker_trader->roles()->attach($role_TRDB);
             // ========================================
-
 
             //Create Broker Client
 
@@ -399,13 +386,13 @@ class FunctionSet
             // $broker_client->roles()->attach($role_TRDB);
             $request['id'] = $broker_client->id;
 
-            //Adds Permissions Selected For Sprint Final 
+            //Adds Permissions Selected For Sprint Final
             // $this->HelperClass->addPermission($request->permission, $broker_client->id, 'Broker Client');
             Mail::to($broker_user['email'])->send(new LocalBrokerClient($request));
         }
     }
 
-    function createBrokerClient($request)
+    public function createBrokerClient($request)
     {
         // return $request;
         $local_broker = LocalBroker::with('user')->where('user_id', $request->local_broker_id)->first();
@@ -424,12 +411,12 @@ class FunctionSet
                     'status' => 'Unverified',
                     'open_orders' => $request->open_orders,
                     'jcsd' => $request->jcsd,
-                    'account_balance' => $request->account_balance
+                    'account_balance' => $request->account_balance,
                 ]
 
             );
         } else {
-            //Notify Local Broker that 
+            //Notify Local Broker that
             // For future Sprint
             // $broker_trader = new User();
 
@@ -442,7 +429,6 @@ class FunctionSet
             // $request['id'] = $broker_trader->id;
             // $broker_trader->roles()->attach($role_TRDB);
             // ========================================
-
 
             //Create Broker Client
 
@@ -461,7 +447,7 @@ class FunctionSet
             // $broker_client->roles()->attach($role_TRDB);
             $request['id'] = $broker_client->id;
 
-            //Adds Permissions Selected For Sprint Final 
+            //Adds Permissions Selected For Sprint Final
             // $this->HelperClass->addPermission($request->permission, $broker_client->id, 'Broker Client');
             Mail::to($broker_user['email'])->send(new LocalBrokerClient($request));
         }
@@ -469,8 +455,6 @@ class FunctionSet
 
     public function createBrokerUser($request)
     {
-
-
 
         $local_broker = $this->getUserAll($request->local_broker_id);
         $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
@@ -518,13 +502,11 @@ class FunctionSet
             $request['hash'] = $hash;
             $request['p'] = $pass;
 
-
             $broker_user = new BrokerUser();
             $broker_user->user_id = $user->id;
             $broker_user->dma_broker_id = $request->local_broker_id;
             $broker_user->broker_trading_account_id = $request->broker_trading_account_id;
             $broker_user->save();
-
 
             //Check to see how many permission have been selected to appl to the new broker user
             $permission_length = count($request->permissions);
@@ -541,13 +523,13 @@ class FunctionSet
         }
     }
 
-    function rand_pass($length)
+    public function rand_pass($length)
     {
 
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         return substr(str_shuffle($chars), 0, $length);
     }
-    function generateRandomString($length = 10)
+    public function generateRandomString($length = 10)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
@@ -569,7 +551,8 @@ class FunctionSet
     public function executionBalanceUpdate($sender_sub_id)
     {
         // Call fix and return excutiun report for the required SensderSubID
-        $url = "http://35.155.69.248:8020/api/messagedownload/download";
+        //$url = "http://35.155.69.248:8020/api/messagedownload/download";
+        $url = this . fix_wrapper_url("api/messagedownload/download");
         $data = array(
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $sender_sub_id,
@@ -591,17 +574,16 @@ class FunctionSet
         $request = json_decode($result, true);
         $account = $request['executionReports'];
         $total_reports = count($account);
-        // return 
+        // return
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
-
 
         //Find the very last exucution sequence number for this particular broker
         $seq_last = DB::table('broker_client_order_execution_reports')->orderBy('id', 'desc')->limit(1)->get();
 
         // Check latest sequence number coming from the fix
-        //  $incomingSeq =  $account[$total_reports]['seqNum'];     
+        //  $incomingSeq =  $account[$total_reports]['seqNum'];
 
         //  if($seq_last){
         //      return $seq_last[0]->seqNum.' = '.$incomingSeq;
@@ -609,14 +591,14 @@ class FunctionSet
 
         // iterate through all reports and update accounts as required
         foreach ($account as $key => $value) {
-            $order_number =  $account[$key]['clOrdID'];
+            $order_number = $account[$key]['clOrdID'];
             $sender_sub_id = $account[$key]['senderSubID'];
             $price = $account[$key]['price'];
             $quantity = $account[$key]['orderQty'];
             $status = $account[$key]['status'];
             // return $order_number;
             $jcsd = str_replace('JCSD', "", $account[$key]['qTradeacc']);
-            // Define The broker client 
+            // Define The broker client
             // $broker_client = BrokerClientOrder::where('client_order_number', $order_number)->first();
             $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
 
@@ -625,7 +607,7 @@ class FunctionSet
 
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
             $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $sender_sub_id)
-                ->select('broker_trading_accounts.broker_settlement_account_id as trading_id',  'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
+                ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
                 ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
                 ->get();
 
@@ -648,7 +630,7 @@ class FunctionSet
                         if ($status === "C" || $status === "4" || $status === "8") {
 
                             // Check if the order is open
-                            if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" &&  $o->order_status != "2") {
+                            if ($o->order_status != "C" && $o->order_status != "4" && $o->order_status != "8" && $o->order_status != "2") {
 
                                 // ===========================================================
                                 // Set Status To $account[$key]['status]
@@ -659,7 +641,7 @@ class FunctionSet
                         } else if ($status === "1") {
 
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                            if ($o->order_status != "C" && $o->order_status != "4" && $o->order_status != "8" && $o->order_status != "2") {
                                 //Update Broker Client Order Status
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
@@ -672,7 +654,7 @@ class FunctionSet
                         } else {
 
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                            if ($o->order_status != "C" && $o->order_status != "4" && $o->order_status != "8" && $o->order_status != "2") {
                                 //The order has been filled
                                 // Update Database with required value
                                 DB::table('broker_clients')
@@ -687,7 +669,7 @@ class FunctionSet
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
                                     ->update(['order_status' => $status]);
-                                    // ->update(['order_status' => 2]);
+                                // ->update(['order_status' => 2]);
                             }
                         }
                     }
