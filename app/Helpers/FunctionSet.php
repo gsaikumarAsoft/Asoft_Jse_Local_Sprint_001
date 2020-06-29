@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use OrderStatus;
 
 class FunctionSet
 {
@@ -43,6 +44,14 @@ class FunctionSet
     public function fix_wrapper_url($path)
     {
         return config('fixwrapper.base_url') + $path; //"api/OrderManagement/OrderCancelRequest";
+    }
+
+    public function IsOrderOpened($orderStatus)
+    {
+        return ($orderStatus != OrderStatus::Expired &&
+            $orderStatus != OrderStatus::Cancelled &&
+            $orderStatus != OrderStatus::Rejected &&
+            $orderStatus != OrderStatus::Failed);
     }
 
     public function cancelOrder($order)
@@ -88,7 +97,7 @@ class FunctionSet
         curl_close($ch);
         // return $result;
     }
-    public function createBrokerOrder($request, $local_broker_id, $status, $client_id)
+    public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
     {
 
         $type = json_decode($request->order_type); //Predefine Order Type For JSON ENCODE
@@ -109,7 +118,7 @@ class FunctionSet
         $broker_client_order->handling_instructions = $request->handling_instructions;
         $broker_client_order->order_quantity = $request->quantity;
         $broker_client_order->order_type = $request->order_type;
-        $broker_client_order->order_status = $status;
+        $broker_client_order->order_status = $order_status;
         $broker_client_order->order_date = $mytime->toDateTimeString();
         $broker_client_order->currency = $request->currency;
         $broker_client_order->symbol = $request->symbol;
@@ -208,7 +217,7 @@ class FunctionSet
             $this->LogActivity->addToLog('Order Failed');
             $order = DB::table('broker_client_orders')
                 ->where('id', $broker_client_order->id)
-                ->update(['order_status' => 'Failed']);
+                ->update(['order_status' => OrderStatus::Failed]);
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Unable To Place!']);
         }
     }
@@ -542,10 +551,9 @@ class FunctionSet
 
     public function orderStatus($id)
     {
-
         // check current broker client order status
-        $status = BrokerClientOrder::select('order_status')->where('id', $id)->first();
-        return $status;
+        $order_status = BrokerClientOrder::select('order_status')->where('id', $id)->first();
+        return $order_status;
     }
 
     public function executionBalanceUpdate($sender_sub_id)
@@ -595,7 +603,7 @@ class FunctionSet
             $sender_sub_id = $account[$key]['senderSubID'];
             $price = $account[$key]['price'];
             $quantity = $account[$key]['orderQty'];
-            $status = $account[$key]['status'];
+            $order_status = $account[$key]['status'];
             // return $order_number;
             $jcsd = str_replace('JCSD', "", $account[$key]['qTradeacc']);
             // Define The broker client
@@ -626,26 +634,28 @@ class FunctionSet
                         $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
                         $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
                         //If offer is (Rejected, Cancelled, Expired)
-                        // return $status;
-                        if ($status === "C" || $status === "4" || $status === "8") {
+                        // return $order_status;
+                        if ($order_status === OrderStatus::Expired ||
+                            $order_status === OrderStatus::Cancelled ||
+                            $order_status === OrderStatus::Rejected) {
 
                             // Check if the order is open
-                            if ($o->order_status != "C" && $o->order_status != "4" && $o->order_status != "8" && $o->order_status != "2") {
+                            if (IsOrderOpened($o->order_status)) {
 
                                 // ===========================================================
                                 // Set Status To $account[$key]['status]
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
-                                    ->update(['order_status' => $status]);
+                                    ->update(['order_status' => $order_status]);
                             }
-                        } else if ($status === "1") {
+                        } else if ($order_status === OrderStatus::PartialFilled) {
 
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if ($o->order_status != "C" && $o->order_status != "4" && $o->order_status != "8" && $o->order_status != "2") {
+                            if (IsOrderOpened($o->order_status)) {
                                 //Update Broker Client Order Status
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
-                                    ->update(['order_status' => 1]);
+                                    ->update(['order_status' => OrderStatus::PartialFilled]);
 
                                 DB::table('broker_clients')
                                     ->where('id', $bc->id)
@@ -654,7 +664,7 @@ class FunctionSet
                         } else {
 
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if ($o->order_status != "C" && $o->order_status != "4" && $o->order_status != "8" && $o->order_status != "2") {
+                            if (IsOrderOpened($o->order_status)) {
                                 //The order has been filled
                                 // Update Database with required value
                                 DB::table('broker_clients')
@@ -668,7 +678,7 @@ class FunctionSet
 
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
-                                    ->update(['order_status' => $status]);
+                                    ->update(['order_status' => $order_status]);
                                 // ->update(['order_status' => 2]);
                             }
                         }
