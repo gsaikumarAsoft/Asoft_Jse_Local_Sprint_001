@@ -19,7 +19,7 @@
         ></b-table>
         <div v-if="!create"></div>
         <b-modal
-        :hide-footer="!create"
+          :hide-footer="!create"
           id="jse-new-order"
           size="xl"
           ref="modal"
@@ -41,6 +41,7 @@
                       :options="broker_trading_account_options"
                       class="mb-3"
                       :disabled="disabled == 1"
+                      @change="currencyHandler(order.trading_account)"
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
@@ -145,7 +146,7 @@
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
-                      :disabled="disabled == 1"
+                      :disabled="1 || 3"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -819,7 +820,7 @@ export default {
         { value: "ETB", text: "ETB:  Ethiopian Birr" },
         { value: "EUR", text: "EUR:  Eu   ro" },
         { value: "FJD", text: "FJD:  Fijian Dollar" },
-        { value: "   FKP", text: "FKP:  Falkland Islands Pound" },
+        { value: "KP", text: "FKP:  Falkland Islands Pound" },
         { value: "GBP", text: "GBP:  Bri  tish Pound Sterling" },
         { value: "GEL", text: "GEL:  Georgian Lari" },
         { value: "GGP", text: "GGP:  Guernsey Pound" },
@@ -954,17 +955,33 @@ export default {
   },
   watch: {
     "order.time_in_force": function(d) {
-      var fix_value = d.fix_value;
-      this.expiration = false;
-      if (fix_value === "6") {
-        // console.log(TIF.fix_valu:disabled="validated == 1"e);
-        // Show the Expiration date input for this order
-        this.expiration = true;
-      }
-      console.log(this.expiration);
+      // if (d.fix_value) {
+        var fix_value = d.fix_value;
+        this.expiration = false;
+        if (fix_value === "6") {
+          // console.log(TIF.fix_valu:disabled="validated == 1"e);
+          // Show the Expiration date input for this order
+          this.expiration = true;
+        }
+        console.log(this.expiration);
+      // }
     }
   },
   methods: {
+    search(nameKey, myArray) {
+      for (var i = 0; i < myArray.length; i++) {
+        if (myArray[i].value === nameKey) {
+          return myArray[i];
+        }
+      }
+    },
+    currencyHandler() {
+      this.order.currency = {};
+      var data = this.broker_trading_account_options[0].data;
+      var currency = data.currency;
+      var resultObject = this.search(currency, this.currencies);
+      this.order.currency = resultObject;
+    },
     showOptionValueInput() {
       if (this.order_option_input === false) {
         this.order_option_input = true;
@@ -979,7 +996,7 @@ export default {
 
       //Pre Select Client And Trading Accounts
       var data = JSON.parse(this.orders);
-   
+
       var clients = data[0].clients;
       var trading = data[0].trading;
       var i, j;
@@ -1037,6 +1054,7 @@ export default {
       fr.onload = e => {
         const result = JSON.parse(e.target.result);
         self.order_template_data = result;
+
       };
 
       this.order_template_data = fr.readAsText(files);
@@ -1258,19 +1276,19 @@ export default {
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
-        this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
-        var new_order = {};
-        this.order["handling_instructions"] = JSON.stringify(
-          this.order.handling_instructions
-        );
-        this.order["symbol"] = JSON.stringify(this.order.symbol);
-        this.order["currency"] = JSON.stringify(this.order.currency);
-        this.order["order_type"] = JSON.stringify(this.order.order_type);
-        this.order["side"] = JSON.stringify(this.order.side);
-        this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
-        this.order["option_type"] = JSON.stringify(this.order.option_type);
-        this.order["order_type"] = JSON.stringify(this.order.order_type);
-        this.createBrokerClientOrder(this.order);
+      this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
+      var new_order = {};
+      this.order["handling_instructions"] = JSON.stringify(
+        this.order.handling_instructions
+      );
+      this.order["symbol"] = JSON.stringify(this.order.symbol);
+      this.order["currency"] = JSON.stringify(this.order.currency);
+      this.order["order_type"] = JSON.stringify(this.order.order_type);
+      this.order["side"] = JSON.stringify(this.order.side);
+      this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
+      this.order["option_type"] = JSON.stringify(this.order.option_type);
+      this.order["order_type"] = JSON.stringify(this.order.order_type);
+      this.createBrokerClientOrder(this.order);
       // }
     },
     resetModal() {
