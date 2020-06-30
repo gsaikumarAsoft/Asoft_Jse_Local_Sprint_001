@@ -36,7 +36,6 @@ class FunctionSet
 
 
         $this->LogActivity = new LogActivity;
-
     }
     function jsonStrip($value, $field)
     {
@@ -94,9 +93,11 @@ class FunctionSet
     function createBrokerOrder($request, $local_broker_id, $status, $client_id)
     {
 
+        // Find Local Broker For This Order & Define the SenderSub Id
+        $local_broker = $this->LocalBrokerPick($local_broker_id);
+        $sender_sub_id = $local_broker->name;
 
         $type = json_decode($request->order_type); //Predefine Order Type For JSON ENCODE
-
 
         //Locate the Broker Trading Account For This Order
         $trading = BrokerTradingAccount::find($request->trading_account);
@@ -132,21 +133,16 @@ class FunctionSet
         $broker_client_order->expiration_date = $request->expiration_date;
         $broker_client_order->time_in_force = $request->time_in_force;
         $broker_client_order->broker_client_id = $client_id;
-        $broker_client_order->trading_account_id = $request->client_trading_account;
+        $broker_client_order->trading_account_id = $request->trading_account;
         $broker_client_order->save();
 
-        // Send customer order to FIX 4.2 Switch
-
-        //API Beta Fix Swith PHP Post 4.23
-        // Private: 172.26.0.184
-        // Port: 8020, 80, 22, 6544
-        // $url = "http://35.155.69.248:8020/api/messagedownload/download";
+        // Send customer order to FIX 4.2 Switch - API Beta Fix Swith PHP Post 4.23
         $url = "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle";
         $data = array(
             'BeginString' => 'FIX.4.2',
             'TargetCompID' => $trading->target_comp_id,
             'SenderCompID' => $trading->sender_comp_id,
-            'SenderSubID' => $trading->trading_account_number,
+            'SenderSubID' => $sender_sub_id,
             'Host' => $trading->socket,
             'Port' => (int) $trading->port,
             // =======================================================================================
@@ -164,7 +160,6 @@ class FunctionSet
             'ClientID' => $trading->trading_account_number,
             'AccountType' => 'CL',
         );
-
 
         //Check if this is an iceberg order
         if ($request->has('max_floor') && $request->has('display_range')) {
@@ -205,53 +200,62 @@ class FunctionSet
         $result = curl_exec($ch);
         curl_close($ch);
 
+        // ================================================================================================
+        $data['text'] = 'Submitted';
+        $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+        // ================================================================================================
+
         $fix_status = json_decode($result, true);
 
         if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
             $this->LogActivity->addToLog('Order Successfull');
-            $this->executionBalanceUpdate($trading->trading_account_number); //BARITA to be changed to any subsender id that comes into the application later
+
+            return $this->executionBalanceUpdate($sender_sub_id);
             return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
         } else {
-            $this->LogActivity->addToLog('Order Failed');
+            $this->LogActivity->addToLog('Order Failed:' . $fix_status['result']);
+            $data['text'] = 'Failed';
             $order = DB::table('broker_client_orders')
                 ->where('id', $broker_client_order->id)
                 ->update(['order_status' => 'Failed']);
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Unable To Place!']);
+            $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result']]);
         }
     }
     public function logExecution($request)
     {
         $execution_report = $request['executionReports'];
+        // return $execution_report;
         // BrokerOrderExecutionReport::truncate();
         foreach ($execution_report as $report) {
             $clients[] = $report;
-
-            $broker_order_execution_report = BrokerOrderExecutionReport::updateOrCreate(
-                ['clOrdID' => $report['clOrdID'] ],
-                ['orderID' => $report['orderID'], 'text' => $report['text'], 'ordRejRes' => $report['ordRejRes'], 'status' => $report['status'],'buyorSell' => $report['buyorSell'],'securitySubType' => 0,'time' => $report['time'],'ordType' => $report['ordType'],'orderQty' => $report['orderQty'], 'timeInForce' => $report['timeInForce'], 'symbol' => $report['symbol'], 'qTradeacc' => $report['qTradeacc'], 'price' => $report['price'], 'stopPx' => $report['stopPx'], 'execType' => $report['execType'], 'senderSubID' => $report['senderSubID'], 'seqNum' => $report['seqNum'], 'sendingTime' => $report['sendingTime'], 'messageDate' => $report['messageDate'] ]
-            );
-            // $broker_order_execution_report = new BrokerOrderExecutionReport();
-            // $broker_order_execution_report->clOrdID = $report['clOrdID'];
-            // $broker_order_execution_report->orderID = $report['orderID'];
-            // $broker_order_execution_report->text = $report['text'];
-            // $broker_order_execution_report->ordRejRes = $report['ordRejRes'];
-            // $broker_order_execution_report->status = $report['status'];
-            // $broker_order_execution_report->buyorSell = $report['buyorSell'];
-            // $broker_order_execution_report->securitySubType = 0;
-            // $broker_order_execution_report->time = $report['time'];
-            // $broker_order_execution_report->ordType = $report['ordType'];
-            // $broker_order_execution_report->orderQty = $report['orderQty'];
-            // $broker_order_execution_report->timeInForce = $report['timeInForce'];
-            // $broker_order_execution_report->symbol = $report['symbol'];
-            // $broker_order_execution_report->qTradeacc = $report['qTradeacc'];
-            // $broker_order_execution_report->price = $report['price'];
-            // $broker_order_execution_report->stopPx = $report['stopPx'];
-            // $broker_order_execution_report->execType = $report['execType'];
-            // $broker_order_execution_report->senderSubID = $report['senderSubID'];
-            // $broker_order_execution_report->seqNum = $report['seqNum'];
-            // $broker_order_execution_report->sendingTime = $report['sendingTime'];
-            // $broker_order_execution_report->messageDate = $report['messageDate'];
-            // $broker_order_execution_report->save();
+            // return $report['OrderID'];
+            // $broker_order_execution_report = BrokerOrderExecutionReport::updateOrCreate(
+            // ['clOrdID' => $report['clOrdID'] ],
+            // ['orderID' => $report['orderID'], 'text' => $report['text'], 'ordRejRes' => $report['ordRejRes'], 'status' => $report['status'],'buyorSell' => $report['buyorSell'],'securitySubType' => 0,'time' => $report['time'],'ordType' => $report['ordType'],'orderQty' => $report['orderQty'], 'timeInForce' => $report['timeInForce'], 'symbol' => $report['symbol'], 'qTradeacc' => $report['qTradeacc'], 'price' => $report['price'], 'stopPx' => $report['stopPx'], 'execType' => $report['execType'], 'senderSubID' => $report['senderSubID'], 'seqNum' => $report['seqNum'], 'sendingTime' => $report['sendingTime'], 'messageDate' => $report['messageDate'] ]
+            // );
+            $broker_order_execution_report = new BrokerOrderExecutionReport();
+            $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
+            $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
+            $broker_order_execution_report->text = $report['text'];
+            $broker_order_execution_report->ordRejRes = $report['ordRejRes'] ?? null;
+            $broker_order_execution_report->status = $report['status'] ?? 8;
+            $broker_order_execution_report->buyorSell = $report['buyorSell'] ?? $report['BuyorSell'];
+            $broker_order_execution_report->securitySubType = 0;
+            $broker_order_execution_report->time = $report['time'] ?? null;
+            $broker_order_execution_report->ordType = $report['ordType'] ?? $report['OrdType'];
+            $broker_order_execution_report->orderQty = $report['orderQty'] ?? $report['OrderQty'] ?? 0;
+            $broker_order_execution_report->timeInForce = $report['timeInForce'] ?? 0;
+            $broker_order_execution_report->symbol = $report['symbol'] ?? $report['Symbol'];
+            $broker_order_execution_report->qTradeacc = $report['qTradeacc'] ?? $report['Account'];
+            $broker_order_execution_report->price = $report['price'] ?? $report['Price'];
+            $broker_order_execution_report->stopPx = $report['stopPx'] ?? $report['stopPx'];
+            $broker_order_execution_report->execType = $report['execType'] ?? 0;
+            $broker_order_execution_report->senderSubID = $report['senderSubID'] ?? $report['SenderSubID'];
+            $broker_order_execution_report->seqNum = $report['seqNum'] ?? 0;
+            $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? 0;
+            $broker_order_execution_report->messageDate = $report['messageDate'] ?? 0;
+            $broker_order_execution_report->save();
         }
     }
     function defineLocalBroker($id)
@@ -291,7 +295,12 @@ class FunctionSet
         return $user;
     }
 
-
+    function LocalBrokerPick($id)
+    {
+        $local_broker = LocalBroker::find($id);
+        $broker = User::find($local_broker->user_id);
+        return $broker;
+    }
     function getLocalBrokerById($id)
     {
         $broker = User::find($id)->first();
@@ -591,15 +600,14 @@ class FunctionSet
         $request = json_decode($result, true);
         $account = $request['executionReports'];
         $total_reports = count($account);
-        // return 
 
+        return $request;
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
 
 
         //Find the very last exucution sequence number for this particular broker
         $seq_last = DB::table('broker_client_order_execution_reports')->orderBy('id', 'desc')->limit(1)->get();
-
         // Check latest sequence number coming from the fix
         //  $incomingSeq =  $account[$total_reports]['seqNum'];     
 
@@ -630,67 +638,70 @@ class FunctionSet
                 ->get();
 
             $array = json_decode(json_encode($settlement_account), true);
+
+
             if ($order && $broker_client) {
                 // return $order;
                 $od = $order;
                 $bc = $broker_client;
+                return $bc;
                 if ($od->id) {
                     $o = $this->orderStatus($od->id);
                     // Define the open order amount
                     $op_or = $bc->open_orders - ($quantity * $price);
                     $fil_or = $bc->filled_orders + ($quantity * $price);
-                    if ($array) {
-                        $sa = $array[0];
-                        $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
-                        $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
-                        //If offer is (Rejected, Cancelled, Expired)
-                        // return $status;
-                        if ($status === "C" || $status === "4" || $status === "8") {
+                    // if ($array) {
+                    $sa = $array[0];
+                    $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
+                    $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
+                    //If offer is (Rejected, Cancelled, Expired)
+                    // return $status;
+                    if ($status === "C" || $status === "4" || $status === "8") {
 
-                            // Check if the order is open
-                            if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" &&  $o->order_status != "2") {
+                        // Check if the order is open
+                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" &&  $o->order_status != "2") {
 
-                                // ===========================================================
-                                // Set Status To $account[$key]['status]
-                                DB::table('broker_client_orders')
-                                    ->where('id', $od->id)
-                                    ->update(['order_status' => $status]);
-                            }
-                        } else if ($status === "1") {
+                            // ===========================================================
+                            // Set Status To $account[$key]['status]
+                            DB::table('broker_client_orders')
+                                ->where('id', $od->id)
+                                ->update(['order_status' => $status]);
+                        }
+                    } else if ($status === "1") {
 
-                            //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
-                                //Update Broker Client Order Status
-                                DB::table('broker_client_orders')
-                                    ->where('id', $od->id)
-                                    ->update(['order_status' => 1]);
+                        //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
+                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                            //Update Broker Client Order Status
+                            DB::table('broker_client_orders')
+                                ->where('id', $od->id)
+                                ->update(['order_status' => 1]);
 
-                                DB::table('broker_clients')
-                                    ->where('id', $bc->id)
-                                    ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
-                            }
-                        } else {
+                            DB::table('broker_clients')
+                                ->where('id', $bc->id)
+                                ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
+                        }
+                    } else {
 
-                            //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
-                                //The order has been filled
-                                // Update Database with required value
-                                DB::table('broker_clients')
-                                    ->where('id', $bc->id)
-                                    ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
+                        //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
+                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                            //The order has been filled
+                            // Update Database with required value
+                            DB::table('broker_clients')
+                                ->where('id', $bc->id)
+                                ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
 
-                                //Update Broker Settlement account once the order is filled
-                                DB::table('broker_settlement_accounts')
-                                    ->where('id', $sa['id'])
-                                    ->update(['amount_allocated' => $settlement_allocated], ['filled_orders', $settlement_fil_ord]);
+                            //Update Broker Settlement account once the order is filled
+                            DB::table('broker_settlement_accounts')
+                                ->where('id', $sa['id'])
+                                ->update(['amount_allocated' => $settlement_allocated], ['filled_orders', $settlement_fil_ord]);
 
-                                DB::table('broker_client_orders')
-                                    ->where('id', $od->id)
-                                    ->update(['order_status' => $status]);
-                                    // ->update(['order_status' => 2]);
-                            }
+                            // DB::table('broker_client_orders')
+                            //     ->where('id', $od->id)
+                            //     ->update(['order_status' => $status]);
+                            // ->update(['order_status' => 2]);
                         }
                     }
+                    // }
                 }
             }
         }

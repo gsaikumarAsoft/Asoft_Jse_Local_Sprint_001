@@ -72941,16 +72941,17 @@ __webpack_require__.r(__webpack_exports__);
 
       //Pre Select Client And Trading Accounts
       var data = JSON.parse(this.orders);
+   
       var clients = data[0].clients;
       var trading = data[0].trading;
-      let i, j;
+      var i, j;
       for (i = 0; i < clients.length; i++) {
         if (o.broker_client_id === clients[i].id) {
           this.order.client_trading_account = clients[i].id;
         }
       }
       for (j = 0; j < trading.length; j++) {
-        // console.log(trading[j].id);
+        console.log(trading[j].id);
         if (parseInt(o.trading_account_id) === trading[j].id) {
           this.order.trading_account = trading[j].id;
         }
@@ -73129,16 +73130,16 @@ __webpack_require__.r(__webpack_exports__);
     createBrokerClientOrder(broker) {
       //Notes:
 
-      this.$swal
-        .fire({
-          title: "Creating Client Order",
-          html: "One moment while we setup the current order",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        })
-        .then(result => {});
+      // this.$swal
+      //   .fire({
+      //     title: "Creating Client Order",
+      //     html: "One moment while we setup the current order",
+      //     timerProgressBar: true,
+      //     onBeforeOpen: () => {
+      //       this.$swal.showLoading();
+      //     }
+      //   })
+      //   .then(result => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
@@ -73157,10 +73158,10 @@ __webpack_require__.r(__webpack_exports__);
             if (valid) {
               console.log(data);
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             } else {
               this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
+              // setTimeout(location.reload.bind(location), 2000);
             }
           })
           .catch(error => {

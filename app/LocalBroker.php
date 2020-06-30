@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class LocalBroker extends Model
 {
 
-    protected $guarded = ['id'];
+    // protected $guarded = ['id'];
 
     protected $fillable = [
         'user_id',

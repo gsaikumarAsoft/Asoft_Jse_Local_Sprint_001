@@ -171,7 +171,7 @@ class BrokerController extends Controller
             ->get();
 
 
-        // return $execution_reports;
+        return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 
