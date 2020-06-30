@@ -255,8 +255,6 @@ class BrokerController extends Controller
     public function clientOrder(Request $request)
     {
 
-
-
         //Define The Broker Making The Order
         $user = auth()->user();
         $user_definition  = LocalBroker::where('user_id', $user->id)->first();
@@ -272,7 +270,7 @@ class BrokerController extends Controller
 
 
         // Client Account Information
-        $c_account = BrokerClient::find($request['client_trading_account'])->first();
+        $c_account = BrokerClient::find($request->client_trading_account);
 
         // Calculations Before Creating A New Order
         $order_value = $request->price * $request->quantity;
