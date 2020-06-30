@@ -107,7 +107,7 @@ class BrokerController extends Controller
         $local_broker_id = $user->local_broker_id;
 
         $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $local_broker_id)
-            ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_trading_accounts.id')
+            ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_settlement_accounts.currency', 'broker_trading_accounts.id')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
             ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
             ->join('users', 'foreign_brokers.user_id', 'users.id')
@@ -166,9 +166,9 @@ class BrokerController extends Controller
         // return $this->HelperClass->executionBalanceUpdate("BARITA"); //Download Execution Reports
         $execution_reports = DB::table('broker_client_order_execution_reports')
             ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
-            ->join('broker_client_orders','broker_client_order_execution_reports.clordid','broker_client_orders.clordid')
-            ->join('local_brokers','broker_client_orders.local_broker_id','local_brokers.id')
-            ->join('broker_trading_accounts','local_brokers.id','broker_trading_accounts.local_broker_id')
+            ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.clordid')
+            ->join('local_brokers', 'broker_client_orders.local_broker_id', 'local_brokers.id')
+            ->join('broker_trading_accounts', 'local_brokers.id', 'broker_trading_accounts.local_broker_id')
             ->join('users', 'broker_client_order_execution_reports.senderSubID', 'users.name')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
             ->get();
@@ -228,7 +228,7 @@ class BrokerController extends Controller
         $user = auth()->user();
         // return $user;
         $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->get();
-        return $orders;
+        // return $orders;
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
         // return $broker_traders;
         return view('brokers.order')->with('orders', $orders)->with('client_accounts', $broker_traders);

@@ -73232,7 +73232,7 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`).then(response => {
         this.$swal("Cancelled");
         setTimeout(location.reload.bind(location), 1000);
-      });
+      });arsed 
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
@@ -75078,65 +75078,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
   components: {
     headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_3__["default"],
-    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default())
+    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default()),
   },
   data() {
     return {
       expiration: false,
       disabled: 0,
-      modalTitle: 'New Order',
+      modalTitle: "New Order",
       permissions: [],
       order_template_data: [],
       file: "",
@@ -75164,8 +75117,8 @@ __webpack_require__.r(__webpack_exports__);
             var type = JSON.parse(item.order_type);
             var order = JSON.parse(value);
             var d = JSON.parse(order);
-            return d['text'];
-          }
+            return d["text"];
+          },
         },
         {
           key: "symbol",
@@ -75177,7 +75130,7 @@ __webpack_require__.r(__webpack_exports__);
 
             return s.text;
             // return symbol.text;
-          }
+          },
         },
         {
           key: "time_in_force",
@@ -75193,7 +75146,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "currency",
@@ -75209,7 +75162,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "side",
@@ -75225,7 +75178,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
@@ -75257,11 +75210,11 @@ __webpack_require__.r(__webpack_exports__);
             } else {
               return value;
             }
-          }
-        }
+          },
+        },
         // { key: "foreign_broker", sortable: true }
       ],
-      broker_client_orders: '',
+      broker_client_orders: "",
       broker: {},
       perPage: 5,
       currentPage: 1,
@@ -75269,37 +75222,37 @@ __webpack_require__.r(__webpack_exports__);
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "1"
+          fix_value: "1",
         },
         {
           text: "Automated execution order, public, Broker intervention OK",
           value: "Automated execution order, public, Broker intervention OK",
-          fix_value: "2"
+          fix_value: "2",
         },
         {
           text: "Manual order, best execution",
           value: "Manual order, best execution",
-          fix_value: "3"
+          fix_value: "3",
         },
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "4"
-        }
+          fix_value: "4",
+        },
       ],
       jason_order: [],
       option_values: [
         {
           text: "TimeInForce",
           value: "TimeInForce",
-          type: "Date: when to expire"
+          type: "Date: when to expire",
         },
         {
           text: "Exection Destination",
           value: "Exection Destination",
-          type: "optional"
+          type: "optional",
         },
-        { text: "Exuction Instruction", value: "Exection Instruction" }
+        { text: "Exuction Instruction", value: "Exection Instruction" },
       ],
       option_types: [
         { text: "ClOrdID", value: "ClOrdID" },
@@ -75313,19 +75266,19 @@ __webpack_require__.r(__webpack_exports__);
         { text: "Side", value: "Side" },
         { text: "StopPx", value: "StopPx" },
         { text: "TimeInForce", value: "TimeInForce" },
-        { text: "TransactTime", value: "TransactTime" }
+        { text: "TransactTime", value: "TransactTime" },
       ],
       time_in_force: [
         { text: "Day", value: "Day", fix_value: "0" },
         {
           text: "Good Till Cancel (GTC)",
           value: "Good Till Cancel (GTC)",
-          fix_value: "1"
+          fix_value: "1",
         },
         {
           text: "Good Till Date (GTD)",
           value: "Good Till Date (GTD)",
-          fix_value: "6"
+          fix_value: "6",
         },
         // {
         //   text: "At the Opening (OPG)",
@@ -75335,13 +75288,13 @@ __webpack_require__.r(__webpack_exports__);
         {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
-          fix_value: "3"
+          fix_value: "3",
         },
         {
           text: "Fill or Kill (FOK)",
           value: "Fill or Kill (FOK)",
-          fix_value: "4"
-        }
+          fix_value: "4",
+        },
         // {
         //   text: "Good Till Crossing (GTX)",
         //   value: "Good Till Crossing (GTX)",
@@ -75363,7 +75316,7 @@ __webpack_require__.r(__webpack_exports__);
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -75573,17 +75526,31 @@ __webpack_require__.r(__webpack_exports__);
         { value: "YER", text: "YER:  Yemeni Rial" },
         { value: "ZAR", text: "ZAR:  South African Rand" },
         { value: "ZMW", text: "ZMW:  Zambian Kwacha" },
-        { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" }
+        { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" },
       ],
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_client_orders.length;
-    }
+    },
   },
   methods: {
+    search(nameKey, myArray) {
+      for (var i = 0; i < myArray.length; i++) {
+        if (myArray[i].value === nameKey) {
+          return myArray[i];
+        }
+      }
+    },
+    currencyHandler() {
+      this.order.currency = {};
+      var data = this.broker_trading_account_options[0].data
+      var currency = data.currency;
+      var resultObject = this.search(currency, this.currencies);
+      this.order.currency = resultObject;
+    },
     showOptionValueInput() {
       if (this.order_option_input === false) {
         this.order_option_input = true;
@@ -75596,7 +75563,7 @@ __webpack_require__.r(__webpack_exports__);
       this.order = {};
       this.order = o;
 
-      var clients =this.client_trading_account_options;
+      var clients = this.client_trading_account_options;
       var trading = this.broker_trading_account_options;
       let i, j;
       for (i = 0; i < clients.length; i++) {
@@ -75634,8 +75601,8 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
-        footer: "<a href='orders' >Exit</a>"
-      }).then(result => {
+        footer: "<a href='orders' >Exit</a>",
+      }).then((result) => {
         if (result.value) {
           if (this.permissions.indexOf("update-broker-order") !== -1) {
             this.$bvModal.show("jse-new-order");
@@ -75650,7 +75617,8 @@ __webpack_require__.r(__webpack_exports__);
         }
         if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(o.id);brokerOr
+            this.destroy(o.id);
+            brokerOr;
           } else {
             this.$swal(
               "Oops!",
@@ -75667,7 +75635,7 @@ __webpack_require__.r(__webpack_exports__);
       // console.log(this.files);
       const fr = new FileReader();
       const self = this;
-      fr.onload = e => {
+      fr.onload = (e) => {
         const result = JSON.parse(e.target.result);
         self.order_template_data = result;
       };
@@ -75685,7 +75653,7 @@ __webpack_require__.r(__webpack_exports__);
     saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
-        order_options: this.order_option_inputs
+        order_options: this.order_option_inputs,
       };
 
       delete order_data.order_standard["trading_account"];
@@ -75698,27 +75666,27 @@ __webpack_require__.r(__webpack_exports__);
           "Filename: Untitled.json, please insert a name for your file below.",
         input: "text",
         inputAttributes: {
-          autocapitalize: "off"
+          autocapitalize: "off",
         },
         confirmButtontext: "Create File",
         showLoaderOnConfirm: true,
-        preConfirm: request => {
+        preConfirm: (request) => {
           // once the user is complete giving the file a name, show them the order modal
 
           var Filename = request;
           var blob = new Blob(
             [
-              JSON.stringify(order_data)
+              JSON.stringify(order_data),
               //   JSON.stringify(this.order_option_inputs)
             ],
             {
-              type: "application/json"
+              type: "application/json",
             }
           );
           file_saver__WEBPACK_IMPORTED_MODULE_0___default()(blob, Filename + ".json");
         },
-        allowOutsideClick: () => !this.$swal.isLoading()
-      }).then(result => {
+        allowOutsideClick: () => !this.$swal.isLoading(),
+      }).then((result) => {
         if (result.value) {
           //Re Open Modal and allow user to continue their function
           this.$bvModal.show("jse-new-order");
@@ -75726,8 +75694,9 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     tradingAccounts() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-trading-accounts").then(response => {
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-trading-accounts").then((response) => {
         let data = response.data;
+        console.log("Right Here");
         console.log(data);
         let i;
         for (i = 0; i < data.length; i++) {
@@ -75741,7 +75710,8 @@ __webpack_require__.r(__webpack_exports__);
               data[i].trading_account_number +
               " : " +
               data[i].account,
-            value: data[i].id
+            value: data[i].id,
+            data: data[i]
           });
         }
       });
@@ -75777,16 +75747,16 @@ __webpack_require__.r(__webpack_exports__);
     createBrokerClientOrder(broker) {
       //Notes:
 
-      this.$swal
-        .fire({
-          title: "Creating Client Order",
-          html: "One moment while we setup the current order",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        })
-        .then(result => {});
+      // this.$swal
+      //   .fire({
+      //     title: "Creating Client Order",
+      //     html: "One moment while we setup the current order",
+      //     timerProgressBar: true,
+      //     onBeforeOpen: () => {
+      //       this.$swal.showLoading();
+      //     },
+      //   })
+      //   .then((result) => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
@@ -75798,7 +75768,7 @@ __webpack_require__.r(__webpack_exports__);
       } else {
         axios__WEBPACK_IMPORTED_MODULE_2___default.a
           .post("store-operator-client-order", broker)
-          .then(response => {
+          .then((response) => {
             let data = response.data;
             let valid = data.isvalid;
             console.log(data);
@@ -75811,7 +75781,7 @@ __webpack_require__.r(__webpack_exports__);
               setTimeout(location.reload.bind(location), 2000);
             }
           })
-          .catch(error => {
+          .catch((error) => {
             var s = error.response.data.message;
             var field = s.match(/'([^']+)'/)[1];
             if (error.response.data.message.includes("cannot be null")) {
@@ -75864,7 +75834,7 @@ __webpack_require__.r(__webpack_exports__);
 
         ExDestination: "CNQ",
 
-        ClientID: "JMMB_TRADER1"
+        ClientID: "JMMB_TRADER1",
       };
 
       console.log(order_sample);
@@ -75873,11 +75843,12 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/OrderManagement/NewOrderSingle",
+            this.$fixApi +
+            "api/OrderManagement/NewOrderSingle",
           order_sample,
           { crossDomain: true }
         )
-        .then(response => {
+        .then((response) => {
           let status = response.status;
           if (status === 200) {
             this.messageDownload(order_sample);
@@ -75888,16 +75859,17 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_2___default.a
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/messagedownload/download",
+            this.$fixApi +
+            "api/messagedownload/download",
           order_sample,
           { crossDomain: true }
         )
-        .then(response => {
+        .then((response) => {
           console.log(response);
         });
     },
     add() {
-      this.disabled = '0';
+      this.disabled = "0";
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
@@ -75941,19 +75913,19 @@ __webpack_require__.r(__webpack_exports__);
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
-        this.$bvModal.hide("jse-new-order"); //Close the m  odal if it is open
-        var new_order = {};
-        this.order["handling_instructions"] = JSON.stringify(
-          this.order.handling_instructions
-        );
-        this.order["symbol"] = JSON.stringify(this.order.symbol);
-        this.order["currency"] = JSON.stringify(this.order.currency);
-        this.order["order_type"] = JSON.stringify(this.order.order_type);
-        this.order["side"] = JSON.stringify(this.order.side);
-        this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
-        this.order["option_type"] = JSON.stringify(this.order.option_type);
-        this.order["order_type"] = JSON.stringify(this.order.order_type);
-        this.createBrokerClientOrder(this.order);
+      this.$bvModal.hide("jse-new-order"); //Close the m  odal if it is open
+      var new_order = {};
+      this.order["handling_instructions"] = JSON.stringify(
+        this.order.handling_instructions
+      );
+      this.order["symbol"] = JSON.stringify(this.order.symbol);
+      this.order["currency"] = JSON.stringify(this.order.currency);
+      this.order["order_type"] = JSON.stringify(this.order.order_type);
+      this.order["side"] = JSON.stringify(this.order.side);
+      this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
+      this.order["option_type"] = JSON.stringify(this.order.option_type);
+      this.order["order_type"] = JSON.stringify(this.order.order_type);
+      this.createBrokerClientOrder(this.order);
       // }
     },
     resetModal() {
@@ -75963,10 +75935,10 @@ __webpack_require__.r(__webpack_exports__);
     },
     handleSubmit() {},
     getSymbols() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json").then(response => {
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json").then((response) => {
         this.symbols = response.data;
       });
-    }
+    },
   },
   mounted() {
     this.getBrokers();
@@ -75986,11 +75958,10 @@ __webpack_require__.r(__webpack_exports__);
 
     // if there are orders present
     // if(JSON.parse(this.orders).length >= 1){
-      this.broker_client_orders = JSON.parse(this.orders);
-      console.log(this.broker_client_orders);
+    this.broker_client_orders = JSON.parse(this.orders);
+    console.log(this.broker_client_orders);
     // }
-    
-  }
+  },
 });
 
 
@@ -80018,6 +79989,13 @@ var render = function() {
                                           _vm.broker_trading_account_options,
                                         disabled: _vm.disabled == 1
                                       },
+                                      on: {
+                                        change: function($event) {
+                                          return _vm.currencyHandler(
+                                            _vm.order.trading_account
+                                          )
+                                        }
+                                      },
                                       scopedSlots: _vm._u([
                                         {
                                           key: "first",
@@ -80028,7 +80006,7 @@ var render = function() {
                                                 { attrs: { value: null } },
                                                 [
                                                   _vm._v(
-                                                    "\n                        -- Please select a Trading\n                        Account--\n                      "
+                                                    "\n                        -- Please select a Trading Account--\n                      "
                                                   )
                                                 ]
                                               )
@@ -80088,7 +80066,7 @@ var render = function() {
                                                   { attrs: { value: null } },
                                                   [
                                                     _vm._v(
-                                                      "\n                        -- Please select a Client\n                        Account--\n                      "
+                                                      "\n                        -- Please select a Client Account--\n                      "
                                                     )
                                                   ]
                                                 )
@@ -80126,7 +80104,7 @@ var render = function() {
                                                 _vm._v(
                                                   "\n                      JCSD-" +
                                                     _vm._s(b.jcsd) +
-                                                    " :\n                      " +
+                                                    " : " +
                                                     _vm._s(b.name) +
                                                     ' "Investor"\n                    '
                                                 )
@@ -80281,7 +80259,7 @@ var render = function() {
                                         placeholder: "Select a currency",
                                         label: "text",
                                         options: _vm.currencies,
-                                        disabled: _vm.disabled == 1
+                                        disabled: 1 || false
                                       },
                                       model: {
                                         value: _vm.order.currency,

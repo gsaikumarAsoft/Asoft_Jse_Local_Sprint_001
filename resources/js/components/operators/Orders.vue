@@ -5,8 +5,8 @@
       <h1>Current Orders</h1>
       <div class="content">
         <b-table
-        responsiveS
-          v-if='permissions.indexOf("read-broker-order") !== -1'
+          responsiveS
+          v-if="permissions.indexOf('read-broker-order') !== -1"
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
           id="orders-table"
@@ -21,7 +21,7 @@
         <!-- <pre>{{broker_client_orders}}</pre> -->
         <div v-if="!create"></div>
         <b-modal
-        :hide-footer="!create"
+          :hide-footer="!create"
           id="jse-new-order"
           size="xl"
           ref="modal"
@@ -42,11 +42,11 @@
                       :options="broker_trading_account_options"
                       class="mb-3"
                       :disabled="disabled == 1"
+                      @change="currencyHandler(order.trading_account)"
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null">
-                          -- Please select a Trading
-                          Account--
+                          -- Please select a Trading Account--
                         </b-form-select-option>
                       </template>
                       <!-- <b-form-select-option
@@ -58,10 +58,7 @@
                   </b-form-group>
                 </b-col>
                 <b-col>
-                  <b-form-group
-                    label="Client Account"
-                    label-for="broker-input"
-                  >
+                  <b-form-group label="Client Account" label-for="broker-input">
                     <b-form-select
                       v-model="order.client_trading_account"
                       :options="client_trading_account_options.trading_account"
@@ -70,8 +67,7 @@
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null">
-                          -- Please select a Client
-                          Account--
+                          -- Please select a Client Account--
                         </b-form-select-option>
                       </template>
                       <b-form-select-option
@@ -79,8 +75,7 @@
                         :value="b.id"
                         :key="b.id"
                       >
-                        JCSD-{{ b.jcsd }} :
-                        {{ b.name }} "Investor"
+                        JCSD-{{ b.jcsd }} : {{ b.name }} "Investor"
                       </b-form-select-option>
                     </b-form-select>
                   </b-form-group>
@@ -92,7 +87,6 @@
                     label-for="input-1-client-order-number"
                   >
                     <b-form-input
-                    
                       id="input-10"
                       v-model="order.client_order_number"
                       type="text"
@@ -119,10 +113,7 @@
               </b-row>
               <b-row>
                 <b-col>
-                  <b-form-group
-                    label="Symbol"
-                    label-for="order-input"
-                  >
+                  <b-form-group label="Symbol" label-for="order-input">
                     <multiselect
                       placeholder="Select a symbol"
                       v-model="order.symbol"
@@ -134,24 +125,18 @@
                 </b-col>
 
                 <b-col>
-                  <b-form-group
-                    label="Currency"
-                    label-for="broker-input"
-                  >
+                  <b-form-group label="Currency" label-for="broker-input">
                     <multiselect
                       placeholder="Select a currency"
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
-                      :disabled="disabled == 1"
+                      :disabled="1 || 3"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
                 <b-col>
-                  <b-form-group
-                    label="Value"
-                    label-for="order-input"
-                  >
+                  <b-form-group label="Value" label-for="order-input">
                     <b-input-group size="md" prepend="$">
                       <b-form-input
                         id="value-input1"
@@ -164,11 +149,7 @@
                   </b-form-group>
                 </b-col>
                 <b-col>
-                  <b-form-group
-                    label="Stop Price"
-                    label-for="limit-input"
-                  
-                  >
+                  <b-form-group label="Stop Price" label-for="limit-input">
                     <b-input-group size="md" prepend="$">
                       <b-form-input
                         id="value-input"
@@ -201,11 +182,7 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
-                  <b-form-group
-                    label="Quantity"
-                    label-for="broker-input"
-                  
-                  >
+                  <b-form-group label="Quantity" label-for="broker-input">
                     <b-input-group size="md">
                       <b-form-input
                         id="quantity-input"
@@ -217,11 +194,7 @@
                   </b-form-group>
                 </b-col>
                 <b-col>
-                  <b-form-group
-                    label="Price"
-                    label-for="order-input"
-                  
-                  >
+                  <b-form-group label="Price" label-for="order-input">
                     <b-input-group size="md" prepend="$">
                       <b-form-input
                         id="price-input"
@@ -234,11 +207,7 @@
                   </b-form-group>
                 </b-col>
                 <b-col>
-                  <b-form-group
-                    label="Side"
-                    label-for="type-input"
-                  
-                  >
+                  <b-form-group label="Side" label-for="type-input">
                     <multiselect
                       placeholder="Select a Side"
                       v-model="order.side"
@@ -249,11 +218,7 @@
                   </b-form-group>
                 </b-col>
                 <b-col>
-                  <b-form-group
-                    label="Order Type"
-                    label-for="type-input"
-                  
-                  >
+                  <b-form-group label="Order Type" label-for="type-input">
                     <multiselect
                       placeholder="Select an Order Type"
                       v-model="order.order_type"
@@ -271,7 +236,6 @@
                   <b-form-group
                     label="Handling Instructions"
                     label-for="broker-input"
-                  
                   >
                     <multiselect
                       placeholder="Select an Instruction"
@@ -315,11 +279,7 @@
                   </b-form-group>
                 </b-col>-->
                 <b-col>
-                  <b-form-group
-                    label="Time In Force"
-                    label-for="broker-input"
-                  
-                  >
+                  <b-form-group label="Time In Force" label-for="broker-input">
                     <multiselect
                       placeholder="Select a Time In Force"
                       v-model="order.time_in_force"
@@ -347,11 +307,7 @@
                 <b-col>
                   <!-- Iceberg Options -->
                   <!-- [ Display Range ] -->
-                  <b-form-group
-                    label="Display Range"
-                    label-for="order-input"
-                  
-                  >
+                  <b-form-group label="Display Range" label-for="order-input">
                     <b-input-group size="md" prepend="+-">
                       <b-form-input
                         id="display_range-input"
@@ -366,11 +322,7 @@
                 <b-col>
                   <!-- Iceberg Options -->
                   <!-- [ Display Range ] -->
-                  <b-form-group
-                    label="Max Floor"
-                    label-for="order-input"
-                  
-                  >
+                  <b-form-group label="Max Floor" label-for="order-input">
                     <b-input-group size="md" prepend="^">
                       <b-form-input
                         id="max_floor-input"
@@ -483,10 +435,11 @@
           aria-controls="orders-table"
         ></b-pagination>
         <b-button
-          v-if='permissions.indexOf("create-broker-order") !== -1'
+          v-if="permissions.indexOf('create-broker-order') !== -1"
           v-b-modal.jse-new-order
           @click="add"
-        >Create New Order</b-button>
+          >Create New Order</b-button
+        >
       </div>
     </div>
   </div>
@@ -501,13 +454,13 @@ export default {
   props: ["orders", "client_accounts"],
   components: {
     headNav,
-    Multiselect
+    Multiselect,
   },
   data() {
     return {
       expiration: false,
       disabled: 0,
-      modalTitle: 'New Order',
+      modalTitle: "New Order",
       permissions: [],
       order_template_data: [],
       file: "",
@@ -535,8 +488,8 @@ export default {
             var type = JSON.parse(item.order_type);
             var order = JSON.parse(value);
             var d = JSON.parse(order);
-            return d['text'];
-          }
+            return d["text"];
+          },
         },
         {
           key: "symbol",
@@ -548,7 +501,7 @@ export default {
 
             return s.text;
             // return symbol.text;
-          }
+          },
         },
         {
           key: "time_in_force",
@@ -564,7 +517,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "currency",
@@ -580,7 +533,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "side",
@@ -596,7 +549,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
@@ -628,11 +581,11 @@ export default {
             } else {
               return value;
             }
-          }
-        }
+          },
+        },
         // { key: "foreign_broker", sortable: true }
       ],
-      broker_client_orders: '',
+      broker_client_orders: "",
       broker: {},
       perPage: 5,
       currentPage: 1,
@@ -640,37 +593,37 @@ export default {
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "1"
+          fix_value: "1",
         },
         {
           text: "Automated execution order, public, Broker intervention OK",
           value: "Automated execution order, public, Broker intervention OK",
-          fix_value: "2"
+          fix_value: "2",
         },
         {
           text: "Manual order, best execution",
           value: "Manual order, best execution",
-          fix_value: "3"
+          fix_value: "3",
         },
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "4"
-        }
+          fix_value: "4",
+        },
       ],
       jason_order: [],
       option_values: [
         {
           text: "TimeInForce",
           value: "TimeInForce",
-          type: "Date: when to expire"
+          type: "Date: when to expire",
         },
         {
           text: "Exection Destination",
           value: "Exection Destination",
-          type: "optional"
+          type: "optional",
         },
-        { text: "Exuction Instruction", value: "Exection Instruction" }
+        { text: "Exuction Instruction", value: "Exection Instruction" },
       ],
       option_types: [
         { text: "ClOrdID", value: "ClOrdID" },
@@ -684,19 +637,19 @@ export default {
         { text: "Side", value: "Side" },
         { text: "StopPx", value: "StopPx" },
         { text: "TimeInForce", value: "TimeInForce" },
-        { text: "TransactTime", value: "TransactTime" }
+        { text: "TransactTime", value: "TransactTime" },
       ],
       time_in_force: [
         { text: "Day", value: "Day", fix_value: "0" },
         {
           text: "Good Till Cancel (GTC)",
           value: "Good Till Cancel (GTC)",
-          fix_value: "1"
+          fix_value: "1",
         },
         {
           text: "Good Till Date (GTD)",
           value: "Good Till Date (GTD)",
-          fix_value: "6"
+          fix_value: "6",
         },
         // {
         //   text: "At the Opening (OPG)",
@@ -706,13 +659,13 @@ export default {
         {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
-          fix_value: "3"
+          fix_value: "3",
         },
         {
           text: "Fill or Kill (FOK)",
           value: "Fill or Kill (FOK)",
-          fix_value: "4"
-        }
+          fix_value: "4",
+        },
         // {
         //   text: "Good Till Crossing (GTX)",
         //   value: "Good Till Crossing (GTX)",
@@ -734,7 +687,7 @@ export default {
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -944,17 +897,31 @@ export default {
         { value: "YER", text: "YER:  Yemeni Rial" },
         { value: "ZAR", text: "ZAR:  South African Rand" },
         { value: "ZMW", text: "ZMW:  Zambian Kwacha" },
-        { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" }
+        { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" },
       ],
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_client_orders.length;
-    }
+    },
   },
   methods: {
+    search(nameKey, myArray) {
+      for (var i = 0; i < myArray.length; i++) {
+        if (myArray[i].value === nameKey) {
+          return myArray[i];
+        }
+      }
+    },
+    currencyHandler() {
+      this.order.currency = {};
+      var data = this.broker_trading_account_options[0].data
+      var currency = data.currency;
+      var resultObject = this.search(currency, this.currencies);
+      this.order.currency = resultObject;
+    },
     showOptionValueInput() {
       if (this.order_option_input === false) {
         this.order_option_input = true;
@@ -967,7 +934,7 @@ export default {
       this.order = {};
       this.order = o;
 
-      var clients =this.client_trading_account_options;
+      var clients = this.client_trading_account_options;
       var trading = this.broker_trading_account_options;
       let i, j;
       for (i = 0; i < clients.length; i++) {
@@ -1005,8 +972,8 @@ export default {
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
-        footer: "<a href='orders' >Exit</a>"
-      }).then(result => {
+        footer: "<a href='orders' >Exit</a>",
+      }).then((result) => {
         if (result.value) {
           if (this.permissions.indexOf("update-broker-order") !== -1) {
             this.$bvModal.show("jse-new-order");
@@ -1021,7 +988,8 @@ export default {
         }
         if (result.dismiss === "cancel") {
           if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(o.id);brokerOr
+            this.destroy(o.id);
+            brokerOr;
           } else {
             this.$swal(
               "Oops!",
@@ -1038,7 +1006,7 @@ export default {
       // console.log(this.files);
       const fr = new FileReader();
       const self = this;
-      fr.onload = e => {
+      fr.onload = (e) => {
         const result = JSON.parse(e.target.result);
         self.order_template_data = result;
       };
@@ -1056,7 +1024,7 @@ export default {
     saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
-        order_options: this.order_option_inputs
+        order_options: this.order_option_inputs,
       };
 
       delete order_data.order_standard["trading_account"];
@@ -1069,27 +1037,27 @@ export default {
           "Filename: Untitled.json, please insert a name for your file below.",
         input: "text",
         inputAttributes: {
-          autocapitalize: "off"
+          autocapitalize: "off",
         },
         confirmButtontext: "Create File",
         showLoaderOnConfirm: true,
-        preConfirm: request => {
+        preConfirm: (request) => {
           // once the user is complete giving the file a name, show them the order modal
 
           var Filename = request;
           var blob = new Blob(
             [
-              JSON.stringify(order_data)
+              JSON.stringify(order_data),
               //   JSON.stringify(this.order_option_inputs)
             ],
             {
-              type: "application/json"
+              type: "application/json",
             }
           );
           saveAs(blob, Filename + ".json");
         },
-        allowOutsideClick: () => !this.$swal.isLoading()
-      }).then(result => {
+        allowOutsideClick: () => !this.$swal.isLoading(),
+      }).then((result) => {
         if (result.value) {
           //Re Open Modal and allow user to continue their function
           this.$bvModal.show("jse-new-order");
@@ -1097,8 +1065,9 @@ export default {
       });
     },
     tradingAccounts() {
-      axios.get("broker-trading-accounts").then(response => {
+      axios.get("broker-trading-accounts").then((response) => {
         let data = response.data;
+        console.log("Right Here");
         console.log(data);
         let i;
         for (i = 0; i < data.length; i++) {
@@ -1112,7 +1081,8 @@ export default {
               data[i].trading_account_number +
               " : " +
               data[i].account,
-            value: data[i].id
+            value: data[i].id,
+            data: data[i]
           });
         }
       });
@@ -1148,16 +1118,16 @@ export default {
     createBrokerClientOrder(broker) {
       //Notes:
 
-      this.$swal
-        .fire({
-          title: "Creating Client Order",
-          html: "One moment while we setup the current order",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        })
-        .then(result => {});
+      // this.$swal
+      //   .fire({
+      //     title: "Creating Client Order",
+      //     html: "One moment while we setup the current order",
+      //     timerProgressBar: true,
+      //     onBeforeOpen: () => {
+      //       this.$swal.showLoading();
+      //     },
+      //   })
+      //   .then((result) => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
@@ -1169,7 +1139,7 @@ export default {
       } else {
         axios
           .post("store-operator-client-order", broker)
-          .then(response => {
+          .then((response) => {
             let data = response.data;
             let valid = data.isvalid;
             console.log(data);
@@ -1182,7 +1152,7 @@ export default {
               setTimeout(location.reload.bind(location), 2000);
             }
           })
-          .catch(error => {
+          .catch((error) => {
             var s = error.response.data.message;
             var field = s.match(/'([^']+)'/)[1];
             if (error.response.data.message.includes("cannot be null")) {
@@ -1235,7 +1205,7 @@ export default {
 
         ExDestination: "CNQ",
 
-        ClientID: "JMMB_TRADER1"
+        ClientID: "JMMB_TRADER1",
       };
 
       console.log(order_sample);
@@ -1244,11 +1214,12 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/OrderManagement/NewOrderSingle",
+            this.$fixApi +
+            "api/OrderManagement/NewOrderSingle",
           order_sample,
           { crossDomain: true }
         )
-        .then(response => {
+        .then((response) => {
           let status = response.status;
           if (status === 200) {
             this.messageDownload(order_sample);
@@ -1259,16 +1230,17 @@ export default {
       axios
         .post(
           "https://cors-anywhere.herokuapp.com/" +
-           this.$fixApi+"api/messagedownload/download",
+            this.$fixApi +
+            "api/messagedownload/download",
           order_sample,
           { crossDomain: true }
         )
-        .then(response => {
+        .then((response) => {
           console.log(response);
         });
     },
     add() {
-      this.disabled = '0';
+      this.disabled = "0";
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
@@ -1312,19 +1284,19 @@ export default {
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
-        this.$bvModal.hide("jse-new-order"); //Close the m  odal if it is open
-        var new_order = {};
-        this.order["handling_instructions"] = JSON.stringify(
-          this.order.handling_instructions
-        );
-        this.order["symbol"] = JSON.stringify(this.order.symbol);
-        this.order["currency"] = JSON.stringify(this.order.currency);
-        this.order["order_type"] = JSON.stringify(this.order.order_type);
-        this.order["side"] = JSON.stringify(this.order.side);
-        this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
-        this.order["option_type"] = JSON.stringify(this.order.option_type);
-        this.order["order_type"] = JSON.stringify(this.order.order_type);
-        this.createBrokerClientOrder(this.order);
+      this.$bvModal.hide("jse-new-order"); //Close the m  odal if it is open
+      var new_order = {};
+      this.order["handling_instructions"] = JSON.stringify(
+        this.order.handling_instructions
+      );
+      this.order["symbol"] = JSON.stringify(this.order.symbol);
+      this.order["currency"] = JSON.stringify(this.order.currency);
+      this.order["order_type"] = JSON.stringify(this.order.order_type);
+      this.order["side"] = JSON.stringify(this.order.side);
+      this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
+      this.order["option_type"] = JSON.stringify(this.order.option_type);
+      this.order["order_type"] = JSON.stringify(this.order.order_type);
+      this.createBrokerClientOrder(this.order);
       // }
     },
     resetModal() {
@@ -1334,10 +1306,10 @@ export default {
     },
     handleSubmit() {},
     getSymbols() {
-      axios.get("/apis/symbols.json").then(response => {
+      axios.get("/apis/symbols.json").then((response) => {
         this.symbols = response.data;
       });
-    }
+    },
   },
   mounted() {
     this.getBrokers();
@@ -1357,11 +1329,10 @@ export default {
 
     // if there are orders present
     // if(JSON.parse(this.orders).length >= 1){
-      this.broker_client_orders = JSON.parse(this.orders);
-      console.log(this.broker_client_orders);
+    this.broker_client_orders = JSON.parse(this.orders);
+    console.log(this.broker_client_orders);
     // }
-    
-  }
+  },
 };
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

@@ -1270,7 +1270,7 @@ export default {
       axios.delete(`destroy-broker-client-order/${id}`).then(response => {
         this.$swal("Cancelled");
         setTimeout(location.reload.bind(location), 1000);
-      });
+      });arsed 
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
