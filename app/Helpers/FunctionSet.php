@@ -229,7 +229,7 @@ class FunctionSet
                 break;
             default:
                 // If the response fails create a record in the audit log and in the execution reports as well
-                $data['text'] = "Order Failed: " . $fix_status['status'] . '.  ' . $fix_status['title'] . ' TraceID = [' . $fix_status['traceId'] . ']';
+                $data['text'] = "Order Failed: " . $fix_status['result'] . '.  ' . $fix_status['title'] . ' TraceID = [' . $fix_status['traceId'] . ']';
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
