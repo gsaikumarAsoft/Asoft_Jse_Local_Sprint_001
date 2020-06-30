@@ -183,7 +183,7 @@ class BrokerController extends Controller
         $execution_report = $request->executionReports;
 
         // return $request;
-        BrokerOrderExecutionReport::truncate();
+        // BrokerOrderExecutionReport::truncate();
         foreach ($execution_report as $report) {
             $clients[] = $report;
 

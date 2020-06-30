@@ -209,7 +209,7 @@ class FunctionSet
         // ================================================================================================
 
         $fix_status = json_decode($result, true);
-
+        // return $fix_status;
         switch ($fix_status['result']) {
             case "Session could not be established with CIBC. Order number {0}":
                 $this->LogActivity->addToLog('Order Failed:' . $fix_status['result'] . '-' . $request->client_order_number);
@@ -233,6 +233,7 @@ class FunctionSet
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
+                break;
         }
 
         // return $fix_status['result'];
@@ -689,22 +690,36 @@ class FunctionSet
 
                             // ===========================================================
                             // Set Status To $account[$key]['status]
-                            DB::table('broker_client_orders')
-                                ->where('id', $od->id)
-                                ->update(['order_status' => $status]);
+                            // DB::table('broker_client_orders')
+                            //     ->where('id', $od->id)
+                            //     ->update(['order_status' => $status]);
+                            BrokerClientOrder::updateOrCreate(
+                                ['id' => $od->id],
+                                ['order_status' => $status]
+
+                            );
                         }
                     } else if ($status === "1") {
 
                         //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
                         if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
                             //Update Broker Client Order Status
-                            DB::table('broker_client_orders')
-                                ->where('id', $od->id)
-                                ->update(['order_status' => 1]);
 
-                            DB::table('broker_clients')
-                                ->where('id', $bc->id)
-                                ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
+                            BrokerClientOrder::updateOrCreate(
+                                ['id' => $od->id],
+                                ['order_status' => 1]
+
+                            );
+                            // DB::table('broker_client_orders')
+                            //     ->where('id', $od->id)
+                            //     ->update(['order_status' => 1]);
+                            BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['open_orders' => $op_or, 'filled_orders' => $fil_or]
+                            );
+                            // DB::table('broker_clients')
+                            //     ->where('id', $bc->id)
+                            //     ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
                         }
                     } else {
 
@@ -712,15 +727,23 @@ class FunctionSet
                         if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
                             //The order has been filled
                             // Update Database with required value
-                            DB::table('broker_clients')
-                                ->where('id', $bc->id)
-                                ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
+                            // DB::table('broker_clients')
+                            //     ->where('id', $bc->id)
+                            //     ->update(['open_orders' => $op_or], ['filled_orders' => $fil_or]);
+
+                            BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['open_orders' => $op_or, 'filled_orders' => $fil_or]
+                            );
 
                             //Update Broker Settlement account once the order is filled
-                            DB::table('broker_settlement_accounts')
-                                ->where('id', $sa['id'])
-                                ->update(['amount_allocated' => $settlement_allocated], ['filled_orders', $settlement_fil_ord]);
-
+                            // DB::table('broker_settlement_accounts')
+                            //     ->where('id', $sa['id'])
+                            //     ->update(['amount_allocated' => $settlement_allocated], ['filled_orders', $settlement_fil_ord]);
+                            BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                ['amount_allocated' => $settlement_allocated,  'filled_orders', $settlement_fil_ord]
+                            );
                             // DB::table('broker_client_orders')
                             //     ->where('id', $od->id)
                             //     ->update(['order_status' => $status]);
