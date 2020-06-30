@@ -11,14 +11,11 @@ use App\BrokerUser;
 use App\ForeignBroker;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
+use App\Helpers\OrderStatus;
 use App\LocalBroker;
-use App\Mail\TradingAccount;
 use App\Role;
-use Illuminate\Http\Request;
 use App\User;
-use Carbon\Carbon;
-use CreateBrokerClientOrderExecutionReports;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +32,7 @@ class BrokerController extends Controller
         return view('brokers.index');
     }
 
-    function storeBrokerClient(Request $request)
+    public function storeBrokerClient(Request $request)
     {
         if ($request->id) {
             // If the operator didnt select a status default to unverified
@@ -69,7 +66,6 @@ class BrokerController extends Controller
         }
     }
 
-
     public function getUsers()
     {
         $users = Role::where('name', 'client')->first()->users()->get();
@@ -81,13 +77,12 @@ class BrokerController extends Controller
         return view('brokers.company');
     }
 
-
     public function tradingAccounts()
     {
 
         $user = auth()->user();
 
-        $user_definition  = LocalBroker::where('user_id', $user->id)->first();
+        $user_definition = LocalBroker::where('user_id', $user->id)->first();
 
         $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition['id'])
             ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_trading_accounts.id', 'broker_settlement_accounts.currency')
@@ -118,13 +113,11 @@ class BrokerController extends Controller
     public function users()
     {
 
-
         $broker_users = $data = BrokerUser::with('role')->get();
         return view('brokers.user')->with('broker_users', $broker_users);
     }
     public function brokerUsers()
     {
-
 
         $broker_users = $data = BrokerUser::with('role')->get();
         return $broker_users;
@@ -170,8 +163,7 @@ class BrokerController extends Controller
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
             ->get();
 
-
-        return $execution_reports;
+        // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 
@@ -183,7 +175,6 @@ class BrokerController extends Controller
         BrokerOrderExecutionReport::truncate();
         foreach ($execution_report as $report) {
             $clients[] = $report;
-
 
             $broker_order_execution_report = new BrokerOrderExecutionReport();
             $broker_order_execution_report->clOrdID = $report['clOrdID'];
@@ -208,7 +199,6 @@ class BrokerController extends Controller
             $broker_order_execution_report->messageDate = $report['messageDate'];
             $broker_order_execution_report->save();
         }
-
 
         return $this->HelperClass->executionBalanceUpdate($clients);
     }
@@ -239,12 +229,11 @@ class BrokerController extends Controller
         return view('brokers.log');
     }
 
-
     public function destroyOrder($id)
     {
         $order = BrokerClientOrder::updateOrCreate(
             ['clordid' => $id],
-            ['order_status' => 4]
+            ['order_status' => OrderStatus::Cancelled] //4
         );
 
         return $this->HelperClass->cancelOrder($order);
@@ -252,14 +241,11 @@ class BrokerController extends Controller
     public function clientOrder(Request $request)
     {
 
-
-
         //Define The Broker Making The Order
         $user = auth()->user();
-        $user_definition  = LocalBroker::where('user_id', $user->id)->first();
+        $user_definition = LocalBroker::where('user_id', $user->id)->first();
         $local_broker_id = $user_definition->id;
         // ===================================================================
-
 
         //Trading Account Information
         $trading = BrokerTradingAccount::with('settlement_account')->find($request->trading_account)->first();
@@ -267,14 +253,12 @@ class BrokerController extends Controller
         //Settlement Account Information
         $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
 
-
         // Client Account Information
         $c_account = BrokerClient::find($request['client_trading_account'])->first();
 
         // Calculations Before Creating A New Order
         $order_value = $request->price * $request->quantity;
         // $settlement_available = $settlement->account_balance - $settlement->amount_allocated;
-
 
         //Beta 2
         $settlement_available = $settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
@@ -296,12 +280,11 @@ class BrokerController extends Controller
                 // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
-                // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 
+                // [Settlement Allocated] = [Settlement Allocated] + [Order Value]
                 $settlement_allocated = $settlement->amount_allocated + $order_value;
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
                 $client_open_orders = $c_account->open_orders + $order_value;
-
 
                 // Update Settlement Account Balances
                 BrokerSettlementAccount::updateOrCreate(
@@ -309,13 +292,11 @@ class BrokerController extends Controller
                     ['amount_allocated' => $settlement_allocated]
                 );
 
-
                 // Update Broker Clients Open Orders
                 BrokerClient::updateOrCreate(
                     ['id' => $request['client_trading_account']],
                     ['open_orders' => $client_open_orders]
                 );
-
 
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
