@@ -46,12 +46,13 @@ class FunctionSet
         return config('fixwrapper.base_url') + $path; //"api/OrderManagement/OrderCancelRequest";
     }
 
-    public function IsOrderOpened($orderStatus)
-    {
-        return ($orderStatus != OrderStatus::Expired &&
-            $orderStatus != OrderStatus::Cancelled &&
-            $orderStatus != OrderStatus::Rejected &&
-            $orderStatus != OrderStatus::Failed);
+    public function IsOrderValidOpenedBuy($o)
+    {    
+        return ($o->order_status != OrderStatus::Expired &&
+            $o->order_status != OrderStatus::Cancelled &&
+            $o->order_status != OrderStatus::Rejected &&
+            $o->order_status != OrderStatus::Failed && 
+            $o->side ==="BUY");
     }
 
     public function cancelOrder($order)
@@ -640,7 +641,7 @@ class FunctionSet
                             $order_status === OrderStatus::Rejected) {
 
                             // Check if the order is open
-                            if (IsOrderOpened($o->order_status)) {
+                            if (IsOrderValidOpenedBuy($o)) {
 
                                 // ===========================================================
                                 // Set Status To $account[$key]['status]
@@ -651,7 +652,7 @@ class FunctionSet
                         } else if ($order_status === OrderStatus::PartialFilled) {
 
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if (IsOrderOpened($o->order_status)) {
+                            if (IsOrderValidOpenedBuy($o)) {
                                 //Update Broker Client Order Status
                                 DB::table('broker_client_orders')
                                     ->where('id', $od->id)
@@ -664,7 +665,7 @@ class FunctionSet
                         } else {
 
                             //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                            if (IsOrderOpened($o->order_status)) {
+                            if (IsOrderValidOpenedBuy($o)) {
                                 //The order has been filled
                                 // Update Database with required value
                                 DB::table('broker_clients')
