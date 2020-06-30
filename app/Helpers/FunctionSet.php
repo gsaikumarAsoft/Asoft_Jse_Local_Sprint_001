@@ -42,7 +42,7 @@ class FunctionSet
     //set fix wrapper url
     public function fix_wrapper_url($path)
     {
-        return config('fixwrapper.base_url') + $path; //"api/OrderManagement/OrderCancelRequest";
+        return env('FIX_API_URL') . $path; //"api/OrderManagement/OrderCancelRequest";
     }
 
     public function IsOrderOpened($orderStatus)
@@ -63,8 +63,7 @@ class FunctionSet
 
         //Settlement Account Information
         $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
-        //$url =  "http://35.155.69.248:8020/api/OrderManagement/OrderCancelRequest";
-        $url = this . fix_wrapper_url("api/OrderManagement/OrderCancelRequest");
+        $url = $this->fix_wrapper_url("api/OrderManagement/OrderCancelRequest");
         $data = array(
             'BeginString' => 'FIX.4.2',
             'TargetCompID' => $trading->target_comp_id,
@@ -93,12 +92,12 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
+
         curl_close($ch);
         // return $result;
     }
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
     {
-
         // Find Local Broker For This Order & Define the SenderSub Id
         $local_broker = $this->LocalBrokerPick($local_broker_id);
         $sender_sub_id = $local_broker->name;
@@ -141,8 +140,8 @@ class FunctionSet
         $broker_client_order->trading_account_id = $request->trading_account;
         $broker_client_order->save();
 
-        // Send customer order to FIX 4.2 Switch - API Beta Fix Swith PHP Post 4.23
-        $url = "http://35.155.69.248:8020/api/OrderManagement/NewOrderSingle";
+        // Send customer order to FIX 4.2 Switch - API Beta Fix Swith PHP Post 4.2
+        $url = $this->fix_wrapper_url("api/OrderManagement/NewOrderSingle");
         $data = array(
             'BeginString' => 'FIX.4.2',
             'TargetCompID' => $trading->target_comp_id,
@@ -211,20 +210,54 @@ class FunctionSet
 
         $fix_status = json_decode($result, true);
 
-        if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
-            $this->LogActivity->addToLog('Order Successfull');
+        switch ($fix_status['result']) {
+            case "Session could not be established with CIBC. Order number {0}":
+                $this->LogActivity->addToLog('Order Failed:' . $fix_status['result'] . '-' . $request->client_order_number);
+                $data['text'] = 'Failed: ' . $fix_status['result'] . '-' . $request->client_order_number;
+                $order = DB::table('broker_client_orders')
+                    ->where('id', $broker_client_order->id)
+                    ->update(['order_status' => 'Failed']);
+                $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
 
-            return $this->executionBalanceUpdate($sender_sub_id);
-            return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
-        } else {
-            $this->LogActivity->addToLog('Order Failed:' . $fix_status['result']);
-            $data['text'] = 'Failed';
-            $order = DB::table('broker_client_orders')
-                ->where('id', $broker_client_order->id)
-                ->update(['order_status' => 'Failed']);
-            $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result']]);
+                break;
+            case "Please Check the endpoint /MessageDownload/Download for message queue":
+                // If the order is successfull create a log
+                $this->LogActivity->addToLog('Order Successfull' . '-' . $request->client_order_number);
+                $this->executionBalanceUpdate($sender_sub_id);
+                return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
+                break;
+            default:
+                // If the response fails create a record in the audit log and in the execution reports as well
+                $data['text'] = "Order Failed: " . $fix_status['status'] . '.  ' . $fix_status['title'] . ' TraceID = [' . $fix_status['traceId'] . ']';
+                $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
+                $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
         }
+
+        // return $fix_status['result'];
+        // if ($fix_status['status'] === 400) {
+        //     // If the response fails create a record in the audit log and in the execution reports as well
+        //     $data['text'] = "Order Failed: " . $fix_status['status'] . '.  ' . $fix_status['title'] . ' TraceID = [' . $fix_status['traceId'] . ']';
+        //     $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
+        //     $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+        //     return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
+        // }
+
+        // if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
+        //     // If the order is successfull create a log
+        //     $this->LogActivity->addToLog('Order Successfull');
+        //     $this->executionBalanceUpdate($sender_sub_id);
+        //     return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
+        // } else {
+        //     $this->LogActivity->addToLog('Order Failed:' . $fix_status['result']);
+        //     $data['text'] = 'Failed';
+        //     $order = DB::table('broker_client_orders')
+        //         ->where('id', $broker_client_order->id)
+        //         ->update(['order_status' => 'Failed']);
+        //     $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+        //     return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result']]);
+        // }
     }
     public function logExecution($request)
     {
@@ -572,7 +605,7 @@ class FunctionSet
     {
         // Call fix and return excutiun report for the required SensderSubID
         //$url = "http://35.155.69.248:8020/api/messagedownload/download";
-        $url = this . fix_wrapper_url("api/messagedownload/download");
+        $url = $this->fix_wrapper_url("api/messagedownload/download");
         $data = array(
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $sender_sub_id,
