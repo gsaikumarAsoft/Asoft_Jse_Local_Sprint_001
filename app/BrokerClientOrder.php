@@ -35,4 +35,8 @@ class BrokerClientOrder extends Model
         
 
     ];
+    public function clients()
+    {
+        return $this->hasMany(BrokerClient::class);
+    }
 }

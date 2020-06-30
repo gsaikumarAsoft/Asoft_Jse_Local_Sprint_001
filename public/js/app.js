@@ -75596,23 +75596,21 @@ __webpack_require__.r(__webpack_exports__);
       this.order = {};
       this.order = o;
 
-      //Pre Select Client And Trading Accounts
-      var data = JSON.parse(this.orders);
-      console.log(data);
-      // var clients = data[0].clients;
-      // var trading = data[0].trading;
-      // let i, j;
-      // for (i = 0; i < clients.length; i++) {
-      //   if (o.broker_client_id === clients[i].id) {
-      //     this.order.client_trading_account = clients[i].id;
-      //   }
-      // }
-      // for (j = 0; j < trading.length; j++) {
-      //   // console.log(trading[j].id);
-      //   if (parseInt(o.trading_account_id) === trading[j].id) {
-      //     this.order.trading_account = trading[j].id;
-      //   }
-      // }
+      var clients =this.client_trading_account_options;
+      var trading = this.broker_trading_account_options;
+      let i, j;
+      for (i = 0; i < clients.length; i++) {
+        if (o.broker_client_id === clients[i].id) {
+          this.order.client_trading_account = clients[i].id;
+        }
+      }
+      console.log(trading);
+      for (j = 0; j < trading.length; j++) {
+        // console.log(trading[j].id);
+        if (parseInt(o.trading_account_id) === trading[j].value) {
+          this.order.trading_account = trading[j].value;
+        }
+      }
       // // =============================================================
       //Check if we already parsed to json if we didnt do so now.
       if (typeof o.time_in_force === "string") {
@@ -75625,7 +75623,8 @@ __webpack_require__.r(__webpack_exports__);
         this.order.order_type = JSON.parse(JSON.parse(o.order_type));
         this.order.time_in_force = JSON.parse(o.time_in_force);
       }
-      // this.$refs.selectedOrder.clearSelected();==============================================
+      this.$refs.selectedOrder.clearSelected();
+      // ==============================================
       this.$swal({
         title: o.clordid,
         text: "The Options for the current order are.",
@@ -75973,7 +75972,7 @@ __webpack_require__.r(__webpack_exports__);
     this.getBrokers();
     this.getSymbols();
     this.tradingAccounts();
-    // console.log(this.client_accounts);
+    console.log(this);
     var client_accounts_data = JSON.parse(this.client_accounts);
     this.client_trading_account_options = client_accounts_data;
 
