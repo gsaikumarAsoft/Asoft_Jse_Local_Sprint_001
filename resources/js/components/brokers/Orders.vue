@@ -1015,6 +1015,7 @@ export default {
       if (typeof o.time_in_force === "string") {
         // Parse stringified data from database back to json for viewing in the multiselect dropdown
         // let handling = JSON.parse(o.handling_instructions);
+        console.log("order", this.order);
         this.order.handling_instructions = JSON.parse(o.handling_instructions);
         this.order.symbol = JSON.parse(o.symbol);
         this.order.currency = JSON.parse(o.currency);
