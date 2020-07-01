@@ -1316,9 +1316,7 @@ export default {
     var client_accounts = client_accounts_data[0]["clients"];
     console.log("orders", orders);
     this.broker_client_orders = orders.sort(function(a, b) {
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      return b.client_order_number > a.client_order_number ? -1 : 1;
     });
     this.client_trading_account_options = client_accounts;
 
