@@ -86,9 +86,9 @@
   </div>
 </template>
 <script lang="ts">
-import permissionMixin from "./../../mixins/Permissions";
+import permissionMixin from "./../../mixins/Permissions.vue";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 export default {
   mixins: [permissionMixin],
   components: {
@@ -167,61 +167,59 @@ export default {
     }
   },
   methods: {
-    getUserRole() {
-      axios.put(`/nv9w8yp8rbwg4t`).then(response => {
-        let data = response.data;
-        let role = data.roles[0];
-        let broker_account = data.broker;
-        // console.log(broker_account);
-        this.user_role = role.name;
-        this.user_name = data.name;
+    async getUserRole() {
+      const { data } = await axios.put(`/nv9w8yp8rbwg4t`);
+      let role = data.roles[0];
+      let broker_account = data.broker;
+      // console.log(broker_account);
+      this.user_role = role.name;
+      this.user_name = data.name;
 
-        // console.log(this.permissions.indexOf("create") !== -1);
+      // console.log(this.permissions.indexOf("create") !== -1);
 
-        if (
-          this.permissions.indexOf("create-broker-user") !== -1 &&
-          broker_account.length > 0
-        ) {
-          this.permission_target.push({
+      if (
+        this.permissions.indexOf("create-broker-user") !== -1 &&
+        broker_account.length > 0
+      ) {
+        this.permission_target.push({
+          role: "ADMB",
+          text: "Broker User",
+          value: "broker-user"
+        });
+      } else {
+        this.permission_target = [
+          {
             role: "ADMB",
             text: "Broker User",
             value: "broker-user"
-          });
-        } else {
-          this.permission_target = [
-            {
-              role: "ADMB",
-              text: "Broker User",
-              value: "broker-user"
-            },
-            {
-              role: "",
-              text: "Broker Client",
-              value: "broker-client"
-            },
-            {
-              role: "",
-              text: "Broker Accounts",
-              value: "broker-accounts"
-            },
-            {
-              role: "",
-              text: "Broker Orders",
-              value: "broker-order"
-            }
-          ];
-        }
+          },
+          {
+            role: "",
+            text: "Broker Client",
+            value: "broker-client"
+          },
+          {
+            role: "",
+            text: "Broker Accounts",
+            value: "broker-accounts"
+          },
+          {
+            role: "",
+            text: "Broker Orders",
+            value: "broker-order"
+          }
+        ];
+      }
 
-        if (this.permissions.indexOf("create-broker-client") !== -1) {
-          this.permission_target = [
-            {
-              role: "ADMB",
-              text: "Broker Client",
-              value: "broker-client"
-            }
-          ];
-        }
-      });
+      if (this.permissions.indexOf("create-broker-client") !== -1) {
+        this.permission_target = [
+          {
+            role: "ADMB",
+            text: "Broker Client",
+            value: "broker-client"
+          }
+        ];
+      }
     },
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
@@ -232,13 +230,13 @@ export default {
       this.create = false;
       this.broker = {};
     },
-    handleOk(bvModalEvt) {
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
+      await this.handleSubmit();
     },
-    handleSubmit() {
+    async handleSubmit() {
       // console.log(this.broker);
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
@@ -253,7 +251,7 @@ export default {
         //Determine if a new user is being created or we are updating an existing user
         if (this.create) {
           //Exclude ID
-          this.storeBrokerUser({
+          await this.storeBrokerUser({
             local_broker_id: parseInt(this.$userId),
             broker_trading_account_id: this.broker.broker_trading_account_id,
             name: this.broker.name,
@@ -266,7 +264,7 @@ export default {
           });
         } else {
           //Include ID
-          this.storeBrokerUser({
+          await this.storeBrokerUser({
             id: this.broker.id,
             local_broker_id: parseInt(this.$userId),
             broker_trading_account_id: this.broker.broker_trading_account_id,
@@ -278,7 +276,7 @@ export default {
             ),
             target: this.broker.target
           });
-          this.$swal(`Account Updated for ${this.broker.email}`);
+          await this.$swal(`Account Updated for ${this.broker.email}`);
         }
 
         this.resetModal();
@@ -293,11 +291,11 @@ export default {
         this.$bvModal.hide("modal-1");
       });
     },
-    brokerUserHandler(b) {
+    async brokerUserHandler(b) {
       this.broker = b;
       this.broker.selected_permissions = this.broker.types;
       // console.log(this.broker);
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to View Or Delete the following User <b>(${b.name})</b> `,
@@ -309,111 +307,105 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "User Has Been Removed.", "success");
-        }
-      });
+      }); //.then(result => {
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        await this.$swal("Deleted!", "User Has Been Removed.", "success");
+      }
+      //});
     },
-    getBrokers() {
-      axios.get("broker-users").then(response => {
-        // console.log(response);
-        let data = response.data;
-        let user_permissions = [{}];
-        this.local_broker_users = data;
+    async getBrokers() {
+      const { data } = await axios.get("broker-users");
+      // console.log(response);
+      // let data = response.data;
+      let user_permissions = [{}];
+      this.local_broker_users = data;
 
-        //Handle Permissions
-        let i, j, k;
-        for (i = 0; i < this.local_broker_users.length; i++) {
-          // console.log(this.local_broker_users[i].permissions)
-          this.local_broker_users[i].types = [];
-          this.local_broker_users[i].selected_client_permissions = [];
-          this.local_broker_users[i].selected_broker_permissions = [];
+      //Handle Permissions
+      for (let i = 0; i < this.local_broker_users.length; i++) {
+        // console.log(this.local_broker_users[i].permissions)
+        this.local_broker_users[i].types = [];
+        this.local_broker_users[i].selected_client_permissions = [];
+        this.local_broker_users[i].selected_broker_permissions = [];
 
-          user_permissions = this.local_broker_users[i].permissions;
-          for (k = 0; k < user_permissions.length; k++) {
-            var specific_permission = user_permissions[k].name;
-            this.local_broker_users[i].types.push(specific_permission);
+        user_permissions = this.local_broker_users[i].permissions;
+        for (let k = 0; k < user_permissions.length; k++) {
+          var specific_permission = user_permissions[k].name;
+          this.local_broker_users[i].types.push(specific_permission);
 
-            if (specific_permission.includes("client")) {
-              this.local_broker_users[i].selected_client_permissions.push(
-                specific_permission
-              );
-            }
-
-            if (specific_permission.includes("order")) {
-              this.local_broker_users[i].selected_broker_permissions.push(
-                specific_permission
-              );
-            }
-          }
-        }
-
-        this.broker.selected_permissions = this.local_broker_users.types;
-      });
-    },
-    tradingAccounts() {
-      axios.get("broker-trading-accounts").then(response => {
-        let data = response.data;
-        let i;
-        for (i = 0; i < data.length; i++) {
-          // console.log(data[i]);
-          this.broker_trading_account_options.push({
-            text:
-              data[i].foreign_broker +
-              " : " +
-              data[i].bank +
-              "-" +
-              data[i].trading_account_number +
-              " : " +
-              data[i].account,
-            value: data[i].id
-          });
-        }
-      });
-    },
-    storeBrokerUser(broker) {
-      this.$swal
-        .fire({
-          title: "Creating User Account",
-          html: "One moment while we setup the User Account",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        })
-        .then(result => {});
-      axios
-        .post("store-broker", broker)
-        .then(response => {
-          this.$swal(`Account created for ${broker.email}`);
-          // setTimeout(location.reload.bind(location), 2000);
-          this.getBrokers();
-        })
-        .catch(error => {
-          if (error.response.data.message.includes("Duplicate entry")) {
-            this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
+          if (specific_permission.includes("client")) {
+            this.local_broker_users[i].selected_client_permissions.push(
+              specific_permission
             );
           }
+
+          if (specific_permission.includes("order")) {
+            this.local_broker_users[i].selected_broker_permissions.push(
+              specific_permission
+            );
+          }
+        }
+      }
+
+      this.broker.selected_permissions = this.local_broker_users.types;
+      // });
+    },
+    async tradingAccounts() {
+      const { data } = await axios.get("broker-trading-accounts");
+
+      for (let i = 0; i < data.length; i++) {
+        // console.log(data[i]);
+        this.broker_trading_account_options.push({
+          text:
+            data[i].foreign_broker +
+            " : " +
+            data[i].bank +
+            "-" +
+            data[i].trading_account_number +
+            " : " +
+            data[i].account,
+          value: data[i].id
         });
+      }
+    },
+    async storeBrokerUser(broker) {
+      const result = await this.$swal.fire({
+        title: "Creating User Account",
+        html: "One moment while we setup the User Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+
+      try {
+        await axios.post("store-broker", broker);
+
+        await this.$swal(`Account created for ${broker.email}`);
+        // setTimeout(location.reload.bind(location), 2000);
+        await this.getBrokers();
+      } catch (error) {
+        if (error.response.data.message.includes("Duplicate entry")) {
+          await this.$swal(
+            `An Account with this email address already exists. Please try using a different email`
+          );
+        }
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`user-broker-delete/${id}`).then(response => {
-        // this.getBrokers();
-        window.location.reload();
-      });
+    async destroy(id) {
+      await axios.delete(`user-broker-delete/${id}`);
+      // this.getBrokers();
+      window.location.reload();
     }
   },
-  mounted() {
-    this.getUserRole();
+  async mounted() {
+    await this.getUserRole();
 
     // //Define Permission On Front And Back End
     // let p = JSON.parse(this.$userPermissions);
@@ -422,19 +414,18 @@ export default {
     //   this.permissions.push(p[i].name);
     //   // console.log(p[i].name);
     // }
-    axios.get("local-brokers").then(response => {
-      let local_brokers = response.data;
-      // console.log(response);
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].name,
-          value: local_brokers[i].id
-        });
-      }
-    });
-    this.getBrokers();
-    this.tradingAccounts();
+    const { data: local_brokers } = await axios.get("local-brokers"); //.then(response => {
+
+    console.log("local_brokers", local_brokers);
+    for (let i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].name,
+        value: local_brokers[i].id
+      });
+    }
+
+    await this.getBrokers();
+    await this.tradingAccounts();
 
     console.log(this.permissions);
   }

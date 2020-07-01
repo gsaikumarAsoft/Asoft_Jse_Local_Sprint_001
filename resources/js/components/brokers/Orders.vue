@@ -40,7 +40,7 @@
                       v-model="order.trading_account"
                       :options="broker_trading_account_options"
                       class="mb-3"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                       @change="currencyHandler(order.trading_account)"
                     >
                       <template v-slot:first>
@@ -67,7 +67,7 @@
                       v-model="order.client_trading_account"
                       :options="client_trading_account_options.trading_account"
                       class="mb-3"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
@@ -98,7 +98,6 @@
                       v-model="order.client_order_number"
                       type="text"
                       placeholder="Enter Client Order Number"
-                      :disabled="1 || 3"
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -113,7 +112,7 @@
                       v-model="order.market_order_number"
                       type="text"
                       placeholder="Enter Market Order Number"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -130,7 +129,7 @@
                       v-model="order.symbol"
                       label="text"
                       :options="symbols"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -146,7 +145,7 @@
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
-                      :disabled="1 || 3"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -162,7 +161,7 @@
                         v-model="order.value"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -175,11 +174,12 @@
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
+                        required
                         id="value-input"
                         v-model="order.stop_price"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -215,7 +215,7 @@
                         id="quantity-input"
                         v-model="order.quantity"
                         :state="nameState"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -232,7 +232,8 @@
                         v-model="order.price"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
+                        required
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -248,7 +249,7 @@
                       v-model="order.side"
                       label="text"
                       :options="side_options"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -263,7 +264,7 @@
                       v-model="order.order_type"
                       label="text"
                       :options="order_types"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -282,7 +283,7 @@
                       v-model="order.handling_instructions"
                       label="text"
                       :options="handling_options"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                     <!-- <b-form-select
                       v-model="order.local_broker"
@@ -330,7 +331,7 @@
                       order="order_option_inputs[][option_type]"
                       label="text"
                       :options="time_in_force"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -340,7 +341,7 @@
                     id="example-datepicker"
                     v-model="order.expiration_date"
                     class="mb-2"
-                    :disabled="disabled == 1"
+                    :disabled="disabled"
                   ></b-form-datepicker>
                 </b-col>
               </b-row>
@@ -362,7 +363,7 @@
                         v-model="order.display_range"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -381,7 +382,7 @@
                         v-model="order.max_floor"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -440,7 +441,7 @@
                         </b-col>
                       </b-row>
                     </b-container>
-                    <!-- <b-button
+                    <b-button
                       href="#"
                       v-if="order_option_inputs.length > 0"
                       @click="saveOrderToJSON"
@@ -495,7 +496,8 @@
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
+import currenciesMixin from "../../mixins/Currencies.js";
 // import jsonfile from 'jsonfile';
 export default {
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -503,6 +505,7 @@ export default {
     headNav,
     Multiselect
   },
+  mixins: [currenciesMixin],
   data() {
     return {
       // messageDownload: [],
@@ -772,180 +775,8 @@ export default {
         // { text: "Pegged", value: "Pegged", fix_value: "J" }
       ],
       symbols: [],
-      currencies: [
-        { value: "AFN", text: "AFN:  Afghan Afghani" },
-        { value: "ALL", text: "ALL:  Albanian Lek" },
-        { value: "AMD", text: "AMD:  Armenian Dram" },
-        { value: "ANG", text: "ANG:  Netherlands Antillean Guilder" },
-        { value: "AOA", text: "AOA:  Angolan Kwanza" },
-        { value: "ARS", text: "ARS:  Argentine Peso" },
-        { value: "AUD", text: "AUD:  Australian Dollar" },
-        { value: "AWG", text: "A WG:  Aruban Florin" },
-        { value: "AZN", text: "AZN:  Azerbaijani Manat" },
-        { value: "BAM", text: "BAM:  Bosnia-Herzegovina Convertible Mark" },
-        { value: "BBD", text: "BBD:  Barbadian Dollar" },
-        { value: "BDT", text: "BDT:  Bangladeshi Taka" },
-        { value: "BGN", text: "BGN:  Bulgar  ian Lev" },
-        { value: "BHD", text: "BHD:  Bahraini Dinar" },
-        { value: "BIF", text: "BIF:  Burundian Franc" },
-        { value: "BMD", text: "BMD:  Bermud  an Dollar" },
-        { value: "BND", text: "BND:  Brunei Dollar" },
-        { value: "BOB", text: "BOB:  Bolivian Boliviano" },
-        { value: "BRL", text: "BRL:  Br   azilian Real" },
-        { value: "BSD", text: "BSD:  Bahamian Dollar" },
-        { value: "BTC", text: "BTC:  Bitcoin" },
-        { value: "BTN", text: "BTN:  Bh   utanese Ngultrum" },
-        { value: "BWP", text: "BWP:  Botswanan Pula" },
-        { value: "BYN", text: "BYN:  Belarusian Ruble" },
-        { value: "BZD", text: "BZ   D:  Belize Dollar" },
-        { value: "CAD", text: "CAD:  Canadian Dollar" },
-        { value: "CDF", text: "CDF:  Congolese Franc" },
-        { value: "CHF", text: "CHF:  Swiss Franc   " },
-        { value: "CLF", text: "CLF:  Chilean Unit of Account (UF)" },
-        { value: "CLP", text: "CLP:  Chilean Peso" },
-        { value: "CNH", text: "CNH:  Chinese Yuan (Offshore)" },
-        { value: "CNY", text: "CNY:  Chinese Yuan" },
-        { value: "COP", text: "COP:  Colombi an Peso" },
-        { value: "CRC", text: "CRC:  Costa Rican Colón" },
-        { value: "CUC", text: "CUC:  Cuban Convertible Peso" },
-        { value: "CUP", text: "CUP:  Cuban Peso" },
-        { value: "CVE", text: "CVE:  Cape Verdean Escudo" },
-        { value: "CZK", text: "CZK:  Czech Republic Koruna" },
-        { value: "DJF", text: "DJF:  Djiboutian Franc" },
-        { value: "DKK", text: "DKK:  Danish Krone" },
-        { value: "DOP", text: "DOP:  Dominican Peso   " },
-        { value: "DZD", text: "DZD:  Algerian Dinar" },
-        { value: "EGP", text: "EG   P:  Egyptian Pound" },
-        { value: "ERN", text: "ERN:  Eritrean Nakfa" },
-        { value: "ETB", text: "ETB:  Ethiopian Birr" },
-        { value: "EUR", text: "EUR:  Eu   ro" },
-        { value: "FJD", text: "FJD:  Fijian Dollar" },
-        { value: "KP", text: "FKP:  Falkland Islands Pound" },
-        { value: "GBP", text: "GBP:  Bri  tish Pound Sterling" },
-        { value: "GEL", text: "GEL:  Georgian Lari" },
-        { value: "GGP", text: "GGP:  Guernsey Pound" },
-        { value: "GHS", text: "GHS:  Ghanaian Cedi" },
-        { value: "GIP", text: "GIP:  Gibraltar Pou nd" },
-        { value: "GMD", text: "GMD:  Gambian Dalasi" },
-        { value: "G  NF", text: "GNF:  Guinean Franc" },
-        { value: "GTQ", text: "GTQ:  Guatemala  n Quetzal" },
-        { value: "GYD", text: "GYD:  Guyanaese Dollar" },
-        { value: "HKD", text: "HKD:  Hong Kong Dollar" },
-        { value: "HNL", text: "HNL:  Hondura n Lempira" },
-        { value: "HRK", text: "HRK:  Croatian Kuna" },
-        { value: "HTG", text: "HTG:  Haitian Gourde" },
-        { value: "HUF", text: "HUF:    Hungarian Forint" },
-        { value: "IDR", text: "IDR:  Indonesian Rupiah" },
-        { value: "ILS", text: "ILS:  Israeli New Sheqel" },
-        { value: "IM P", text: "IMP:  Manx pound" },
-        { value: "INR", text: "INR:  Indian Rupe   e" },
-        { value: "IQD", text: "IQD:  Iraqi Dinar" },
-        { value: "IRR", text: "IRR:  Iranian Rial" },
-        { value: "ISK", text: "ISK:  Icelandic Króna" },
-        { value: "JEP", text: "JEP:  Jersey Pound" },
-        { value: "JMD", text: "JMD:     Jamaican Dollar" },
-        { value: "JOD", text: "JOD:  Jordanian Dinar" },
-        { value: "JPY", text: "JPY:  Japanese Yen" },
-        { value: "KES", text: "KES:  Kenyan Shilling" },
-        { value: "KGS", text: "KGS:  Kyrgystani Som" },
-        { value: "KHR", text: "KHR:  Cambodian Riel" },
-        { value: "KMF", text: "KMF:  Comorian Franc" },
-        { value: "KPW", text: "KPW:  North Korean Won " },
-        { value: "KRW", text: "KRW:  South Korean Won" },
-        { value: "KWD", text: "KWD:  Kuwaiti Dinar" },
-        { value: "KYD", text: "KYD:  Cayman Island s Dollar" },
-        { value: "KZT", text: "KZT:  Kazakhstani Tenge" },
-        { value: "LAK", text: "LAK:  Laotian Kip" },
-        { value: "LBP", text: "LBP:  Lebane  se Pound" },
-        { value: "LKR", text: "LKR:  Sri Lankan Rupee" },
-        { value: "LRD", text: "LRD:  Liberian Dollar" },
-        { value: "LSL", text: "L SL:  Lesotho Loti" },
-        { value: "LYD", text: "LYD:  Libyan Dinar" },
-        { value: "MAD", text: "MAD:  Moroccan Dirham" },
-        { value: "MDL", text: "MDL:  Moldovan Leu" },
-        { value: "MGA", text: "MGA:  Malagasy Ariary" },
-        { value: "MKD", text: "MKD:  Macedonian Denar" },
-        { value: "MMK", text: "MMK:  M yanma Kyat" },
-        { value: "MNT", text: "MNT:  Mongolian Tugrik" },
-        { value: "MOP", text: "MOP:  Macanese Pataca" },
-        { value: "MRO", text: "M RO:  Mauritanian Ouguiya (pre-2018)" },
-        { value: "MRU", text: "MRU:  Mau  ritanian Ouguiya" },
-        { value: "MUR", text: "MUR:  Mauritian Rupee" },
-        { value: "MVR", text: "MVR:  Maldivian Rufiyaa" },
-        { value: "MWK", text: "MWK:  Malawian Kwacha" },
-        { value: "MXN", text: "MXN:  Mexican Peso" },
-        { value: "MYR", text: "MYR:  Malaysian Ringgit" },
-        { value: "MZN", text: "MZN:  Mozambican Metical" },
-        { value: "NAD", text: "NAD:    Namibian Dollar" },
-        { value: "NGN", text: "NGN:  Nigerian Naira" },
-        { value: "NIO", text: "NIO:  Nicaraguan Córdoba" },
-        { value: "NOK", text: "NOK:  Norwegian Krone" },
-        { value: "NPR", text: "NPR:  Nepalese Rupee" },
-        { value: "NZD", text: "NZD:  New Zealand Dollar" },
-        { value: "OMR", text: "OMR:  Omani Rial" },
-        { value: "PAB", text: "PAB:  Panamanian Balboa" },
-        { value: "PEN", text: "PEN:  Peruvian Nuevo Sol" },
-        { value: "PG K", text: "PGK:  Papua New Guinean Kina" },
-        { value: "PHP", text: "PHP:     Philippine Peso" },
-        { value: "PKR", text: "PKR:  Pakistani Rupee" },
-        { value: "PLN", text: "PLN:  Polish Zloty" },
-        { value: "PYG", text: "PYG  :  Paraguayan Guarani" },
-        { value: "QAR", text: "QAR:  Qatari Rial" },
-        { value: "RON", text: "RON:  Romanian Leu" },
-        { value: "RSD", text: "  RSD:  Serbian Dinar" },
-        { value: "RUB", text: "RUB:  Russian Ruble" },
-        { value: "RWF", text: "RWF:  Rwandan Franc" },
-        { value: "SAR", text: "SAR  :  Saudi Riyal" },
-        { value: "SBD", text: "SBD:  Solomon Islands Dollar" },
-        { value: "SCR", text: "SCR:  Seychellois Rupee" },
-        { value: "SDG", text: "SDG:  Sudanese Pound" },
-        { value: "SEK", text: "SEK:  Swedish Krona" },
-        { value: "SGD", text: "SGD:  Singapore Dollar" },
-        { value: "SHP", text: "SHP:  Saint Helena Pound" },
-        { value: "SLL", text: "SLL:  Sierra Leonean Leone" },
-        { value: "SOS", text: "SOS:  Somali Shilling" },
-        { value: "SRD", text: "SRD:  Surinamese Dollar" },
-        { value: "SSP", text: "SSP:  South Sudanese Pound" },
-        { value: "STD", text: "STD:  São Tomé and Príncipe Dobra (pre-20,18)" },
-        { value: "STN", text: "STN:  São Tomé and Príncipe Dobra" },
-        { value: "SVC", text: "SVC:  Salvadoran Colón" },
-        { value: "SYP", text: "SYP:  Syrian Pound" },
-        { value: "SZL", text: "SZL:  Swazi Lilangeni" },
-        { value: "THB", text: "THB:  Thai Baht" },
-        { value: "TJS", text: "TJS:  Tajikistani Somoni" },
-        { value: "TMT", text: "TMT:  Turkmenistani Manat" },
-        { value: "TND", text: "TND:  Tunisian Dinar" },
-        { value: "TOP", text: "TOP:  Tongan Pa'anga" },
-        { value: "TRY", text: "TRY:  Turkish Lira" },
-        { value: "TTD", text: "TTD:  Trinidad and Tobago Dollar" },
-        { value: "TWD", text: "TWD:  New Taiwan Dollar" },
-        { value: "TZS", text: "TZS:  Tanzanian Shilling" },
-        { value: "UAH", text: "UAH:  Ukrainian Hryvnia" },
-        { value: "UGX", text: "UGX:  Ugandan Shilling" },
-        { value: "USD", text: "USD:  United States Dollar" },
-        { value: "UYU", text: "UYU:  Uruguayan Peso" },
-        { value: "UZS", text: "UZS:  Uzbekistan Som" },
-        { value: "VEF", text: "VEF:  Venezuelan Bolívar Fuerte (Old)" },
-        { value: "VES", text: "VES:  Venezuelan Bolívar Soberano" },
-        { value: "VND", text: "VND:  Vietnamese Dong" },
-        { value: "VUV", text: "VUV:  Vanuatu Vatu" },
-        { value: "WST", text: "WST:  Samoan Tala" },
-        { value: "XAF", text: "XAF:  CFA Franc BEAC" },
-        { value: "XAG", text: "XAG:  Silver Ounce" },
-        { value: "XAU", text: "XAU:  Gold Ounce" },
-        { value: "XCD", text: "XCD:  East Caribbean Dollar" },
-        { value: "XDR", text: "XDR:  Special Drawing Rights" },
-        { value: "XOF", text: "XOF:  CFA Franc BCEAO" },
-        { value: "XPD", text: "XPD:  Palladium Ounce" },
-        { value: "XPF", text: "XPF:  CFP Franc" },
-        { value: "XPT", text: "XPT:  Platinum Ounce" },
-        { value: "YER", text: "YER:  Yemeni Rial" },
-        { value: "ZAR", text: "ZAR:  South African Rand" },
-        { value: "ZMW", text: "ZMW:  Zambian Kwacha" },
-        { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" }
-      ],
       nameState: null,
-      disabled: 0
+      disabled: false
     };
   },
   computed: {
@@ -956,14 +787,14 @@ export default {
   watch: {
     "order.time_in_force": function(d) {
       // if (d.fix_value) {
-        var fix_value = d.fix_value;
-        this.expiration = false;
-        if (fix_value === "6") {
-          // console.log(TIF.fix_valu:disabled="validated == 1"e);
-          // Show the Expiration date input for this order
-          this.expiration = true;
-        }
-        console.log(this.expiration);
+      var fix_value = d.fix_value;
+      this.expiration = false;
+      if (fix_value === "6") {
+        // console.log(TIF.fix_valu:disabled="validated == 1"e);
+        // Show the Expiration date input for this order
+        this.expiration = true;
+      }
+      console.log(this.expiration);
       // }
     }
   },
@@ -989,13 +820,15 @@ export default {
         this.order_option_input = false;
       }
     },
-    brokerOrderHandler(o) {
-      this.disabled = 1;
+    async brokerOrderHandler(o) {
+      this.disabled = true;
       this.order = {};
       this.order = o;
 
+      console.log("order", o);
+
       //Pre Select Client And Trading Accounts
-      var data = JSON.parse(this.orders);
+      var data = { ...this.orders };
 
       var clients = data[0].clients;
       var trading = data[0].trading;
@@ -1016,6 +849,7 @@ export default {
       if (typeof o.time_in_force === "string") {
         // Parse stringified data from database back to json for viewing in the multiselect dropdown
         // let handling = JSON.parse(o.handling_instructions);
+        console.log("order", this.order);
         this.order.handling_instructions = JSON.parse(o.handling_instructions);
         this.order.symbol = JSON.parse(o.symbol);
         this.order.currency = JSON.parse(o.currency);
@@ -1025,7 +859,7 @@ export default {
       }
       // this.$refs.selectedOrder.clearSelected();
       // =============================================================================================
-      this.$swal({
+      const result = await this.$swal({
         title: o.clordid,
         text: "The Options for the current order are.",
         icon: "question",
@@ -1035,15 +869,14 @@ export default {
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
         footer: "<a href='orders' >Exit</a>"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("jse-new-order");
-          this.modalTitle = `Viewing Order ${o.clordid}`;
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(o.clordid);
-        }
-      });
+      }); //.then(result => {
+      if (result.value) {
+        this.$bvModal.show("jse-new-order");
+        this.modalTitle = `Viewing Order ${o.clordid}`;
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(o.clordid);
+      }
     },
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
@@ -1052,9 +885,9 @@ export default {
       const fr = new FileReader();
       const self = this;
       fr.onload = e => {
-        const result = JSON.parse(e.target.result);
-        self.order_template_data = result;
-
+        console.log("e.target.result", e.target.result);
+        //const result = JSON.parse(e.target.result);
+        self.order_template_data = e.target.result;
       };
 
       this.order_template_data = fr.readAsText(files);
@@ -1067,7 +900,7 @@ export default {
       this.order_option_inputs = this.order_template_data.order_options;
       this.template = false;
     },
-    saveOrderToJSON() {
+    async saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
         order_options: this.order_option_inputs
@@ -1078,7 +911,7 @@ export default {
       this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
 
       //Allow the user to create a file name before saving the file to their machine
-      this.$swal({
+      const result = await this.$swal({
         title:
           "Filename: Untitled.json, please insert a name for your file below.",
         input: "text",
@@ -1103,36 +936,36 @@ export default {
           saveAs(blob, Filename + ".json");
         },
         allowOutsideClick: () => !this.$swal.isLoading()
-      }).then(result => {
-        if (result.value) {
-          //Re Open Modal and allow user to continue their function
-          this.$bvModal.show("jse-new-order");
-        }
       });
+
+      if (result.value) {
+        //Re Open Modal and allow user to continue their function
+        this.$bvModal.show("jse-new-order");
+      }
     },
-    tradingAccounts() {
-      axios.get("broker-trading-accounts").then(response => {
-        let data = response.data;
-        console.log(data);
-        let i;
-        for (i = 0; i < data.length; i++) {
-          //console.log(data[i]);
-          this.broker_trading_account_options.push({
-            text:
-              data[i].foreign_broker +
-              " : " +
-              data[i].bank +
-              "-" +
-              data[i].trading_account_number +
-              " : " +
-              data[i].account,
-            value: data[i].id,
-            data: data[i]
-          });
-        }
-      });
+    async tradingAccounts() {
+      const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
+      //let data = response.data;
+      console.log("tradingAccounts", data);
+      for (let i = 0; i < data.length; i++) {
+        //console.log(data[i]);
+        this.broker_trading_account_options.push({
+          text:
+            data[i].foreign_broker +
+            " : " +
+            data[i].bank +
+            "-" +
+            data[i].trading_account_number +
+            " : " +
+            data[i].account,
+          value: data[i].id,
+          data: data[i]
+        });
+      }
+      // });
     },
-    setTradingAccounts() {
+
+    /* setTradingAccounts() {
       axios.get("broker-trading-accounts").then(response => {
         let data = response.data;
         console.log;
@@ -1154,90 +987,97 @@ export default {
           // });
         }
       });
-    },
+    }, */
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
       return valid;
     },
-    getBrokers() {
-      // axios.get("broker-list").then(response => {
-      //   let data = response.data;
-      //   let i;
-      //   for (i = 0; i < data.length; i++) {
-      //     this.local_broker.push({
-      //       text:data[i].name,
-      //        value:data[i].id
-      //     });
-      //   }
-      //   // this.broker_client_orders = data;
+    async getBrokers() {
+      const { data } = await axios.get("broker-list"); //.then(response => {
+      //let data = response.data;
+      for (let i = 0; i < data.length; i++) {
+        this.local_broker.push({
+          text: data[i].name,
+          value: data[i].id
+        });
+      }
+      // this.broker_client_orders = data;
       // });
-      // axios.get("foreign-broker-list").then(fresponse => {
-      //   let fdata = fresponse.data;
-      //   let j;
-      //   for (j = 0; j < fdata.length; j++) {
-      //     this.foreign_broker.push({
-      //       text:fdata[j].name,
-      //        value:fdata[j].id
-      //     });
-      //   }
+      let { data: fdata } = await axios.get("foreign-broker-list"); //.then(fresponse => {
+      // let fdata = fresponse.data;
+      for (let j = 0; j < fdata.length; j++) {
+        this.foreign_broker.push({
+          text: fdata[j].name,
+          value: fdata[j].id
+        });
+      }
       // });
     },
-    createBrokerClientOrder(broker) {
+    async createBrokerClientOrder(broker) {
       //Notes:
 
-      // this.$swal
-      //   .fire({
-      //     title: "Creating Client Order",
-      //     html: "One moment while we setup the current order",
-      //     timerProgressBar: true,
-      //     onBeforeOpen: () => {
-      //       this.$swal.showLoading();
-      //     }
-      //   })
-      //   .then(result => {});
+      await this.$swal.fire({
+        title: "Creating Client Order",
+        html: "One moment while we setup the current order",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+      // .then(result => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
       if (!broker.trading_account || !broker.client_trading_account) {
-        this.$swal(
+        await this.$swal(
           "You need to select a Trading Account & Client Account to continue"
         );
-      } else {
-        axios
-          .post("store-broker-client-order", broker)
-          .then(response => {
-            let data = response.data;
-            let valid = data.isvalid;
-            console.log(data);
-            if (valid) {
-              console.log(data);
-              this.$swal(data.errors);
-              // setTimeout(location.reload.bind(location), 2000);
-            } else {
-              this.$swal(data.errors);
-              // setTimeout(location.reload.bind(location), 2000);
-            }
-          })
-          .catch(error => {
-            var s = error.response.data.message;
-            var field = s.match(/'([^']+)'/)[1];
-            if (error.response.data.message.includes("cannot be null")) {
-              this.$swal(
-                `When creating an order ${field} cannot be null. Please try creating the order again.`
-              );
-            }
-          });
+        return;
       }
+
+      if (broker.price > broker.stop_price) {
+        await this.$swal("Price must be less than or equal to the Stop Price");
+        return;
+      }
+
+      try {
+        const { data, isvalid: valid } = await axios.post(
+          "store-broker-client-order",
+          broker
+        );
+        //  .then(response => {
+        // let data = response.data;
+        //   let valid = data.isvalid;
+        console.log(data);
+        if (valid) {
+          console.log(data);
+          await this.$swal(data.errors);
+          // setTimeout(location.reload.bind(location), 2000);
+        } else {
+          await this.$swal(data.errors);
+          // setTimeout(location.reload.bind(location), 2000);
+        }
+        // })
+      } catch (error) {
+        var s = error.response.data.message;
+        var field = s.match(/'([^']+)'/)[1];
+        if (error.response.data.message.includes("cannot be null")) {
+          this.$swal(
+            `When creating an order ${field} cannot be null. Please try creating the order again.`
+          );
+        }
+      } //);
     },
-    getSymbols() {
-      axios.get("/apis/symbols.json").then(response => {
-        this.symbols = response.data;
-      });
+    async getSymbols() {
+      const { data } = await axios.get("/apis/symbols.json"); //.then(response => {
+      this.symbols = data;
+      // });
     },
+
     add() {
-      this.disabled = 0;
+      this.disabled = false;
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
@@ -1265,12 +1105,17 @@ export default {
       this.order_option_inputs.splice(index, 1);
     },
 
-    destroy(id) {
-      this.$swal("Proccessing Order Cancellation");
-      axios.delete(`destroy-broker-client-order/${id}`).then(response => {
-        this.$swal("Cancelled");
-        setTimeout(location.reload.bind(location), 1000);
-      });arsed 
+    async destroy(id) {
+      await this.$swal("Proccessing Order Cancellation");
+      await axios.delete(`destroy-broker-client-order/${id}`); //.then(response => {
+      await this.$swal("Cancelled");
+      await this.timeout(1000);
+      window.location.reload.bind(window.location);
+    },
+
+    //sleep function
+    timeout(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     },
     handleJSEOrder() {
       // Exit when the form isn't valid
@@ -1298,15 +1143,19 @@ export default {
     },
     handleSubmit() {}
   },
-  mounted() {
-    this.getSymbols();
-    this.getBrokers();
-    this.tradingAccounts();
+  async mounted() {
+    await this.getSymbols();
+    //await this.getBrokers();
+    await this.tradingAccounts();
     var order_data = JSON.parse(this.orders);
     var client_accounts_data = JSON.parse(this.client_accounts);
     var orders = order_data[0]["order"];
     var client_accounts = client_accounts_data[0]["clients"];
+    console.log("orders", orders);
     this.broker_client_orders = orders;
+    this.broker_client_orders.sort(function(a, b) {
+      return b.client_order_number > a.client_order_number ? -1 : 1;
+    });
     this.client_trading_account_options = client_accounts;
 
     // var local = JSON.parse(this.local_brokers);

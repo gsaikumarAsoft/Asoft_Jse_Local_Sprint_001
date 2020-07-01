@@ -45,12 +45,15 @@ class FunctionSet
         return env('FIX_API_URL') . $path; //"api/OrderManagement/OrderCancelRequest";
     }
 
-    public function IsOrderOpened($orderStatus)
+    //check if Order is opened and side = BUY
+    public function isOrderOpenedBuy($o)
     {
-        return ($orderStatus != OrderStatus::Expired &&
-            $orderStatus != OrderStatus::Cancelled &&
-            $orderStatus != OrderStatus::Rejected &&
-            $orderStatus != OrderStatus::Failed);
+        return ($o->order_status != OrderStatus::Expired &&
+            $o->order_status != OrderStatus::Cancelled &&
+            $o->order_status != OrderStatus::Rejected &&
+            $o->order_status != OrderStatus::Failed &&
+            $o->side == "BUY"
+        );
     }
 
     public function cancelOrder($order)
@@ -96,6 +99,7 @@ class FunctionSet
         curl_close($ch);
         // return $result;
     }
+
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
     {
         // Find Local Broker For This Order & Define the SenderSub Id
@@ -111,6 +115,23 @@ class FunctionSet
 
         // Locate the broker client for this order
         $client = BrokerClient::find($client_id);
+
+        //validation
+       /*  if (is_null($request->stop_price)) {
+            return response()->json(['isvalid' => false, 'errors' => 'The Stop Price is required']);
+        }
+
+        if (is_nuill($request->quantity)) {
+            return response()->json(['isvalid' => false, 'errors' => 'The Quantity is required']);
+        }
+
+        if (is_null($request->price)) {
+            return response()->json(['isvalid' => false, 'errors' => 'The Price is required']);
+        }
+
+        if ((int) $request->price > (int) $request->stop_price) {
+            return response()->json(['isvalid' => false, 'errors' => 'Price cannot be greater than the Stop Price!']);
+        } */
 
         // Store Order to our databases
         $mytime = Carbon::now();
@@ -216,7 +237,7 @@ class FunctionSet
                 $data['text'] = 'Failed: ' . $fix_status['result'] . '-' . $request->client_order_number;
                 $order = DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
-                    ->update(['order_status' => 'Failed']);
+                    ->update(['order_status' => OrderStatus::Failed]);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
 
@@ -332,13 +353,13 @@ class FunctionSet
         return $user;
     }
 
-    function LocalBrokerPick($id)
+    public function LocalBrokerPick($id)
     {
         $local_broker = LocalBroker::find($id);
         $broker = User::find($local_broker->user_id);
         return $broker;
     }
-    function getLocalBrokerById($id)
+    public function getLocalBrokerById($id)
     {
         $broker = User::find($id)->first();
         return $broker;
@@ -666,7 +687,6 @@ class FunctionSet
 
             $array = json_decode(json_encode($settlement_account), true);
 
-
             if ($order && $broker_client) {
                 // return $order;
                 $od = $order;
@@ -683,10 +703,12 @@ class FunctionSet
                     $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
                     //If offer is (Rejected, Cancelled, Expired)
                     // return $status;
-                    if ($status === "C" || $status === "4" || $status === "8") {
+                    if ($status === OrderStatus::Expired ||
+                        $status === OrderStatus::Cancelled ||
+                        $status === OrderStatus::Cancelled) {
 
                         // Check if the order is open
-                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" &&  $o->order_status != "2") {
+                        if (isOrderOpenedBuy($o)) {
 
                             // ===========================================================
                             // Set Status To $account[$key]['status]
@@ -699,15 +721,15 @@ class FunctionSet
 
                             );
                         }
-                    } else if ($status === "1") {
+                    } else if ($status === OrderStatus::PartialFilled) {
 
                         //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                        if (isOrderOpenedBuy($o)) {
                             //Update Broker Client Order Status
 
                             BrokerClientOrder::updateOrCreate(
                                 ['id' => $od->id],
-                                ['order_status' => 1]
+                                ['order_status' => OrderStatus::PartialFilled]
 
                             );
                             // DB::table('broker_client_orders')
@@ -724,7 +746,7 @@ class FunctionSet
                     } else {
 
                         //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                        if ($o->order_status != "C" &&  $o->order_status != "4" &&  $o->order_status != "8" && $o->order_status != "2") {
+                        if (isOrderOpenedBuy($o)) {
                             //The order has been filled
                             // Update Database with required value
                             // DB::table('broker_clients')
@@ -742,7 +764,7 @@ class FunctionSet
                             //     ->update(['amount_allocated' => $settlement_allocated], ['filled_orders', $settlement_fil_ord]);
                             BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['amount_allocated' => $settlement_allocated,  'filled_orders', $settlement_fil_ord]
+                                ['amount_allocated' => $settlement_allocated, 'filled_orders', $settlement_fil_ord]
                             );
                             // DB::table('broker_client_orders')
                             //     ->where('id', $od->id)
