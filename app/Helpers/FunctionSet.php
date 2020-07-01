@@ -116,54 +116,50 @@ class FunctionSet
         // Locate the broker client for this order
         $client = BrokerClient::find($client_id);
 
-        try {
-            //validation
-            if (is_null($request->stop_price)) {
-                throw new Exception('The Stop Price is required');
-            }
-
-            if (is_nuill($request->quantity)) {
-                throw new Exception('The Quantity is required');
-            }
-
-            if (is_null($request->price)) {
-                throw new Exception('The Price is required');
-            }
-
-            if ((int) $request->price > (int) $request->stop_price) {
-                throw new Exception('Price cannot be greater than the Stop Price!');
-            }
-
-            // Store Order to our databases
-            $mytime = Carbon::now();
-            $broker_client_order = new BrokerClientOrder();
-            $broker_client_order->local_broker_id = $local_broker_id;
-            $broker_client_order->foreign_broker_id = $foreign_broker_id[0]->id;
-            $broker_client_order->handling_instructions = $request->handling_instructions;
-            $broker_client_order->order_quantity = $request->quantity;
-            $broker_client_order->order_type = $request->order_type;
-            $broker_client_order->order_status = $order_status;
-            $broker_client_order->order_date = $mytime->toDateTimeString();
-            $broker_client_order->currency = $request->currency;
-            $broker_client_order->symbol = $request->symbol;
-            $broker_client_order->price = $request->price;
-            $broker_client_order->value = $request->value;
-            $broker_client_order->quantity = $request->quantity;
-            $broker_client_order->country = 'Jamaica';
-            $broker_client_order->side = $request->side;
-            $broker_client_order->status_time = $mytime->toDateTimeString();
-            $broker_client_order->client_order_number = $request->client_order_number;
-            $broker_client_order->clordid = $request->client_order_number;
-            $broker_client_order->market_order_number = $request->market_order_number;
-            $broker_client_order->stop_price = $request->stop_price;
-            $broker_client_order->expiration_date = $request->expiration_date;
-            $broker_client_order->time_in_force = $request->time_in_force;
-            $broker_client_order->broker_client_id = $client_id;
-            $broker_client_order->trading_account_id = $request->trading_account;
-            $broker_client_order->save();
-        } catch (Exception $exception) {
-            return response()->json(['isvalid' => true, 'errors' => $exception->getMessage()]);
+        //validation
+        if (is_null($request->stop_price)) {
+            return response()->json(['isvalid' => true, 'errors' => 'The Stop Price is required']);
         }
+
+        if (is_nuill($request->quantity)) {
+            return response()->json(['isvalid' => true, 'errors' => 'The Quantity is required']);
+        }
+
+        if (is_null($request->price)) {
+            return response()->json(['isvalid' => true, 'errors' => 'The Price is required']);
+        }
+
+        if ((int) $request->price > (int) $request->stop_price) {
+            return response()->json(['isvalid' => true, 'errors' => 'Price cannot be greater than the Stop Price!']);
+        }
+
+        // Store Order to our databases
+        $mytime = Carbon::now();
+        $broker_client_order = new BrokerClientOrder();
+        $broker_client_order->local_broker_id = $local_broker_id;
+        $broker_client_order->foreign_broker_id = $foreign_broker_id[0]->id;
+        $broker_client_order->handling_instructions = $request->handling_instructions;
+        $broker_client_order->order_quantity = $request->quantity;
+        $broker_client_order->order_type = $request->order_type;
+        $broker_client_order->order_status = $order_status;
+        $broker_client_order->order_date = $mytime->toDateTimeString();
+        $broker_client_order->currency = $request->currency;
+        $broker_client_order->symbol = $request->symbol;
+        $broker_client_order->price = $request->price;
+        $broker_client_order->value = $request->value;
+        $broker_client_order->quantity = $request->quantity;
+        $broker_client_order->country = 'Jamaica';
+        $broker_client_order->side = $request->side;
+        $broker_client_order->status_time = $mytime->toDateTimeString();
+        $broker_client_order->client_order_number = $request->client_order_number;
+        $broker_client_order->clordid = $request->client_order_number;
+        $broker_client_order->market_order_number = $request->market_order_number;
+        $broker_client_order->stop_price = $request->stop_price;
+        $broker_client_order->expiration_date = $request->expiration_date;
+        $broker_client_order->time_in_force = $request->time_in_force;
+        $broker_client_order->broker_client_id = $client_id;
+        $broker_client_order->trading_account_id = $request->trading_account;
+        $broker_client_order->save();
 
         // Send customer order to FIX 4.2 Switch - API Beta Fix Swith PHP Post 4.2
         $url = $this->fix_wrapper_url("api/OrderManagement/NewOrderSingle");

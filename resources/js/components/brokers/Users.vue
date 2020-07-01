@@ -86,9 +86,9 @@
   </div>
 </template>
 <script lang="ts">
-import permissionMixin from "./../../mixins/Permissions";
+import permissionMixin from "./../../mixins/Permissions.vue";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 export default {
   mixins: [permissionMixin],
   components: {
