@@ -132,7 +132,7 @@ class AccountVerificationController extends Controller
                 // DMA ADMIN WEB ISSUES - From Demo Session 2020-07-01
                 // - Remove Settlement Account Notification to Foreign Broker Email
                 // Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
-                
+
                 return view('layouts.approve');
                 break;
             case 'reject':
@@ -177,22 +177,23 @@ class AccountVerificationController extends Controller
     public function verifyB2B($id, $action)
     {
 
-
         switch ($action) {
             case 'accept':
                 $trading = BrokerTradingAccount::where('hash', $id)->first();
                 $foreign_broker = BrokerSettlementAccount::where('id', $trading->broker_settlement_account_id)
                     ->update(['foreign_broker_status' => 'Verified']);
                 $account = BrokerSettlementAccount::where('id', $trading->broker_settlement_account_id)->first();
-                // return $account;
+                
                 $trading = DB::table('broker_trading_accounts')->select('target_comp_id', 'sender_comp_id')->where('broker_settlement_account_id', $account['id'])->get();
                 if ($account->settlement_agent_status === 'Verified' && $account->foreign_broker_status === 'Verified') {
 
-
+                    
                     $broker = BrokerTradingAccount::where('hash', $id)
                         ->update(['status' => 'Verified']);
                     $local_broker = $this->HelperClass->getUserAll($account->local_broker_id);
+                    $fb = $this->HelperClass->getUserAll($account->foreign_broker_id);
                     $account['broker_name'] = $local_broker->name;
+                    $account['foreign_broker_name'] = $fb->name;
                     $account['bank_agent'] = $account['bank_name'];
                     $account['sender_comp_id'] = $trading[0]->sender_comp_id;
                     $account['target_comp_id'] = $trading[0]->target_comp_id;

@@ -12,7 +12,7 @@
             </p>    
         <li>Settlement Agent:  {{$user['bank_agent']}}</li>
         <li>Settlement Account Number: {{$user['account']}}</li>
-        <li>Foreign Broker: {{$user['broker_name']}}</li>
+        <li>Foreign Broker: {{$user['foreign_broker_name']}}</li>
         <li>TargetCompID:  {{$user['target_comp_id']}}</li>
         <li>SenderCompID: {{$user['sender_comp_id']}}</li>
         
