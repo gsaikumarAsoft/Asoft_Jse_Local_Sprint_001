@@ -97,7 +97,7 @@
                       v-model="order.client_order_number"
                       type="text"
                       placeholder="Enter Client Order Number"
-                      :disabled="1 || 3"
+                      :disabled="!!disabled"
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
