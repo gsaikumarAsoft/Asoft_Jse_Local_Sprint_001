@@ -118,19 +118,19 @@ class FunctionSet
 
         try {
             //validation
-            if ($request->has('stop_price')) {
+            if (is_null($request->stop_price)) {
                 throw new Exception('The Stop Price is required');
             }
 
-            if ($request->has('quantity')) {
+            if (is_nuill($request->quantity)) {
                 throw new Exception('The Quantity is required');
             }
 
-            if ($request->has('price')) {
+            if (is_null($request->price)) {
                 throw new Exception('The Price is required');
             }
 
-            if ($request->price > $request->stop_price) {
+            if ((int) $request->price > (int) $request->stop_price) {
                 throw new Exception('Price cannot be greater than the Stop Price!');
             }
 
