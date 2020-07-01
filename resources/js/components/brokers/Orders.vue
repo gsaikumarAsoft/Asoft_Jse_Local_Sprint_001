@@ -174,6 +174,7 @@
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
+                        required
                         id="value-input"
                         v-model="order.stop_price"
                         :state="nameState"
@@ -232,6 +233,7 @@
                         :state="nameState"
                         type="number"
                         :disabled="disabled"
+                        required
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -1204,32 +1206,38 @@ export default {
         this.$swal(
           "You need to select a Trading Account & Client Account to continue"
         );
-      } else {
-        axios
-          .post("store-broker-client-order", broker)
-          .then(response => {
-            let data = response.data;
-            let valid = data.isvalid;
-            console.log(data);
-            if (valid) {
-              console.log(data);
-              this.$swal(data.errors);
-              // setTimeout(location.reload.bind(location), 2000);
-            } else {
-              this.$swal(data.errors);
-              // setTimeout(location.reload.bind(location), 2000);
-            }
-          })
-          .catch(error => {
-            var s = error.response.data.message;
-            var field = s.match(/'([^']+)'/)[1];
-            if (error.response.data.message.includes("cannot be null")) {
-              this.$swal(
-                `When creating an order ${field} cannot be null. Please try creating the order again.`
-              );
-            }
-          });
+        return;
       }
+
+      if (broker.price > broker.stop_price) {
+        this.$swal("Price must be less than or equal to the Stop Price");
+        return;
+      }
+
+      axios
+        .post("store-broker-client-order", broker)
+        .then(response => {
+          let data = response.data;
+          let valid = data.isvalid;
+          console.log(data);
+          if (valid) {
+            console.log(data);
+            this.$swal(data.errors);
+            // setTimeout(location.reload.bind(location), 2000);
+          } else {
+            this.$swal(data.errors);
+            // setTimeout(location.reload.bind(location), 2000);
+          }
+        })
+        .catch(error => {
+          var s = error.response.data.message;
+          var field = s.match(/'([^']+)'/)[1];
+          if (error.response.data.message.includes("cannot be null")) {
+            this.$swal(
+              `When creating an order ${field} cannot be null. Please try creating the order again.`
+            );
+          }
+        });
     },
     getSymbols() {
       axios.get("/apis/symbols.json").then(response => {
@@ -1306,7 +1314,11 @@ export default {
     var client_accounts_data = JSON.parse(this.client_accounts);
     var orders = order_data[0]["order"];
     var client_accounts = client_accounts_data[0]["clients"];
-    this.broker_client_orders = orders;
+    this.broker_client_orders = orders.sort(function(a, b) {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    });
     this.client_trading_account_options = client_accounts;
 
     // var local = JSON.parse(this.local_brokers);
