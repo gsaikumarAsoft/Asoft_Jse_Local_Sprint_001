@@ -40,7 +40,7 @@
                       v-model="order.trading_account"
                       :options="broker_trading_account_options"
                       class="mb-3"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                       @change="currencyHandler(order.trading_account)"
                     >
                       <template v-slot:first>
@@ -67,7 +67,7 @@
                       v-model="order.client_trading_account"
                       :options="client_trading_account_options.trading_account"
                       class="mb-3"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
@@ -93,11 +93,11 @@
                     label-for="input-1-client-order-number"
                   >
                     <b-form-input
+                      disabled
                       id="input-10"
                       v-model="order.client_order_number"
                       type="text"
                       placeholder="Enter Client Order Number"
-                      :disabled="!!disabled"
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -112,7 +112,7 @@
                       v-model="order.market_order_number"
                       type="text"
                       placeholder="Enter Market Order Number"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -129,7 +129,7 @@
                       v-model="order.symbol"
                       label="text"
                       :options="symbols"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -145,7 +145,7 @@
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
-                      :disabled="1 || 3"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -161,7 +161,7 @@
                         v-model="order.value"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -178,7 +178,7 @@
                         v-model="order.stop_price"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -214,7 +214,7 @@
                         id="quantity-input"
                         v-model="order.quantity"
                         :state="nameState"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -231,7 +231,7 @@
                         v-model="order.price"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -247,7 +247,7 @@
                       v-model="order.side"
                       label="text"
                       :options="side_options"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -262,7 +262,7 @@
                       v-model="order.order_type"
                       label="text"
                       :options="order_types"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -281,7 +281,7 @@
                       v-model="order.handling_instructions"
                       label="text"
                       :options="handling_options"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                     <!-- <b-form-select
                       v-model="order.local_broker"
@@ -329,7 +329,7 @@
                       order="order_option_inputs[][option_type]"
                       label="text"
                       :options="time_in_force"
-                      :disabled="disabled == 1"
+                      :disabled="disabled"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -339,7 +339,7 @@
                     id="example-datepicker"
                     v-model="order.expiration_date"
                     class="mb-2"
-                    :disabled="disabled == 1"
+                    :disabled="disabled"
                   ></b-form-datepicker>
                 </b-col>
               </b-row>
@@ -361,7 +361,7 @@
                         v-model="order.display_range"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -380,7 +380,7 @@
                         v-model="order.max_floor"
                         :state="nameState"
                         type="number"
-                        :disabled="disabled == 1"
+                        :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -944,7 +944,7 @@ export default {
         { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" }
       ],
       nameState: null,
-      disabled: 0
+      disabled: false
     };
   },
   computed: {
@@ -989,7 +989,7 @@ export default {
       }
     },
     brokerOrderHandler(o) {
-      this.disabled = 1;
+      this.disabled = true;
       this.order = {};
       this.order = o;
 
@@ -1237,7 +1237,7 @@ export default {
       });
     },
     add() {
-      this.disabled = 0;
+      this.disabled = false;
       this.modalTitle = "New Order";
       this.create = true;
       var dt = new Date();
