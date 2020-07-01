@@ -117,7 +117,7 @@ class FunctionSet
         $client = BrokerClient::find($client_id);
 
         //validation
-        if (is_null($request->stop_price)) {
+       /*  if (is_null($request->stop_price)) {
             return response()->json(['isvalid' => false, 'errors' => 'The Stop Price is required']);
         }
 
@@ -131,7 +131,7 @@ class FunctionSet
 
         if ((int) $request->price > (int) $request->stop_price) {
             return response()->json(['isvalid' => false, 'errors' => 'Price cannot be greater than the Stop Price!']);
-        }
+        } */
 
         // Store Order to our databases
         $mytime = Carbon::now();
