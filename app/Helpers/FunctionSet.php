@@ -118,19 +118,19 @@ class FunctionSet
 
         //validation
         if (is_null($request->stop_price)) {
-            return response()->json(['isvalid' => true, 'errors' => 'The Stop Price is required']);
+            return response()->json(['isvalid' => false, 'errors' => 'The Stop Price is required']);
         }
 
         if (is_nuill($request->quantity)) {
-            return response()->json(['isvalid' => true, 'errors' => 'The Quantity is required']);
+            return response()->json(['isvalid' => false, 'errors' => 'The Quantity is required']);
         }
 
         if (is_null($request->price)) {
-            return response()->json(['isvalid' => true, 'errors' => 'The Price is required']);
+            return response()->json(['isvalid' => false, 'errors' => 'The Price is required']);
         }
 
         if ((int) $request->price > (int) $request->stop_price) {
-            return response()->json(['isvalid' => true, 'errors' => 'Price cannot be greater than the Stop Price!']);
+            return response()->json(['isvalid' => false, 'errors' => 'Price cannot be greater than the Stop Price!']);
         }
 
         // Store Order to our databases
