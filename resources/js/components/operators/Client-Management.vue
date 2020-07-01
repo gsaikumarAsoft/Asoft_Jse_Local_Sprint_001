@@ -92,7 +92,7 @@
   </div>
 </template>
 <script lang="ts">
-import permissionMixin from "./../../mixins/Permissions";
+import permissionMixin from "./../../../js/mixins/Permissions.js";
 import axios from "axios";
 import headNav from "./../partials/Nav";
 export default {
