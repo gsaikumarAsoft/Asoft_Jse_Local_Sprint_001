@@ -1314,6 +1314,7 @@ export default {
     var client_accounts_data = JSON.parse(this.client_accounts);
     var orders = order_data[0]["order"];
     var client_accounts = client_accounts_data[0]["clients"];
+    console.log("orders", orders);
     this.broker_client_orders = orders.sort(function(a, b) {
       return (
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
