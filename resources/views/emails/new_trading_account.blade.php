@@ -11,8 +11,8 @@
         <h4>Trading Account</h4>
         <li>Local Broker: {{$user['local_broker_name']}}</li>
         <li>Trading Account: {{$user['trading_account_number']}}</li>
-        <li>Settlement Agent:  {{$user['settlement_agent']}}</li>
-        <li>Settlement Account Number: {{$user['settlement_account_number']}}</li>
+        {{-- <li>Settlement Agent:  {{$user['settlement_agent']}}</li> --}}
+        {{-- <li>Settlement Account Number: {{$user['settlement_account_number']}}</li> --}}
         <li>Foreign Broker: {{$user['broker_name']}}</li>
         <li>TargetCompID:  {{$user['target_comp_id']}}</li>
         <li>SenderCompID: {{$user['sender_comp_id']}}</li>
