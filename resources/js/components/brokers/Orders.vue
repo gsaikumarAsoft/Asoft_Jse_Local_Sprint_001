@@ -1112,29 +1112,29 @@ export default {
         }
       });
     },
-    tradingAccounts() {
-      axios.get("broker-trading-accounts").then(response => {
-        let data = response.data;
-        console.log(data);
-        let i;
-        for (i = 0; i < data.length; i++) {
-          //console.log(data[i]);
-          this.broker_trading_account_options.push({
-            text:
-              data[i].foreign_broker +
-              " : " +
-              data[i].bank +
-              "-" +
-              data[i].trading_account_number +
-              " : " +
-              data[i].account,
-            value: data[i].id,
-            data: data[i]
-          });
-        }
-      });
+    async tradingAccounts() {
+      const {data} = await axios.get("broker-trading-accounts"); //.then(response => {
+      //let data = response.data;
+      console.log("tradingAccounts", data);      
+      for (let i = 0; i < data.length; i++) {
+        //console.log(data[i]);
+        this.broker_trading_account_options.push({
+          text:
+            data[i].foreign_broker +
+            " : " +
+            data[i].bank +
+            "-" +
+            data[i].trading_account_number +
+            " : " +
+            data[i].account,
+          value: data[i].id,
+          data: data[i]
+        });
+      }
+      // });
     },
-    setTradingAccounts() {
+
+    /* setTradingAccounts() {
       axios.get("broker-trading-accounts").then(response => {
         let data = response.data;
         console.log;
@@ -1156,36 +1156,34 @@ export default {
           // });
         }
       });
-    },
+    }, */
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
       return valid;
     },
-    getBrokers() {
-      // axios.get("broker-list").then(response => {
-      //   let data = response.data;
-      //   let i;
-      //   for (i = 0; i < data.length; i++) {
-      //     this.local_broker.push({
-      //       text:data[i].name,
-      //        value:data[i].id
-      //     });
-      //   }
-      //   // this.broker_client_orders = data;
+    async getBrokers() {
+      const { data } = await axios.get("broker-list"); //.then(response => {
+      //let data = response.data;      
+      for (let i = 0; i < data.length; i++) {
+        this.local_broker.push({
+          text: data[i].name,
+          value: data[i].id
+        });
+      }
+      // this.broker_client_orders = data;
       // });
-      // axios.get("foreign-broker-list").then(fresponse => {
-      //   let fdata = fresponse.data;
-      //   let j;
-      //   for (j = 0; j < fdata.length; j++) {
-      //     this.foreign_broker.push({
-      //       text:fdata[j].name,
-      //        value:fdata[j].id
-      //     });
-      //   }
+      let { data: fdata } = await axios.get("foreign-broker-list"); //.then(fresponse => {
+      // let fdata = fresponse.data;      
+      for (let j = 0; j < fdata.length; j++) {
+        this.foreign_broker.push({
+          text: fdata[j].name,
+          value: fdata[j].id
+        });
+      }
       // });
     },
-    createBrokerClientOrder(broker) {
+    async createBrokerClientOrder(broker) {
       //Notes:
 
       // this.$swal
@@ -1214,36 +1212,41 @@ export default {
         return;
       }
 
-      axios
-        .post("store-broker-client-order", broker)
-        .then(response => {
-          let data = response.data;
-          let valid = data.isvalid;
+      try {
+        const { data, isvalid: valid } = await axios.post(
+          "store-broker-client-order",
+          broker
+        );
+        //  .then(response => {
+        // let data = response.data;
+        //   let valid = data.isvalid;
+        console.log(data);
+        if (valid) {
           console.log(data);
-          if (valid) {
-            console.log(data);
-            this.$swal(data.errors);
-            // setTimeout(location.reload.bind(location), 2000);
-          } else {
-            this.$swal(data.errors);
-            // setTimeout(location.reload.bind(location), 2000);
-          }
-        })
-        .catch(error => {
-          var s = error.response.data.message;
-          var field = s.match(/'([^']+)'/)[1];
-          if (error.response.data.message.includes("cannot be null")) {
-            this.$swal(
-              `When creating an order ${field} cannot be null. Please try creating the order again.`
-            );
-          }
-        });
+          this.$swal(data.errors);
+          // setTimeout(location.reload.bind(location), 2000);
+        } else {
+          this.$swal(data.errors);
+          // setTimeout(location.reload.bind(location), 2000);
+        }
+        // })
+      } catch (error) {
+        var s = error.response.data.message;
+        var field = s.match(/'([^']+)'/)[1];
+        if (error.response.data.message.includes("cannot be null")) {
+          this.$swal(
+            `When creating an order ${field} cannot be null. Please try creating the order again.`
+          );
+        }
+      } //);
     },
-    getSymbols() {
-      axios.get("/apis/symbols.json").then(response => {
-        this.symbols = response.data;
-      });
+    async getSymbols() {
+      const {data} = await axios.get("/apis/symbols.json"); //.then(response => {
+      this.symbols = data;
+      // });
     },
+
+
     add() {
       this.disabled = false;
       this.modalTitle = "New Order";
@@ -1306,10 +1309,10 @@ export default {
     },
     handleSubmit() {}
   },
-  mounted() {
-    this.getSymbols();
-    this.getBrokers();
-    this.tradingAccounts();
+  async mounted() {
+    await this.getSymbols();
+    //await this.getBrokers();
+    await this.tradingAccounts();
     var order_data = JSON.parse(this.orders);
     var client_accounts_data = JSON.parse(this.client_accounts);
     var orders = order_data[0]["order"];
