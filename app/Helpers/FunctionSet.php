@@ -629,7 +629,7 @@ class FunctionSet
         $account = $request['executionReports'];
         $total_reports = count($account);
 
-        return $request;
+        // return $request;
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
 
@@ -671,7 +671,7 @@ class FunctionSet
                 // return $order;
                 $od = $order;
                 $bc = $broker_client;
-                return $bc;
+                // return $bc;
                 if ($od->id) {
                     $o = $this->orderStatus($od->id);
                     // Define the open order amount
@@ -748,6 +748,11 @@ class FunctionSet
                             //     ->where('id', $od->id)
                             //     ->update(['order_status' => $status]);
                             // ->update(['order_status' => 2]);
+
+                            BrokerClientOrder::updateOrCreate(
+                                ['id' => $od->id ],
+                                ['order_status' => $status]
+                            );
                         }
                     }
                     // }
