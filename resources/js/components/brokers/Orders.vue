@@ -1315,7 +1315,8 @@ export default {
     var orders = order_data[0]["order"];
     var client_accounts = client_accounts_data[0]["clients"];
     console.log("orders", orders);
-    this.broker_client_orders = orders.sort(function(a, b) {
+    this.broker_client_orders = orders;
+    this.broker_client_orders.sort(function(a, b) {
       return b.client_order_number > a.client_order_number ? -1 : 1;
     });
     this.client_trading_account_options = client_accounts;
