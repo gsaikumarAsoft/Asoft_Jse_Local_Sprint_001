@@ -93,7 +93,6 @@
                     label-for="input-1-client-order-number"
                   >
                     <b-form-input
-                      disabled
                       id="input-10"
                       v-model="order.client_order_number"
                       type="text"
@@ -440,7 +439,7 @@
                         </b-col>
                       </b-row>
                     </b-container>
-                    <!-- <b-button
+                    <b-button
                       href="#"
                       v-if="order_option_inputs.length > 0"
                       @click="saveOrderToJSON"
@@ -495,7 +494,7 @@
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 // import jsonfile from 'jsonfile';
 export default {
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -956,14 +955,14 @@ export default {
   watch: {
     "order.time_in_force": function(d) {
       // if (d.fix_value) {
-        var fix_value = d.fix_value;
-        this.expiration = false;
-        if (fix_value === "6") {
-          // console.log(TIF.fix_valu:disabled="validated == 1"e);
-          // Show the Expiration date input for this order
-          this.expiration = true;
-        }
-        console.log(this.expiration);
+      var fix_value = d.fix_value;
+      this.expiration = false;
+      if (fix_value === "6") {
+        // console.log(TIF.fix_valu:disabled="validated == 1"e);
+        // Show the Expiration date input for this order
+        this.expiration = true;
+      }
+      console.log(this.expiration);
       // }
     }
   },
@@ -1052,9 +1051,9 @@ export default {
       const fr = new FileReader();
       const self = this;
       fr.onload = e => {
-        const result = JSON.parse(e.target.result);
-        self.order_template_data = result;
-
+        console.log("e.target.result", e.target.result);
+        //const result = JSON.parse(e.target.result);
+        self.order_template_data = e.target.result;
       };
 
       this.order_template_data = fr.readAsText(files);
@@ -1270,7 +1269,7 @@ export default {
       axios.delete(`destroy-broker-client-order/${id}`).then(response => {
         this.$swal("Cancelled");
         setTimeout(location.reload.bind(location), 1000);
-      });arsed 
+      }); //arsed
     },
     handleJSEOrder() {
       // Exit when the form isn't valid

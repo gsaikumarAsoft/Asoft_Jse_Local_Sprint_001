@@ -81,7 +81,7 @@
 </template>
 <script lang="ts">
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 export default {
   props: ["broker_traders"],
   components: {
