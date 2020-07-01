@@ -128,8 +128,11 @@ class AccountVerificationController extends Controller
                 
                 $account['user_name'] = $account['foreign_broker'];
                 $account['level'] = 'Foreign';
-                // return $account;
-                Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
+                
+                // DMA ADMIN WEB ISSUES - From Demo Session 2020-07-01
+                // - Remove Settlement Account Notification to Foreign Broker Email
+                // Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
+                
                 return view('layouts.approve');
                 break;
             case 'reject':
