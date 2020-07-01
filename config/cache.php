@@ -16,7 +16,7 @@ return [
     | Supported: "apc", "array", "database", "file",
     |            "memcached", "redis", "dynamodb"
     |
-    */
+     */
 
     'default' => env('CACHE_DRIVER', 'file'),
 
@@ -29,7 +29,7 @@ return [
     | well as their drivers. You may even define multiple stores for the
     | same cache driver to group types of items stored in your caches.
     |
-    */
+     */
 
     'stores' => [
 
@@ -69,6 +69,7 @@ return [
                     'weight' => 100,
                 ],
             ],
+
         ],
 
         'redis' => [
@@ -85,6 +86,11 @@ return [
             'endpoint' => env('DYNAMODB_ENDPOINT'),
         ],
 
+        //disable cache check .env  as well
+        'none' => [
+            'driver' => 'null',
+        ],
+
     ],
 
     /*
@@ -96,8 +102,8 @@ return [
     | be other applications utilizing the same cache. So, we'll specify a
     | value to get prefixed to all our keys so we can avoid collisions.
     |
-    */
+     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache'),
+    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_cache'),
 
 ];
