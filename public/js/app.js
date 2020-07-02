@@ -2003,6 +2003,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     toplinks: _partials_Nav__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  mounted: function mounted() {
+    console.log("In Local Broker");
   }
 });
 
@@ -70645,7 +70648,7 @@ var e=function(){return(e=Object.assign||function(e){for(var t,r=1,s=arguments.l
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -70791,7 +70794,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["accounts"],
   components: {
-    "head-nav": _partials_Nav__WEBPACK_IMPORTED_MODULE_1__["default"]
+    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data() {
     return {
@@ -70970,77 +70973,75 @@ __webpack_require__.r(__webpack_exports__);
         .catch(error => {});
     },
     setLocalBroker() {},
-    getTradingAccountsList() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trader-list").then(response => {
-        let data = response.data;
-        this.trading_accounts = [];
-        this.trading_accounts = data;
-      });
+    async getTradingAccountsList() {
+      ({ data: this.trading_accounts } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trader-list")); //.then(response => {
+      //});
     },
-    getSettlementAccounts() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("settlement-list").then(response => {
-        let data = response.data;
-        let i;
-        for (i = 0; i < data.length; i++) {
-          this.broker_settlement_accounts.push({
-            text:
-              data[i].foreign_broker["name"] +
-              "-" +
-              data[i].local_broker["name"] +
-              "-" +
-              data[i].bank_name +
-              "-" +
-              data[i].account,
-            value: data[i].id
-          });
-        }
-      });
+    async getSettlementAccounts() {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("settlement-list"); //.then(response => {
+
+      for (let i = 0; i < data.length; i++) {
+        this.broker_settlement_accounts.push({
+          text:
+            data[i].foreign_broker["name"] +
+            "-" +
+            data[i].local_broker["name"] +
+            "-" +
+            data[i].bank_name +
+            "-" +
+            data[i].account,
+          value: data[i].id
+        });
+      }
     },
-    storeBrokerTradingAccount() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .post("/store-settlement-broker", this.settlement_account)
-        .then(response => {
-          this.getTradingAccountsList();
-          setTimeout(location.reload.bind(location), 1000);
-          this.create = false;
-        })
-        .catch(error => {});
+
+    async storeBrokerTradingAccount() {
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/store-settlement-broker", this.settlement_account);
+        //.then(response => {
+        this.getTradingAccountsList();
+        setTimeout(location.reload.bind(location), 1000);
+        this.create = false;
+      } catch (error) {}
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`trading-account-delete/${id}`).then(response => {
-        this.getTradingAccountsList();
-      });
-    }
-  },
-  mounted() {
-    axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers").then(response => {
-      let local_brokers = response.data;
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`trading-account-delete/${id}`); //.then(response => {
+      await this.getTradingAccountsList();
+    },
+    async getLocalBrokers() {
+      const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers");
       // console.log(local_brokers);
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
+      for (let i = 0; i < local_brokers.length; i++) {
         this.local_brokers.push({
           text: local_brokers[i].user.name,
           value: local_brokers[i].id
         });
       }
-    });
-    axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers").then(response => {
-      let foreign_brokers = response.data;
-      let i;
-      for (i = 0; i < foreign_brokers.length; i++) {
+    },
+
+    async getForeignBrokers() {
+      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers"); //.then(response => {
+
+      for (let i = 0; i < foreign_brokers.length; i++) {
         let data = foreign_brokers[i].user;
         this.foreign_brokers.push({
           text: data.name,
           value: foreign_brokers[i].id
         });
       }
-    });
+    }
+  },
 
-    this.getTradingAccountsList();
-    this.getSettlementAccounts();
+  async mounted() {
+    await Promise.all([
+      this.getLocalBrokers(),
+      this.getForeignBrokers(),
+      this.getTradingAccountsList(),
+      this.getSettlementAccounts()
+    ]);
   }
 });
 
@@ -71058,7 +71059,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -71109,7 +71110,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
-    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_1__["default"]
+    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data() {
     return {
@@ -71159,10 +71160,10 @@ __webpack_require__.r(__webpack_exports__);
       this.nameState = valid;
       return valid;
     },
-    resetModal() {
+    async resetModal() {
       this.create = false;
       this.broker = {};
-      this.getBrokers();
+      await this.getBrokers();
     },
     handleOk(bvModalEvt) {
       // Prevent modal from closing
@@ -71206,9 +71207,9 @@ __webpack_require__.r(__webpack_exports__);
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    foreignBrokerHandler(b) {
+    async foreignBrokerHandler(b) {
       this.broker = b.user;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Foreign Broker <b>(${b.user.name})</b> `,
@@ -71220,57 +71221,50 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
-        }
-      });
+      }); //.then(result => {
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
+      }
     },
-    getBrokers() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers").then(response => {
-        let data = response.data;
-        this.foreign_brokers = data;
-      });
+    async getBrokers() {
+      ({ data: this.foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers")); //.then(response => {
     },
-    storeForeignBroker(broker) {
-      this.$swal
-        .fire({
+
+    async storeForeignBroker(broker) {
+      try {
+        this.$swal.fire({
           title: "Creating Foreign Broker Account",
           html: "One moment while we setup the Account",
           timerProgressBar: true,
           onBeforeOpen: () => {
             this.$swal.showLoading();
-            axios__WEBPACK_IMPORTED_MODULE_0___default.a
-              .post("store-foreign-broker", broker)
-              .then(response => {
-                this.getBrokers();
-              })
-              .catch(error => {
-                this.$swal(
-                  "Account Created!",
-                  // "Foreign Broker Has Been Removed.",
-                  "success"
-                );
-              });
           }
-        })
-        .then(result => {});
+        });
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-foreign-broker", broker);
+        await this.getBrokers();
+        this.$swal(
+          "Account Created!",
+          // "Foreign Broker Has Been Removed.",
+          "success"
+        );
+      } catch (error) {
+      } finally {
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`foreign-broker-delete/${id}`).then(response => {
-        this.getBrokers();
-      });
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`foreign-broker-delete/${id}`); //.then(response => {
+      await this.getBrokers();
     }
   },
-  mounted() {
-    this.getBrokers();
+  async mounted() {
+    await this.getBrokers();
   }
 });
 
@@ -71288,7 +71282,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -71339,7 +71333,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
-    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_1__["default"]
+    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data() {
     return {
@@ -71352,17 +71346,17 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: "user.name",
           sortable: true,
-          label: 'Name'
+          label: "Name"
         },
         {
           key: "user.email",
           sortable: true,
-          label: 'Email'
+          label: "Email"
         },
         {
           key: "user.status",
           sortable: true,
-          label: 'Account Status'
+          label: "Account Status"
         }
       ],
       modalTitle: "Local Broker Update",
@@ -71389,10 +71383,10 @@ __webpack_require__.r(__webpack_exports__);
       this.nameState = valid;
       return valid;
     },
-    resetModal() {
+    async resetModal() {
       this.create = false;
       this.broker = {};
-      this.getBrokers();
+      await this.getBrokers();
     },
     handleOk(bvModalEvt) {
       // Prevent modal from closing
@@ -71400,23 +71394,22 @@ __webpack_require__.r(__webpack_exports__);
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit() {
+    async handleSubmit() {
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
-
         //Determine if a new user is being created or we are updating an existing user
         if (this.create) {
           //Exclude ID
-          this.storeLocalBroker({
+          await this.storeLocalBroker({
             name: this.broker.name,
             email: this.broker.email
           });
           this.$swal(`Account created for ${this.broker.email}`);
         } else {
           //Include ID
-          this.storeLocalBroker({
+          await this.storeLocalBroker({
             id: this.broker.id,
             name: this.broker.name,
             email: this.broker.email
@@ -71436,9 +71429,9 @@ __webpack_require__.r(__webpack_exports__);
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    localBrokerHandler(b) {
+    async localBrokerHandler(b) {
       this.broker = b.user;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Local Broker <b>(${b.user.name})</b> `,
@@ -71450,42 +71443,35 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
-        }
-      });
+      }); //.then(result => {
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
+      }
     },
-    getBrokers() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers").then(response => {
-        let data = response.data;
-        console.log(data);
-        this.local_brokers = data;
-      });
+    async getBrokers() {
+      ({ data: this.local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers")); //.then(response => {
+      console.log("this.local_brokers", this.local_brokers);
     },
-    storeLocalBroker(broker) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .post("store-local-broker", broker)
-        .then(response => {
-          this.getBrokers();
-        })
-        .catch(error => {});
+    async storeLocalBroker(broker) {
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-local-broker", broker);
+        await this.getBrokers();
+      } catch (error) {}
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`local-broker-delete/${id}`).then(response => {
-        this.getBrokers();
-      });
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`local-broker-delete/${id}`);
+      await this.getBrokers();
     }
   },
-  mounted() {
-    this.getBrokers();
+  async mounted() {
+    await this.getBrokers();
   }
 });
 
@@ -71657,7 +71643,7 @@ __webpack_require__.r(__webpack_exports__);
     "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
   data() {
-    return {     
+    return {
       create: false,
       broker_settlement_account: [],
       settlement_account: {},
@@ -71704,7 +71690,7 @@ __webpack_require__.r(__webpack_exports__);
         },
         {
           key: "settlement_agent_status",
-          label: 'Status',
+          label: "Status",
           sortable: true
         }
       ],
@@ -71718,8 +71704,8 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
-    importAccounts(){
-            this.$swal
+    importAccounts() {
+      this.$swal
         .fire({
           title: "Importing",
           html: "One moment while we import new settlement accounts.",
@@ -71819,12 +71805,12 @@ __webpack_require__.r(__webpack_exports__);
 
       this.nameState = null;
     },
-    settlmentAccountHandler(b) {
+    async settlmentAccountHandler(b) {
       // console.log(b);
       this.settlement_account = {};
       console.log(b);
       this.settlement_account = b;
-      this.$swal({
+      const result = this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
@@ -71836,67 +71822,60 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Settlement Account Has Been Removed.",
-            "success"
-          );
-        }
       });
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        this.$swal(
+          "Deleted!",
+          "Settlement Account Has Been Removed.",
+          "success"
+        );
+      }
     },
     setLocalBroker() {
       // console.log(this);
     },
-    getSettlementList() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../settlement-list").then(response => {
-        let broker_settlement_accounts = response.data;
-        this.broker_settlement_account = [];
-        this.broker_settlement_account = broker_settlement_accounts;
-        // console.log(this.broker_settlement_account);
-      });
+    async getSettlementList() {
+      ({ data: this.broker_settlement_account } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(
+        "../settlement-list"
+      )); //.then(response => {
+      console.log("broker_settlement_account)", this.broker_settlement_account);
     },
-    storeBrokerSettlementAccount(account) {
+    async storeBrokerSettlementAccount(account) {
       // console.log(account);
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a
-        .post("../store-settlement-broker", account)
-        .then(response => {
-          this.getSettlementList();
-          this.create = false;
-        })
-        .catch(error => {
-          // console.log(error);
-        });
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
+        await this.getSettlementList();
+        this.create = false;
+      } catch (error) {
+        // console.log(error);
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`).then(response => {
-        this.getSettlementList();
-      });
-    }
-  },
-  mounted() {
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../local-brokers").then(response => {
-      let local_brokers = response.data;
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
+      await this.getSettlementList();
+    },
+
+    async getlocalBrokers() {
+      const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../local-brokers"); //.then(response => {
+
+      for (let i = 0; i < local_brokers.length; i++) {
         this.local_brokers.push({
           text: local_brokers[i].user.name,
           value: local_brokers[i].user.id
         });
       }
-    });
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../foreign-brokers").then(response => {
-      let foreign_brokers = response.data;
-      let i;
-      for (i = 0; i < foreign_brokers.length; i++) {
+    },
+    async getForeiognBrokers() {
+      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../foreign-brokers"); //.then(response => {
+
+      for (let i = 0; i < foreign_brokers.length; i++) {
         // console.log(foreign_brokers[i].user );
         let data = foreign_brokers[i].user;
         this.foreign_brokers.push({
@@ -71904,9 +71883,14 @@ __webpack_require__.r(__webpack_exports__);
           value: data.id
         });
       }
-    });
-
-    this.getSettlementList();
+    }
+  },
+  async mounted() {
+    await Promise.all([
+      this.getlocalBrokers(),
+      this.getForeiognBrokers(),
+      this.getSettlementList()
+    ]);
   }
 });
 
@@ -72114,7 +72098,7 @@ __webpack_require__.r(__webpack_exports__);
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit() {
+    async handleSubmit() {
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
@@ -72122,7 +72106,7 @@ __webpack_require__.r(__webpack_exports__);
         //Determine if a new client is being created or we are updating an existing client
         if (this.create) {
           //Exclude ID
-          this.storeBrokerClient({
+          await this.storeBrokerClient({
             name: this.broker.name,
             local_broker_id: parseInt(this.$userId),
             open_orders: this.broker.open_orders,
@@ -72134,7 +72118,7 @@ __webpack_require__.r(__webpack_exports__);
           // this.getClients();
         } else {
           //Include ID
-          this.storeBrokerClient({
+          await this.storeBrokerClient({
             id: this.broker.id,
             local_broker_id: parseInt(this.$userId),
             open_orders: this.broker.open_orders,
@@ -72154,20 +72138,18 @@ __webpack_require__.r(__webpack_exports__);
         });
       }
     },
-    getClients(broker) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .get("trading-accounts", broker)
-        .then(response => {
-          console.log(response);
-          this.local_broker_clients = [];
-          var broker = response.data[0];
-          this.local_broker_clients = broker.clients;
-        })
-        .catch(error => {});
+    async getClients(broker) {
+      try {
+        const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trading-accounts", broker);
+        console.log("get clients", data);
+        this.local_broker_clients = [];
+        var broker = data[0];
+        this.local_broker_clients = broker.clients;
+      } catch (error) {}
     },
-    brokerClientHandler(b) {
+    async brokerClientHandler(b) {
       this.broker = b;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Client <b>(${b.name})</b> `,
@@ -72179,68 +72161,59 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "Client Has Been Removed.", "success");
+      });
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        await this.$swal("Deleted!", "Client Has Been Removed.", "success");
+      }
+    },
+    async storeBrokerClient(broker) {
+      console.log(this.broker);
+      const result = await this.$swal.fire({
+        title: "Creating Client Account",
+        html: "One moment while we setup  a new Client Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
         }
       });
-    },
-    storeBrokerClient(broker) {
-      console.log(this.broker);
-      this.$swal
-        .fire({
-          title: "Creating Client Account",
-          html: "One moment while we setup  a new Client Account",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        })
-        .then(result => {});
       console.log("Storing Broker Client");
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .post("store-broker-client", broker)
-        .then(response => {
-          this.$swal(`Account created`);
-          setTimeout(location.reload.bind(location), 1000);
-        })
-        .catch(error => {
-          if (error.response.data.message.includes("Duplicate entry")) {
-            this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
-            );
-          }
-        });
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-broker-client", broker);
+        await this.$swal(`Account created`);
+        setTimeout(location.reload.bind(location), 1000);
+      } catch (error) {
+        if (error.response.data.message.includes("Duplicate entry")) {
+          await this.$swal(
+            `An Account with this email address already exists. Please try using a different email`
+          );
+        }
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`client-broker-delete/${id}`).then(response => {
-        this.getClients();
-      });
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`client-broker-delete/${id}`);
+      await this.getClients();
     }
   },
-  mounted() {
+  async mounted() {
     var client_data = JSON.parse(this.broker_traders);
     var clients = client_data[0].clients;
     this.local_broker_clients = clients;
     // this.getClients();
-    axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers").then(response => {
-      let local_brokers = response.data;
-      // console.log(local_brokers);
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].name,
-          value: local_brokers[i].id
-        });
-      }
-    });
+    const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers");
+    console.log("local brokers", local_brokers);
+    for (let i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].name,
+        value: local_brokers[i].id
+      });
+    }
   }
 });
 
@@ -72264,7 +72237,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_multiselect__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(vue_multiselect__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 /* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! jspdf */ "./node_modules/jspdf/dist/jspdf.min.js");
 /* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_5__);
 
@@ -72307,12 +72280,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["execution_reports"],
   components: {
-    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_4__["default"],
+    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
     Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_2___default())
   },
   data() {
     return {
-      report_data: JSON.parse(this.execution_reports),
       fields: [
         { key: "clordid", sortable: true, label: "Order Number" },
         { key: "qTradeacc", sortable: true, label: "Client Account" },
@@ -72419,37 +72391,41 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   computed: {
+    report_data() {
+      return JSON.parse(this.execution_reports);
+    },
     rows() {
       return this.report_data.length;
     }
   },
   methods: {
     exportBalances() {
-      const tableData = [];
-      for (var i = 0; i < this.report_data.length; i++) {
-        tableData.push([
-          // this.report_data[i].clOrdID,
-          this.report_data[i].orderID,
-          // this.report_data[i].text,
-          // this.report_data[i].ordRejRes,
-          // this.report_data[i].status,
-          this.report_data[i].buyorSell,
-          this.report_data[i].securitySubType,
-          // this.report_data[i].time,
-          this.report_data[i].ordType,
-          this.report_data[i].orderQty,
-          this.report_data[i].timeInForce,
-          this.report_data[i].symbol,
-          // this.report_data[i].qTradeacc,
-          this.report_data[i].price,
-          this.report_data[i].stopPx,
-          // this.report_data[i].execType,
-          this.report_data[i].senderSub,
-          this.report_data[i].seqNum
-          // this.report_data[i].sendingTime,
-          // this.report_data[i].messageDate
-        ]);
-      }
+      const tableData = this.report_data.map(r =>
+        //for (var i = 0; i < this.report_data.length; i++) {
+        //tableData.push([
+        [
+          // r.clOrdID,
+          r.orderID,
+          // r.text,
+          // r.ordRejRes,
+          // r.status,
+          r.buyorSell,
+          r.securitySubType,
+          // r.time,
+          r.ordType,
+          r.orderQty,
+          r.timeInForce,
+          r.symbol,
+          // r.qTradeacc,
+          r.price,
+          r.stopPx,
+          // r.execType,
+          r.senderSub,
+          r.seqNum
+          // r.sendingTime,
+          // r.messageDate
+        ]
+      );
 
       // console.log(this.broker_settlement_account[i])
       // tableData.push(this.broker_settlement_account[i]);
@@ -73303,6 +73279,7 @@ __webpack_require__.r(__webpack_exports__);
   watch: {
     "order.time_in_force": function(d) {
       // if (d.fix_value) {
+      console.log("d", d);
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
@@ -73532,49 +73509,47 @@ __webpack_require__.r(__webpack_exports__);
     },
     async createBrokerClientOrder(broker) {
       //Notes:
-
-      await this.$swal.fire({
+      console.log("broker", broker);
+      /*  await this.$swal.fire({
         title: "Creating Client Order",
         html: "One moment while we setup the current order",
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
         }
-      });
+      }); */
       // .then(result => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
       if (!broker.trading_account || !broker.client_trading_account) {
-        await this.$swal(
+        this.$swal(
           "You need to select a Trading Account & Client Account to continue"
         );
         return;
       }
 
       if (broker.price > broker.stop_price) {
-        await this.$swal("Price must be less than or equal to the Stop Price");
+        this.$swal("Price must be less than or equal to the Stop Price");
         return;
       }
 
       try {
-        const { data, isvalid: valid } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post(
-          "store-broker-client-order",
-          broker
-        );
+        const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("store-broker-client-order", broker);
         //  .then(response => {
         // let data = response.data;
-        //   let valid = data.isvalid;
-        console.log(data);
+        let valid = data.isvalid;
+        console.log("post data",data);
         if (valid) {
           console.log(data);
-          await this.$swal(data.errors);
+          this.$swal(data.errors);
           // setTimeout(location.reload.bind(location), 2000);
         } else {
-          await this.$swal(data.errors);
+          this.$swal(data.errors);
           // setTimeout(location.reload.bind(location), 2000);
         }
+        setTimeout(location.reload.bind(location), 2000);
         // })
       } catch (error) {
         var s = error.response.data.message;
@@ -73622,9 +73597,9 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     async destroy(id) {
-      await this.$swal("Proccessing Order Cancellation");
+      this.$swal("Proccessing Order Cancellation");
       await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`); //.then(response => {
-      await this.$swal("Cancelled");
+      this.$swal("Cancelled");
       await this.timeout(1000);
       window.location.reload.bind(window.location);
     },
@@ -73633,7 +73608,7 @@ __webpack_require__.r(__webpack_exports__);
     timeout(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
-    handleJSEOrder() {
+    async handleJSEOrder() {
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
@@ -73649,7 +73624,7 @@ __webpack_require__.r(__webpack_exports__);
       this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
       this.order["option_type"] = JSON.stringify(this.order.option_type);
       this.order["order_type"] = JSON.stringify(this.order.order_type);
-      this.createBrokerClientOrder(this.order);
+      await this.createBrokerClientOrder(this.order);
       // }
     },
     resetModal() {
@@ -73708,24 +73683,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -73765,7 +73723,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
-    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_1__["default"]
+    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data() {
     return {
@@ -73775,34 +73733,28 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   methods: {
-    getBrokers() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("/broker-list").then(response => {
-        let data = response.data;
-        this.local_brokers = data;
-      });
+    async getBrokers() {
+      ({ data: this.local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("/broker-list")); //.then(response => {
     },
-    storeLocalBroker() {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .post("/store-local-broker", this.broker)
-        .then(response => {
-          this.getBrokers();
-          console.log(response);
-          this.create = false;
-          this.getBrokers();
-        })
-        .catch(error => {});
+    async storeLocalBroker() {
+      try {
+        const response = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/store-local-broker", this.broker);
+        //.then(response => {
+        console.log(response);
+        await this.getBrokers();
+        this.create = false;
+      } catch (error) {}
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`/local-broker-delete/${id}`).then(response => {
-        this.getBrokers();
-      });
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`/local-broker-delete/${id}`);
+      await this.getBrokers();
     }
   },
-  mounted() {
-    this.getBrokers();
+  async mounted() {
+    await this.getBrokers();
   }
 });
 
@@ -73824,8 +73776,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jspdf_autotable__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(jspdf_autotable__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
-
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -73953,7 +73904,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["settlement_accounts"],
   components: {
-    "head-nav": _partials_Nav__WEBPACK_IMPORTED_MODULE_3__["default"]
+    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
   data() {
     return {
@@ -74057,13 +74008,13 @@ __webpack_require__.r(__webpack_exports__);
       this.create = false;
       this.settlement_account = {};
     },
-    handleOk(bvModalEvt) {
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
+      await this.handleSubmit();
     },
-    handleSubmit() {
+    async handleSubmit() {
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
@@ -74071,7 +74022,7 @@ __webpack_require__.r(__webpack_exports__);
         //Determine if a new user is being created or we are updating an existing user
         if (this.create) {
           //Exclude ID
-          this.storeBrokerSettlementAccount({
+          await this.storeBrokerSettlementAccount({
             account: this.settlement_account.account,
             account_balance: this.settlement_account.account_balance,
             amount_allocated: this.settlement_account.amount_allocated,
@@ -74081,10 +74032,12 @@ __webpack_require__.r(__webpack_exports__);
             local_broker_id: this.settlement_account.local_broker_id,
             status: "Unverified"
           });
-          this.$swal(`Account created for ${this.settlement_account.email}`);
+          await this.$swal(
+            `Account created for ${this.settlement_account.email}`
+          );
         } else {
           //Include ID
-          this.storeBrokerSettlementAccount({
+          await this.storeBrokerSettlementAccount({
             account: this.settlement_account.account,
             account_balance: this.settlement_account.account_balance,
             amount_allocated: this.settlement_account.amount_allocated,
@@ -74105,12 +74058,12 @@ __webpack_require__.r(__webpack_exports__);
 
       this.nameState = null;
     },
-    settlmentAccountHandler(b) {
+    async settlmentAccountHandler(b) {
       // console.log(b);
       this.settlement_account = {};
       console.log(b);
       this.settlement_account = b;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
@@ -74122,24 +74075,23 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Settlement Account Has Been Removed.",
-            "success"
-          );
-        }
       });
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        await this.$swal(
+          "Deleted!",
+          "Settlement Account Has Been Removed.",
+          "success"
+        );
+      }
     },
     setLocalBroker() {
       // console.log(this);
     },
-    getSettlementList() {
+    async getSettlementList() {
       // axios.get("../settlement-list").then(response => {
       //   let broker_settlement_accounts = response.data;
       //   this.broker_settlement_account = [];
@@ -74148,55 +74100,51 @@ __webpack_require__.r(__webpack_exports__);
       // });
       // setTimeout(location.reload.bind(location));
     },
-    storeBrokerSettlementAccount(account) {
+    async storeBrokerSettlementAccount(account) {
       // console.log(account);
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a
-        .post("../store-settlement-broker", account)
-        .then(response => {
-          this.getSettlementList();
-          this.create = false;
-        })
-        .catch(error => {
-          if (error.response.data.message.includes("Duplicate entry")) {
-            this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
-            );
-          }
-        });
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
+        //.then(response => {
+        await this.getSettlementList();
+        this.create = false;
+      } catch (error) {
+        if (error.response.data.message.includes("Duplicate entry")) {
+          await this.$swal(
+            `An Account with this email address already exists. Please try using a different email`
+          );
+        }
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`).then(response => {
-        this.getSettlementList();
-      });
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
+      await this.getSettlementList();
     }
   },
-  mounted() {
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("local-brokers").then(response => {
-      let local_brokers = response.data;
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].user.name,
-          value: local_brokers[i].user.id
-        });
-      }
-    });
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("foreign-broker-list").then(response => {
-      let foreign_brokers = response.data;
-      let i;
-      for (i = 0; i < foreign_brokers.length; i++) {
-        // console.log(foreign_brokers[i].user );
-        let data = foreign_brokers[i].user;
-        this.foreign_brokers.push({
-          text: data.name,
-          value: data.id
-        });
-      }
-    });
-    // this.getSettlementList();
+  async mounted() {
+    const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("local-brokers");
+
+    for (let i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].user.name,
+        value: local_brokers[i].user.id
+      });
+    }
+
+    const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("foreign-broker-list");
+
+    for (let i = 0; i < foreign_brokers.length; i++) {
+      // console.log(foreign_brokers[i].user );
+      const foreign_broker = foreign_brokers[i].user;
+      this.foreign_brokers.push({
+        text: foreign_broker.name,
+        value: foreign_broker.id
+      });
+    }
+
+    // await this.getSettlementList();
   }
 });
 
@@ -74539,7 +74487,7 @@ __webpack_require__.r(__webpack_exports__);
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("broker-users");
       // console.log(response);
       // let data = response.data;
-      let user_permissions = [{}];
+      let user_permissions = [];
       this.local_broker_users = data;
 
       //Handle Permissions
@@ -74645,7 +74593,7 @@ __webpack_require__.r(__webpack_exports__);
     await this.getBrokers();
     await this.tradingAccounts();
 
-    console.log(this.permissions);
+    console.log("permissions",this.permissions);
   }
 });
 
@@ -74664,7 +74612,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _js_mixins_Permissions_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../js/mixins/Permissions.js */ "./resources/js/mixins/Permissions.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -74765,24 +74713,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_js_mixins_Permissions_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
   components: {
-    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_2__["default"]
+    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   data() {
     return {
-      broker: {status: 'Un-Verified'},
+      broker: { status: "Un-Verified" },
       permissions: [],
       selected_permissions: [],
       create: false,
       clients: [],
       local_brokers: [],
-      broker: {},
       perPage: 5,
       currentPage: 1,
       client_status: [
         { value: null, text: "Please select a status" },
         { value: "Verified", text: "Verified" },
         { value: "Un-verified", text: "Rejected" },
-        { value: "Pending", text: "Pending" },
+        { value: "Pending", text: "Pending" }
       ],
       options: [
         { text: "Create", value: "Create" },
@@ -74854,8 +74801,8 @@ __webpack_require__.r(__webpack_exports__);
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit(b) {
-     // Exit when the form isn't valid
+    async handleSubmit(b) {
+      // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
@@ -74902,9 +74849,10 @@ __webpack_require__.r(__webpack_exports__);
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    brokerClientHandler(b) {
+
+    async brokerClientHandler(b) {
       this.broker = b;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Client <b>(${b.name})</b> `,
@@ -74916,71 +74864,63 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          if (this.permissions.indexOf("update-broker-client") !== -1) {
-            this.$bvModal.show("modal-1");
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request update permissions from your Admin",
-              "error"
-            );
-          }
+      }); //.then(result => {
+      if (result.value) {
+        if (this.permissions.indexOf("update-broker-client") !== -1) {
+          this.$bvModal.show("modal-1");
+        } else {
+          this.$swal(
+            "Oops!",
+            "Please request update permissions from your Admin",
+            "error"
+          );
         }
-        if (result.dismiss === "cancel") {
-          if (this.permissions.indexOf("delete-broker-client") !== -1) {
-            this.destroy(b.id);
-            this.$swal("Deleted!", "Client Has Been Removed.", "success");
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request delete permissions from your Admin",
-              "error"
-            );
-          }
+      }
+      if (result.dismiss === "cancel") {
+        if (this.permissions.indexOf("delete-broker-client") !== -1) {
+          await this.destroy(b.id);
+          this.$swal("Deleted!", "Client Has Been Removed.", "success");
+        } else {
+          this.$swal(
+            "Oops!",
+            "Please request delete permissions from your Admin",
+            "error"
+          );
         }
-      });
+      }
     },
-    getClients() {
-      axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("operator-clients").then(response => {
-        let data = response.data;
-        let user_permissions = [{}];
-        this.clients = data;
-        // console.log(this.clients);
-
-        //Handle Permissions
-        let i, j, k;
-        for (i = 0; i < this.clients.length; i++) {
-          this.clients[i].types = [];
-          user_permissions = this.clients[i].permission;
-          // console.log(user_permissions);
-          for (k = 0; k < user_permissions.length; k++) {
-            var specific_permission = user_permissions[k].permission;
-            this.clients[i].types.push(specific_permission);
-          }
+    async getClients() {
+      ({ data: this.clients } = await axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("operator-clients")); //.then(response => {
+      let user_permissions = [];
+      console.log("getClients", this.clients);
+      //Handle Permissions
+      let i, j, k;
+      for (i = 0; i < this.clients.length; i++) {
+        this.clients[i].types = [];
+        user_permissions = this.clients[i].permission;
+        // console.log(user_permissions);
+        for (k = 0; k < user_permissions.length; k++) {
+          var specific_permission = user_permissions[k].permission;
+          this.clients[i].types.push(specific_permission);
         }
-      });
+      }
     },
-    storeClient(broker) {console.log(broker);
-
-      axios__WEBPACK_IMPORTED_MODULE_1___default.a
-        .post("store-broker-trader", broker)
-        .then(response => {
-          this.getClients();
-        })
-        .catch(error => {});
+    async storeClient(broker) {
+      console.log("storeClient", broker);
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_1___default.a.post("store-broker-trader", broker);
+        await this.getClients();
+      } catch (error) {}
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios__WEBPACK_IMPORTED_MODULE_1___default.a.delete(`client-broker-delete/${id}`).then(response => {
-        this.getClients();
-      });
+    async destroy(id) {
+      await axios__WEBPACK_IMPORTED_MODULE_1___default.a.delete(`client-broker-delete/${id}`);
+      await this.getClients();
     }
   },
-  mounted() {
+  async mounted() {
     // //Define Permission On Front And Back End
     let p = JSON.parse(this.$userPermissions);
     //Looop through and identify all permission to validate against actions
@@ -74988,17 +74928,17 @@ __webpack_require__.r(__webpack_exports__);
       this.permissions.push(p[i].name);
     }
 
-    axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("trading-accounts").then(response => {
-      let local_brokers = response.data;
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].name,
-          value: local_brokers[i].id
-        });
-      }
-    });
-    this.getClients();
+    const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("trading-accounts"); //.then(response => {
+
+    let i;
+    for (i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].name,
+        value: local_brokers[i].id
+      });
+    }
+
+    await this.getClients();
   }
 });
 
@@ -75020,19 +74960,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_multiselect__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
-
-
-
-
-
-
-
-
-
-
-
-
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../mixins/Currencies.js */ "./resources/js/mixins/Currencies.js");
 
 
 
@@ -75476,9 +75405,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
   components: {
-    headNav: _partials_Nav__WEBPACK_IMPORTED_MODULE_3__["default"],
-    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default()),
+    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
+    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default())
   },
+  mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   data() {
     return {
       expiration: false,
@@ -75512,7 +75442,7 @@ __webpack_require__.r(__webpack_exports__);
             var order = JSON.parse(value);
             var d = JSON.parse(order);
             return d["text"];
-          },
+          }
         },
         {
           key: "symbol",
@@ -75524,7 +75454,7 @@ __webpack_require__.r(__webpack_exports__);
 
             return s.text;
             // return symbol.text;
-          },
+          }
         },
         {
           key: "time_in_force",
@@ -75540,7 +75470,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          },
+          }
         },
         {
           key: "currency",
@@ -75556,7 +75486,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          },
+          }
         },
         {
           key: "side",
@@ -75572,7 +75502,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          },
+          }
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
@@ -75604,8 +75534,8 @@ __webpack_require__.r(__webpack_exports__);
             } else {
               return value;
             }
-          },
-        },
+          }
+        }
         // { key: "foreign_broker", sortable: true }
       ],
       broker_client_orders: "",
@@ -75616,37 +75546,37 @@ __webpack_require__.r(__webpack_exports__);
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "1",
+          fix_value: "1"
         },
         {
           text: "Automated execution order, public, Broker intervention OK",
           value: "Automated execution order, public, Broker intervention OK",
-          fix_value: "2",
+          fix_value: "2"
         },
         {
           text: "Manual order, best execution",
           value: "Manual order, best execution",
-          fix_value: "3",
+          fix_value: "3"
         },
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "4",
-        },
+          fix_value: "4"
+        }
       ],
       jason_order: [],
       option_values: [
         {
           text: "TimeInForce",
           value: "TimeInForce",
-          type: "Date: when to expire",
+          type: "Date: when to expire"
         },
         {
           text: "Exection Destination",
           value: "Exection Destination",
-          type: "optional",
+          type: "optional"
         },
-        { text: "Exuction Instruction", value: "Exection Instruction" },
+        { text: "Exuction Instruction", value: "Exection Instruction" }
       ],
       option_types: [
         { text: "ClOrdID", value: "ClOrdID" },
@@ -75660,19 +75590,19 @@ __webpack_require__.r(__webpack_exports__);
         { text: "Side", value: "Side" },
         { text: "StopPx", value: "StopPx" },
         { text: "TimeInForce", value: "TimeInForce" },
-        { text: "TransactTime", value: "TransactTime" },
+        { text: "TransactTime", value: "TransactTime" }
       ],
       time_in_force: [
         { text: "Day", value: "Day", fix_value: "0" },
         {
           text: "Good Till Cancel (GTC)",
           value: "Good Till Cancel (GTC)",
-          fix_value: "1",
+          fix_value: "1"
         },
         {
           text: "Good Till Date (GTD)",
           value: "Good Till Date (GTD)",
-          fix_value: "6",
+          fix_value: "6"
         },
         // {
         //   text: "At the Opening (OPG)",
@@ -75682,13 +75612,13 @@ __webpack_require__.r(__webpack_exports__);
         {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
-          fix_value: "3",
+          fix_value: "3"
         },
         {
           text: "Fill or Kill (FOK)",
           value: "Fill or Kill (FOK)",
-          fix_value: "4",
-        },
+          fix_value: "4"
+        }
         // {
         //   text: "Good Till Crossing (GTX)",
         //   value: "Good Till Crossing (GTX)",
@@ -75697,7 +75627,7 @@ __webpack_require__.r(__webpack_exports__);
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
-        { text: "Sell", value: "Sell", fix_value: "2" },
+        { text: "Sell", value: "Sell", fix_value: "2" }
         // { text: "Buy minus", value: "Buy minus", fix_value: "3" },
         // { text: "Sell plus", value: "Sell plus", fix_value: "4" },
         // { text: "Sell short", value: "Sell short", fix_value: "5" },
@@ -75710,7 +75640,7 @@ __webpack_require__.r(__webpack_exports__);
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -75750,185 +75680,13 @@ __webpack_require__.r(__webpack_exports__);
         // { text: "Pegged", value: "Pegged", fix_value: "J" }
       ],
       symbols: [],
-      currencies: [
-        { value: "AFN", text: "AFN:  Afghan Afghani" },
-        { value: "ALL", text: "ALL:  Albanian Lek" },
-        { value: "AMD", text: "AMD:  Armenian Dram" },
-        { value: "ANG", text: "ANG:  Netherlands Antillean Guilder" },
-        { value: "AOA", text: "AOA:  Angolan Kwanza" },
-        { value: "ARS", text: "ARS:  Argentine Peso" },
-        { value: "AUD", text: "AUD:  Australian Dollar" },
-        { value: "AWG", text: "A WG:  Aruban Florin" },
-        { value: "AZN", text: "AZN:  Azerbaijani Manat" },
-        { value: "BAM", text: "BAM:  Bosnia-Herzegovina Convertible Mark" },
-        { value: "BBD", text: "BBD:  Barbadian Dollar" },
-        { value: "BDT", text: "BDT:  Bangladeshi Taka" },
-        { value: "BGN", text: "BGN:  Bulgar  ian Lev" },
-        { value: "BHD", text: "BHD:  Bahraini Dinar" },
-        { value: "BIF", text: "BIF:  Burundian Franc" },
-        { value: "BMD", text: "BMD:  Bermud  an Dollar" },
-        { value: "BND", text: "BND:  Brunei Dollar" },
-        { value: "BOB", text: "BOB:  Bolivian Boliviano" },
-        { value: "BRL", text: "BRL:  Br   azilian Real" },
-        { value: "BSD", text: "BSD:  Bahamian Dollar" },
-        { value: "BTC", text: "BTC:  Bitcoin" },
-        { value: "BTN", text: "BTN:  Bh   utanese Ngultrum" },
-        { value: "BWP", text: "BWP:  Botswanan Pula" },
-        { value: "BYN", text: "BYN:  Belarusian Ruble" },
-        { value: "BZD", text: "BZ   D:  Belize Dollar" },
-        { value: "CAD", text: "CAD:  Canadian Dollar" },
-        { value: "CDF", text: "CDF:  Congolese Franc" },
-        { value: "CHF", text: "CHF:  Swiss Franc   " },
-        { value: "CLF", text: "CLF:  Chilean Unit of Account (UF)" },
-        { value: "CLP", text: "CLP:  Chilean Peso" },
-        { value: "CNH", text: "CNH:  Chinese Yuan (Offshore)" },
-        { value: "CNY", text: "CNY:  Chinese Yuan" },
-        { value: "COP", text: "COP:  Colombi an Peso" },
-        { value: "CRC", text: "CRC:  Costa Rican Colón" },
-        { value: "CUC", text: "CUC:  Cuban Convertible Peso" },
-        { value: "CUP", text: "CUP:  Cuban Peso" },
-        { value: "CVE", text: "CVE:  Cape Verdean Escudo" },
-        { value: "CZK", text: "CZK:  Czech Republic Koruna" },
-        { value: "DJF", text: "DJF:  Djiboutian Franc" },
-        { value: "DKK", text: "DKK:  Danish Krone" },
-        { value: "DOP", text: "DOP:  Dominican Peso   " },
-        { value: "DZD", text: "DZD:  Algerian Dinar" },
-        { value: "EGP", text: "EG   P:  Egyptian Pound" },
-        { value: "ERN", text: "ERN:  Eritrean Nakfa" },
-        { value: "ETB", text: "ETB:  Ethiopian Birr" },
-        { value: "EUR", text: "EUR:  Eu   ro" },
-        { value: "FJD", text: "FJD:  Fijian Dollar" },
-        { value: "   FKP", text: "FKP:  Falkland Islands Pound" },
-        { value: "GBP", text: "GBP:  Bri  tish Pound Sterling" },
-        { value: "GEL", text: "GEL:  Georgian Lari" },
-        { value: "GGP", text: "GGP:  Guernsey Pound" },
-        { value: "GHS", text: "GHS:  Ghanaian Cedi" },
-        { value: "GIP", text: "GIP:  Gibraltar Pou nd" },
-        { value: "GMD", text: "GMD:  Gambian Dalasi" },
-        { value: "G  NF", text: "GNF:  Guinean Franc" },
-        { value: "GTQ", text: "GTQ:  Guatemala  n Quetzal" },
-        { value: "GYD", text: "GYD:  Guyanaese Dollar" },
-        { value: "HKD", text: "HKD:  Hong Kong Dollar" },
-        { value: "HNL", text: "HNL:  Hondura n Lempira" },
-        { value: "HRK", text: "HRK:  Croatian Kuna" },
-        { value: "HTG", text: "HTG:  Haitian Gourde" },
-        { value: "HUF", text: "HUF:    Hungarian Forint" },
-        { value: "IDR", text: "IDR:  Indonesian Rupiah" },
-        { value: "ILS", text: "ILS:  Israeli New Sheqel" },
-        { value: "IM P", text: "IMP:  Manx pound" },
-        { value: "INR", text: "INR:  Indian Rupe   e" },
-        { value: "IQD", text: "IQD:  Iraqi Dinar" },
-        { value: "IRR", text: "IRR:  Iranian Rial" },
-        { value: "ISK", text: "ISK:  Icelandic Króna" },
-        { value: "JEP", text: "JEP:  Jersey Pound" },
-        { value: "JMD", text: "JMD:     Jamaican Dollar" },
-        { value: "JOD", text: "JOD:  Jordanian Dinar" },
-        { value: "JPY", text: "JPY:  Japanese Yen" },
-        { value: "KES", text: "KES:  Kenyan Shilling" },
-        { value: "KGS", text: "KGS:  Kyrgystani Som" },
-        { value: "KHR", text: "KHR:  Cambodian Riel" },
-        { value: "KMF", text: "KMF:  Comorian Franc" },
-        { value: "KPW", text: "KPW:  North Korean Won " },
-        { value: "KRW", text: "KRW:  South Korean Won" },
-        { value: "KWD", text: "KWD:  Kuwaiti Dinar" },
-        { value: "KYD", text: "KYD:  Cayman Island s Dollar" },
-        { value: "KZT", text: "KZT:  Kazakhstani Tenge" },
-        { value: "LAK", text: "LAK:  Laotian Kip" },
-        { value: "LBP", text: "LBP:  Lebane  se Pound" },
-        { value: "LKR", text: "LKR:  Sri Lankan Rupee" },
-        { value: "LRD", text: "LRD:  Liberian Dollar" },
-        { value: "LSL", text: "L SL:  Lesotho Loti" },
-        { value: "LYD", text: "LYD:  Libyan Dinar" },
-        { value: "MAD", text: "MAD:  Moroccan Dirham" },
-        { value: "MDL", text: "MDL:  Moldovan Leu" },
-        { value: "MGA", text: "MGA:  Malagasy Ariary" },
-        { value: "MKD", text: "MKD:  Macedonian Denar" },
-        { value: "MMK", text: "MMK:  M yanma Kyat" },
-        { value: "MNT", text: "MNT:  Mongolian Tugrik" },
-        { value: "MOP", text: "MOP:  Macanese Pataca" },
-        { value: "MRO", text: "M RO:  Mauritanian Ouguiya (pre-2018)" },
-        { value: "MRU", text: "MRU:  Mau  ritanian Ouguiya" },
-        { value: "MUR", text: "MUR:  Mauritian Rupee" },
-        { value: "MVR", text: "MVR:  Maldivian Rufiyaa" },
-        { value: "MWK", text: "MWK:  Malawian Kwacha" },
-        { value: "MXN", text: "MXN:  Mexican Peso" },
-        { value: "MYR", text: "MYR:  Malaysian Ringgit" },
-        { value: "MZN", text: "MZN:  Mozambican Metical" },
-        { value: "NAD", text: "NAD:    Namibian Dollar" },
-        { value: "NGN", text: "NGN:  Nigerian Naira" },
-        { value: "NIO", text: "NIO:  Nicaraguan Córdoba" },
-        { value: "NOK", text: "NOK:  Norwegian Krone" },
-        { value: "NPR", text: "NPR:  Nepalese Rupee" },
-        { value: "NZD", text: "NZD:  New Zealand Dollar" },
-        { value: "OMR", text: "OMR:  Omani Rial" },
-        { value: "PAB", text: "PAB:  Panamanian Balboa" },
-        { value: "PEN", text: "PEN:  Peruvian Nuevo Sol" },
-        { value: "PG K", text: "PGK:  Papua New Guinean Kina" },
-        { value: "PHP", text: "PHP:     Philippine Peso" },
-        { value: "PKR", text: "PKR:  Pakistani Rupee" },
-        { value: "PLN", text: "PLN:  Polish Zloty" },
-        { value: "PYG", text: "PYG  :  Paraguayan Guarani" },
-        { value: "QAR", text: "QAR:  Qatari Rial" },
-        { value: "RON", text: "RON:  Romanian Leu" },
-        { value: "RSD", text: "  RSD:  Serbian Dinar" },
-        { value: "RUB", text: "RUB:  Russian Ruble" },
-        { value: "RWF", text: "RWF:  Rwandan Franc" },
-        { value: "SAR", text: "SAR  :  Saudi Riyal" },
-        { value: "SBD", text: "SBD:  Solomon Islands Dollar" },
-        { value: "SCR", text: "SCR:  Seychellois Rupee" },
-        { value: "SDG", text: "SDG:  Sudanese Pound" },
-        { value: "SEK", text: "SEK:  Swedish Krona" },
-        { value: "SGD", text: "SGD:  Singapore Dollar" },
-        { value: "SHP", text: "SHP:  Saint Helena Pound" },
-        { value: "SLL", text: "SLL:  Sierra Leonean Leone" },
-        { value: "SOS", text: "SOS:  Somali Shilling" },
-        { value: "SRD", text: "SRD:  Surinamese Dollar" },
-        { value: "SSP", text: "SSP:  South Sudanese Pound" },
-        { value: "STD", text: "STD:  São Tomé and Príncipe Dobra (pre-20,18)" },
-        { value: "STN", text: "STN:  São Tomé and Príncipe Dobra" },
-        { value: "SVC", text: "SVC:  Salvadoran Colón" },
-        { value: "SYP", text: "SYP:  Syrian Pound" },
-        { value: "SZL", text: "SZL:  Swazi Lilangeni" },
-        { value: "THB", text: "THB:  Thai Baht" },
-        { value: "TJS", text: "TJS:  Tajikistani Somoni" },
-        { value: "TMT", text: "TMT:  Turkmenistani Manat" },
-        { value: "TND", text: "TND:  Tunisian Dinar" },
-        { value: "TOP", text: "TOP:  Tongan Pa'anga" },
-        { value: "TRY", text: "TRY:  Turkish Lira" },
-        { value: "TTD", text: "TTD:  Trinidad and Tobago Dollar" },
-        { value: "TWD", text: "TWD:  New Taiwan Dollar" },
-        { value: "TZS", text: "TZS:  Tanzanian Shilling" },
-        { value: "UAH", text: "UAH:  Ukrainian Hryvnia" },
-        { value: "UGX", text: "UGX:  Ugandan Shilling" },
-        { value: "USD", text: "USD:  United States Dollar" },
-        { value: "UYU", text: "UYU:  Uruguayan Peso" },
-        { value: "UZS", text: "UZS:  Uzbekistan Som" },
-        { value: "VEF", text: "VEF:  Venezuelan Bolívar Fuerte (Old)" },
-        { value: "VES", text: "VES:  Venezuelan Bolívar Soberano" },
-        { value: "VND", text: "VND:  Vietnamese Dong" },
-        { value: "VUV", text: "VUV:  Vanuatu Vatu" },
-        { value: "WST", text: "WST:  Samoan Tala" },
-        { value: "XAF", text: "XAF:  CFA Franc BEAC" },
-        { value: "XAG", text: "XAG:  Silver Ounce" },
-        { value: "XAU", text: "XAU:  Gold Ounce" },
-        { value: "XCD", text: "XCD:  East Caribbean Dollar" },
-        { value: "XDR", text: "XDR:  Special Drawing Rights" },
-        { value: "XOF", text: "XOF:  CFA Franc BCEAO" },
-        { value: "XPD", text: "XPD:  Palladium Ounce" },
-        { value: "XPF", text: "XPF:  CFP Franc" },
-        { value: "XPT", text: "XPT:  Platinum Ounce" },
-        { value: "YER", text: "YER:  Yemeni Rial" },
-        { value: "ZAR", text: "ZAR:  South African Rand" },
-        { value: "ZMW", text: "ZMW:  Zambian Kwacha" },
-        { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" },
-      ],
-      nameState: null,
+      nameState: null
     };
   },
   computed: {
     rows() {
       return this.broker_client_orders.length;
-    },
+    }
   },
   methods: {
     search(nameKey, myArray) {
@@ -75940,7 +75698,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     currencyHandler() {
       this.order.currency = {};
-      var data = this.broker_trading_account_options[0].data
+      var data = this.broker_trading_account_options[0].data;
       var currency = data.currency;
       var resultObject = this.search(currency, this.currencies);
       this.order.currency = resultObject;
@@ -75952,7 +75710,7 @@ __webpack_require__.r(__webpack_exports__);
         this.order_option_input = false;
       }
     },
-    brokerOrderHandler(o) {
+    async brokerOrderHandler(o) {
       this.disabled = 1;
       this.order = {};
       this.order = o;
@@ -75986,7 +75744,7 @@ __webpack_require__.r(__webpack_exports__);
       }
       this.$refs.selectedOrder.clearSelected();
       // ==============================================
-      this.$swal({
+      const result = await this.$swal({
         title: o.clordid,
         text: "The Options for the current order are.",
         icon: "question",
@@ -75995,33 +75753,32 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
-        footer: "<a href='orders' >Exit</a>",
-      }).then((result) => {
-        if (result.value) {
-          if (this.permissions.indexOf("update-broker-order") !== -1) {
-            this.$bvModal.show("jse-new-order");
-            this.modalTitle = `Viewing Order ${o.clordid}`;
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request update permissions from your Admin to proceed",
-              "error"
-            );
-          }
+        footer: "<a href='orders' >Exit</a>"
+      }); //.then(result => {
+      if (result.value) {
+        if (this.permissions.indexOf("update-broker-order") !== -1) {
+          this.$bvModal.show("jse-new-order");
+          this.modalTitle = `Viewing Order ${o.clordid}`;
+        } else {
+          await this.$swal(
+            "Oops!",
+            "Please request update permissions from your Admin to proceed",
+            "error"
+          );
         }
-        if (result.dismiss === "cancel") {
-          if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(o.id);
-            brokerOr;
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request delete permissions from your Admin",
-              "error"
-            );
-          }
+      }
+      if (result.dismiss === "cancel") {
+        if (this.permissions.indexOf("delete-broker-order") !== -1) {
+          await this.destroy(o.id);
+          //broker Or;
+        } else {
+          this.$swal(
+            "Oops!",
+            "Please request delete permissions from your Admin",
+            "error"
+          );
         }
-      });
+      }
     },
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
@@ -76029,9 +75786,9 @@ __webpack_require__.r(__webpack_exports__);
       // console.log(this.files);
       const fr = new FileReader();
       const self = this;
-      fr.onload = (e) => {
-        const result = JSON.parse(e.target.result);
-        self.order_template_data = result;
+      fr.onload = e => {
+        //const result = JSON.parse(e.target.result);
+        self.order_template_data = e.target.result;
       };
 
       this.order_template_data = fr.readAsText(files);
@@ -76044,10 +75801,11 @@ __webpack_require__.r(__webpack_exports__);
       this.order_option_inputs = this.order_template_data.order_options;
       this.template = false;
     },
-    saveOrderToJSON() {
+
+    async saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
-        order_options: this.order_option_inputs,
+        order_options: this.order_option_inputs
       };
 
       delete order_data.order_standard["trading_account"];
@@ -76055,67 +75813,63 @@ __webpack_require__.r(__webpack_exports__);
       this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
 
       //Allow the user to create a file name before saving the file to their machine
-      this.$swal({
+      const result = await this.$swal({
         title:
           "Filename: Untitled.json, please insert a name for your file below.",
         input: "text",
         inputAttributes: {
-          autocapitalize: "off",
+          autocapitalize: "off"
         },
         confirmButtontext: "Create File",
         showLoaderOnConfirm: true,
-        preConfirm: (request) => {
+        preConfirm: request => {
           // once the user is complete giving the file a name, show them the order modal
 
           var Filename = request;
           var blob = new Blob(
             [
-              JSON.stringify(order_data),
+              JSON.stringify(order_data)
               //   JSON.stringify(this.order_option_inputs)
             ],
             {
-              type: "application/json",
+              type: "application/json"
             }
           );
           file_saver__WEBPACK_IMPORTED_MODULE_0___default()(blob, Filename + ".json");
         },
-        allowOutsideClick: () => !this.$swal.isLoading(),
-      }).then((result) => {
-        if (result.value) {
-          //Re Open Modal and allow user to continue their function
-          this.$bvModal.show("jse-new-order");
-        }
+        allowOutsideClick: () => !this.$swal.isLoading()
       });
+      if (result.value) {
+        //Re Open Modal and allow user to continue their function
+        this.$bvModal.show("jse-new-order");
+      }
     },
-    tradingAccounts() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-trading-accounts").then((response) => {
-        let data = response.data;
-        console.log("Right Here");
-        console.log(data);
-        let i;
-        for (i = 0; i < data.length; i++) {
-          //console.log(data[i]);
-          this.broker_trading_account_options.push({
-            text:
-              data[i].foreign_broker +
-              " : " +
-              data[i].bank +
-              "-" +
-              data[i].trading_account_number +
-              " : " +
-              data[i].account,
-            value: data[i].id,
-            data: data[i]
-          });
-        }
-      });
+    async tradingAccounts() {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-trading-accounts"); //.then(response => {
+      console.log("Right Here");
+      console.log(data);
+      for (let i = 0; i < data.length; i++) {
+        //console.log(data[i]);
+        this.broker_trading_account_options.push({
+          text:
+            data[i].foreign_broker +
+            " : " +
+            data[i].bank +
+            "-" +
+            data[i].trading_account_number +
+            " : " +
+            data[i].account,
+          value: data[i].id,
+          data: data[i]
+        });
+      }
     },
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
       return valid;
     },
-    getBrokers() {
+    async getBrokers() {
       // axios.get("broker-list").then(response => {
       //   let data = response.data;
       //   let i;
@@ -76138,7 +75892,7 @@ __webpack_require__.r(__webpack_exports__);
       //   }
       // });
     },
-    createBrokerClientOrder(broker) {
+    async createBrokerClientOrder(broker) {
       //Notes:
 
       // this.$swal
@@ -76160,107 +75914,85 @@ __webpack_require__.r(__webpack_exports__);
           "You need to select a Trading Account & Client Account to continue"
         );
       } else {
-        axios__WEBPACK_IMPORTED_MODULE_2___default.a
-          .post("store-operator-client-order", broker)
-          .then((response) => {
-            let data = response.data;
-            let valid = data.isvalid;
+        try {
+          const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post(
+            "store-operator-client-order",
+            broker
+          );
+          //.then(response => {
+          let valid = data.isvalid;
+          console.log(data);
+          if (valid) {
             console.log(data);
-            if (valid) {
-              console.log(data);
-              this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
-            } else {
-              this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
-            }
-          })
-          .catch((error) => {
-            var s = error.response.data.message;
-            var field = s.match(/'([^']+)'/)[1];
-            if (error.response.data.message.includes("cannot be null")) {
-              this.$swal(
-                `When creating an order ${field} cannot be null. Please try creating the order again.`
-              );
-            }
-          });
+            this.$swal(data.errors);
+            setTimeout(location.reload.bind(location), 2000);
+          } else {
+            this.$swal(data.errors);
+            setTimeout(location.reload.bind(location), 2000);
+          }
+        } catch (error) {
+          var s = error.response.data.message;
+          var field = s.match(/'([^']+)'/)[1];
+          if (error.response.data.message.includes("cannot be null")) {
+            this.$swal(
+              `When creating an order ${field} cannot be null. Please try creating the order again.`
+            );
+          }
+        }
       }
     },
-    callFix() {
+    async callFix() {
       let order_sample = {
         BeginString: "FIX.4.2",
-
         TargetCompID: "CIBC_TST",
-
         SenderCompID: "JSE_TST",
-
         SenderSubID: "JMMB",
-
         Host: "10.246.7.212",
-
         Port: 27102,
-
         UserName: "FC4",
-
         Password: "password",
-
         OrderID: "JMMB000004",
-
         BuyorSell: "1",
-
         OrdType: "4",
-
         OrderQty: "2",
-
         TimeInForce: "6",
-
         Symbol: "AAPL",
-
         Account: "1466267",
-
         Price: "224.99",
-
         Side: "5",
-
         Strategy: 1000,
-
         StopPx: 230.0,
-
         ExDestination: "CNQ",
-
-        ClientID: "JMMB_TRADER1",
+        ClientID: "JMMB_TRADER1"
       };
 
       console.log(order_sample);
 
       // Fix Wrapper
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-            this.$fixApi +
-            "api/OrderManagement/NewOrderSingle",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then((response) => {
-          let status = response.status;
-          if (status === 200) {
-            this.messageDownload(order_sample);
-          }
-        });
+      const { status } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post(
+        "https://cors-anywhere.herokuapp.com/" +
+          this.$fixApi +
+          "api/OrderManagement/NewOrderSingle",
+        order_sample
+        //{ crossDomain: true }
+      );
+
+      if (status === 200) {
+        await this.messageDownload(order_sample);
+      }
     },
-    messageDownload(order_sample) {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-            this.$fixApi +
-            "api/messagedownload/download",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then((response) => {
-          console.log(response);
-        });
+
+    async messageDownload(order_sample) {
+      const response = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post(
+        "https://cors-anywhere.herokuapp.com/" +
+          this.$fixApi +
+          "api/messagedownload/download",
+        order_sample
+        //{ crossDomain: true }
+      );
+      ///.then(response => {
+      console.log(response);
+      ///});
     },
     add() {
       this.disabled = "0";
@@ -76289,7 +76021,7 @@ __webpack_require__.r(__webpack_exports__);
     removeOption(index) {
       this.order_option_inputs.splice(index, 1);
     },
-    destroy(id) {
+    async destroy(id) {
       // this.$swal("Proccessing Order Cancellation");
       // // Fix Wrapper
       // axios
@@ -76303,7 +76035,7 @@ __webpack_require__.r(__webpack_exports__);
       //     this.$swal("Order Cancelled");
       //   });
     },
-    handleJSEOrder() {
+    async handleJSEOrder() {
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
@@ -76319,7 +76051,7 @@ __webpack_require__.r(__webpack_exports__);
       this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
       this.order["option_type"] = JSON.stringify(this.order.option_type);
       this.order["order_type"] = JSON.stringify(this.order.order_type);
-      this.createBrokerClientOrder(this.order);
+      await this.createBrokerClientOrder(this.order);
       // }
     },
     resetModal() {
@@ -76328,17 +76060,17 @@ __webpack_require__.r(__webpack_exports__);
       this.order = {};
     },
     handleSubmit() {},
-    getSymbols() {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json").then((response) => {
-        this.symbols = response.data;
-      });
-    },
+    async getSymbols() {
+      ({ data: this.symbols } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json"));
+    }
   },
-  mounted() {
-    this.getBrokers();
-    this.getSymbols();
-    this.tradingAccounts();
-    console.log(this);
+  async mounted() {
+    await Promise.all([
+      this.getBrokers(),
+      this.getSymbols(),
+      this.tradingAccounts()
+    ]);
+
     var client_accounts_data = JSON.parse(this.client_accounts);
     this.client_trading_account_options = client_accounts_data;
 
@@ -76355,7 +76087,7 @@ __webpack_require__.r(__webpack_exports__);
     this.broker_client_orders = JSON.parse(this.orders);
     console.log(this.broker_client_orders);
     // }
-  },
+  }
 });
 
 
@@ -76376,7 +76108,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jspdf_autotable__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(jspdf_autotable__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -76414,7 +76146,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["accounts"],
   components: {
-    "head-nav": _partials_Nav__WEBPACK_IMPORTED_MODULE_3__["default"]
+    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
   data() {
     return {
@@ -76492,7 +76224,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jspdf_autotable__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(jspdf_autotable__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _partials_Nav__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 
 
 
@@ -76530,7 +76262,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["accounts"],
   components: {
-    "head-nav": _partials_Nav__WEBPACK_IMPORTED_MODULE_3__["default"]
+    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
   data() {
     return {
@@ -79261,7 +78993,7 @@ var render = function() {
                     }
                   }
                 },
-                [_vm._v("\n        Add Local Broker\n      ")]
+                [_vm._v("Add Local Broker")]
               )
             : _vm._e(),
           _vm._v(" "),
@@ -79277,7 +79009,7 @@ var render = function() {
                     }
                   }
                 },
-                [_vm._v("\n        Save\n      ")]
+                [_vm._v("Save")]
               )
             : _vm._e()
         ])
@@ -80400,7 +80132,7 @@ var render = function() {
                                                 { attrs: { value: null } },
                                                 [
                                                   _vm._v(
-                                                    "\n                        -- Please select a Trading Account--\n                      "
+                                                    "-- Please select a Trading Account--"
                                                   )
                                                 ]
                                               )
@@ -80460,7 +80192,7 @@ var render = function() {
                                                   { attrs: { value: null } },
                                                   [
                                                     _vm._v(
-                                                      "\n                        -- Please select a Client Account--\n                      "
+                                                      "-- Please select a Client Account--"
                                                     )
                                                   ]
                                                 )
@@ -80496,11 +80228,11 @@ var render = function() {
                                               },
                                               [
                                                 _vm._v(
-                                                  "\n                      JCSD-" +
+                                                  "JCSD-" +
                                                     _vm._s(b.jcsd) +
                                                     " : " +
                                                     _vm._s(b.name) +
-                                                    ' "Investor"\n                    '
+                                                    ' "Investor"'
                                                 )
                                               ]
                                             )

@@ -123,7 +123,7 @@ class ApplicationController extends Controller
         $role_ADMB = Role::where('name', 'ADMB')->first();
 
         if ($request->id) {
-            LogActivity::addToLog('Updated Foreign Broker Details');
+            $this->LogActivity::addToLog('Updated Local Broker Details');
             $broker = User::updateOrCreate(
                 ['id' => $request->id],
                 ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified']
@@ -132,6 +132,7 @@ class ApplicationController extends Controller
             $request['hash']  = $broker->hash;
             Mail::to($request->email)->send(new LocalBrokerDetailsUpdate($request));
         } else {
+            $this->LogActivity::addToLog('Created A Local Broker');
             $hash = $this->HelperClass->generateRandomString(20);
             $user = new User();
             $user->name = $request->name;
@@ -170,7 +171,7 @@ class ApplicationController extends Controller
 
         if ($request->id) {
 
-            LogActivity::addToLog('Updated Settlement Account Details');
+            $this->LogActivity::addToLog('Updated Settlement Account Details');
 
             $b = BrokerSettlementAccount::find($request->id);
 
@@ -206,6 +207,7 @@ class ApplicationController extends Controller
 
             //Check if the user already exists
             if (count($this->HelperClass->getSettlementUserByEmail($request->email)) > 0) {
+                $this->LogActivity::addToLog('Updated Settlement Account Details');
                 // if the user exists update password and send new email
                 $u = $this->HelperClass->getSettlementUserByEmail($request->email);
                 // return $u;
@@ -300,7 +302,7 @@ class ApplicationController extends Controller
                 Mail::to($request->email)->send(new SettlementAccountConfirmation($data, $user));
 
 
-                LogActivity::addToLog('Created New Settlement Account');
+                $this->LogActivity::addToLog('Created New Settlement Account');
             }
         }
     }
@@ -327,7 +329,7 @@ class ApplicationController extends Controller
             $request['hash']  = $broker->hash;
             //Notify the broker that updates are being made to their accout
             Mail::to($request->email)->send(new BrokerDetailsUpdate($request, $broker->hash));
-            LogActivity::addToLog('Update Foreign Broker Details');
+            $this->LogActivity::addToLog('Update Foreign Broker Details');
         } else {
 
             $hash = $this->HelperClass->generateRandomString(20);
@@ -350,7 +352,7 @@ class ApplicationController extends Controller
 
 
             Mail::to($request->email)->send(new NewForeignBroker($request, $pass));
-            LogActivity::addToLog('Created New Foreign Broker');
+            $this->LogActivity::addToLog('Created New Foreign Broker');
         }
     }
 
@@ -361,7 +363,7 @@ class ApplicationController extends Controller
 
         $b = LocalBroker::find($id);
         $b->delete();
-        LogActivity::addToLog('Deleted Local Broker');
+        $this->LogActivity::addToLog('Deleted Local Broker');
     }
     function destroyForeignBroker($id)
     {
