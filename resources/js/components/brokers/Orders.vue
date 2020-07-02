@@ -787,6 +787,7 @@ export default {
   watch: {
     "order.time_in_force": function(d) {
       // if (d.fix_value) {
+      console.log("d", d);
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
@@ -1016,8 +1017,8 @@ export default {
     },
     async createBrokerClientOrder(broker) {
       //Notes:
-
-     /*  await this.$swal.fire({
+      console.log("broker", broker);
+      /*  await this.$swal.fire({
         title: "Creating Client Order",
         html: "One moment while we setup the current order",
         timerProgressBar: true,
@@ -1043,14 +1044,11 @@ export default {
       }
 
       try {
-        const { data, isvalid: valid } = await axios.post(
-          "store-broker-client-order",
-          broker
-        );
+        const { data } = await axios.post("store-broker-client-order", broker);
         //  .then(response => {
         // let data = response.data;
-        //   let valid = data.isvalid;
-        console.log(data);
+        let valid = data.isvalid;
+        console.log("post data",data);
         if (valid) {
           console.log(data);
           this.$swal(data.errors);
@@ -1059,6 +1057,7 @@ export default {
           this.$swal(data.errors);
           // setTimeout(location.reload.bind(location), 2000);
         }
+        setTimeout(location.reload.bind(location), 2000);
         // })
       } catch (error) {
         var s = error.response.data.message;
@@ -1117,7 +1116,7 @@ export default {
     timeout(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
-    handleJSEOrder() {
+    async handleJSEOrder() {
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
@@ -1133,7 +1132,7 @@ export default {
       this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
       this.order["option_type"] = JSON.stringify(this.order.option_type);
       this.order["order_type"] = JSON.stringify(this.order.order_type);
-      this.createBrokerClientOrder(this.order);
+      await this.createBrokerClientOrder(this.order);
       // }
     },
     resetModal() {
