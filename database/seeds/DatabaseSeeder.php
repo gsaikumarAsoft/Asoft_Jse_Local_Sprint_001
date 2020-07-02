@@ -12,15 +12,15 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // Role comes before User seeder here.
-        $this->call(RoleTableSeeder::class);
-        $this->call(PermissionTableSeeder::class);
+        // $this->call(RoleTableSeeder::class);
+        // $this->call(PermissionTableSeeder::class);
         // User seeder will use the roles above created.
 
        
         $this->call(UserTableSeeder::class);
-        $this->call(LocalBrokerSeeder::class);
-        $this->call(ForeignSeeder::class);
-        $this->call(SettlementAccountSeeder::class);
-        $this->call(BrokerClientOrderSeeder::class);
+        // $this->call(LocalBrokerSeeder::class);
+        // $this->call(ForeignSeeder::class);
+        // $this->call(SettlementAccountSeeder::class);
+        // $this->call(BrokerClientOrderSeeder::class);
     }
 }
