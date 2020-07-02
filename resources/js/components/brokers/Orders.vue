@@ -787,7 +787,7 @@ export default {
   watch: {
     "order.time_in_force": function(d) {
       // if (d.fix_value) {
-      console.log("d", d);
+      // console.log("d", d);
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
@@ -826,21 +826,22 @@ export default {
       this.order = {};
       this.order = o;
 
-      console.log("order", o);
+      // console.log("order", o);
 
       //Pre Select Client And Trading Accounts
-      var data = { ...this.orders };
+      // var data = { ...this.orders };
+      var data = JSON.parse(this.orders);
 
       var clients = data[0].clients;
       var trading = data[0].trading;
       var i, j;
+      // console.log(trading);
       for (i = 0; i < clients.length; i++) {
         if (o.broker_client_id === clients[i].id) {
           this.order.client_trading_account = clients[i].id;
         }
       }
       for (j = 0; j < trading.length; j++) {
-        console.log(trading[j].id);
         if (parseInt(o.trading_account_id) === trading[j].id) {
           this.order.trading_account = trading[j].id;
         }
@@ -850,7 +851,7 @@ export default {
       if (typeof o.time_in_force === "string") {
         // Parse stringified data from database back to json for viewing in the multiselect dropdown
         // let handling = JSON.parse(o.handling_instructions);
-        console.log("order", this.order);
+        // console.log("order", this.order);
         this.order.handling_instructions = JSON.parse(o.handling_instructions);
         this.order.symbol = JSON.parse(o.symbol);
         this.order.currency = JSON.parse(o.currency);
@@ -870,14 +871,15 @@ export default {
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
         footer: "<a href='orders' >Exit</a>"
-      }); //.then(result => {
+      }).then(result => {
       if (result.value) {
         this.$bvModal.show("jse-new-order");
         this.modalTitle = `Viewing Order ${o.clordid}`;
       }
       if (result.dismiss === "cancel") {
-        await this.destroy(o.clordid);
+        this.destroy(o.clordid);
       }
+      });
     },
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
