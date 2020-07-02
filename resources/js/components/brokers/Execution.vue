@@ -33,7 +33,7 @@ import moment from "moment";
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 import jsPDF from "jspdf";
 export default {
   props: ["execution_reports"],
@@ -43,7 +43,6 @@ export default {
   },
   data() {
     return {
-      report_data: JSON.parse(this.execution_reports),
       fields: [
         { key: "clordid", sortable: true, label: "Order Number" },
         { key: "qTradeacc", sortable: true, label: "Client Account" },
@@ -150,37 +149,41 @@ export default {
     };
   },
   computed: {
+    report_data() {
+      return JSON.parse(this.execution_reports);
+    },
     rows() {
       return this.report_data.length;
     }
   },
   methods: {
     exportBalances() {
-      const tableData = [];
-      for (var i = 0; i < this.report_data.length; i++) {
-        tableData.push([
-          // this.report_data[i].clOrdID,
-          this.report_data[i].orderID,
-          // this.report_data[i].text,
-          // this.report_data[i].ordRejRes,
-          // this.report_data[i].status,
-          this.report_data[i].buyorSell,
-          this.report_data[i].securitySubType,
-          // this.report_data[i].time,
-          this.report_data[i].ordType,
-          this.report_data[i].orderQty,
-          this.report_data[i].timeInForce,
-          this.report_data[i].symbol,
-          // this.report_data[i].qTradeacc,
-          this.report_data[i].price,
-          this.report_data[i].stopPx,
-          // this.report_data[i].execType,
-          this.report_data[i].senderSub,
-          this.report_data[i].seqNum
-          // this.report_data[i].sendingTime,
-          // this.report_data[i].messageDate
-        ]);
-      }
+      const tableData = this.report_data.map(r =>
+        //for (var i = 0; i < this.report_data.length; i++) {
+        //tableData.push([
+        [
+          // r.clOrdID,
+          r.orderID,
+          // r.text,
+          // r.ordRejRes,
+          // r.status,
+          r.buyorSell,
+          r.securitySubType,
+          // r.time,
+          r.ordType,
+          r.orderQty,
+          r.timeInForce,
+          r.symbol,
+          // r.qTradeacc,
+          r.price,
+          r.stopPx,
+          // r.execType,
+          r.senderSub,
+          r.seqNum
+          // r.sendingTime,
+          // r.messageDate
+        ]
+      );
 
       // console.log(this.broker_settlement_account[i])
       // tableData.push(this.broker_settlement_account[i]);

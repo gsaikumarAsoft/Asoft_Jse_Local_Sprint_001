@@ -187,7 +187,7 @@ export default {
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit() {
+    async handleSubmit() {
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
@@ -195,7 +195,7 @@ export default {
         //Determine if a new client is being created or we are updating an existing client
         if (this.create) {
           //Exclude ID
-          this.storeBrokerClient({
+          await this.storeBrokerClient({
             name: this.broker.name,
             local_broker_id: parseInt(this.$userId),
             open_orders: this.broker.open_orders,
@@ -207,7 +207,7 @@ export default {
           // this.getClients();
         } else {
           //Include ID
-          this.storeBrokerClient({
+          await this.storeBrokerClient({
             id: this.broker.id,
             local_broker_id: parseInt(this.$userId),
             open_orders: this.broker.open_orders,
@@ -227,20 +227,18 @@ export default {
         });
       }
     },
-    getClients(broker) {
-      axios
-        .get("trading-accounts", broker)
-        .then(response => {
-          console.log(response);
-          this.local_broker_clients = [];
-          var broker = response.data[0];
-          this.local_broker_clients = broker.clients;
-        })
-        .catch(error => {});
+    async getClients(broker) {
+      try {
+        const { data } = await axios.get("trading-accounts", broker);
+        console.log("get clients", data);
+        this.local_broker_clients = [];
+        var broker = data[0];
+        this.local_broker_clients = broker.clients;
+      } catch (error) {}
     },
-    brokerClientHandler(b) {
+    async brokerClientHandler(b) {
       this.broker = b;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Client <b>(${b.name})</b> `,
@@ -252,68 +250,59 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "Client Has Been Removed.", "success");
+      });
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        await this.$swal("Deleted!", "Client Has Been Removed.", "success");
+      }
+    },
+    async storeBrokerClient(broker) {
+      console.log(this.broker);
+      const result = await this.$swal.fire({
+        title: "Creating Client Account",
+        html: "One moment while we setup  a new Client Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
         }
       });
-    },
-    storeBrokerClient(broker) {
-      console.log(this.broker);
-      this.$swal
-        .fire({
-          title: "Creating Client Account",
-          html: "One moment while we setup  a new Client Account",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        })
-        .then(result => {});
       console.log("Storing Broker Client");
-      axios
-        .post("store-broker-client", broker)
-        .then(response => {
-          this.$swal(`Account created`);
-          setTimeout(location.reload.bind(location), 1000);
-        })
-        .catch(error => {
-          if (error.response.data.message.includes("Duplicate entry")) {
-            this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
-            );
-          }
-        });
+      try {
+        await axios.post("store-broker-client", broker);
+        await this.$swal(`Account created`);
+        setTimeout(location.reload.bind(location), 1000);
+      } catch (error) {
+        if (error.response.data.message.includes("Duplicate entry")) {
+          await this.$swal(
+            `An Account with this email address already exists. Please try using a different email`
+          );
+        }
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`client-broker-delete/${id}`).then(response => {
-        this.getClients();
-      });
+    async destroy(id) {
+      await axios.delete(`client-broker-delete/${id}`);
+      await this.getClients();
     }
   },
-  mounted() {
+  async mounted() {
     var client_data = JSON.parse(this.broker_traders);
     var clients = client_data[0].clients;
     this.local_broker_clients = clients;
     // this.getClients();
-    axios.get("local-brokers").then(response => {
-      let local_brokers = response.data;
-      // console.log(local_brokers);
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].name,
-          value: local_brokers[i].id
-        });
-      }
-    });
+    const { data: local_brokers } = await axios.get("local-brokers");
+    console.log("local brokers", local_brokers);
+    for (let i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].name,
+        value: local_brokers[i].id
+      });
+    }
   }
 };
 </script>

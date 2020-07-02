@@ -45,7 +45,7 @@
 </template>
 <script lang="ts">
 import axios from "axios";
-import headNav from "./partials/Nav";
+import headNav from "./partials/Nav.vue";
 export default {
   components: {
     headNav
@@ -98,10 +98,10 @@ export default {
       this.nameState = valid;
       return valid;
     },
-    resetModal() {
+    async resetModal() {
       this.create = false;
       this.broker = {};
-      this.getBrokers();
+      await this.getBrokers();
     },
     handleOk(bvModalEvt) {
       // Prevent modal from closing
@@ -145,9 +145,9 @@ export default {
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    foreignBrokerHandler(b) {
+    async foreignBrokerHandler(b) {
       this.broker = b.user;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Foreign Broker <b>(${b.user.name})</b> `,
@@ -159,57 +159,50 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
-        }
-      });
+      }); //.then(result => {
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
+      }
     },
-    getBrokers() {
-      axios.get("foreign-brokers").then(response => {
-        let data = response.data;
-        this.foreign_brokers = data;
-      });
+    async getBrokers() {
+      ({ data: this.foreign_brokers } = await axios.get("foreign-brokers")); //.then(response => {
     },
-    storeForeignBroker(broker) {
-      this.$swal
-        .fire({
+
+    async storeForeignBroker(broker) {
+      try {
+        this.$swal.fire({
           title: "Creating Foreign Broker Account",
           html: "One moment while we setup the Account",
           timerProgressBar: true,
           onBeforeOpen: () => {
             this.$swal.showLoading();
-            axios
-              .post("store-foreign-broker", broker)
-              .then(response => {
-                this.getBrokers();
-              })
-              .catch(error => {
-                this.$swal(
-                  "Account Created!",
-                  // "Foreign Broker Has Been Removed.",
-                  "success"
-                );
-              });
           }
-        })
-        .then(result => {});
+        });
+        await axios.post("store-foreign-broker", broker);
+        await this.getBrokers();
+        this.$swal(
+          "Account Created!",
+          // "Foreign Broker Has Been Removed.",
+          "success"
+        );
+      } catch (error) {
+      } finally {
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`foreign-broker-delete/${id}`).then(response => {
-        this.getBrokers();
-      });
+    async destroy(id) {
+      await axios.delete(`foreign-broker-delete/${id}`); //.then(response => {
+      await this.getBrokers();
     }
   },
-  mounted() {
-    this.getBrokers();
+  async mounted() {
+    await this.getBrokers();
   }
 };
 </script>

@@ -146,7 +146,7 @@ export default {
     "head-nav": headNav
   },
   data() {
-    return {     
+    return {
       create: false,
       broker_settlement_account: [],
       settlement_account: {},
@@ -193,7 +193,7 @@ export default {
         },
         {
           key: "settlement_agent_status",
-          label: 'Status',
+          label: "Status",
           sortable: true
         }
       ],
@@ -207,8 +207,8 @@ export default {
     }
   },
   methods: {
-    importAccounts(){
-            this.$swal
+    importAccounts() {
+      this.$swal
         .fire({
           title: "Importing",
           html: "One moment while we import new settlement accounts.",
@@ -308,12 +308,12 @@ export default {
 
       this.nameState = null;
     },
-    settlmentAccountHandler(b) {
+    async settlmentAccountHandler(b) {
       // console.log(b);
       this.settlement_account = {};
       console.log(b);
       this.settlement_account = b;
-      this.$swal({
+      const result = this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
@@ -325,67 +325,60 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Settlement Account Has Been Removed.",
-            "success"
-          );
-        }
       });
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        this.$swal(
+          "Deleted!",
+          "Settlement Account Has Been Removed.",
+          "success"
+        );
+      }
     },
     setLocalBroker() {
       // console.log(this);
     },
-    getSettlementList() {
-      axios.get("../settlement-list").then(response => {
-        let broker_settlement_accounts = response.data;
-        this.broker_settlement_account = [];
-        this.broker_settlement_account = broker_settlement_accounts;
-        // console.log(this.broker_settlement_account);
-      });
+    async getSettlementList() {
+      ({ data: this.broker_settlement_account } = await axios.get(
+        "../settlement-list"
+      )); //.then(response => {
+      console.log("broker_settlement_account)", this.broker_settlement_account);
     },
-    storeBrokerSettlementAccount(account) {
+    async storeBrokerSettlementAccount(account) {
       // console.log(account);
-      axios
-        .post("../store-settlement-broker", account)
-        .then(response => {
-          this.getSettlementList();
-          this.create = false;
-        })
-        .catch(error => {
-          // console.log(error);
-        });
+      try {
+        await axios.post("../store-settlement-broker", account);
+        await this.getSettlementList();
+        this.create = false;
+      } catch (error) {
+        // console.log(error);
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`../settlement-account-delete/${id}`).then(response => {
-        this.getSettlementList();
-      });
-    }
-  },
-  mounted() {
-    axios.get("../local-brokers").then(response => {
-      let local_brokers = response.data;
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
+    async destroy(id) {
+      await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
+      await this.getSettlementList();
+    },
+
+    async getlocalBrokers() {
+      const { data: local_brokers } = await axios.get("../local-brokers"); //.then(response => {
+
+      for (let i = 0; i < local_brokers.length; i++) {
         this.local_brokers.push({
           text: local_brokers[i].user.name,
           value: local_brokers[i].user.id
         });
       }
-    });
-    axios.get("../foreign-brokers").then(response => {
-      let foreign_brokers = response.data;
-      let i;
-      for (i = 0; i < foreign_brokers.length; i++) {
+    },
+    async getForeiognBrokers() {
+      const { data: foreign_brokers } = await axios.get("../foreign-brokers"); //.then(response => {
+
+      for (let i = 0; i < foreign_brokers.length; i++) {
         // console.log(foreign_brokers[i].user );
         let data = foreign_brokers[i].user;
         this.foreign_brokers.push({
@@ -393,9 +386,14 @@ export default {
           value: data.id
         });
       }
-    });
-
-    this.getSettlementList();
+    }
+  },
+  async mounted() {
+    await Promise.all([
+      this.getlocalBrokers(),
+      this.getForeiognBrokers(),
+      this.getSettlementList()
+    ]);
   }
 };
 </script>

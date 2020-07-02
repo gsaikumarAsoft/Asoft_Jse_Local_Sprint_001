@@ -139,7 +139,7 @@
 </template>
 <script lang="ts">
 import axios from "axios";
-import headNav from "./partials/Nav";
+import headNav from "./partials/Nav.vue";
 export default {
   props: ["accounts"],
   components: {
@@ -322,77 +322,75 @@ export default {
         .catch(error => {});
     },
     setLocalBroker() {},
-    getTradingAccountsList() {
-      axios.get("trader-list").then(response => {
-        let data = response.data;
-        this.trading_accounts = [];
-        this.trading_accounts = data;
-      });
+    async getTradingAccountsList() {
+      ({ data: this.trading_accounts } = await axios.get("trader-list")); //.then(response => {
+      //});
     },
-    getSettlementAccounts() {
-      axios.get("settlement-list").then(response => {
-        let data = response.data;
-        let i;
-        for (i = 0; i < data.length; i++) {
-          this.broker_settlement_accounts.push({
-            text:
-              data[i].foreign_broker["name"] +
-              "-" +
-              data[i].local_broker["name"] +
-              "-" +
-              data[i].bank_name +
-              "-" +
-              data[i].account,
-            value: data[i].id
-          });
-        }
-      });
+    async getSettlementAccounts() {
+      const { data } = await axios.get("settlement-list"); //.then(response => {
+
+      for (let i = 0; i < data.length; i++) {
+        this.broker_settlement_accounts.push({
+          text:
+            data[i].foreign_broker["name"] +
+            "-" +
+            data[i].local_broker["name"] +
+            "-" +
+            data[i].bank_name +
+            "-" +
+            data[i].account,
+          value: data[i].id
+        });
+      }
     },
-    storeBrokerTradingAccount() {
-      axios
-        .post("/store-settlement-broker", this.settlement_account)
-        .then(response => {
-          this.getTradingAccountsList();
-          setTimeout(location.reload.bind(location), 1000);
-          this.create = false;
-        })
-        .catch(error => {});
+
+    async storeBrokerTradingAccount() {
+      try {
+        await axios.post("/store-settlement-broker", this.settlement_account);
+        //.then(response => {
+        this.getTradingAccountsList();
+        setTimeout(location.reload.bind(location), 1000);
+        this.create = false;
+      } catch (error) {}
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`trading-account-delete/${id}`).then(response => {
-        this.getTradingAccountsList();
-      });
-    }
-  },
-  mounted() {
-    axios.get("local-brokers").then(response => {
-      let local_brokers = response.data;
+    async destroy(id) {
+      await axios.delete(`trading-account-delete/${id}`); //.then(response => {
+      await this.getTradingAccountsList();
+    },
+    async getLocalBrokers() {
+      const { data: local_brokers } = await axios.get("local-brokers");
       // console.log(local_brokers);
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
+      for (let i = 0; i < local_brokers.length; i++) {
         this.local_brokers.push({
           text: local_brokers[i].user.name,
           value: local_brokers[i].id
         });
       }
-    });
-    axios.get("foreign-brokers").then(response => {
-      let foreign_brokers = response.data;
-      let i;
-      for (i = 0; i < foreign_brokers.length; i++) {
+    },
+
+    async getForeignBrokers() {
+      const { data: foreign_brokers } = await axios.get("foreign-brokers"); //.then(response => {
+
+      for (let i = 0; i < foreign_brokers.length; i++) {
         let data = foreign_brokers[i].user;
         this.foreign_brokers.push({
           text: data.name,
           value: foreign_brokers[i].id
         });
       }
-    });
+    }
+  },
 
-    this.getTradingAccountsList();
-    this.getSettlementAccounts();
+  async mounted() {
+    await Promise.all([
+      this.getLocalBrokers(),
+      this.getForeignBrokers(),
+      this.getTradingAccountsList(),
+      this.getSettlementAccounts()
+    ]);
   }
 };
 </script>

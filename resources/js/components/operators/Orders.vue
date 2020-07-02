@@ -33,10 +33,7 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
-                  <b-form-group
-                    label="Trading Account"
-                    label-for="broker-input"
-                  >
+                  <b-form-group label="Trading Account" label-for="broker-input">
                     <b-form-select
                       v-model="order.trading_account"
                       :options="broker_trading_account_options"
@@ -45,9 +42,7 @@
                       @change="currencyHandler(order.trading_account)"
                     >
                       <template v-slot:first>
-                        <b-form-select-option :value="null">
-                          -- Please select a Trading Account--
-                        </b-form-select-option>
+                        <b-form-select-option :value="null">-- Please select a Trading Account--</b-form-select-option>
                       </template>
                       <!-- <b-form-select-option
                         v-for="b in local_brokers_list"
@@ -66,17 +61,13 @@
                       :disabled="disabled == 1"
                     >
                       <template v-slot:first>
-                        <b-form-select-option :value="null">
-                          -- Please select a Client Account--
-                        </b-form-select-option>
+                        <b-form-select-option :value="null">-- Please select a Client Account--</b-form-select-option>
                       </template>
                       <b-form-select-option
                         v-for="b in client_trading_account_options"
                         :value="b.id"
                         :key="b.id"
-                      >
-                        JCSD-{{ b.jcsd }} : {{ b.name }} "Investor"
-                      </b-form-select-option>
+                      >JCSD-{{ b.jcsd }} : {{ b.name }} "Investor"</b-form-select-option>
                     </b-form-select>
                   </b-form-group>
                 </b-col>
@@ -233,10 +224,7 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
-                  <b-form-group
-                    label="Handling Instructions"
-                    label-for="broker-input"
-                  >
+                  <b-form-group label="Handling Instructions" label-for="broker-input">
                     <multiselect
                       placeholder="Select an Instruction"
                       v-model="order.handling_instructions"
@@ -387,8 +375,8 @@
                           
                         </b-col>
                       </b-row>
-                    </b-container>
-                    <!-- <b-button
+                  </b-container>-->
+                  <!-- <b-button
                       href="#"
                       v-if="order_option_inputs.length > 0"
                       @click="saveOrderToJSON"
@@ -438,8 +426,7 @@
           v-if="permissions.indexOf('create-broker-order') !== -1"
           v-b-modal.jse-new-order
           @click="add"
-          >Create New Order</b-button
-        >
+        >Create New Order</b-button>
       </div>
     </div>
   </div>
@@ -449,13 +436,15 @@ import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
+import currenciesMixin from "../../mixins/Currencies.js";
 // import jsonfile from 'jsonfile';
 export default {
   props: ["orders", "client_accounts"],
   components: {
     headNav,
-    Multiselect,
+    Multiselect
   },
+  mixins: [currenciesMixin],
   data() {
     return {
       expiration: false,
@@ -489,7 +478,7 @@ export default {
             var order = JSON.parse(value);
             var d = JSON.parse(order);
             return d["text"];
-          },
+          }
         },
         {
           key: "symbol",
@@ -501,7 +490,7 @@ export default {
 
             return s.text;
             // return symbol.text;
-          },
+          }
         },
         {
           key: "time_in_force",
@@ -517,7 +506,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          },
+          }
         },
         {
           key: "currency",
@@ -533,7 +522,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          },
+          }
         },
         {
           key: "side",
@@ -549,7 +538,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          },
+          }
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
@@ -581,8 +570,8 @@ export default {
             } else {
               return value;
             }
-          },
-        },
+          }
+        }
         // { key: "foreign_broker", sortable: true }
       ],
       broker_client_orders: "",
@@ -593,37 +582,37 @@ export default {
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "1",
+          fix_value: "1"
         },
         {
           text: "Automated execution order, public, Broker intervention OK",
           value: "Automated execution order, public, Broker intervention OK",
-          fix_value: "2",
+          fix_value: "2"
         },
         {
           text: "Manual order, best execution",
           value: "Manual order, best execution",
-          fix_value: "3",
+          fix_value: "3"
         },
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "4",
-        },
+          fix_value: "4"
+        }
       ],
       jason_order: [],
       option_values: [
         {
           text: "TimeInForce",
           value: "TimeInForce",
-          type: "Date: when to expire",
+          type: "Date: when to expire"
         },
         {
           text: "Exection Destination",
           value: "Exection Destination",
-          type: "optional",
+          type: "optional"
         },
-        { text: "Exuction Instruction", value: "Exection Instruction" },
+        { text: "Exuction Instruction", value: "Exection Instruction" }
       ],
       option_types: [
         { text: "ClOrdID", value: "ClOrdID" },
@@ -637,19 +626,19 @@ export default {
         { text: "Side", value: "Side" },
         { text: "StopPx", value: "StopPx" },
         { text: "TimeInForce", value: "TimeInForce" },
-        { text: "TransactTime", value: "TransactTime" },
+        { text: "TransactTime", value: "TransactTime" }
       ],
       time_in_force: [
         { text: "Day", value: "Day", fix_value: "0" },
         {
           text: "Good Till Cancel (GTC)",
           value: "Good Till Cancel (GTC)",
-          fix_value: "1",
+          fix_value: "1"
         },
         {
           text: "Good Till Date (GTD)",
           value: "Good Till Date (GTD)",
-          fix_value: "6",
+          fix_value: "6"
         },
         // {
         //   text: "At the Opening (OPG)",
@@ -659,13 +648,13 @@ export default {
         {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
-          fix_value: "3",
+          fix_value: "3"
         },
         {
           text: "Fill or Kill (FOK)",
           value: "Fill or Kill (FOK)",
-          fix_value: "4",
-        },
+          fix_value: "4"
+        }
         // {
         //   text: "Good Till Crossing (GTX)",
         //   value: "Good Till Crossing (GTX)",
@@ -674,7 +663,7 @@ export default {
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
-        { text: "Sell", value: "Sell", fix_value: "2" },
+        { text: "Sell", value: "Sell", fix_value: "2" }
         // { text: "Buy minus", value: "Buy minus", fix_value: "3" },
         // { text: "Sell plus", value: "Sell plus", fix_value: "4" },
         // { text: "Sell short", value: "Sell short", fix_value: "5" },
@@ -687,7 +676,7 @@ export default {
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -727,185 +716,13 @@ export default {
         // { text: "Pegged", value: "Pegged", fix_value: "J" }
       ],
       symbols: [],
-      currencies: [
-        { value: "AFN", text: "AFN:  Afghan Afghani" },
-        { value: "ALL", text: "ALL:  Albanian Lek" },
-        { value: "AMD", text: "AMD:  Armenian Dram" },
-        { value: "ANG", text: "ANG:  Netherlands Antillean Guilder" },
-        { value: "AOA", text: "AOA:  Angolan Kwanza" },
-        { value: "ARS", text: "ARS:  Argentine Peso" },
-        { value: "AUD", text: "AUD:  Australian Dollar" },
-        { value: "AWG", text: "A WG:  Aruban Florin" },
-        { value: "AZN", text: "AZN:  Azerbaijani Manat" },
-        { value: "BAM", text: "BAM:  Bosnia-Herzegovina Convertible Mark" },
-        { value: "BBD", text: "BBD:  Barbadian Dollar" },
-        { value: "BDT", text: "BDT:  Bangladeshi Taka" },
-        { value: "BGN", text: "BGN:  Bulgar  ian Lev" },
-        { value: "BHD", text: "BHD:  Bahraini Dinar" },
-        { value: "BIF", text: "BIF:  Burundian Franc" },
-        { value: "BMD", text: "BMD:  Bermud  an Dollar" },
-        { value: "BND", text: "BND:  Brunei Dollar" },
-        { value: "BOB", text: "BOB:  Bolivian Boliviano" },
-        { value: "BRL", text: "BRL:  Br   azilian Real" },
-        { value: "BSD", text: "BSD:  Bahamian Dollar" },
-        { value: "BTC", text: "BTC:  Bitcoin" },
-        { value: "BTN", text: "BTN:  Bh   utanese Ngultrum" },
-        { value: "BWP", text: "BWP:  Botswanan Pula" },
-        { value: "BYN", text: "BYN:  Belarusian Ruble" },
-        { value: "BZD", text: "BZ   D:  Belize Dollar" },
-        { value: "CAD", text: "CAD:  Canadian Dollar" },
-        { value: "CDF", text: "CDF:  Congolese Franc" },
-        { value: "CHF", text: "CHF:  Swiss Franc   " },
-        { value: "CLF", text: "CLF:  Chilean Unit of Account (UF)" },
-        { value: "CLP", text: "CLP:  Chilean Peso" },
-        { value: "CNH", text: "CNH:  Chinese Yuan (Offshore)" },
-        { value: "CNY", text: "CNY:  Chinese Yuan" },
-        { value: "COP", text: "COP:  Colombi an Peso" },
-        { value: "CRC", text: "CRC:  Costa Rican Colón" },
-        { value: "CUC", text: "CUC:  Cuban Convertible Peso" },
-        { value: "CUP", text: "CUP:  Cuban Peso" },
-        { value: "CVE", text: "CVE:  Cape Verdean Escudo" },
-        { value: "CZK", text: "CZK:  Czech Republic Koruna" },
-        { value: "DJF", text: "DJF:  Djiboutian Franc" },
-        { value: "DKK", text: "DKK:  Danish Krone" },
-        { value: "DOP", text: "DOP:  Dominican Peso   " },
-        { value: "DZD", text: "DZD:  Algerian Dinar" },
-        { value: "EGP", text: "EG   P:  Egyptian Pound" },
-        { value: "ERN", text: "ERN:  Eritrean Nakfa" },
-        { value: "ETB", text: "ETB:  Ethiopian Birr" },
-        { value: "EUR", text: "EUR:  Eu   ro" },
-        { value: "FJD", text: "FJD:  Fijian Dollar" },
-        { value: "   FKP", text: "FKP:  Falkland Islands Pound" },
-        { value: "GBP", text: "GBP:  Bri  tish Pound Sterling" },
-        { value: "GEL", text: "GEL:  Georgian Lari" },
-        { value: "GGP", text: "GGP:  Guernsey Pound" },
-        { value: "GHS", text: "GHS:  Ghanaian Cedi" },
-        { value: "GIP", text: "GIP:  Gibraltar Pou nd" },
-        { value: "GMD", text: "GMD:  Gambian Dalasi" },
-        { value: "G  NF", text: "GNF:  Guinean Franc" },
-        { value: "GTQ", text: "GTQ:  Guatemala  n Quetzal" },
-        { value: "GYD", text: "GYD:  Guyanaese Dollar" },
-        { value: "HKD", text: "HKD:  Hong Kong Dollar" },
-        { value: "HNL", text: "HNL:  Hondura n Lempira" },
-        { value: "HRK", text: "HRK:  Croatian Kuna" },
-        { value: "HTG", text: "HTG:  Haitian Gourde" },
-        { value: "HUF", text: "HUF:    Hungarian Forint" },
-        { value: "IDR", text: "IDR:  Indonesian Rupiah" },
-        { value: "ILS", text: "ILS:  Israeli New Sheqel" },
-        { value: "IM P", text: "IMP:  Manx pound" },
-        { value: "INR", text: "INR:  Indian Rupe   e" },
-        { value: "IQD", text: "IQD:  Iraqi Dinar" },
-        { value: "IRR", text: "IRR:  Iranian Rial" },
-        { value: "ISK", text: "ISK:  Icelandic Króna" },
-        { value: "JEP", text: "JEP:  Jersey Pound" },
-        { value: "JMD", text: "JMD:     Jamaican Dollar" },
-        { value: "JOD", text: "JOD:  Jordanian Dinar" },
-        { value: "JPY", text: "JPY:  Japanese Yen" },
-        { value: "KES", text: "KES:  Kenyan Shilling" },
-        { value: "KGS", text: "KGS:  Kyrgystani Som" },
-        { value: "KHR", text: "KHR:  Cambodian Riel" },
-        { value: "KMF", text: "KMF:  Comorian Franc" },
-        { value: "KPW", text: "KPW:  North Korean Won " },
-        { value: "KRW", text: "KRW:  South Korean Won" },
-        { value: "KWD", text: "KWD:  Kuwaiti Dinar" },
-        { value: "KYD", text: "KYD:  Cayman Island s Dollar" },
-        { value: "KZT", text: "KZT:  Kazakhstani Tenge" },
-        { value: "LAK", text: "LAK:  Laotian Kip" },
-        { value: "LBP", text: "LBP:  Lebane  se Pound" },
-        { value: "LKR", text: "LKR:  Sri Lankan Rupee" },
-        { value: "LRD", text: "LRD:  Liberian Dollar" },
-        { value: "LSL", text: "L SL:  Lesotho Loti" },
-        { value: "LYD", text: "LYD:  Libyan Dinar" },
-        { value: "MAD", text: "MAD:  Moroccan Dirham" },
-        { value: "MDL", text: "MDL:  Moldovan Leu" },
-        { value: "MGA", text: "MGA:  Malagasy Ariary" },
-        { value: "MKD", text: "MKD:  Macedonian Denar" },
-        { value: "MMK", text: "MMK:  M yanma Kyat" },
-        { value: "MNT", text: "MNT:  Mongolian Tugrik" },
-        { value: "MOP", text: "MOP:  Macanese Pataca" },
-        { value: "MRO", text: "M RO:  Mauritanian Ouguiya (pre-2018)" },
-        { value: "MRU", text: "MRU:  Mau  ritanian Ouguiya" },
-        { value: "MUR", text: "MUR:  Mauritian Rupee" },
-        { value: "MVR", text: "MVR:  Maldivian Rufiyaa" },
-        { value: "MWK", text: "MWK:  Malawian Kwacha" },
-        { value: "MXN", text: "MXN:  Mexican Peso" },
-        { value: "MYR", text: "MYR:  Malaysian Ringgit" },
-        { value: "MZN", text: "MZN:  Mozambican Metical" },
-        { value: "NAD", text: "NAD:    Namibian Dollar" },
-        { value: "NGN", text: "NGN:  Nigerian Naira" },
-        { value: "NIO", text: "NIO:  Nicaraguan Córdoba" },
-        { value: "NOK", text: "NOK:  Norwegian Krone" },
-        { value: "NPR", text: "NPR:  Nepalese Rupee" },
-        { value: "NZD", text: "NZD:  New Zealand Dollar" },
-        { value: "OMR", text: "OMR:  Omani Rial" },
-        { value: "PAB", text: "PAB:  Panamanian Balboa" },
-        { value: "PEN", text: "PEN:  Peruvian Nuevo Sol" },
-        { value: "PG K", text: "PGK:  Papua New Guinean Kina" },
-        { value: "PHP", text: "PHP:     Philippine Peso" },
-        { value: "PKR", text: "PKR:  Pakistani Rupee" },
-        { value: "PLN", text: "PLN:  Polish Zloty" },
-        { value: "PYG", text: "PYG  :  Paraguayan Guarani" },
-        { value: "QAR", text: "QAR:  Qatari Rial" },
-        { value: "RON", text: "RON:  Romanian Leu" },
-        { value: "RSD", text: "  RSD:  Serbian Dinar" },
-        { value: "RUB", text: "RUB:  Russian Ruble" },
-        { value: "RWF", text: "RWF:  Rwandan Franc" },
-        { value: "SAR", text: "SAR  :  Saudi Riyal" },
-        { value: "SBD", text: "SBD:  Solomon Islands Dollar" },
-        { value: "SCR", text: "SCR:  Seychellois Rupee" },
-        { value: "SDG", text: "SDG:  Sudanese Pound" },
-        { value: "SEK", text: "SEK:  Swedish Krona" },
-        { value: "SGD", text: "SGD:  Singapore Dollar" },
-        { value: "SHP", text: "SHP:  Saint Helena Pound" },
-        { value: "SLL", text: "SLL:  Sierra Leonean Leone" },
-        { value: "SOS", text: "SOS:  Somali Shilling" },
-        { value: "SRD", text: "SRD:  Surinamese Dollar" },
-        { value: "SSP", text: "SSP:  South Sudanese Pound" },
-        { value: "STD", text: "STD:  São Tomé and Príncipe Dobra (pre-20,18)" },
-        { value: "STN", text: "STN:  São Tomé and Príncipe Dobra" },
-        { value: "SVC", text: "SVC:  Salvadoran Colón" },
-        { value: "SYP", text: "SYP:  Syrian Pound" },
-        { value: "SZL", text: "SZL:  Swazi Lilangeni" },
-        { value: "THB", text: "THB:  Thai Baht" },
-        { value: "TJS", text: "TJS:  Tajikistani Somoni" },
-        { value: "TMT", text: "TMT:  Turkmenistani Manat" },
-        { value: "TND", text: "TND:  Tunisian Dinar" },
-        { value: "TOP", text: "TOP:  Tongan Pa'anga" },
-        { value: "TRY", text: "TRY:  Turkish Lira" },
-        { value: "TTD", text: "TTD:  Trinidad and Tobago Dollar" },
-        { value: "TWD", text: "TWD:  New Taiwan Dollar" },
-        { value: "TZS", text: "TZS:  Tanzanian Shilling" },
-        { value: "UAH", text: "UAH:  Ukrainian Hryvnia" },
-        { value: "UGX", text: "UGX:  Ugandan Shilling" },
-        { value: "USD", text: "USD:  United States Dollar" },
-        { value: "UYU", text: "UYU:  Uruguayan Peso" },
-        { value: "UZS", text: "UZS:  Uzbekistan Som" },
-        { value: "VEF", text: "VEF:  Venezuelan Bolívar Fuerte (Old)" },
-        { value: "VES", text: "VES:  Venezuelan Bolívar Soberano" },
-        { value: "VND", text: "VND:  Vietnamese Dong" },
-        { value: "VUV", text: "VUV:  Vanuatu Vatu" },
-        { value: "WST", text: "WST:  Samoan Tala" },
-        { value: "XAF", text: "XAF:  CFA Franc BEAC" },
-        { value: "XAG", text: "XAG:  Silver Ounce" },
-        { value: "XAU", text: "XAU:  Gold Ounce" },
-        { value: "XCD", text: "XCD:  East Caribbean Dollar" },
-        { value: "XDR", text: "XDR:  Special Drawing Rights" },
-        { value: "XOF", text: "XOF:  CFA Franc BCEAO" },
-        { value: "XPD", text: "XPD:  Palladium Ounce" },
-        { value: "XPF", text: "XPF:  CFP Franc" },
-        { value: "XPT", text: "XPT:  Platinum Ounce" },
-        { value: "YER", text: "YER:  Yemeni Rial" },
-        { value: "ZAR", text: "ZAR:  South African Rand" },
-        { value: "ZMW", text: "ZMW:  Zambian Kwacha" },
-        { value: "ZWL", text: "ZWL:  Zimbabwean Dollar" },
-      ],
-      nameState: null,
+      nameState: null
     };
   },
   computed: {
     rows() {
       return this.broker_client_orders.length;
-    },
+    }
   },
   methods: {
     search(nameKey, myArray) {
@@ -917,7 +734,7 @@ export default {
     },
     currencyHandler() {
       this.order.currency = {};
-      var data = this.broker_trading_account_options[0].data
+      var data = this.broker_trading_account_options[0].data;
       var currency = data.currency;
       var resultObject = this.search(currency, this.currencies);
       this.order.currency = resultObject;
@@ -929,7 +746,7 @@ export default {
         this.order_option_input = false;
       }
     },
-    brokerOrderHandler(o) {
+    async brokerOrderHandler(o) {
       this.disabled = 1;
       this.order = {};
       this.order = o;
@@ -963,7 +780,7 @@ export default {
       }
       this.$refs.selectedOrder.clearSelected();
       // ==============================================
-      this.$swal({
+      const result = await this.$swal({
         title: o.clordid,
         text: "The Options for the current order are.",
         icon: "question",
@@ -972,33 +789,32 @@ export default {
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
-        footer: "<a href='orders' >Exit</a>",
-      }).then((result) => {
-        if (result.value) {
-          if (this.permissions.indexOf("update-broker-order") !== -1) {
-            this.$bvModal.show("jse-new-order");
-            this.modalTitle = `Viewing Order ${o.clordid}`;
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request update permissions from your Admin to proceed",
-              "error"
-            );
-          }
+        footer: "<a href='orders' >Exit</a>"
+      }); //.then(result => {
+      if (result.value) {
+        if (this.permissions.indexOf("update-broker-order") !== -1) {
+          this.$bvModal.show("jse-new-order");
+          this.modalTitle = `Viewing Order ${o.clordid}`;
+        } else {
+          await this.$swal(
+            "Oops!",
+            "Please request update permissions from your Admin to proceed",
+            "error"
+          );
         }
-        if (result.dismiss === "cancel") {
-          if (this.permissions.indexOf("delete-broker-order") !== -1) {
-            this.destroy(o.id);
-            brokerOr;
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request delete permissions from your Admin",
-              "error"
-            );
-          }
+      }
+      if (result.dismiss === "cancel") {
+        if (this.permissions.indexOf("delete-broker-order") !== -1) {
+          await this.destroy(o.id);
+          //broker Or;
+        } else {
+          this.$swal(
+            "Oops!",
+            "Please request delete permissions from your Admin",
+            "error"
+          );
         }
-      });
+      }
     },
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
@@ -1006,7 +822,7 @@ export default {
       // console.log(this.files);
       const fr = new FileReader();
       const self = this;
-      fr.onload = (e) => {
+      fr.onload = e => {
         //const result = JSON.parse(e.target.result);
         self.order_template_data = e.target.result;
       };
@@ -1021,10 +837,11 @@ export default {
       this.order_option_inputs = this.order_template_data.order_options;
       this.template = false;
     },
-    saveOrderToJSON() {
+
+    async saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
-        order_options: this.order_option_inputs,
+        order_options: this.order_option_inputs
       };
 
       delete order_data.order_standard["trading_account"];
@@ -1032,67 +849,63 @@ export default {
       this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
 
       //Allow the user to create a file name before saving the file to their machine
-      this.$swal({
+      const result = await this.$swal({
         title:
           "Filename: Untitled.json, please insert a name for your file below.",
         input: "text",
         inputAttributes: {
-          autocapitalize: "off",
+          autocapitalize: "off"
         },
         confirmButtontext: "Create File",
         showLoaderOnConfirm: true,
-        preConfirm: (request) => {
+        preConfirm: request => {
           // once the user is complete giving the file a name, show them the order modal
 
           var Filename = request;
           var blob = new Blob(
             [
-              JSON.stringify(order_data),
+              JSON.stringify(order_data)
               //   JSON.stringify(this.order_option_inputs)
             ],
             {
-              type: "application/json",
+              type: "application/json"
             }
           );
           saveAs(blob, Filename + ".json");
         },
-        allowOutsideClick: () => !this.$swal.isLoading(),
-      }).then((result) => {
-        if (result.value) {
-          //Re Open Modal and allow user to continue their function
-          this.$bvModal.show("jse-new-order");
-        }
+        allowOutsideClick: () => !this.$swal.isLoading()
       });
+      if (result.value) {
+        //Re Open Modal and allow user to continue their function
+        this.$bvModal.show("jse-new-order");
+      }
     },
-    tradingAccounts() {
-      axios.get("broker-trading-accounts").then((response) => {
-        let data = response.data;
-        console.log("Right Here");
-        console.log(data);
-        let i;
-        for (i = 0; i < data.length; i++) {
-          //console.log(data[i]);
-          this.broker_trading_account_options.push({
-            text:
-              data[i].foreign_broker +
-              " : " +
-              data[i].bank +
-              "-" +
-              data[i].trading_account_number +
-              " : " +
-              data[i].account,
-            value: data[i].id,
-            data: data[i]
-          });
-        }
-      });
+    async tradingAccounts() {
+      const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
+      console.log("Right Here");
+      console.log(data);
+      for (let i = 0; i < data.length; i++) {
+        //console.log(data[i]);
+        this.broker_trading_account_options.push({
+          text:
+            data[i].foreign_broker +
+            " : " +
+            data[i].bank +
+            "-" +
+            data[i].trading_account_number +
+            " : " +
+            data[i].account,
+          value: data[i].id,
+          data: data[i]
+        });
+      }
     },
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
       return valid;
     },
-    getBrokers() {
+    async getBrokers() {
       // axios.get("broker-list").then(response => {
       //   let data = response.data;
       //   let i;
@@ -1115,7 +928,7 @@ export default {
       //   }
       // });
     },
-    createBrokerClientOrder(broker) {
+    async createBrokerClientOrder(broker) {
       //Notes:
 
       // this.$swal
@@ -1137,107 +950,85 @@ export default {
           "You need to select a Trading Account & Client Account to continue"
         );
       } else {
-        axios
-          .post("store-operator-client-order", broker)
-          .then((response) => {
-            let data = response.data;
-            let valid = data.isvalid;
+        try {
+          const { data } = await axios.post(
+            "store-operator-client-order",
+            broker
+          );
+          //.then(response => {
+          let valid = data.isvalid;
+          console.log(data);
+          if (valid) {
             console.log(data);
-            if (valid) {
-              console.log(data);
-              this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
-            } else {
-              this.$swal(data.errors);
-              setTimeout(location.reload.bind(location), 2000);
-            }
-          })
-          .catch((error) => {
-            var s = error.response.data.message;
-            var field = s.match(/'([^']+)'/)[1];
-            if (error.response.data.message.includes("cannot be null")) {
-              this.$swal(
-                `When creating an order ${field} cannot be null. Please try creating the order again.`
-              );
-            }
-          });
+            this.$swal(data.errors);
+            setTimeout(location.reload.bind(location), 2000);
+          } else {
+            this.$swal(data.errors);
+            setTimeout(location.reload.bind(location), 2000);
+          }
+        } catch (error) {
+          var s = error.response.data.message;
+          var field = s.match(/'([^']+)'/)[1];
+          if (error.response.data.message.includes("cannot be null")) {
+            this.$swal(
+              `When creating an order ${field} cannot be null. Please try creating the order again.`
+            );
+          }
+        }
       }
     },
-    callFix() {
+    async callFix() {
       let order_sample = {
         BeginString: "FIX.4.2",
-
         TargetCompID: "CIBC_TST",
-
         SenderCompID: "JSE_TST",
-
         SenderSubID: "JMMB",
-
         Host: "10.246.7.212",
-
         Port: 27102,
-
         UserName: "FC4",
-
         Password: "password",
-
         OrderID: "JMMB000004",
-
         BuyorSell: "1",
-
         OrdType: "4",
-
         OrderQty: "2",
-
         TimeInForce: "6",
-
         Symbol: "AAPL",
-
         Account: "1466267",
-
         Price: "224.99",
-
         Side: "5",
-
         Strategy: 1000,
-
         StopPx: 230.0,
-
         ExDestination: "CNQ",
-
-        ClientID: "JMMB_TRADER1",
+        ClientID: "JMMB_TRADER1"
       };
 
       console.log(order_sample);
 
       // Fix Wrapper
-      axios
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-            this.$fixApi +
-            "api/OrderManagement/NewOrderSingle",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then((response) => {
-          let status = response.status;
-          if (status === 200) {
-            this.messageDownload(order_sample);
-          }
-        });
+      const { status } = await axios.post(
+        "https://cors-anywhere.herokuapp.com/" +
+          this.$fixApi +
+          "api/OrderManagement/NewOrderSingle",
+        order_sample
+        //{ crossDomain: true }
+      );
+
+      if (status === 200) {
+        await this.messageDownload(order_sample);
+      }
     },
-    messageDownload(order_sample) {
-      axios
-        .post(
-          "https://cors-anywhere.herokuapp.com/" +
-            this.$fixApi +
-            "api/messagedownload/download",
-          order_sample,
-          { crossDomain: true }
-        )
-        .then((response) => {
-          console.log(response);
-        });
+
+    async messageDownload(order_sample) {
+      const response = await axios.post(
+        "https://cors-anywhere.herokuapp.com/" +
+          this.$fixApi +
+          "api/messagedownload/download",
+        order_sample
+        //{ crossDomain: true }
+      );
+      ///.then(response => {
+      console.log(response);
+      ///});
     },
     add() {
       this.disabled = "0";
@@ -1266,7 +1057,7 @@ export default {
     removeOption(index) {
       this.order_option_inputs.splice(index, 1);
     },
-    destroy(id) {
+    async destroy(id) {
       // this.$swal("Proccessing Order Cancellation");
       // // Fix Wrapper
       // axios
@@ -1280,7 +1071,7 @@ export default {
       //     this.$swal("Order Cancelled");
       //   });
     },
-    handleJSEOrder() {
+    async handleJSEOrder() {
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
@@ -1296,7 +1087,7 @@ export default {
       this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
       this.order["option_type"] = JSON.stringify(this.order.option_type);
       this.order["order_type"] = JSON.stringify(this.order.order_type);
-      this.createBrokerClientOrder(this.order);
+      await this.createBrokerClientOrder(this.order);
       // }
     },
     resetModal() {
@@ -1305,17 +1096,17 @@ export default {
       this.order = {};
     },
     handleSubmit() {},
-    getSymbols() {
-      axios.get("/apis/symbols.json").then((response) => {
-        this.symbols = response.data;
-      });
-    },
+    async getSymbols() {
+      ({ data: this.symbols } = await axios.get("/apis/symbols.json"));
+    }
   },
-  mounted() {
-    this.getBrokers();
-    this.getSymbols();
-    this.tradingAccounts();
-    console.log(this);
+  async mounted() {
+    await Promise.all([
+      this.getBrokers(),
+      this.getSymbols(),
+      this.tradingAccounts()
+    ]);
+
     var client_accounts_data = JSON.parse(this.client_accounts);
     this.client_trading_account_options = client_accounts_data;
 
@@ -1332,7 +1123,7 @@ export default {
     this.broker_client_orders = JSON.parse(this.orders);
     console.log(this.broker_client_orders);
     // }
-  },
+  }
 };
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

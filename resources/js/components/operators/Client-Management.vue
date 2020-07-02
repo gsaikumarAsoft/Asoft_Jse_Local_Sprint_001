@@ -4,7 +4,7 @@
     <div class="container-fluid">
       <div class="content">
         <b-table
-         v-if='permissions.indexOf("read-broker-client") !== -1'
+          v-if="permissions.indexOf('read-broker-client') !== -1"
           striped
           hover
           show-empty
@@ -25,7 +25,7 @@
           aria-controls="local-brokers"
         ></b-pagination>
         <b-button
-          v-if='permissions.indexOf("create-broker-client") !== -1'
+          v-if="permissions.indexOf('create-broker-client') !== -1"
           v-b-modal.modal-1
           @click="create = true"
         >Create Client</b-button>
@@ -70,21 +70,21 @@
               ></b-form-input>
             </b-form-group>
             <b-form-group
-              v-if='permissions.indexOf("approve-broker-client") !== -1'
+              v-if="permissions.indexOf('approve-broker-client') !== -1"
               label="Client Status"
               label-for="status-input"
               invalid-feedback="Client status is required"
             >
               <b-form-select v-model="broker.operator_status" :options="client_status"></b-form-select>
             </b-form-group>
-              <!-- <b-form-group label="Access Permissions:">
+            <!-- <b-form-group label="Access Permissions:">
                 <b-form-checkbox-group
                   id="checkbox-group-1"
                   v-model="selected_permissions"
                   :options="options"
                   name="flavour-1"
                 ></b-form-checkbox-group>
-              </b-form-group> -->
+            </b-form-group>-->
           </form>
         </b-modal>
       </div>
@@ -102,7 +102,7 @@ export default {
   },
   data() {
     return {
-      broker: {status: 'Un-Verified'},
+      broker: { status: "Un-Verified" },
       permissions: [],
       selected_permissions: [],
       create: false,
@@ -114,7 +114,7 @@ export default {
         { value: null, text: "Please select a status" },
         { value: "Verified", text: "Verified" },
         { value: "Un-verified", text: "Rejected" },
-        { value: "Pending", text: "Pending" },
+        { value: "Pending", text: "Pending" }
       ],
       options: [
         { text: "Create", value: "Create" },
@@ -186,8 +186,8 @@ export default {
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit(b) {
-     // Exit when the form isn't valid
+    async handleSubmit(b) {
+      // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
@@ -234,9 +234,10 @@ export default {
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    brokerClientHandler(b) {
+
+    async brokerClientHandler(b) {
       this.broker = b;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Client <b>(${b.name})</b> `,
@@ -248,71 +249,63 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          if (this.permissions.indexOf("update-broker-client") !== -1) {
-            this.$bvModal.show("modal-1");
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request update permissions from your Admin",
-              "error"
-            );
-          }
+      }); //.then(result => {
+      if (result.value) {
+        if (this.permissions.indexOf("update-broker-client") !== -1) {
+          this.$bvModal.show("modal-1");
+        } else {
+          this.$swal(
+            "Oops!",
+            "Please request update permissions from your Admin",
+            "error"
+          );
         }
-        if (result.dismiss === "cancel") {
-          if (this.permissions.indexOf("delete-broker-client") !== -1) {
-            this.destroy(b.id);
-            this.$swal("Deleted!", "Client Has Been Removed.", "success");
-          } else {
-            this.$swal(
-              "Oops!",
-              "Please request delete permissions from your Admin",
-              "error"
-            );
-          }
+      }
+      if (result.dismiss === "cancel") {
+        if (this.permissions.indexOf("delete-broker-client") !== -1) {
+          await this.destroy(b.id);
+          this.$swal("Deleted!", "Client Has Been Removed.", "success");
+        } else {
+          this.$swal(
+            "Oops!",
+            "Please request delete permissions from your Admin",
+            "error"
+          );
         }
-      });
+      }
     },
-    getClients() {
-      axios.get("operator-clients").then(response => {
-        let data = response.data;
-        let user_permissions = [];
-        this.clients = data;
-        // console.log(this.clients);
-
-        //Handle Permissions
-        let i, j, k;
-        for (i = 0; i < this.clients.length; i++) {
-          this.clients[i].types = [];
-          user_permissions = this.clients[i].permission;
-          // console.log(user_permissions);
-          for (k = 0; k < user_permissions.length; k++) {
-            var specific_permission = user_permissions[k].permission;
-            this.clients[i].types.push(specific_permission);
-          }
+    async getClients() {
+      ({ data: this.clients } = await axios.get("operator-clients")); //.then(response => {
+      let user_permissions = [];
+      console.log("getClients", this.clients);
+      //Handle Permissions
+      let i, j, k;
+      for (i = 0; i < this.clients.length; i++) {
+        this.clients[i].types = [];
+        user_permissions = this.clients[i].permission;
+        // console.log(user_permissions);
+        for (k = 0; k < user_permissions.length; k++) {
+          var specific_permission = user_permissions[k].permission;
+          this.clients[i].types.push(specific_permission);
         }
-      });
+      }
     },
-    storeClient(broker) {console.log(broker);
-
-      axios
-        .post("store-broker-trader", broker)
-        .then(response => {
-          this.getClients();
-        })
-        .catch(error => {});
+    async storeClient(broker) {
+      console.log("storeClient", broker);
+      try {
+        await axios.post("store-broker-trader", broker);
+        await this.getClients();
+      } catch (error) {}
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`client-broker-delete/${id}`).then(response => {
-        this.getClients();
-      });
+    async destroy(id) {
+      await axios.delete(`client-broker-delete/${id}`);
+      await this.getClients();
     }
   },
-  mounted() {
+  async mounted() {
     // //Define Permission On Front And Back End
     let p = JSON.parse(this.$userPermissions);
     //Looop through and identify all permission to validate against actions
@@ -320,17 +313,17 @@ export default {
       this.permissions.push(p[i].name);
     }
 
-    axios.get("trading-accounts").then(response => {
-      let local_brokers = response.data;
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].name,
-          value: local_brokers[i].id
-        });
-      }
-    });
-    this.getClients();
+    const { data: local_brokers } = await axios.get("trading-accounts"); //.then(response => {
+
+    let i;
+    for (i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].name,
+        value: local_brokers[i].id
+      });
+    }
+
+    await this.getClients();
   }
 };
 </script>

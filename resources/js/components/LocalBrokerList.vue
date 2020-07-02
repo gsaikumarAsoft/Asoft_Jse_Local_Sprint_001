@@ -45,7 +45,7 @@
 </template>
 <script lang="ts">
 import axios from "axios";
-import headNav from "./partials/Nav";
+import headNav from "./partials/Nav.vue";
 export default {
   components: {
     headNav
@@ -61,17 +61,17 @@ export default {
         {
           key: "user.name",
           sortable: true,
-          label: 'Name'
+          label: "Name"
         },
         {
           key: "user.email",
           sortable: true,
-          label: 'Email'
+          label: "Email"
         },
         {
           key: "user.status",
           sortable: true,
-          label: 'Account Status'
+          label: "Account Status"
         }
       ],
       modalTitle: "Local Broker Update",
@@ -98,10 +98,10 @@ export default {
       this.nameState = valid;
       return valid;
     },
-    resetModal() {
+    async resetModal() {
       this.create = false;
       this.broker = {};
-      this.getBrokers();
+      await this.getBrokers();
     },
     handleOk(bvModalEvt) {
       // Prevent modal from closing
@@ -109,23 +109,22 @@ export default {
       // Trigger submit handler
       this.handleSubmit();
     },
-    handleSubmit() {
+    async handleSubmit() {
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
-
         //Determine if a new user is being created or we are updating an existing user
         if (this.create) {
           //Exclude ID
-          this.storeLocalBroker({
+          await this.storeLocalBroker({
             name: this.broker.name,
             email: this.broker.email
           });
           this.$swal(`Account created for ${this.broker.email}`);
         } else {
           //Include ID
-          this.storeLocalBroker({
+          await this.storeLocalBroker({
             id: this.broker.id,
             name: this.broker.name,
             email: this.broker.email
@@ -145,9 +144,9 @@ export default {
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    localBrokerHandler(b) {
+    async localBrokerHandler(b) {
       this.broker = b.user;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Local Broker <b>(${b.user.name})</b> `,
@@ -159,42 +158,35 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
-        }
-      });
+      }); //.then(result => {
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
+      }
     },
-    getBrokers() {
-      axios.get("local-brokers").then(response => {
-        let data = response.data;
-        console.log(data);
-        this.local_brokers = data;
-      });
+    async getBrokers() {
+      ({ data: this.local_brokers } = await axios.get("local-brokers")); //.then(response => {
+      console.log("this.local_brokers", this.local_brokers);
     },
-    storeLocalBroker(broker) {
-      axios
-        .post("store-local-broker", broker)
-        .then(response => {
-          this.getBrokers();
-        })
-        .catch(error => {});
+    async storeLocalBroker(broker) {
+      try {
+        await axios.post("store-local-broker", broker);
+        await this.getBrokers();
+      } catch (error) {}
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`local-broker-delete/${id}`).then(response => {
-        this.getBrokers();
-      });
+    async destroy(id) {
+      await axios.delete(`local-broker-delete/${id}`);
+      await this.getBrokers();
     }
   },
-  mounted() {
-    this.getBrokers();
+  async mounted() {
+    await this.getBrokers();
   }
 };
 </script>
