@@ -18,14 +18,13 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use OrderStatus;
 
 class FunctionSet
 {
 
     public function __construct()
     {
-
+        $this->OrderStatus = new OrderStatus;
         $this->LogActivity = new LogActivity;
     }
     public function jsonStrip($value, $field)
@@ -48,10 +47,10 @@ class FunctionSet
     //check if Order is opened and side = BUY
     public function isOrderOpenedBuy($o)
     {
-        return ($o->order_status != OrderStatus::Expired &&
-            $o->order_status != OrderStatus::Cancelled &&
-            $o->order_status != OrderStatus::Rejected &&
-            $o->order_status != OrderStatus::Failed &&
+        return ($o->order_status != $this->OrderStatus->Expired() &&
+            $o->order_status != $this->OrderStatus->Cancelled() &&
+            $o->order_status != $this->OrderStatus->Rejected() &&
+            $o->order_status != $this->OrderStatus->Failed() &&
             $o->side == "BUY"
         );
     }
@@ -237,7 +236,7 @@ class FunctionSet
                 $data['text'] = 'Failed: ' . $fix_status['result'] . '-' . $request->client_order_number;
                 $order = DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
-                    ->update(['order_status' => OrderStatus::Failed]);
+                    ->update(['order_status' => $this->OrderStatus->Failed()]);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
 
@@ -669,7 +668,7 @@ class FunctionSet
             $sender_sub_id = $account[$key]['senderSubID'];
             $price = $account[$key]['price'];
             $quantity = $account[$key]['orderQty'];
-            $order_status = $account[$key]['status'];
+            $status = $account[$key]['status'];
             // return $order_number;
             $jcsd = str_replace('JCSD', "", $account[$key]['qTradeacc']);
             // Define The broker client
@@ -686,7 +685,7 @@ class FunctionSet
                 ->get();
 
             $array = json_decode(json_encode($settlement_account), true);
-
+            return $array;
             if ($order && $broker_client) {
                 // return $order;
                 $od = $order;
@@ -703,12 +702,12 @@ class FunctionSet
                     $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
                     //If offer is (Rejected, Cancelled, Expired)
                     // return $status;
-                    if ($status === OrderStatus::Expired ||
-                        $status === OrderStatus::Cancelled ||
-                        $status === OrderStatus::Cancelled) {
+                    if ($status === $this->OrderStatus->Expired() ||
+                        $status === $this->OrderStatus->Cancelled() ||
+                        $status === $this->OrderStatus->Cancelled()) {
 
                         // Check if the order is open
-                        if (isOrderOpenedBuy($o)) {
+                        if ($this->isOrderOpenedBuy($o)) {
 
                             // ===========================================================
                             // Set Status To $account[$key]['status]
@@ -721,15 +720,15 @@ class FunctionSet
 
                             );
                         }
-                    } else if ($status === OrderStatus::PartialFilled) {
+                    } else if ($status === $this->OrderStatus->PartialFilled()) {
 
                         //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                        if (isOrderOpenedBuy($o)) {
+                        if ($this->isOrderOpenedBuy($o)) {
                             //Update Broker Client Order Status
 
                             BrokerClientOrder::updateOrCreate(
                                 ['id' => $od->id],
-                                ['order_status' => OrderStatus::PartialFilled]
+                                ['order_status' => $this->OrderStatus->PartialFilled()]
 
                             );
                             // DB::table('broker_client_orders')
@@ -746,7 +745,7 @@ class FunctionSet
                     } else {
 
                         //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)
-                        if (isOrderOpenedBuy($o)) {
+                        if ($this->isOrderOpenedBuy($o)) {
                             //The order has been filled
                             // Update Database with required value
                             // DB::table('broker_clients')

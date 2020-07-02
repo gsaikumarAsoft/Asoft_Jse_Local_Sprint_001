@@ -1,7 +1,6 @@
-
-
-
 <?php
+
+namespace App\Helpers;
 
 /*
 0 = New
@@ -16,19 +15,50 @@
 E = Pending Replace
  */
 
-abstract class OrderStatus
+class OrderStatus
 {
-
-    const _New = "0";
-    const PartialFilled = "1";
-    const Filled = "2";
-    const Cancelled = "4";
-    const Replaced = "5";
-    const Expired = "C";
-    const _Private = "Z";
-    const Unplaced = "U";
-    const Inactive = "E";
-    const Rejected = "8";
-    const Failed = "Failed";
-
+    public static function  _New()
+    {
+        return "0";
+    }
+    public static function  PartialFilled()
+    {
+        return "1";
+    }
+    public static function  Filled()
+    {
+        return "2";
+    }
+    public static function  Cancelled()
+    {
+        return "4";
+    }
+    public static function  Replaced()
+    {
+        return "5";
+    }
+    public static function  Expired()
+    {
+        return "C";
+    }
+    public static function  _Private()
+    {
+        return "Z";
+    }
+    public static function  Unplaced()
+    {
+        return "U";
+    }
+    public static function  Inactive()
+    {
+        return "E";
+    }
+    public static function  Rejected()
+    {
+        return "8";
+    }
+    public static function  Failed()
+    {
+        return "Failed";
+    }
 }
