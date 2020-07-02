@@ -1017,28 +1017,28 @@ export default {
     async createBrokerClientOrder(broker) {
       //Notes:
 
-      await this.$swal.fire({
+     /*  await this.$swal.fire({
         title: "Creating Client Order",
         html: "One moment while we setup the current order",
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
         }
-      });
+      }); */
       // .then(result => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
       if (!broker.trading_account || !broker.client_trading_account) {
-        await this.$swal(
+        this.$swal(
           "You need to select a Trading Account & Client Account to continue"
         );
         return;
       }
 
       if (broker.price > broker.stop_price) {
-        await this.$swal("Price must be less than or equal to the Stop Price");
+        this.$swal("Price must be less than or equal to the Stop Price");
         return;
       }
 
@@ -1053,10 +1053,10 @@ export default {
         console.log(data);
         if (valid) {
           console.log(data);
-          await this.$swal(data.errors);
+          this.$swal(data.errors);
           // setTimeout(location.reload.bind(location), 2000);
         } else {
-          await this.$swal(data.errors);
+          this.$swal(data.errors);
           // setTimeout(location.reload.bind(location), 2000);
         }
         // })
@@ -1106,9 +1106,9 @@ export default {
     },
 
     async destroy(id) {
-      await this.$swal("Proccessing Order Cancellation");
+      this.$swal("Proccessing Order Cancellation");
       await axios.delete(`destroy-broker-client-order/${id}`); //.then(response => {
-      await this.$swal("Cancelled");
+      this.$swal("Cancelled");
       await this.timeout(1000);
       window.location.reload.bind(window.location);
     },
