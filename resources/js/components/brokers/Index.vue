@@ -17,6 +17,9 @@ import toplinks from "./../partials/Nav";
 export default {
   components: {
     toplinks
+  },
+  mounted() {
+    console.log("In Local Broker");
   }
 };
 </script>

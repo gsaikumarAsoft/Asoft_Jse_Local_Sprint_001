@@ -31,7 +31,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 export default {
   props: ["accounts"],
   components: {

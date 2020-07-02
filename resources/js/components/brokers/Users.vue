@@ -321,7 +321,7 @@ export default {
       const { data } = await axios.get("broker-users");
       // console.log(response);
       // let data = response.data;
-      let user_permissions = [{}];
+      let user_permissions = [];
       this.local_broker_users = data;
 
       //Handle Permissions
@@ -427,7 +427,7 @@ export default {
     await this.getBrokers();
     await this.tradingAccounts();
 
-    console.log(this.permissions);
+    console.log("permissions",this.permissions);
   }
 };
 </script>

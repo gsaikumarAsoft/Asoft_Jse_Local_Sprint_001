@@ -94,7 +94,7 @@
 <script lang="ts">
 import permissionMixin from "./../../../js/mixins/Permissions.js";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 export default {
   mixins: [permissionMixin],
   components: {
@@ -108,7 +108,6 @@ export default {
       create: false,
       clients: [],
       local_brokers: [],
-      broker: {},
       perPage: 5,
       currentPage: 1,
       client_status: [
@@ -278,7 +277,7 @@ export default {
     getClients() {
       axios.get("operator-clients").then(response => {
         let data = response.data;
-        let user_permissions = [{}];
+        let user_permissions = [];
         this.clients = data;
         // console.log(this.clients);
 

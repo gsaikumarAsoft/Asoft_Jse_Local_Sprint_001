@@ -15,7 +15,6 @@
           :current-page="currentPage"
           @row-clicked="settlmentAccountHandler"
         >
-      
           <template slot="index" slot-scope="row">{{ row }}</template>
         </b-table>
         <b-pagination
@@ -122,7 +121,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 export default {
   props: ["settlement_accounts"],
   components: {
@@ -230,13 +229,13 @@ export default {
       this.create = false;
       this.settlement_account = {};
     },
-    handleOk(bvModalEvt) {
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
+      await this.handleSubmit();
     },
-    handleSubmit() {
+    async handleSubmit() {
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
@@ -244,7 +243,7 @@ export default {
         //Determine if a new user is being created or we are updating an existing user
         if (this.create) {
           //Exclude ID
-          this.storeBrokerSettlementAccount({
+          await this.storeBrokerSettlementAccount({
             account: this.settlement_account.account,
             account_balance: this.settlement_account.account_balance,
             amount_allocated: this.settlement_account.amount_allocated,
@@ -254,10 +253,12 @@ export default {
             local_broker_id: this.settlement_account.local_broker_id,
             status: "Unverified"
           });
-          this.$swal(`Account created for ${this.settlement_account.email}`);
+          await this.$swal(
+            `Account created for ${this.settlement_account.email}`
+          );
         } else {
           //Include ID
-          this.storeBrokerSettlementAccount({
+          await this.storeBrokerSettlementAccount({
             account: this.settlement_account.account,
             account_balance: this.settlement_account.account_balance,
             amount_allocated: this.settlement_account.amount_allocated,
@@ -278,12 +279,12 @@ export default {
 
       this.nameState = null;
     },
-    settlmentAccountHandler(b) {
+    async settlmentAccountHandler(b) {
       // console.log(b);
       this.settlement_account = {};
       console.log(b);
       this.settlement_account = b;
-      this.$swal({
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
@@ -295,24 +296,23 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Settlement Account Has Been Removed.",
-            "success"
-          );
-        }
       });
+      if (result.value) {
+        this.$bvModal.show("modal-1");
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+        await this.$swal(
+          "Deleted!",
+          "Settlement Account Has Been Removed.",
+          "success"
+        );
+      }
     },
     setLocalBroker() {
       // console.log(this);
     },
-    getSettlementList() {
+    async getSettlementList() {
       // axios.get("../settlement-list").then(response => {
       //   let broker_settlement_accounts = response.data;
       //   this.broker_settlement_account = [];
@@ -321,55 +321,51 @@ export default {
       // });
       // setTimeout(location.reload.bind(location));
     },
-    storeBrokerSettlementAccount(account) {
+    async storeBrokerSettlementAccount(account) {
       // console.log(account);
-      axios
-        .post("../store-settlement-broker", account)
-        .then(response => {
-          this.getSettlementList();
-          this.create = false;
-        })
-        .catch(error => {
-          if (error.response.data.message.includes("Duplicate entry")) {
-            this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
-            );
-          }
-        });
+      try {
+        await axios.post("../store-settlement-broker", account);
+        //.then(response => {
+        await this.getSettlementList();
+        this.create = false;
+      } catch (error) {
+        if (error.response.data.message.includes("Duplicate entry")) {
+          await this.$swal(
+            `An Account with this email address already exists. Please try using a different email`
+          );
+        }
+      }
     },
     add() {
       this.create = true;
     },
-    destroy(id) {
-      axios.delete(`../settlement-account-delete/${id}`).then(response => {
-        this.getSettlementList();
-      });
+    async destroy(id) {
+      await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
+      await this.getSettlementList();
     }
   },
-  mounted() {
-    axios.get("local-brokers").then(response => {
-      let local_brokers = response.data;
-      let i;
-      for (i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].user.name,
-          value: local_brokers[i].user.id
-        });
-      }
-    });
-    axios.get("foreign-broker-list").then(response => {
-      let foreign_brokers = response.data;
-      let i;
-      for (i = 0; i < foreign_brokers.length; i++) {
-        // console.log(foreign_brokers[i].user );
-        let data = foreign_brokers[i].user;
-        this.foreign_brokers.push({
-          text: data.name,
-          value: data.id
-        });
-      }
-    });
-    // this.getSettlementList();
+  async mounted() {
+    const { data: local_brokers } = await axios.get("local-brokers");
+
+    for (let i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].user.name,
+        value: local_brokers[i].user.id
+      });
+    }
+
+    const { data: foreign_brokers } = await axios.get("foreign-broker-list");
+
+    for (let i = 0; i < foreign_brokers.length; i++) {
+      // console.log(foreign_brokers[i].user );
+      const foreign_broker = foreign_brokers[i].user;
+      this.foreign_brokers.push({
+        text: foreign_broker.name,
+        value: foreign_broker.id
+      });
+    }
+
+    // await this.getSettlementList();
   }
 };
 </script>

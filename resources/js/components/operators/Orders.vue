@@ -448,7 +448,7 @@
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
-import headNav from "./../partials/Nav";
+import headNav from "./../partials/Nav.vue";
 // import jsonfile from 'jsonfile';
 export default {
   props: ["orders", "client_accounts"],
@@ -1007,8 +1007,8 @@ export default {
       const fr = new FileReader();
       const self = this;
       fr.onload = (e) => {
-        const result = JSON.parse(e.target.result);
-        self.order_template_data = result;
+        //const result = JSON.parse(e.target.result);
+        self.order_template_data = e.target.result;
       };
 
       this.order_template_data = fr.readAsText(files);
