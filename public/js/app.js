@@ -70770,27 +70770,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["accounts"],
   components: {
@@ -70798,10 +70777,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
-      create: false,
       trading_accounts: [],
       broker_settlement_accounts: [],
-      settlement_account: {},
+      trading_account: null,
       local_brokers: [],
       foreign_brokers: [],
       perPage: 5,
@@ -70868,11 +70846,10 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
-    AccountHandler(b) {
-      this.settlement_account = b;
-      this.settlement_account.broker_settlement_account =
-        b.broker_settlement_account_id;
-      this.$swal({
+    async accountHandler(b) {
+      console.log("selected trading_account", b);
+
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Trading account for : <b>(${b.settlement_account.account})</b> `,
@@ -70883,155 +70860,128 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Trading Account Has Been Removed.",
-            "success"
-          );
-        }
       });
-    },
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
-    resetModal() {
-      this.create = false;
-      this.settlement_account = {};
-    },
-    handleOk(bvModalEvt) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault();
-      // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
-      // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
 
-        //Determine if a new client is being created or we are updating an existing client
-        if (this.create) {
-          //Exclude ID
-          this.storeTradingAccount({
-            name: this.settlement_account.name,
-            // local_broker_id: 1,
-            local_broker_id: this.settlement_account.local_broker_id,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            umir: this.settlement_account.umir,
-            target_comp_id: this.settlement_account.target_comp_id,
-            sender_comp_id: this.settlement_account.sender_comp_id,
-            socket: this.settlement_account.socket,
-            port: this.settlement_account.port,
-            trading_account_number: this.settlement_account
-              .trading_account_number,
-            settlement_account_number: this.settlement_account
-              .broker_settlement_account
-          });
-          this.$swal(`Creating Account`);
-        } else {
-          //Include ID
-          this.storeTradingAccount({
-            id: this.settlement_account.id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            umir: this.settlement_account.umir,
-            target_comp_id: this.settlement_account.target_comp_id,
-            sender_comp_id: this.settlement_account.sender_comp_id,
-            socket: this.settlement_account.socket,
-            port: this.settlement_account.port,
-            trading_account_number: this.settlement_account
-              .trading_account_number,
-            settlement_account_number: this.settlement_account
-              .broker_settlement_account
-          });
-          this.$swal(`Updating Account`);
-        }
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+      console.log("result", result);
+
+      if (result.value) {
+        this.trading_account = b;
+        this.trading_account.broker_settlement_account =
+          b.broker_settlement_account_id;
+      }
+
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
       }
     },
-    storeTradingAccount(account) {
-      this.$bvModal.hide("modal-1");
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a
-        .post("store-trading-account", account)
-        .then(response => {
-          this.getTradingAccountsList();
-          this.$swal(`Account setup complete`);
-          // setTimeout(location.reload.bind(location), 2000);
-        })
-        .catch(error => {});
+
+    async handleSubmit() {
+      // Exit when the form isn't valid
+      const isNew = !this.trading_account.id;
+
+      const trading_account = {
+        id: this.trading_account.id,
+        local_broker_id: this.trading_account.local_broker_id,
+        foreign_broker_id: this.trading_account.foreign_broker_id,
+        umir: this.trading_account.umir,
+        target_comp_id: this.trading_account.target_comp_id,
+        sender_comp_id: this.trading_account.sender_comp_id,
+        socket: this.trading_account.socket,
+        port: this.trading_account.port,
+        trading_account_number: this.trading_account.trading_account_number,
+        settlement_account_number: this.trading_account
+          .broker_settlement_account
+      };
+
+      //Determine if a new client is being created or we are updating an existing client
+      if (isNew) {
+        trading_account["id"] = null;
+        trading_account["name"] = this.trading_account.name;
+      }
+
+      console.log("trading_account", trading_account);
+      this.$swal.fire({
+        title: `Settlement Account`,
+        html: `${isNew ? "Creating" : "Updating"} Trading Account`,
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-trading-account", trading_account);
+        // await axios.post("/store-settlement-broker", this.trading_account);
+        this.getTradingAccountsList();
+        this.$swal(`Account setup complete`);
+        // setTimeout(location.reload.bind(location), 2000);
+        this.trading_account = null;
+      } catch (error) {
+        console.error("tarding save failed", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
-    setLocalBroker() {},
+
     async getTradingAccountsList() {
       ({ data: this.trading_accounts } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trader-list")); //.then(response => {
       //});
     },
+
     async getSettlementAccounts() {
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("settlement-list"); //.then(response => {
-
-      for (let i = 0; i < data.length; i++) {
-        this.broker_settlement_accounts.push({
-          text:
-            data[i].foreign_broker["name"] +
-            "-" +
-            data[i].local_broker["name"] +
-            "-" +
-            data[i].bank_name +
-            "-" +
-            data[i].account,
-          value: data[i].id
-        });
-      }
+      this.broker_settlement_accounts = data.map(account => ({
+        text: [
+          account.foreign_broker["name"],
+          account.local_broker["name"],
+          account.bank_name,
+          account.account
+        ].join("-"),
+        value: account.id
+      }));
     },
 
     async storeBrokerTradingAccount() {
       try {
-        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/store-settlement-broker", this.settlement_account);
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/store-settlement-broker", this.trading_account);
         //.then(response => {
         this.getTradingAccountsList();
         setTimeout(location.reload.bind(location), 1000);
-        this.create = false;
       } catch (error) {}
     },
-    add() {
-      this.create = true;
-    },
+
     async destroy(id) {
-      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`trading-account-delete/${id}`); //.then(response => {
-      await this.getTradingAccountsList();
+      try {
+        this.$swal.fire({
+          title: `Settlement Account`,
+          html: "Deleting Settlement Account.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`trading-account-delete/${id}`); //.then(response => {
+        await this.getTradingAccountsList();
+        this.$swal("Deleted!", "Trading Account Has Been Removed.", "success");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
+
     async getLocalBrokers() {
       const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers");
-      // console.log(local_brokers);
-      for (let i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].user.name,
-          value: local_brokers[i].id
-        });
-      }
+      this.local_brokers = local_brokers.map(broker => ({
+        text: broker.user.name,
+        value: broker.id
+      }));
     },
 
     async getForeignBrokers() {
-      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers"); //.then(response => {
-
-      for (let i = 0; i < foreign_brokers.length; i++) {
-        let data = foreign_brokers[i].user;
-        this.foreign_brokers.push({
-          text: data.name,
-          value: foreign_brokers[i].id
-        });
-      }
+      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers");
+      this.foreign_brokers = foreign_brokers.map(broker => ({
+        text: broker.user.name,
+        value: broker.id
+      }));
     }
   },
 
@@ -71042,6 +70992,8 @@ __webpack_require__.r(__webpack_exports__);
       this.getTradingAccountsList(),
       this.getSettlementAccounts()
     ]);
+
+    console.log("trading", this.trading_accounts);
   }
 });
 
@@ -71114,7 +71066,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
-      create: false,
       foreign_brokers: [],
       broker: {},
       perPage: 5,
@@ -71145,15 +71096,7 @@ __webpack_require__.r(__webpack_exports__);
       return this.foreign_brokers.length;
     }
   },
-  watch: {
-    create: function(data) {
-      if (data) {
-        this.modalTitle = "Create Foreign Broker";
-      } else {
-        this.modalTitle = "Foreign Broker Update";
-      }
-    }
-  },
+  watch: {},
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
@@ -71161,58 +71104,61 @@ __webpack_require__.r(__webpack_exports__);
       return valid;
     },
     async resetModal() {
-      this.create = false;
       this.broker = {};
       await this.getBrokers();
     },
-    handleOk(bvModalEvt) {
+    async handleModalOK(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
+
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
 
+        const storeType = !this.broker.id ? "Created" : "Updated";
+        const titleType = !this.broker.id ? "Creating" : "Updating";
+        const contentType = !this.broker.id ? "create" : "update";
         //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          this.storeForeignBroker({
-            name: this.broker.name,
-            email: this.broker.email
-          });
-          this.$swal(`Account created for ${this.broker.email}`);
-        } else {
-          //Include ID
-          this.storeForeignBroker({
-            id: this.broker.id,
-            name: this.broker.name,
-            email: this.broker.email
-          });
-          this.$swal(`Account Updated for ${this.broker.email}`);
-        }
 
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+        try {
+          this.$swal.fire({
+            title: `${titleType} Foreign Broker Account`,
+            html: `One moment while we ${contentType} the Account`,
+            timerProgressBar: true,
+            onBeforeOpen: () => {
+              this.$swal.showLoading();
+            }
+          });
+
+          await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-foreign-broker", this.broker);
+          await this.getBrokers();
+          this.$swal(`Account ${storeType} for ${this.broker.email}`);
+
+          this.resetModal();
+          this.$nextTick(() => {
+            this.$bvModal.hide("modal-1");
+          });
+          this.$swal.close();
+        } catch (error) {
+          console.error("store", error);
+          this.$swal(
+            "Oops...",
+            "Something went wrong! This Email Address may already be assigned.",
+            "error"
+          );
+        }
       }
-      // Push the name to submitted names
-      // this.submittedNames.push(this.name);
-      // Hide the modal manually
-      // this.$nextTick(() => {
-      //   this.$bvModal.hide("modal-1");
-      // });
     },
-    async foreignBrokerHandler(b) {
+
+    async displayForeignBroker(b) {
       this.broker = b.user;
+      this.modalTitle = "Foreign Broker Update";
       const result = await this.$swal({
         title: "",
         icon: "info",
-        html: `Would you like to Edit Or Delete the following Foreign Broker <b>(${b.user.name})</b> `,
+        html: `Foreign Broker <b>(${b.user.name})</b> `,
         // showCloseButton: true,
         showCancelButton: true,
         focusConfirm: true,
@@ -71227,40 +71173,34 @@ __webpack_require__.r(__webpack_exports__);
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
       }
     },
     async getBrokers() {
       ({ data: this.foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers")); //.then(response => {
     },
 
-    async storeForeignBroker(broker) {
+    addNewBroker() {
+      this.modalTitle = "Create Foreign Broker";
+      this.$bvModal.show("modal-1");
+    },
+
+    async destroy(id) {
       try {
         this.$swal.fire({
-          title: "Creating Foreign Broker Account",
-          html: "One moment while we setup the Account",
+          title: `Foreign Broker`,
+          html: "Deleting Broker.......",
           timerProgressBar: true,
           onBeforeOpen: () => {
             this.$swal.showLoading();
           }
         });
-        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-foreign-broker", broker);
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`foreign-broker-delete/${id}`); //.then(response => {
         await this.getBrokers();
-        this.$swal(
-          "Account Created!",
-          // "Foreign Broker Has Been Removed.",
-          "success"
-        );
+        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
       } catch (error) {
-      } finally {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
       }
-    },
-    add() {
-      this.create = true;
-    },
-    async destroy(id) {
-      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`foreign-broker-delete/${id}`); //.then(response => {
-      await this.getBrokers();
     }
   },
   async mounted() {
@@ -71337,7 +71277,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
-      create: false,
       local_brokers: [],
       broker: {},
       perPage: 5,
@@ -71368,15 +71307,7 @@ __webpack_require__.r(__webpack_exports__);
       return this.local_brokers.length;
     }
   },
-  watch: {
-    create: function(data) {
-      if (data) {
-        this.modalTitle = "Create Local Broker";
-      } else {
-        this.modalTitle = "Local Broker Update";
-      }
-    }
-  },
+  watch: {},
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
@@ -71384,43 +71315,47 @@ __webpack_require__.r(__webpack_exports__);
       return valid;
     },
     async resetModal() {
-      this.create = false;
       this.broker = {};
       await this.getBrokers();
     },
-    handleOk(bvModalEvt) {
+
+    async handleModalOK(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
-      // Trigger submit handler
-      this.handleSubmit();
-    },
-    async handleSubmit() {
       // Exit when the form isn't valid
+
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
         //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          await this.storeLocalBroker({
-            name: this.broker.name,
-            email: this.broker.email
+        const storeType = !this.broker.id ? "Created" : "Updated";
+        const titleType = !this.broker.id ? "Creating" : "Updating";
+        const contentType = !this.broker.id ? "create" : "update";
+        try {
+          this.$swal.fire({
+            title: `${titleType} Local Broker Account`,
+            html: `One moment while we ${contentType} the Account`,
+            timerProgressBar: true,
+            onBeforeOpen: () => {
+              this.$swal.showLoading();
+            }
           });
-          this.$swal(`Account created for ${this.broker.email}`);
-        } else {
-          //Include ID
-          await this.storeLocalBroker({
-            id: this.broker.id,
-            name: this.broker.name,
-            email: this.broker.email
+          await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-local-broker", this.broker);
+          await this.getBrokers();
+          this.$swal(`Account ${storeType} for ${this.broker.email}`);
+          this.resetModal();
+          this.$nextTick(() => {
+            this.$bvModal.hide("modal-1");
           });
-          this.$swal(`Account Updated for ${this.broker.email}`);
+          this.$swal.close();
+        } catch (error) {
+          console.error("store", error);
+          this.$swal(
+            "Oops...",
+            "Something went wrong! This Email Address may already be assigned.",
+            "error"
+          );
         }
-
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
       }
       // Push the name to submitted names
       // this.submittedNames.push(this.name);
@@ -71429,12 +71364,14 @@ __webpack_require__.r(__webpack_exports__);
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    async localBrokerHandler(b) {
+    async displayLocalBroker(b) {
+      console.log("displayLocalBroker broker", b);
       this.broker = b.user;
+      this.modalTitle = "Local Broker Update";
       const result = await this.$swal({
         title: "",
         icon: "info",
-        html: `Would you like to Edit Or Delete the following Local Broker <b>(${b.user.name})</b> `,
+        html: `Local Broker <b>(${b.user.name})</b> `,
         showCloseButton: true,
         showCancelButton: true,
         // focusConfirm: true,
@@ -71444,30 +71381,42 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
       }); //.then(result => {
+
+      console.log("swal result", result);
       if (result.value) {
         this.$bvModal.show("modal-1");
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
       }
     },
+
     async getBrokers() {
       ({ data: this.local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers")); //.then(response => {
       console.log("this.local_brokers", this.local_brokers);
     },
-    async storeLocalBroker(broker) {
-      try {
-        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-local-broker", broker);
-        await this.getBrokers();
-      } catch (error) {}
-    },
-    add() {
-      this.create = true;
+
+    addNewBroker() {
+      this.modalTitle = "Create Local Broker";
+      this.$bvModal.show("modal-1");
     },
     async destroy(id) {
-      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`local-broker-delete/${id}`);
-      await this.getBrokers();
+      try {
+        this.$swal.fire({
+          title: `Local Broker`,
+          html: "Deleting Broker.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`local-broker-delete/${id}`);
+        await this.getBrokers();
+        this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     }
   },
   async mounted() {
@@ -71637,6 +71586,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   components: {
@@ -71644,9 +71601,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
-      create: false,
-      broker_settlement_account: [],
-      settlement_account: {},
+      settlement_accounts: [],
+      settlement_account: null,
       local_brokers: [],
       foreign_brokers: [],
       perPage: 5,
@@ -71694,13 +71650,19 @@ __webpack_require__.r(__webpack_exports__);
           sortable: true
         }
       ],
-      modalTitle: "Create Broker Settlement Account",
       nameState: null
     };
   },
   computed: {
+    formTitle() {
+      return (
+        (!!(this.settlement_account && this.settlement_account.id)
+          ? "Update"
+          : "Create") + " Settlement Account"
+      );
+    },
     rows() {
-      return this.broker_settlement_account.length;
+      return this.settlement_accounts.length;
     }
   },
   methods: {
@@ -71718,20 +71680,20 @@ __webpack_require__.r(__webpack_exports__);
     },
     exportBalances() {
       const tableData = [];
-      for (var i = 0; i < this.broker_settlement_account.length; i++) {
+      for (var i = 0; i < this.settlement_accounts.length; i++) {
         tableData.push([
-          this.broker_settlement_account[i].local_broker["name"],
-          this.broker_settlement_account[i].foreign_broker["name"],
-          this.broker_settlement_account[i].bank_name,
-          this.broker_settlement_account[i].account,
-          this.broker_settlement_account[i].email,
-          this.broker_settlement_account[i].account_balance,
-          this.broker_settlement_account[i].amount_allocated
+          this.settlement_accounts[i].local_broker["name"],
+          this.settlement_accounts[i].foreign_broker["name"],
+          this.settlement_accounts[i].bank_name,
+          this.settlement_accounts[i].account,
+          this.settlement_accounts[i].email,
+          this.settlement_accounts[i].account_balance,
+          this.settlement_accounts[i].amount_allocated
         ]);
       }
 
-      // console.log(this.broker_settlement_account[i])
-      // tableData.push(this.broker_settlement_account[i]);
+      // console.log(this.settlement_accounts[i])
+      // tableData.push(this.settlement_accounts[i]);
 
       var doc = new jspdf__WEBPACK_IMPORTED_MODULE_0___default.a();
       //   // It can parse html:
@@ -71754,63 +71716,67 @@ __webpack_require__.r(__webpack_exports__);
       });
       doc.save("BrokerSettlementReport.pdf");
     },
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
-    resetModal() {
-      this.create = false;
-      this.settlement_account = {};
-    },
-    handleOk(bvModalEvt) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault();
-      // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
-      // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
-        //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          this.storeBrokerSettlementAccount({
-            id: null,
-            currency: this.settlement_account.currency,
-            account: this.settlement_account.account,
-            account_balance: this.settlement_account.account_balance,
-            amount_allocated: this.settlement_account.amount_allocated,
-            bank_name: this.settlement_account.bank_name,
-            email: this.settlement_account.email,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            status: "Unverified",
-            hash: this.settlement_account.hash
-          });
-          this.$swal(`Account created for ${this.settlement_account.email}`);
-        } else {
-          //Include ID
-          console.log(this.settlement_account);
-          this.storeBrokerSettlementAccount(this.settlement_account);
-        }
 
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+    async handleSubmit() {
+      // Exit when the form isn't valid
+      //Determine if a new user is being created or we are updating an existing user
+      let account;
+
+      let isNew = !this.settlement_account.id;
+
+      if (isNew) {
+        //create with id = null
+        account = {
+          id: null,
+          currency: this.settlement_account.currency,
+          account: this.settlement_account.account,
+          account_balance: this.settlement_account.account_balance,
+          amount_allocated: this.settlement_account.amount_allocated,
+          bank_name: this.settlement_account.bank_name,
+          email: this.settlement_account.email,
+          foreign_broker_id: this.settlement_account.foreign_broker_id,
+          local_broker_id: this.settlement_account.local_broker_id,
+          status: "Unverified",
+          hash: this.settlement_account.hash
+        };
+      } else {
+        //update
+        account = this.settlement_account;
       }
 
-      this.nameState = null;
+      console.log("account", account);
+
+      this.$swal.fire({
+        title: `Settlement Account`,
+        html: `${isNew ? "Creating" : "Updating"} Settlement Account`,
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+
+      // console.log(account);
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
+        await this.getSettlementList();
+        this.$swal(
+          `Settlement Account ${isNew ? "created" : "updated"} for ${
+            this.settlement_account.email
+          }`
+        );
+        this.settlement_account = null;
+        this.nameState = null;
+      } catch (error) {
+        console.error("settlement save failed", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
+
     async settlmentAccountHandler(b) {
       // console.log(b);
-      this.settlement_account = {};
       console.log(b);
-      this.settlement_account = b;
-      const result = this.$swal({
+
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
@@ -71822,68 +71788,62 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Settlement Account Has Been Removed.",
-            "success"
-          );
-        }
       });
+      if (result.value) {
+        this.settlement_account = b;
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+      }
     },
+
     setLocalBroker() {
       // console.log(this);
     },
+
     async getSettlementList() {
-      ({ data: this.broker_settlement_account } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(
+      ({ data: this.settlement_accounts } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(
         "../settlement-list"
       )); //.then(response => {
-      console.log("broker_settlement_account)", this.broker_settlement_account);
+      console.log("settlement_accounts)", this.settlement_accounts);
     },
-    async storeBrokerSettlementAccount(account) {
-      // console.log(account);
-      try {
-        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
-        await this.getSettlementList();
-        this.create = false;
-      } catch (error) {
-        // console.log(error);
-      }
-    },
-    add() {
-      this.create = true;
-    },
+
     async destroy(id) {
-      await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
-      await this.getSettlementList();
+      try {
+        this.$swal.fire({
+          title: `Settlement Account`,
+          html: "Deleting Settlement Account.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
+        await this.getSettlementList();
+        this.$swal(
+          "Deleted!",
+          "Settlement Account Has Been Removed.",
+          "success"
+        );
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
 
     async getlocalBrokers() {
-      const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../local-brokers"); //.then(response => {
-
-      for (let i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].user.name,
-          value: local_brokers[i].user.id
-        });
-      }
+      const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../local-brokers");
+      this.local_brokers = local_brokers.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
     },
     async getForeiognBrokers() {
-      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../foreign-brokers"); //.then(response => {
-
-      for (let i = 0; i < foreign_brokers.length; i++) {
-        // console.log(foreign_brokers[i].user );
-        let data = foreign_brokers[i].user;
-        this.foreign_brokers.push({
-          text: data.name,
-          value: data.id
-        });
-      }
+      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../foreign-brokers");
+      this.foreign_brokers = foreign_brokers.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
     }
   },
   async mounted() {
@@ -72001,11 +71961,10 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
-      create: false,
       local_broker_clients: [],
       local_brokers: [],
       trading_accounts: [],
-      broker: {},
+      client: {},
       perPage: 5,
       currentPage: 1,
       fields: [
@@ -72074,63 +72033,86 @@ __webpack_require__.r(__webpack_exports__);
       return this.local_broker_clients.length;
     }
   },
-  watch: {
-    create: function(data) {
-      if (data) {
-        this.modalTitle = "Create Client Account";
-      } else {
-        this.modalTitle = "Client Account Update";
-      }
-    }
-  },
+  watch: {},
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
       return valid;
     },
-    resetModal() {
-      this.create = false;
-      this.broker = {};
+
+    async resetModal() {
+      this.client = {};
+      this.getClients();
     },
-    handleOk(bvModalEvt) {
+
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
-    },
-    async handleSubmit() {
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
+      if (this.checkFormValidity()) {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
         //Determine if a new client is being created or we are updating an existing client
-        if (this.create) {
-          //Exclude ID
-          await this.storeBrokerClient({
-            name: this.broker.name,
-            local_broker_id: parseInt(this.$userId),
-            open_orders: this.broker.open_orders,
-            account_balance: this.broker.account_balance,
-            email: this.broker.email,
-            jcsd: this.broker.jcsd,
-            status: "Unverified"
-          });
-          // this.getClients();
-        } else {
-          //Include ID
-          await this.storeBrokerClient({
-            id: this.broker.id,
-            local_broker_id: parseInt(this.$userId),
-            open_orders: this.broker.open_orders,
-            account_balance: this.broker.account_balance,
-            name: this.broker.name,
-            email: this.broker.email,
-            jcsd: this.broker.jcsd,
-            status: "Unverified"
-          });
-          // this.getClients();
-          this.$swal(`Account Updated`);
+
+        const isNew = !this.client.id;
+
+        const result = await this.$swal.fire({
+          title: `${isNew ? "Creating" : "Updating"} Client Account`,
+          html: "One moment while we setup  a new Client Account",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+
+        const client = {
+          id: this.client.id,
+          local_broker_id: parseInt(this.$userId),
+          open_orders: this.client.open_orders,
+          account_balance: this.client.account_balance,
+          name: this.client.name,
+          email: this.client.email,
+          jcsd: this.client.jcsd,
+          status: "Unverified"
+        };
+
+        if (isNew) {
+          client["id"] = null;
+        }
+
+        console.log("Storing Broker Client");
+
+        this.$swal.fire({
+          title: `${isNew ? "Creating" : "Updating"} Broker Client`,
+          html: `One moment while we ${
+            isNew ? "create" : "update"
+          } the Account`,
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+
+        try {
+          await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-broker-client", client);
+          await this.$swal(`Account created`);
+          this.$swal.close();
+          //setTimeout(location.reload.bind(location), 1000);
+        } catch (error) {
+          console.error(error);
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message &&
+            error.response.data.message.includes("Duplicate entry")
+          ) {
+            await this.$swal(
+              `An Account with this email address already exists. Please try using a different email`
+            );
+          } else {
+            this.$swal("Oops...", "Something went wrong!", "error");
+          }
         }
 
         this.resetModal();
@@ -72139,17 +72121,19 @@ __webpack_require__.r(__webpack_exports__);
         });
       }
     },
-    async getClients(broker) {
+
+    async getClients() {
       try {
-        const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trading-accounts", broker);
+        const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trading-accounts");
         console.log("get clients", data);
-        this.local_broker_clients = [];
         var broker = data[0];
         this.local_broker_clients = broker.clients;
       } catch (error) {}
     },
+
     async brokerClientHandler(b) {
-      this.broker = b;
+      this.modalTitle = "Client Account Update";
+      this.client = b;
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -72163,6 +72147,7 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
       });
+
       if (result.value) {
         this.$bvModal.show("modal-1");
       }
@@ -72171,50 +72156,44 @@ __webpack_require__.r(__webpack_exports__);
         await this.$swal("Deleted!", "Client Has Been Removed.", "success");
       }
     },
-    async storeBrokerClient(broker) {
-      console.log(this.broker);
-      const result = await this.$swal.fire({
-        title: "Creating Client Account",
-        html: "One moment while we setup  a new Client Account",
-        timerProgressBar: true,
-        onBeforeOpen: () => {
-          this.$swal.showLoading();
-        }
-      });
-      console.log("Storing Broker Client");
-      try {
-        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-broker-client", broker);
-        await this.$swal(`Account created`);
-        setTimeout(location.reload.bind(location), 1000);
-      } catch (error) {
-        if (error.response.data.message.includes("Duplicate entry")) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        }
-      }
+
+    addBrokerClient() {
+      this.modalTitle = "Create Client Account";
+      this.$bvModal.show("modal-1");
     },
-    add() {
-      this.create = true;
-    },
+
     async destroy(id) {
-      await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`client-broker-delete/${id}`);
-      await this.getClients();
+      try {
+        this.$swal.fire({
+          title: `Broker Client`,
+          html: "Deleting Client.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`client-broker-delete/${id}`);
+        await this.getClients();
+        this.$swal("Deleted!", "Broker Client Has Been Removed.", "success");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     }
   },
+
   async mounted() {
-    var client_data = JSON.parse(this.broker_traders);
-    var clients = client_data[0].clients;
-    this.local_broker_clients = clients;
+    console.log("this.broker_traders", this.broker_traders);
+    const client_data = JSON.parse(this.broker_traders);
+    this.local_broker_clients = client_data[0].clients;
+
     // this.getClients();
     const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers");
     console.log("local brokers", local_brokers);
-    for (let i = 0; i < local_brokers.length; i++) {
-      this.local_brokers.push({
-        text: local_brokers[i].name,
-        value: local_brokers[i].id
-      });
-    }
+    this.local_brokers = local_brokers.map(broker => ({
+      text: broker.name,
+      value: broker.id
+    }));
   }
 });
 
@@ -76348,313 +76327,334 @@ var render = function() {
           "div",
           { staticClass: "content" },
           [
-            _c("b-table", {
-              attrs: {
-                striped: "",
-                hover: "",
-                "show-empty": "",
-                "empty-text":
-                  "No Trading Account Configurations have been Created. Create a Trading Account Configuration below.",
-                id: "foreign-brokers",
-                items: _vm.trading_accounts,
-                fields: _vm.fields,
-                "per-page": _vm.perPage,
-                "current-page": _vm.currentPage
-              },
-              on: { "row-clicked": _vm.AccountHandler },
-              scopedSlots: _vm._u([
-                {
-                  key: "index",
-                  fn: function(row) {
-                    return [_vm._v(_vm._s(row))]
-                  }
-                }
-              ])
-            }),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "foreign-brokers"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
-            _c(
-              "b-button",
-              {
-                directives: [
-                  {
-                    name: "b-modal",
-                    rawName: "v-b-modal.modal-1",
-                    modifiers: { "modal-1": true }
-                  }
-                ],
-                on: {
-                  click: function($event) {
-                    _vm.create = true
-                  }
-                }
-              },
-              [_vm._v("Create Account")]
-            ),
-            _vm._v(" "),
-            _c(
-              "b-modal",
-              {
-                attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
-              },
-              [
-                _c("p", { staticClass: "my-4" }, [
-                  _vm._v("Please update the fields below as required!")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "form",
-                  {
-                    ref: "form",
-                    on: {
-                      submit: function($event) {
-                        $event.stopPropagation()
-                        $event.preventDefault()
-                        return _vm.handleSubmit($event)
-                      }
-                    }
-                  },
+            !_vm.trading_account
+              ? _c(
+                  "div",
                   [
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Settlement Account Number",
-                          "label-for": "Settlement-Account-Number-input",
-                          "invalid-feedback":
-                            "Settlement Account Number is required"
-                        }
+                    _c("b-table", {
+                      attrs: {
+                        striped: "",
+                        hover: "",
+                        "show-empty": "",
+                        "empty-text":
+                          "No Trading Account Configurations have been Created. Create a Trading Account Configuration below.",
+                        id: "foreign-brokers",
+                        items: _vm.trading_accounts,
+                        fields: _vm.fields,
+                        "per-page": _vm.perPage,
+                        "current-page": _vm.currentPage
                       },
-                      [
-                        _c("b-form-select", {
-                          attrs: {
-                            label: "Settlement Account",
-                            "label-for": "localBroker-input",
-                            "invalid-feedback":
-                              "A Settlement Account is required",
-                            sm: "",
-                            options: _vm.broker_settlement_accounts
-                          },
-                          model: {
-                            value:
-                              _vm.settlement_account.broker_settlement_account,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "broker_settlement_account",
-                                $$v
-                              )
-                            },
-                            expression:
-                              "settlement_account.broker_settlement_account"
+                      on: { "row-clicked": _vm.accountHandler },
+                      scopedSlots: _vm._u(
+                        [
+                          {
+                            key: "index",
+                            fn: function(row) {
+                              return [_vm._v(_vm._s(row))]
+                            }
                           }
-                        })
-                      ],
-                      1
-                    ),
+                        ],
+                        null,
+                        false,
+                        131414210
+                      )
+                    }),
+                    _vm._v(" "),
+                    _c("b-pagination", {
+                      attrs: {
+                        "total-rows": _vm.rows,
+                        "per-page": _vm.perPage,
+                        "aria-controls": "foreign-brokers"
+                      },
+                      model: {
+                        value: _vm.currentPage,
+                        callback: function($$v) {
+                          _vm.currentPage = $$v
+                        },
+                        expression: "currentPage"
+                      }
+                    }),
                     _vm._v(" "),
                     _c(
-                      "b-form-group",
+                      "b-button",
                       {
-                        attrs: {
-                          label: "Trading Account Number",
-                          "label-for": "Trading-Account-Number-input",
-                          "invalid-feedback":
-                            "Trading Account Number is required"
+                        directives: [
+                          {
+                            name: "b-modal",
+                            rawName: "v-b-modal.modal-1",
+                            modifiers: { "modal-1": true }
+                          }
+                        ],
+                        on: {
+                          click: function($event) {
+                            _vm.trading_account = {}
+                          }
                         }
                       },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "trading-account-number-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value:
-                              _vm.settlement_account.trading_account_number,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "trading_account_number",
-                                $$v
-                              )
-                            },
-                            expression:
-                              "settlement_account.trading_account_number"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "UMIR",
-                          "label-for": "umir-input",
-                          "invalid-feedback": " UMIR is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "umir-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.umir,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "umir", $$v)
-                            },
-                            expression: "settlement_account.umir"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "TargetCompID",
-                          "label-for": "target-input",
-                          "invalid-feedback": "TargetCompID is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "target-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.target_comp_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "target_comp_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.target_comp_id"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "senderCompID",
-                          "label-for": "sender-input",
-                          "invalid-feedback": "SenderCompID is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "sender-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.sender_comp_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "sender_comp_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.sender_comp_id"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Socket",
-                          "label-for": "socket-input",
-                          "invalid-feedback": "Socket is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "socket-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.socket,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "socket", $$v)
-                            },
-                            expression: "settlement_account.socket"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Port",
-                          "label-for": "port-input",
-                          "invalid-feedback": "Port is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "port-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.port,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "port", $$v)
-                            },
-                            expression: "settlement_account.port"
-                          }
-                        })
-                      ],
-                      1
+                      [_vm._v("Create Account")]
                     )
                   ],
                   1
                 )
-              ]
-            )
+              : _c("b-card", { attrs: { title: _vm.modalTitle } }, [
+                  _c("p", { staticClass: "my-4" }, [
+                    _vm._v("Please update the fields below as required!")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "form",
+                    {
+                      on: {
+                        submit: function($event) {
+                          $event.stopPropagation()
+                          $event.preventDefault()
+                          return _vm.handleSubmit($event)
+                        }
+                      }
+                    },
+                    [
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Settlement Account Number",
+                            "label-for": "Settlement-Account-Number-input",
+                            "invalid-feedback":
+                              "Settlement Account Number is required"
+                          }
+                        },
+                        [
+                          _c("b-form-select", {
+                            attrs: {
+                              label: "Settlement Account",
+                              "label-for": "localBroker-input",
+                              "invalid-feedback":
+                                "A Settlement Account is required",
+                              sm: "",
+                              options: _vm.broker_settlement_accounts
+                            },
+                            model: {
+                              value:
+                                _vm.trading_account.broker_settlement_account,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.trading_account,
+                                  "broker_settlement_account",
+                                  $$v
+                                )
+                              },
+                              expression:
+                                "trading_account.broker_settlement_account"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Trading Account Number",
+                            "label-for": "Trading-Account-Number-input",
+                            "invalid-feedback":
+                              "Trading Account Number is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "trading-account-number-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.trading_account.trading_account_number,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.trading_account,
+                                  "trading_account_number",
+                                  $$v
+                                )
+                              },
+                              expression:
+                                "trading_account.trading_account_number"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "UMIR",
+                            "label-for": "umir-input",
+                            "invalid-feedback": " UMIR is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "umir-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.trading_account.umir,
+                              callback: function($$v) {
+                                _vm.$set(_vm.trading_account, "umir", $$v)
+                              },
+                              expression: "trading_account.umir"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "TargetCompID",
+                            "label-for": "target-input",
+                            "invalid-feedback": "TargetCompID is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "target-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.trading_account.target_comp_id,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.trading_account,
+                                  "target_comp_id",
+                                  $$v
+                                )
+                              },
+                              expression: "trading_account.target_comp_id"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "senderCompID",
+                            "label-for": "sender-input",
+                            "invalid-feedback": "SenderCompID is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "sender-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.trading_account.sender_comp_id,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.trading_account,
+                                  "sender_comp_id",
+                                  $$v
+                                )
+                              },
+                              expression: "trading_account.sender_comp_id"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Socket",
+                            "label-for": "socket-input",
+                            "invalid-feedback": "Socket is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "socket-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.trading_account.socket,
+                              callback: function($$v) {
+                                _vm.$set(_vm.trading_account, "socket", $$v)
+                              },
+                              expression: "trading_account.socket"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Port",
+                            "label-for": "port-input",
+                            "invalid-feedback": "Port is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "port-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.trading_account.port,
+                              callback: function($$v) {
+                                _vm.$set(_vm.trading_account, "port", $$v)
+                              },
+                              expression: "trading_account.port"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-button",
+                        { attrs: { type: "submit", variant: "primary" } },
+                        [_vm._v("Submit")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-button",
+                        {
+                          attrs: { type: "button", variant: "warning" },
+                          on: {
+                            click: function($event) {
+                              _vm.trading_account = null
+                            }
+                          }
+                        },
+                        [_vm._v("Cancel")]
+                      )
+                    ],
+                    1
+                  )
+                ])
           ],
           1
         )
@@ -76708,7 +76708,7 @@ var render = function() {
                 "per-page": _vm.perPage,
                 "current-page": _vm.currentPage
               },
-              on: { "row-clicked": _vm.foreignBrokerHandler },
+              on: { "row-clicked": _vm.displayForeignBroker },
               scopedSlots: _vm._u([
                 {
                   key: "index",
@@ -76744,11 +76744,7 @@ var render = function() {
                     modifiers: { "modal-1": true }
                   }
                 ],
-                on: {
-                  click: function($event) {
-                    _vm.create = true
-                  }
-                }
+                on: { click: _vm.addNewBroker }
               },
               [_vm._v("Create Foreign Broker")]
             ),
@@ -76757,7 +76753,7 @@ var render = function() {
               "b-modal",
               {
                 attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
+                on: { ok: _vm.handleModalOK, hidden: _vm.resetModal }
               },
               [
                 _c("p", { staticClass: "my-4" }, [
@@ -76766,16 +76762,7 @@ var render = function() {
                 _vm._v(" "),
                 _c(
                   "form",
-                  {
-                    ref: "form",
-                    on: {
-                      submit: function($event) {
-                        $event.stopPropagation()
-                        $event.preventDefault()
-                        return _vm.handleSubmit($event)
-                      }
-                    }
-                  },
+                  { ref: "form" },
                   [
                     _c(
                       "b-form-group",
@@ -76952,7 +76939,7 @@ var render = function() {
                 "per-page": _vm.perPage,
                 "current-page": _vm.currentPage
               },
-              on: { "row-clicked": _vm.localBrokerHandler },
+              on: { "row-clicked": _vm.displayLocalBroker },
               scopedSlots: _vm._u([
                 {
                   key: "index",
@@ -76988,11 +76975,7 @@ var render = function() {
                     modifiers: { "modal-1": true }
                   }
                 ],
-                on: {
-                  click: function($event) {
-                    _vm.create = true
-                  }
-                }
+                on: { click: _vm.addNewBroker }
               },
               [_vm._v("Create Local Broker")]
             ),
@@ -77001,7 +76984,7 @@ var render = function() {
               "b-modal",
               {
                 attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
+                on: { ok: _vm.handleModalOK, hidden: _vm.resetModal }
               },
               [
                 _c("p", { staticClass: "my-4" }, [
@@ -77010,16 +76993,7 @@ var render = function() {
                 _vm._v(" "),
                 _c(
                   "form",
-                  {
-                    ref: "form",
-                    on: {
-                      submit: function($event) {
-                        $event.stopPropagation()
-                        $event.preventDefault()
-                        return _vm.handleSubmit($event)
-                      }
-                    }
-                  },
+                  { ref: "form" },
                   [
                     _c(
                       "b-form-group",
@@ -77121,345 +77095,387 @@ var render = function() {
           "div",
           { staticClass: "content" },
           [
-            _c("b-table", {
-              attrs: {
-                responsive: "",
-                striped: "",
-                hover: "",
-                "show-empty": "",
-                "empty-text":
-                  "No Settlement Accounts have been Created. Create a Settlement Account below.",
-                id: "foreign-brokers",
-                items: _vm.broker_settlement_account,
-                fields: _vm.fields,
-                "per-page": _vm.perPage,
-                "current-page": _vm.currentPage
-              },
-              on: { "row-clicked": _vm.settlmentAccountHandler },
-              scopedSlots: _vm._u([
-                {
-                  key: "index",
-                  fn: function(row) {
-                    return [_vm._v(_vm._s(row))]
-                  }
-                }
-              ])
-            }),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "foreign-brokers"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
-            _c(
-              "b-button",
-              {
-                directives: [
-                  {
-                    name: "b-modal",
-                    rawName: "v-b-modal.modal-1",
-                    modifiers: { "modal-1": true }
-                  }
-                ],
-                on: {
-                  click: function($event) {
-                    _vm.create = true
-                  }
-                }
-              },
-              [_vm._v("Create Settlement Account")]
-            ),
-            _vm._v(" "),
-            _c("b-button", { on: { click: _vm.importAccounts } }, [
-              _vm._v("Import Accounts")
-            ]),
-            _vm._v(" "),
-            _c("b-button", { on: { click: _vm.exportBalances } }, [
-              _vm._v("Export Balances")
-            ]),
-            _vm._v(" "),
-            _c(
-              "b-modal",
-              {
-                attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
-              },
-              [
-                _c("p", { staticClass: "my-4" }, [
-                  _vm._v("Please update the fields below as required!")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "form",
-                  {
-                    ref: "form",
-                    on: {
-                      submit: function($event) {
-                        $event.stopPropagation()
-                        $event.preventDefault()
-                        return _vm.handleSubmit($event)
-                      }
-                    }
-                  },
+            !_vm.settlement_account
+              ? _c(
+                  "div",
                   [
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          sm: "",
-                          label: "Local Broker",
-                          "label-for": "name-input",
-                          "invalid-feedback": "Name is required"
-                        }
+                    _c("b-table", {
+                      attrs: {
+                        responsive: "",
+                        striped: "",
+                        hover: "",
+                        "show-empty": "",
+                        "empty-text":
+                          "No Settlement Accounts have been Created. Create a Settlement Account below.",
+                        id: "foreign-brokers",
+                        items: _vm.settlement_accounts,
+                        fields: _vm.fields,
+                        "per-page": _vm.perPage,
+                        "current-page": _vm.currentPage
                       },
-                      [
-                        _c("b-form-select", {
-                          attrs: {
-                            label: "Local Broker",
-                            "label-for": "localBroker-input",
-                            "invalid-feedback": "A Local Broker is required",
-                            sm: "",
-                            options: _vm.local_brokers
-                          },
-                          model: {
-                            value: _vm.settlement_account.local_broker_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "local_broker_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.local_broker_id"
+                      on: { "row-clicked": _vm.settlmentAccountHandler },
+                      scopedSlots: _vm._u(
+                        [
+                          {
+                            key: "index",
+                            fn: function(row) {
+                              return [_vm._v(_vm._s(row))]
+                            }
                           }
-                        })
-                      ],
-                      1
-                    ),
+                        ],
+                        null,
+                        false,
+                        131414210
+                      )
+                    }),
+                    _vm._v(" "),
+                    _c("b-pagination", {
+                      attrs: {
+                        "total-rows": _vm.rows,
+                        "per-page": _vm.perPage,
+                        "aria-controls": "foreign-brokers"
+                      },
+                      model: {
+                        value: _vm.currentPage,
+                        callback: function($$v) {
+                          _vm.currentPage = $$v
+                        },
+                        expression: "currentPage"
+                      }
+                    }),
                     _vm._v(" "),
                     _c(
-                      "b-form-group",
+                      "b-button",
                       {
-                        attrs: {
-                          label: "Foreign Broker",
-                          "label-for": "foreign-input",
-                          "invalid-feedback": "Foreign Broker is required"
+                        on: {
+                          click: function($event) {
+                            _vm.settlement_account = {}
+                          }
                         }
                       },
-                      [
-                        _c("b-form-select", {
-                          attrs: { options: _vm.foreign_brokers },
-                          model: {
-                            value: _vm.settlement_account.foreign_broker_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "foreign_broker_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.foreign_broker_id"
-                          }
-                        })
-                      ],
-                      1
+                      [_vm._v("Create Settlement Account")]
                     ),
                     _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Bank",
-                          "label-for": "bank-input",
-                          "invalid-feedback": " Bank is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "bank-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.bank_name,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "bank_name", $$v)
-                            },
-                            expression: "settlement_account.bank_name"
-                          }
-                        })
-                      ],
-                      1
-                    ),
+                    _c("b-button", { on: { click: _vm.importAccounts } }, [
+                      _vm._v("Import Accounts")
+                    ]),
                     _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Account Number",
-                          "label-for": "account-input",
-                          "invalid-feedback": " Account is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "account-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.account,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "account", $$v)
-                            },
-                            expression: "settlement_account.account"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Settlement Agent Email",
-                          "label-for": "email-input",
-                          "invalid-feedback": " Email is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "email-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.email,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "email", $$v)
-                            },
-                            expression: "settlement_account.email"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          sm: "",
-                          label: "Account Currency",
-                          "label-for": "currency-input",
-                          "invalid-feedback": "currency is required"
-                        }
-                      },
-                      [
-                        _c("b-form-select", {
-                          attrs: {
-                            label: "Currency",
-                            "label-for": "Currency-input",
-                            "invalid-feedback": "A currency is required",
-                            sm: "",
-                            options: _vm.currencies
-                          },
-                          model: {
-                            value: _vm.settlement_account.currency,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "currency", $$v)
-                            },
-                            expression: "settlement_account.currency"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Account Balance ",
-                          "label-for": "umir-input",
-                          "invalid-feedback": " Account Balance  is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "balance-input",
-                            state: _vm.nameState,
-                            type: "number",
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.account_balance,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "account_balance",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.account_balance"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Amount Allocated ",
-                          "label-for": "umir-input",
-                          "invalid-feedback": " Amount Allocated  is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "allocated-input",
-                            state: _vm.nameState,
-                            type: "number",
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.amount_allocated,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "amount_allocated",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.amount_allocated"
-                          }
-                        })
-                      ],
-                      1
-                    )
+                    _c("b-button", { on: { click: _vm.exportBalances } }, [
+                      _vm._v("Export Balances")
+                    ])
                   ],
                   1
                 )
-              ]
-            )
+              : _c(
+                  "b-card",
+                  { attrs: { id: "modal-1", title: _vm.formTitle } },
+                  [
+                    _c("p", { staticClass: "my-4" }, [
+                      _vm._v("Please update the fields below as required!")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "form",
+                      {
+                        ref: "form",
+                        on: {
+                          submit: function($event) {
+                            $event.stopPropagation()
+                            $event.preventDefault()
+                            return _vm.handleSubmit($event)
+                          }
+                        }
+                      },
+                      [
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              sm: "",
+                              label: "Local Broker",
+                              "label-for": "name-input",
+                              "invalid-feedback": "Name is required"
+                            }
+                          },
+                          [
+                            _c("b-form-select", {
+                              attrs: {
+                                required: "",
+                                label: "Local Broker",
+                                "label-for": "localBroker-input",
+                                "invalid-feedback":
+                                  "A Local Broker is required",
+                                sm: "",
+                                options: _vm.local_brokers
+                              },
+                              model: {
+                                value: _vm.settlement_account.local_broker_id,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "local_broker_id",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.local_broker_id"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Foreign Broker",
+                              "label-for": "foreign-input",
+                              "invalid-feedback": "Foreign Broker is required"
+                            }
+                          },
+                          [
+                            _c("b-form-select", {
+                              attrs: {
+                                required: "",
+                                options: _vm.foreign_brokers
+                              },
+                              model: {
+                                value: _vm.settlement_account.foreign_broker_id,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "foreign_broker_id",
+                                    $$v
+                                  )
+                                },
+                                expression:
+                                  "settlement_account.foreign_broker_id"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Bank",
+                              "label-for": "bank-input",
+                              "invalid-feedback": " Bank is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "bank-input",
+                                state: _vm.nameState,
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.bank_name,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "bank_name",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.bank_name"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Account Number",
+                              "label-for": "account-input",
+                              "invalid-feedback": " Account is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "account-input",
+                                state: _vm.nameState,
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.account,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "account",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.account"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Settlement Agent Email",
+                              "label-for": "email-input",
+                              "invalid-feedback": " Email is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "email-input",
+                                state: _vm.nameState,
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.email,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.settlement_account, "email", $$v)
+                                },
+                                expression: "settlement_account.email"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              sm: "",
+                              label: "Account Currency",
+                              "label-for": "currency-input",
+                              "invalid-feedback": "currency is required"
+                            }
+                          },
+                          [
+                            _c("b-form-select", {
+                              attrs: {
+                                required: "",
+                                label: "Currency",
+                                "label-for": "Currency-input",
+                                "invalid-feedback": "A currency is required",
+                                sm: "",
+                                options: _vm.currencies
+                              },
+                              model: {
+                                value: _vm.settlement_account.currency,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "currency",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.currency"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Account Balance ",
+                              "label-for": "umir-input",
+                              "invalid-feedback":
+                                " Account Balance  is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "balance-input",
+                                state: _vm.nameState,
+                                type: "number",
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.account_balance,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "account_balance",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.account_balance"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Amount Allocated ",
+                              "label-for": "umir-input",
+                              "invalid-feedback":
+                                " Amount Allocated  is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "allocated-input",
+                                state: _vm.nameState,
+                                type: "number",
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.amount_allocated,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "amount_allocated",
+                                    $$v
+                                  )
+                                },
+                                expression:
+                                  "settlement_account.amount_allocated"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-button",
+                          { attrs: { type: "submit", variant: "primary" } },
+                          [_vm._v("Submit")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-button",
+                          {
+                            attrs: { type: "button", variant: "warning" },
+                            on: {
+                              click: function($event) {
+                                _vm.settlement_account = null
+                              }
+                            }
+                          },
+                          [_vm._v("Cancel")]
+                        )
+                      ],
+                      1
+                    )
+                  ]
+                )
           ],
           1
         )
@@ -77550,11 +77566,7 @@ var render = function() {
                     modifiers: { "modal-1": true }
                   }
                 ],
-                on: {
-                  click: function($event) {
-                    _vm.create = true
-                  }
-                }
+                on: { click: _vm.addBrokerClient }
               },
               [_vm._v("Create Client")]
             ),
@@ -77601,11 +77613,11 @@ var render = function() {
                             required: ""
                           },
                           model: {
-                            value: _vm.broker.jcsd,
+                            value: _vm.client.jcsd,
                             callback: function($$v) {
-                              _vm.$set(_vm.broker, "jcsd", $$v)
+                              _vm.$set(_vm.client, "jcsd", $$v)
                             },
-                            expression: "broker.jcsd"
+                            expression: "client.jcsd"
                           }
                         })
                       ],
@@ -77629,11 +77641,11 @@ var render = function() {
                             required: ""
                           },
                           model: {
-                            value: _vm.broker.name,
+                            value: _vm.client.name,
                             callback: function($$v) {
-                              _vm.$set(_vm.broker, "name", $$v)
+                              _vm.$set(_vm.client, "name", $$v)
                             },
-                            expression: "broker.name"
+                            expression: "client.name"
                           }
                         })
                       ],
@@ -77657,11 +77669,11 @@ var render = function() {
                             required: ""
                           },
                           model: {
-                            value: _vm.broker.email,
+                            value: _vm.client.email,
                             callback: function($$v) {
-                              _vm.$set(_vm.broker, "email", $$v)
+                              _vm.$set(_vm.client, "email", $$v)
                             },
-                            expression: "broker.email"
+                            expression: "client.email"
                           }
                         })
                       ],
@@ -77686,11 +77698,11 @@ var render = function() {
                             required: ""
                           },
                           model: {
-                            value: _vm.broker.account_balance,
+                            value: _vm.client.account_balance,
                             callback: function($$v) {
-                              _vm.$set(_vm.broker, "account_balance", $$v)
+                              _vm.$set(_vm.client, "account_balance", $$v)
                             },
-                            expression: "broker.account_balance"
+                            expression: "client.account_balance"
                           }
                         })
                       ],
@@ -77715,11 +77727,11 @@ var render = function() {
                             required: ""
                           },
                           model: {
-                            value: _vm.broker.open_orders,
+                            value: _vm.client.open_orders,
                             callback: function($$v) {
-                              _vm.$set(_vm.broker, "open_orders", $$v)
+                              _vm.$set(_vm.client, "open_orders", $$v)
                             },
-                            expression: "broker.open_orders"
+                            expression: "client.open_orders"
                           }
                         })
                       ],
@@ -96151,8 +96163,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
