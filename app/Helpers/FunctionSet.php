@@ -477,7 +477,7 @@ class FunctionSet
         $broker_user = $local_broker['user'];
 
         if ($request->id) {
-            LogActivity::addToLog('Update Client Details');
+            $this->LogActivity::addToLog('Updated Client Account Details: JCSD: '.$request->jcsd.', Balance: '.$request->account_balance. ', Open Orders: '.$request->open_orders);
             $b = BrokerClient::find($request->id);
             $b->update(
                 [
@@ -524,6 +524,7 @@ class FunctionSet
 
             //Adds Permissions Selected For Sprint Final
             // $this->HelperClass->addPermission($request->permission, $broker_client->id, 'Broker Client');
+            $this->LogActivity::addToLog('Created Client Account: JCSD: '.$request->jcsd.', Balance: '.$request->account_balance. ', Open Orders: '.$request->open_orders);
             Mail::to($broker_user['email'])->send(new LocalBrokerClient($request));
         }
     }
@@ -765,6 +766,7 @@ class FunctionSet
                                 ['id' => $sa['id']],
                                 ['amount_allocated' => $settlement_allocated, 'filled_orders', $settlement_fil_ord]
                             );
+                            $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$sa['account'].', Balance: '.$sa['account_balance']. ', Amount Allocated: '.$sa['amount_allocated']);
                             // DB::table('broker_client_orders')
                             //     ->where('id', $od->id)
                             //     ->update(['order_status' => $status]);

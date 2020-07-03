@@ -276,7 +276,7 @@ class BrokerController extends Controller
 
         // Check if the client account status is approved before continueing the order. If not Kill it
         if($c_account->status != 'Verified'){
-            $this->LogActivity->addToLog('ORDER BLOCKED: '.$c_account->name.'s account status needs to be updated from '. $c_account->status.' to Verified');
+            $this->LogActivity->addToLog('ORDER BLOCKED: JCSD:'.$c_account->jcsd.'-'.$c_account->name.'s account status needs to be updated from '. $c_account->status.' to Verified');
             return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: '.$c_account->name.'s account status needs to be updated from '. $c_account->status.' to Verified']);
         }
 

@@ -57,6 +57,7 @@
             {{-- <div class="message" style="padding: 10px;"> --}}
                 @yield('message')
             {{-- </div> --}}
+            &nbsp; <a href="/logout">Start New Session</a>
         </div>
     </body>
 </html>
