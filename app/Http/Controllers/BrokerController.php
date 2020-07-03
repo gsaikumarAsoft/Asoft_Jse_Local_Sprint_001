@@ -324,7 +324,7 @@ class BrokerController extends Controller
                     ['open_orders' => $client_open_orders]
                 );
 
-                $this->LogActivity->addToLog('ORDER Submitted: JCSD:'.$c_account->jcsd.'-'.$c_account->name.': Balance:'.$c_account->account_balance);
+                $this->LogActivity->addToLog('ORDER Submitted: JCSD:'.$c_account->jcsd.'-'.$c_account->name.': Balance:'.$c_account->account_balance.', Open Orders:'.$client_open_orders);
                 $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$settlement['account'].', Balance: '.$settlement['account_balance']. ', Amount Allocated: '.$settlement['amount_allocated']);
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
