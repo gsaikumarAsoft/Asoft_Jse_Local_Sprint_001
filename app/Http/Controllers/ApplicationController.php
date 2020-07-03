@@ -9,6 +9,7 @@ use App\ForeignBroker;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
 use App\LocalBroker;
+use App\LogActivity as AppLogActivity;
 use App\Mail\BrokerDetailsUpdate;
 use App\Mail\ForeignBrokerRemoval;
 use App\Mail\LocalBroker as MailLocalBroker;
@@ -40,6 +41,12 @@ class ApplicationController extends Controller
         $this->middleware('auth');
         $this->LogActivity = new LogActivity;
         $this->HelperClass = new FunctionSet;
+    }
+
+    function audit(){
+
+        $data = AppLogActivity::with('user')->get();
+        return $data;
     }
 
     function index(Request $request)

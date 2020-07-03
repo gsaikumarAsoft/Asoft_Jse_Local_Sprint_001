@@ -150,6 +150,7 @@ Route::group(['prefix' => '/settlement-agent', 'middleware' => ['App\Http\Middle
 
 
 Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\AdminMiddleware']], function () {
+    Route::get('internal_audit/', 'ApplicationController@audit');
     Route::get('/', "BrokerController@index")->name('jse-admin');
     Route::get('foreign-broker-list/', 'ApplicationController@indexCad');
     Route::get('/foreign-brokers', 'ApplicationController@foreignBrokerList');
