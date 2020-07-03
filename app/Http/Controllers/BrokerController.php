@@ -255,7 +255,6 @@ class BrokerController extends Controller
     }
     public function clientOrder(Request $request)
     {
-
         //Define The Broker Making The Order
         $user = auth()->user();
         $user_definition  = LocalBroker::where('user_id', $user->id)->first();
@@ -298,14 +297,14 @@ class BrokerController extends Controller
             if ($settlement_available < $order_value) {
 
                 // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
-
+                
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
             } else if ($client_available < $order_value) {
 
                 // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
-                // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 
+                // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
                 $settlement_allocated = $settlement->amount_allocated + $order_value;
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
@@ -325,7 +324,8 @@ class BrokerController extends Controller
                     ['open_orders' => $client_open_orders]
                 );
 
-
+                $this->LogActivity->addToLog('ORDER Submitted: JCSD:'.$c_account->jcsd.'-'.$c_account->name.': Balance:'.$c_account->account_balance);
+                $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$settlement['account'].', Balance: '.$settlement['account_balance']. ', Amount Allocated: '.$settlement['amount_allocated']);
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             }

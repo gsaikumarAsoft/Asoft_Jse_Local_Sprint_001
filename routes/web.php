@@ -215,7 +215,7 @@ Route::get('get-rbc-bai', function () {
     // Storage::disk('public_uploads')->put($path, $file);
     // ===========================================================
 
-            
+
     //Check if user has been authenticted before running updater
     if (auth()->user()) {
 
@@ -226,7 +226,7 @@ Route::get('get-rbc-bai', function () {
             $file_date = date('Ymd');
             $remote_file_path = "/upload/BALTRN3_" . $file_date . ".001";
             $contents = Storage::disk('sftp')->get($remote_file_path);
-            
+
             echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
             echo '<script type="text/javascript">',
                 '
