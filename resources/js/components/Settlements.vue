@@ -325,18 +325,19 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
+      }).then(result => {
+        if (result.value) {
+          this.$bvModal.show("modal-1");
+        }
+        if (result.dismiss === "cancel") {
+          this.destroy(b.id);
+          this.$swal(
+            "Deleted!",
+            "Settlement Account Has Been Removed.",
+            "success"
+          );
+        }
       });
-      if (result.value) {
-        this.$bvModal.show("modal-1");
-      }
-      if (result.dismiss === "cancel") {
-        await this.destroy(b.id);
-        this.$swal(
-          "Deleted!",
-          "Settlement Account Has Been Removed.",
-          "success"
-        );
-      }
     },
     setLocalBroker() {
       // console.log(this);

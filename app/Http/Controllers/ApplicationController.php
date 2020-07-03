@@ -171,7 +171,7 @@ class ApplicationController extends Controller
 
         if ($request->id) {
 
-            $this->LogActivity::addToLog('Updated Settlement Account Details');
+            $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$request->account.', Balance: '.$request->account_balance. ', Amount Allocated: '.$request->amount_allocated);
 
             $b = BrokerSettlementAccount::find($request->id);
 
@@ -207,7 +207,7 @@ class ApplicationController extends Controller
 
             //Check if the user already exists
             if (count($this->HelperClass->getSettlementUserByEmail($request->email)) > 0) {
-                $this->LogActivity::addToLog('Updated Settlement Account Details');
+                $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$request->account.', Balance: '.$request->account_balance. ', Amount Allocated: '.$request->amount_allocated);
                 // if the user exists update password and send new email
                 $u = $this->HelperClass->getSettlementUserByEmail($request->email);
                 // return $u;
@@ -302,7 +302,7 @@ class ApplicationController extends Controller
                 Mail::to($request->email)->send(new SettlementAccountConfirmation($data, $user));
 
 
-                $this->LogActivity::addToLog('Created New Settlement Account');
+                $this->LogActivity::addToLog('Created A New Settlement. Account Number: '.$request->account.', Balance: '.$request->account_balance. ', Amount Allocated: '.$request->amount_allocated);
             }
         }
     }
