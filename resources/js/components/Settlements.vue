@@ -3,31 +3,33 @@
     <head-nav></head-nav>
     <div class="container-fluid">
       <div class="content">
-        <b-table
-          responsive
-          striped
-          hover
-          show-empty
-          :empty-text="'No Settlement Accounts have been Created. Create a Settlement Account below.'"
-          id="foreign-brokers"
-          :items="broker_settlement_account"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          @row-clicked="settlmentAccountHandler"
-        >
-          <template slot="index" slot-scope="row">{{ row }}</template>
-        </b-table>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="foreign-brokers"
-        ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create Settlement Account</b-button>
-        <b-button @click="importAccounts">Import Accounts</b-button>
-        <b-button @click="exportBalances">Export Balances</b-button>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+        <div v-if="!settlement_account">
+          <b-table
+            responsive
+            striped
+            hover
+            show-empty
+            :empty-text="'No Settlement Accounts have been Created. Create a Settlement Account below.'"
+            id="foreign-brokers"
+            :items="settlement_accounts"
+            :fields="fields"
+            :per-page="perPage"
+            :current-page="currentPage"
+            @row-clicked="settlmentAccountHandler"
+          >
+            <template slot="index" slot-scope="row">{{ row }}</template>
+          </b-table>
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="foreign-brokers"
+          ></b-pagination>
+          <b-button @click="settlement_account={}">Create Settlement Account</b-button>
+          <b-button @click="importAccounts">Import Accounts</b-button>
+          <b-button @click="exportBalances">Export Balances</b-button>
+        </div>
+        <b-card v-else id="modal-1" :title="formTitle">
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
             <b-form-group
@@ -37,6 +39,7 @@
               invalid-feedback="Name is required"
             >
               <b-form-select
+                required
                 label="Local Broker"
                 label-for="localBroker-input"
                 invalid-feedback="A Local Broker is required"
@@ -51,6 +54,7 @@
               invalid-feedback="Foreign Broker is required"
             >
               <b-form-select
+                required
                 v-model="settlement_account.foreign_broker_id"
                 :options="foreign_brokers"
               ></b-form-select>
@@ -94,6 +98,7 @@
               invalid-feedback="currency is required"
             >
               <b-form-select
+                required
                 label="Currency"
                 label-for="Currency-input"
                 invalid-feedback="A currency is required"
@@ -128,8 +133,11 @@
                 required
               ></b-form-input>
             </b-form-group>
+
+            <b-button type="submit" variant="primary">Submit</b-button>
+            <b-button type="button" variant="warning" @click="settlement_account = null">Cancel</b-button>
           </form>
-        </b-modal>
+        </b-card>
       </div>
     </div>
   </div>
@@ -147,9 +155,8 @@ export default {
   },
   data() {
     return {
-      create: false,
-      broker_settlement_account: [],
-      settlement_account: {},
+      settlement_accounts: [],
+      settlement_account: null,
       local_brokers: [],
       foreign_brokers: [],
       perPage: 5,
@@ -197,13 +204,19 @@ export default {
           sortable: true
         }
       ],
-      modalTitle: "Create Broker Settlement Account",
       nameState: null
     };
   },
   computed: {
+    formTitle() {
+      return (
+        (!!(this.settlement_account && this.settlement_account.id)
+          ? "Update"
+          : "Create") + " Settlement Account"
+      );
+    },
     rows() {
-      return this.broker_settlement_account.length;
+      return this.settlement_accounts.length;
     }
   },
   methods: {
@@ -221,20 +234,20 @@ export default {
     },
     exportBalances() {
       const tableData = [];
-      for (var i = 0; i < this.broker_settlement_account.length; i++) {
+      for (var i = 0; i < this.settlement_accounts.length; i++) {
         tableData.push([
-          this.broker_settlement_account[i].local_broker["name"],
-          this.broker_settlement_account[i].foreign_broker["name"],
-          this.broker_settlement_account[i].bank_name,
-          this.broker_settlement_account[i].account,
-          this.broker_settlement_account[i].email,
-          this.broker_settlement_account[i].account_balance,
-          this.broker_settlement_account[i].amount_allocated
+          this.settlement_accounts[i].local_broker["name"],
+          this.settlement_accounts[i].foreign_broker["name"],
+          this.settlement_accounts[i].bank_name,
+          this.settlement_accounts[i].account,
+          this.settlement_accounts[i].email,
+          this.settlement_accounts[i].account_balance,
+          this.settlement_accounts[i].amount_allocated
         ]);
       }
 
-      // console.log(this.broker_settlement_account[i])
-      // tableData.push(this.broker_settlement_account[i]);
+      // console.log(this.settlement_accounts[i])
+      // tableData.push(this.settlement_accounts[i]);
 
       var doc = new jsPDF();
       //   // It can parse html:
@@ -257,63 +270,67 @@ export default {
       });
       doc.save("BrokerSettlementReport.pdf");
     },
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
-    resetModal() {
-      this.create = false;
-      this.settlement_account = {};
-    },
-    handleOk(bvModalEvt) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault();
-      // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
-      // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
-        //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          this.storeBrokerSettlementAccount({
-            id: null,
-            currency: this.settlement_account.currency,
-            account: this.settlement_account.account,
-            account_balance: this.settlement_account.account_balance,
-            amount_allocated: this.settlement_account.amount_allocated,
-            bank_name: this.settlement_account.bank_name,
-            email: this.settlement_account.email,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            status: "Unverified",
-            hash: this.settlement_account.hash
-          });
-          this.$swal(`Account created for ${this.settlement_account.email}`);
-        } else {
-          //Include ID
-          console.log(this.settlement_account);
-          this.storeBrokerSettlementAccount(this.settlement_account);
-        }
 
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+    async handleSubmit() {
+      // Exit when the form isn't valid
+      //Determine if a new user is being created or we are updating an existing user
+      let account;
+
+      let isNew = !this.settlement_account.id;
+
+      if (isNew) {
+        //create with id = null
+        account = {
+          id: null,
+          currency: this.settlement_account.currency,
+          account: this.settlement_account.account,
+          account_balance: this.settlement_account.account_balance,
+          amount_allocated: this.settlement_account.amount_allocated,
+          bank_name: this.settlement_account.bank_name,
+          email: this.settlement_account.email,
+          foreign_broker_id: this.settlement_account.foreign_broker_id,
+          local_broker_id: this.settlement_account.local_broker_id,
+          status: "Unverified",
+          hash: this.settlement_account.hash
+        };
+      } else {
+        //update
+        account = this.settlement_account;
       }
 
-      this.nameState = null;
+      console.log("account", account);
+
+      this.$swal.fire({
+        title: `Settlement Account`,
+        html: `${isNew ? "Creating" : "Updating"} Settlement Account`,
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+
+      // console.log(account);
+      try {
+        await axios.post("../store-settlement-broker", account);
+        await this.getSettlementList();
+        this.$swal(
+          `Settlement Account ${isNew ? "created" : "updated"} for ${
+            this.settlement_account.email
+          }`
+        );
+        this.settlement_account = null;
+        this.nameState = null;
+      } catch (error) {
+        console.error("settlement save failed", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
+
     async settlmentAccountHandler(b) {
       // console.log(b);
-      this.settlement_account = {};
       console.log(b);
-      this.settlement_account = b;
-      const result = this.$swal({
+
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
@@ -325,68 +342,62 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Settlement Account Has Been Removed.",
-            "success"
-          );
-        }
       });
+      if (result.value) {
+        this.settlement_account = b;
+      }
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
+      }
     },
+
     setLocalBroker() {
       // console.log(this);
     },
+
     async getSettlementList() {
-      ({ data: this.broker_settlement_account } = await axios.get(
+      ({ data: this.settlement_accounts } = await axios.get(
         "../settlement-list"
       )); //.then(response => {
-      console.log("broker_settlement_account)", this.broker_settlement_account);
+      console.log("settlement_accounts)", this.settlement_accounts);
     },
-    async storeBrokerSettlementAccount(account) {
-      // console.log(account);
-      try {
-        await axios.post("../store-settlement-broker", account);
-        await this.getSettlementList();
-        this.create = false;
-      } catch (error) {
-        // console.log(error);
-      }
-    },
-    add() {
-      this.create = true;
-    },
+
     async destroy(id) {
-      await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
-      await this.getSettlementList();
+      try {
+        this.$swal.fire({
+          title: `Settlement Account`,
+          html: "Deleting Settlement Account.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
+        await this.getSettlementList();
+        this.$swal(
+          "Deleted!",
+          "Settlement Account Has Been Removed.",
+          "success"
+        );
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
 
     async getlocalBrokers() {
-      const { data: local_brokers } = await axios.get("../local-brokers"); //.then(response => {
-
-      for (let i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].user.name,
-          value: local_brokers[i].user.id
-        });
-      }
+      const { data: local_brokers } = await axios.get("../local-brokers");
+      this.local_brokers = local_brokers.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
     },
     async getForeiognBrokers() {
-      const { data: foreign_brokers } = await axios.get("../foreign-brokers"); //.then(response => {
-
-      for (let i = 0; i < foreign_brokers.length; i++) {
-        // console.log(foreign_brokers[i].user );
-        let data = foreign_brokers[i].user;
-        this.foreign_brokers.push({
-          text: data.name,
-          value: data.id
-        });
-      }
+      const { data: foreign_brokers } = await axios.get("../foreign-brokers");
+      this.foreign_brokers = foreign_brokers.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
     }
   },
   async mounted() {

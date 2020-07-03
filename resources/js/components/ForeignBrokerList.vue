@@ -13,7 +13,7 @@
           :fields="fields"
           :per-page="perPage"
           :current-page="currentPage"
-          @row-clicked="foreignBrokerHandler"
+          @row-clicked="displayForeignBroker"
         >
           <template slot="index" slot-scope="row">{{ row }}</template>
         </b-table>
@@ -23,10 +23,10 @@
           :per-page="perPage"
           aria-controls="foreign-brokers"
         ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create Foreign Broker</b-button>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+        <b-button v-b-modal.modal-1 @click="addNewBroker">Create Foreign Broker</b-button>
+        <b-modal id="modal-1" :title="modalTitle" @ok="handleModalOK" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
-          <form ref="form" @submit.stop.prevent="handleSubmit">
+          <form ref="form">
             <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
               <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
             </b-form-group>
@@ -52,7 +52,6 @@ export default {
   },
   data() {
     return {
-      create: false,
       foreign_brokers: [],
       broker: {},
       perPage: 5,
@@ -83,15 +82,7 @@ export default {
       return this.foreign_brokers.length;
     }
   },
-  watch: {
-    create: function(data) {
-      if (data) {
-        this.modalTitle = "Create Foreign Broker";
-      } else {
-        this.modalTitle = "Foreign Broker Update";
-      }
-    }
-  },
+  watch: {},
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
@@ -99,58 +90,61 @@ export default {
       return valid;
     },
     async resetModal() {
-      this.create = false;
       this.broker = {};
       await this.getBrokers();
     },
-    handleOk(bvModalEvt) {
+    async handleModalOK(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
+
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
 
+        const storeType = !this.broker.id ? "Created" : "Updated";
+        const titleType = !this.broker.id ? "Creating" : "Updating";
+        const contentType = !this.broker.id ? "create" : "update";
         //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          this.storeForeignBroker({
-            name: this.broker.name,
-            email: this.broker.email
-          });
-          this.$swal(`Account created for ${this.broker.email}`);
-        } else {
-          //Include ID
-          this.storeForeignBroker({
-            id: this.broker.id,
-            name: this.broker.name,
-            email: this.broker.email
-          });
-          this.$swal(`Account Updated for ${this.broker.email}`);
-        }
 
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+        try {
+          this.$swal.fire({
+            title: `${titleType} Foreign Broker Account`,
+            html: `One moment while we ${contentType} the Account`,
+            timerProgressBar: true,
+            onBeforeOpen: () => {
+              this.$swal.showLoading();
+            }
+          });
+
+          await axios.post("store-foreign-broker", this.broker);
+          await this.getBrokers();
+          this.$swal(`Account ${storeType} for ${this.broker.email}`);
+
+          this.resetModal();
+          this.$nextTick(() => {
+            this.$bvModal.hide("modal-1");
+          });
+          this.$swal.close();
+        } catch (error) {
+          console.error("store", error);
+          this.$swal(
+            "Oops...",
+            "Something went wrong! This Email Address may already be assigned.",
+            "error"
+          );
+        }
       }
-      // Push the name to submitted names
-      // this.submittedNames.push(this.name);
-      // Hide the modal manually
-      // this.$nextTick(() => {
-      //   this.$bvModal.hide("modal-1");
-      // });
     },
-    async foreignBrokerHandler(b) {
+
+    async displayForeignBroker(b) {
       this.broker = b.user;
+      this.modalTitle = "Foreign Broker Update";
       const result = await this.$swal({
         title: "",
         icon: "info",
-        html: `Would you like to Edit Or Delete the following Foreign Broker <b>(${b.user.name})</b> `,
+        html: `Foreign Broker <b>(${b.user.name})</b> `,
         // showCloseButton: true,
         showCancelButton: true,
         focusConfirm: true,
@@ -165,40 +159,34 @@ export default {
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
       }
     },
     async getBrokers() {
       ({ data: this.foreign_brokers } = await axios.get("foreign-brokers")); //.then(response => {
     },
 
-    async storeForeignBroker(broker) {
+    addNewBroker() {
+      this.modalTitle = "Create Foreign Broker";
+      this.$bvModal.show("modal-1");
+    },
+
+    async destroy(id) {
       try {
         this.$swal.fire({
-          title: "Creating Foreign Broker Account",
-          html: "One moment while we setup the Account",
+          title: `Foreign Broker`,
+          html: "Deleting Broker.......",
           timerProgressBar: true,
           onBeforeOpen: () => {
             this.$swal.showLoading();
           }
         });
-        await axios.post("store-foreign-broker", broker);
+        await axios.delete(`foreign-broker-delete/${id}`); //.then(response => {
         await this.getBrokers();
-        this.$swal(
-          "Account Created!",
-          // "Foreign Broker Has Been Removed.",
-          "success"
-        );
+        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
       } catch (error) {
-      } finally {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
       }
-    },
-    add() {
-      this.create = true;
-    },
-    async destroy(id) {
-      await axios.delete(`foreign-broker-delete/${id}`); //.then(response => {
-      await this.getBrokers();
     }
   },
   async mounted() {

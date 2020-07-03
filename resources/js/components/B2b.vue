@@ -3,56 +3,33 @@
     <head-nav></head-nav>
     <div class="container-fluid">
       <div class="content">
-        <b-table
-          striped
-          hover
-          show-empty
-          :empty-text="'No Trading Account Configurations have been Created. Create a Trading Account Configuration below.'"
-          id="foreign-brokers"
-          :items="trading_accounts"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          @row-clicked="AccountHandler"
-        >
-          <template slot="index" slot-scope="row">{{ row }}</template>
-        </b-table>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="foreign-brokers"
-        ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create Account</b-button>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+        <div v-if="!trading_account">
+          <b-table
+            striped
+            hover
+            show-empty
+            :empty-text="'No Trading Account Configurations have been Created. Create a Trading Account Configuration below.'"
+            id="foreign-brokers"
+            :items="trading_accounts"
+            :fields="fields"
+            :per-page="perPage"
+            :current-page="currentPage"
+            @row-clicked="accountHandler"
+          >
+            <template slot="index" slot-scope="row">{{ row }}</template>
+          </b-table>
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="foreign-brokers"
+          ></b-pagination>
+          <b-button v-b-modal.modal-1 @click="trading_account = {}">Create Account</b-button>
+        </div>
+
+        <b-card v-else :title="modalTitle">
           <p class="my-4">Please update the fields below as required!</p>
-          <form ref="form" @submit.stop.prevent="handleSubmit">
-            <!-- <b-form-group
-              sm
-              label="Local Broker"
-              label-for="name-input"
-              invalid-feedback="Name is required"
-            >
-              <b-form-select
-                label="Local Broker"
-                label-for="localBroker-input"
-                invalid-feedback="A Local Broker is required"
-                sm
-                v-model="settlement_account.local_broker_id"
-                :options="local_brokers"
-              ></b-form-select>
-            </b-form-group>
-            <b-form-group
-              label="Foreign Broker"
-              label-for="foreign-input"
-              invalid-feedback="Foreign Broker is required"
-            >
-              <b-form-select
-                v-model="settlement_account.foreign_broker_id"
-                Socket
-                :options="foreign_brokers"
-              ></b-form-select>
-            </b-form-group>-->
+          <form @submit.stop.prevent="handleSubmit">
             <b-form-group
               label="Settlement Account Number"
               label-for="Settlement-Account-Number-input"
@@ -63,7 +40,7 @@
                 label-for="localBroker-input"
                 invalid-feedback="A Settlement Account is required"
                 sm
-                v-model="settlement_account.broker_settlement_account"
+                v-model="trading_account.broker_settlement_account"
                 :options="broker_settlement_accounts"
               ></b-form-select>
             </b-form-group>
@@ -74,7 +51,7 @@
             >
               <b-form-input
                 id="trading-account-number-input"
-                v-model="settlement_account.trading_account_number"
+                v-model="trading_account.trading_account_number"
                 :state="nameState"
                 required
               ></b-form-input>
@@ -82,7 +59,7 @@
             <b-form-group label="UMIR" label-for="umir-input" invalid-feedback=" UMIR is required">
               <b-form-input
                 id="umir-input"
-                v-model="settlement_account.umir"
+                v-model="trading_account.umir"
                 :state="nameState"
                 required
               ></b-form-input>
@@ -94,7 +71,7 @@
             >
               <b-form-input
                 id="target-input"
-                v-model="settlement_account.target_comp_id"
+                v-model="trading_account.target_comp_id"
                 :state="nameState"
                 required
               ></b-form-input>
@@ -106,7 +83,7 @@
             >
               <b-form-input
                 id="sender-input"
-                v-model="settlement_account.sender_comp_id"
+                v-model="trading_account.sender_comp_id"
                 :state="nameState"
                 required
               ></b-form-input>
@@ -118,7 +95,7 @@
             >
               <b-form-input
                 id="socket-input"
-                v-model="settlement_account.socket"
+                v-model="trading_account.socket"
                 :state="nameState"
                 required
               ></b-form-input>
@@ -126,13 +103,15 @@
             <b-form-group label="Port" label-for="port-input" invalid-feedback="Port is required">
               <b-form-input
                 id="port-input"
-                v-model="settlement_account.port"
+                v-model="trading_account.port"
                 :state="nameState"
                 required
               ></b-form-input>
             </b-form-group>
+            <b-button type="submit" variant="primary">Submit</b-button>
+            <b-button type="button" variant="warning" @click="trading_account = null">Cancel</b-button>
           </form>
-        </b-modal>
+        </b-card>
       </div>
     </div>
   </div>
@@ -147,10 +126,9 @@ export default {
   },
   data() {
     return {
-      create: false,
       trading_accounts: [],
       broker_settlement_accounts: [],
-      settlement_account: {},
+      trading_account: null,
       local_brokers: [],
       foreign_brokers: [],
       perPage: 5,
@@ -217,11 +195,10 @@ export default {
     }
   },
   methods: {
-    AccountHandler(b) {
-      this.settlement_account = b;
-      this.settlement_account.broker_settlement_account =
-        b.broker_settlement_account_id;
-      this.$swal({
+    async accountHandler(b) {
+      console.log("selected trading_account", b);
+
+      const result = await this.$swal({
         title: "",
         icon: "info",
         html: `Would you like to Edit Or Delete the following Trading account for : <b>(${b.settlement_account.account})</b> `,
@@ -232,155 +209,128 @@ export default {
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
-      }).then(result => {
-        if (result.value) {
-          this.$bvModal.show("modal-1");
-        }
-        if (result.dismiss === "cancel") {
-          this.destroy(b.id);
-          this.$swal(
-            "Deleted!",
-            "Trading Account Has Been Removed.",
-            "success"
-          );
-        }
       });
-    },
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
-    resetModal() {
-      this.create = false;
-      this.settlement_account = {};
-    },
-    handleOk(bvModalEvt) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault();
-      // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
-      // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
 
-        //Determine if a new client is being created or we are updating an existing client
-        if (this.create) {
-          //Exclude ID
-          this.storeTradingAccount({
-            name: this.settlement_account.name,
-            // local_broker_id: 1,
-            local_broker_id: this.settlement_account.local_broker_id,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            umir: this.settlement_account.umir,
-            target_comp_id: this.settlement_account.target_comp_id,
-            sender_comp_id: this.settlement_account.sender_comp_id,
-            socket: this.settlement_account.socket,
-            port: this.settlement_account.port,
-            trading_account_number: this.settlement_account
-              .trading_account_number,
-            settlement_account_number: this.settlement_account
-              .broker_settlement_account
-          });
-          this.$swal(`Creating Account`);
-        } else {
-          //Include ID
-          this.storeTradingAccount({
-            id: this.settlement_account.id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            umir: this.settlement_account.umir,
-            target_comp_id: this.settlement_account.target_comp_id,
-            sender_comp_id: this.settlement_account.sender_comp_id,
-            socket: this.settlement_account.socket,
-            port: this.settlement_account.port,
-            trading_account_number: this.settlement_account
-              .trading_account_number,
-            settlement_account_number: this.settlement_account
-              .broker_settlement_account
-          });
-          this.$swal(`Updating Account`);
-        }
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+      console.log("result", result);
+
+      if (result.value) {
+        this.trading_account = b;
+        this.trading_account.broker_settlement_account =
+          b.broker_settlement_account_id;
+      }
+
+      if (result.dismiss === "cancel") {
+        await this.destroy(b.id);
       }
     },
-    storeTradingAccount(account) {
-      this.$bvModal.hide("modal-1");
-      axios
-        .post("store-trading-account", account)
-        .then(response => {
-          this.getTradingAccountsList();
-          this.$swal(`Account setup complete`);
-          // setTimeout(location.reload.bind(location), 2000);
-        })
-        .catch(error => {});
+
+    async handleSubmit() {
+      // Exit when the form isn't valid
+      const isNew = !this.trading_account.id;
+
+      const trading_account = {
+        id: this.trading_account.id,
+        local_broker_id: this.trading_account.local_broker_id,
+        foreign_broker_id: this.trading_account.foreign_broker_id,
+        umir: this.trading_account.umir,
+        target_comp_id: this.trading_account.target_comp_id,
+        sender_comp_id: this.trading_account.sender_comp_id,
+        socket: this.trading_account.socket,
+        port: this.trading_account.port,
+        trading_account_number: this.trading_account.trading_account_number,
+        settlement_account_number: this.trading_account
+          .broker_settlement_account
+      };
+
+      //Determine if a new client is being created or we are updating an existing client
+      if (isNew) {
+        trading_account["id"] = null;
+        trading_account["name"] = this.trading_account.name;
+      }
+
+      console.log("trading_account", trading_account);
+      this.$swal.fire({
+        title: `Settlement Account`,
+        html: `${isNew ? "Creating" : "Updating"} Trading Account`,
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+
+      try {
+        await axios.post("store-trading-account", trading_account);
+        // await axios.post("/store-settlement-broker", this.trading_account);
+        this.getTradingAccountsList();
+        this.$swal(`Account setup complete`);
+        // setTimeout(location.reload.bind(location), 2000);
+        this.trading_account = null;
+      } catch (error) {
+        console.error("tarding save failed", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
-    setLocalBroker() {},
+
     async getTradingAccountsList() {
       ({ data: this.trading_accounts } = await axios.get("trader-list")); //.then(response => {
       //});
     },
+
     async getSettlementAccounts() {
       const { data } = await axios.get("settlement-list"); //.then(response => {
-
-      for (let i = 0; i < data.length; i++) {
-        this.broker_settlement_accounts.push({
-          text:
-            data[i].foreign_broker["name"] +
-            "-" +
-            data[i].local_broker["name"] +
-            "-" +
-            data[i].bank_name +
-            "-" +
-            data[i].account,
-          value: data[i].id
-        });
-      }
+      this.broker_settlement_accounts = data.map(account => ({
+        text: [
+          account.foreign_broker["name"],
+          account.local_broker["name"],
+          account.bank_name,
+          account.account
+        ].join("-"),
+        value: account.id
+      }));
     },
 
     async storeBrokerTradingAccount() {
       try {
-        await axios.post("/store-settlement-broker", this.settlement_account);
+        await axios.post("/store-settlement-broker", this.trading_account);
         //.then(response => {
         this.getTradingAccountsList();
         setTimeout(location.reload.bind(location), 1000);
-        this.create = false;
       } catch (error) {}
     },
-    add() {
-      this.create = true;
-    },
+
     async destroy(id) {
-      await axios.delete(`trading-account-delete/${id}`); //.then(response => {
-      await this.getTradingAccountsList();
+      try {
+        this.$swal.fire({
+          title: `Settlement Account`,
+          html: "Deleting Settlement Account.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios.delete(`trading-account-delete/${id}`); //.then(response => {
+        await this.getTradingAccountsList();
+        this.$swal("Deleted!", "Trading Account Has Been Removed.", "success");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     },
+
     async getLocalBrokers() {
       const { data: local_brokers } = await axios.get("local-brokers");
-      // console.log(local_brokers);
-      for (let i = 0; i < local_brokers.length; i++) {
-        this.local_brokers.push({
-          text: local_brokers[i].user.name,
-          value: local_brokers[i].id
-        });
-      }
+      this.local_brokers = local_brokers.map(broker => ({
+        text: broker.user.name,
+        value: broker.id
+      }));
     },
 
     async getForeignBrokers() {
-      const { data: foreign_brokers } = await axios.get("foreign-brokers"); //.then(response => {
-
-      for (let i = 0; i < foreign_brokers.length; i++) {
-        let data = foreign_brokers[i].user;
-        this.foreign_brokers.push({
-          text: data.name,
-          value: foreign_brokers[i].id
-        });
-      }
+      const { data: foreign_brokers } = await axios.get("foreign-brokers");
+      this.foreign_brokers = foreign_brokers.map(broker => ({
+        text: broker.user.name,
+        value: broker.id
+      }));
     }
   },
 
@@ -391,6 +341,8 @@ export default {
       this.getTradingAccountsList(),
       this.getSettlementAccounts()
     ]);
+
+    console.log("trading", this.trading_accounts);
   }
 };
 </script>

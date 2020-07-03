@@ -13,7 +13,7 @@
           :fields="fields"
           :per-page="perPage"
           :current-page="currentPage"
-          @row-clicked="localBrokerHandler"
+          @row-clicked="displayLocalBroker"
         >
           <template slot="index" slot-scope="row">{{ row }}</template>
         </b-table>
@@ -23,10 +23,10 @@
           :per-page="perPage"
           aria-controls="local-brokers"
         ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create Local Broker</b-button>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+        <b-button v-b-modal.modal-1 @click="addNewBroker">Create Local Broker</b-button>
+        <b-modal id="modal-1" :title="modalTitle" @ok="handleModalOK" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
-          <form ref="form" @submit.stop.prevent="handleSubmit">
+          <form ref="form">
             <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
               <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
             </b-form-group>
@@ -52,7 +52,6 @@ export default {
   },
   data() {
     return {
-      create: false,
       local_brokers: [],
       broker: {},
       perPage: 5,
@@ -83,15 +82,7 @@ export default {
       return this.local_brokers.length;
     }
   },
-  watch: {
-    create: function(data) {
-      if (data) {
-        this.modalTitle = "Create Local Broker";
-      } else {
-        this.modalTitle = "Local Broker Update";
-      }
-    }
-  },
+  watch: {},
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
@@ -99,43 +90,47 @@ export default {
       return valid;
     },
     async resetModal() {
-      this.create = false;
       this.broker = {};
       await this.getBrokers();
     },
-    handleOk(bvModalEvt) {
+
+    async handleModalOK(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
-      // Trigger submit handler
-      this.handleSubmit();
-    },
-    async handleSubmit() {
       // Exit when the form isn't valid
+
       if (!this.checkFormValidity()) {
       } else {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
         //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          await this.storeLocalBroker({
-            name: this.broker.name,
-            email: this.broker.email
+        const storeType = !this.broker.id ? "Created" : "Updated";
+        const titleType = !this.broker.id ? "Creating" : "Updating";
+        const contentType = !this.broker.id ? "create" : "update";
+        try {
+          this.$swal.fire({
+            title: `${titleType} Local Broker Account`,
+            html: `One moment while we ${contentType} the Account`,
+            timerProgressBar: true,
+            onBeforeOpen: () => {
+              this.$swal.showLoading();
+            }
           });
-          this.$swal(`Account created for ${this.broker.email}`);
-        } else {
-          //Include ID
-          await this.storeLocalBroker({
-            id: this.broker.id,
-            name: this.broker.name,
-            email: this.broker.email
+          await axios.post("store-local-broker", this.broker);
+          await this.getBrokers();
+          this.$swal(`Account ${storeType} for ${this.broker.email}`);
+          this.resetModal();
+          this.$nextTick(() => {
+            this.$bvModal.hide("modal-1");
           });
-          this.$swal(`Account Updated for ${this.broker.email}`);
+          this.$swal.close();
+        } catch (error) {
+          console.error("store", error);
+          this.$swal(
+            "Oops...",
+            "Something went wrong! This Email Address may already be assigned.",
+            "error"
+          );
         }
-
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
       }
       // Push the name to submitted names
       // this.submittedNames.push(this.name);
@@ -144,12 +139,14 @@ export default {
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    async localBrokerHandler(b) {
+    async displayLocalBroker(b) {
+      console.log("displayLocalBroker broker", b);
       this.broker = b.user;
+      this.modalTitle = "Local Broker Update";
       const result = await this.$swal({
         title: "",
         icon: "info",
-        html: `Would you like to Edit Or Delete the following Local Broker <b>(${b.user.name})</b> `,
+        html: `Local Broker <b>(${b.user.name})</b> `,
         showCloseButton: true,
         showCancelButton: true,
         // focusConfirm: true,
@@ -159,30 +156,42 @@ export default {
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
       }); //.then(result => {
+
+      console.log("swal result", result);
       if (result.value) {
         this.$bvModal.show("modal-1");
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
       }
     },
+
     async getBrokers() {
       ({ data: this.local_brokers } = await axios.get("local-brokers")); //.then(response => {
       console.log("this.local_brokers", this.local_brokers);
     },
-    async storeLocalBroker(broker) {
-      try {
-        await axios.post("store-local-broker", broker);
-        await this.getBrokers();
-      } catch (error) {}
-    },
-    add() {
-      this.create = true;
+
+    addNewBroker() {
+      this.modalTitle = "Create Local Broker";
+      this.$bvModal.show("modal-1");
     },
     async destroy(id) {
-      await axios.delete(`local-broker-delete/${id}`);
-      await this.getBrokers();
+      try {
+        this.$swal.fire({
+          title: `Local Broker`,
+          html: "Deleting Broker.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios.delete(`local-broker-delete/${id}`);
+        await this.getBrokers();
+        this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     }
   },
   async mounted() {

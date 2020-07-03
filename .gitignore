@@ -1,2 +1,4 @@
 .env
 node_modules
+public/js/app.js
+public/js/app.js.LICENSE.txt

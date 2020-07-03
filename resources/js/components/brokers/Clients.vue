@@ -24,28 +24,28 @@
           :per-page="perPage"
           aria-controls="local-brokers"
         ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create Client</b-button>
+        <b-button v-b-modal.modal-1 @click="addBrokerClient">Create Client</b-button>
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
             <b-form-group label="JCSD" label-for="JCSD-input" invalid-feedback="JCSD is required">
               <b-form-input
                 id="JCSD-input"
-                v-model="broker.jcsd"
+                v-model="client.jcsd"
                 type="number"
                 :state="nameState"
                 required
               ></b-form-input>
             </b-form-group>
             <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
-              <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
+              <b-form-input id="name-input" v-model="client.name" :state="nameState" required></b-form-input>
             </b-form-group>
             <b-form-group
               label="Email"
               label-for="email-input"
               invalid-feedback="Email is required"
             >
-              <b-form-input id="name-input" v-model="broker.email" :state="nameState" required></b-form-input>
+              <b-form-input id="name-input" v-model="client.email" :state="nameState" required></b-form-input>
             </b-form-group>
             <b-form-group
               label="Account Balance"
@@ -54,7 +54,7 @@
             >
               <b-form-input
                 id="Account Balance-input"
-                v-model="broker.account_balance"
+                v-model="client.account_balance"
                 :state="nameState"
                 type="number"
                 required
@@ -67,7 +67,7 @@
             >
               <b-form-input
                 id="Open Orders-input"
-                v-model="broker.open_orders"
+                v-model="client.open_orders"
                 :state="nameState"
                 type="number"
                 required
@@ -89,11 +89,10 @@ export default {
   },
   data() {
     return {
-      create: false,
       local_broker_clients: [],
       local_brokers: [],
       trading_accounts: [],
-      broker: {},
+      client: {},
       perPage: 5,
       currentPage: 1,
       fields: [
@@ -162,63 +161,86 @@ export default {
       return this.local_broker_clients.length;
     }
   },
-  watch: {
-    create: function(data) {
-      if (data) {
-        this.modalTitle = "Create Client Account";
-      } else {
-        this.modalTitle = "Client Account Update";
-      }
-    }
-  },
+  watch: {},
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       this.nameState = valid;
       return valid;
     },
-    resetModal() {
-      this.create = false;
-      this.broker = {};
+
+    async resetModal() {
+      this.client = {};
+      this.getClients();
     },
-    handleOk(bvModalEvt) {
+
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
-    },
-    async handleSubmit() {
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
+      if (this.checkFormValidity()) {
         this.$bvModal.hide("modal-1"); //Close the modal if it is open
         //Determine if a new client is being created or we are updating an existing client
-        if (this.create) {
-          //Exclude ID
-          await this.storeBrokerClient({
-            name: this.broker.name,
-            local_broker_id: parseInt(this.$userId),
-            open_orders: this.broker.open_orders,
-            account_balance: this.broker.account_balance,
-            email: this.broker.email,
-            jcsd: this.broker.jcsd,
-            status: "Unverified"
-          });
-          // this.getClients();
-        } else {
-          //Include ID
-          await this.storeBrokerClient({
-            id: this.broker.id,
-            local_broker_id: parseInt(this.$userId),
-            open_orders: this.broker.open_orders,
-            account_balance: this.broker.account_balance,
-            name: this.broker.name,
-            email: this.broker.email,
-            jcsd: this.broker.jcsd,
-            status: "Unverified"
-          });
-          // this.getClients();
-          this.$swal(`Account Updated`);
+
+        const isNew = !this.client.id;
+
+        const result = await this.$swal.fire({
+          title: `${isNew ? "Creating" : "Updating"} Client Account`,
+          html: "One moment while we setup  a new Client Account",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+
+        const client = {
+          id: this.client.id,
+          local_broker_id: parseInt(this.$userId),
+          open_orders: this.client.open_orders,
+          account_balance: this.client.account_balance,
+          name: this.client.name,
+          email: this.client.email,
+          jcsd: this.client.jcsd,
+          status: "Unverified"
+        };
+
+        if (isNew) {
+          client["id"] = null;
+        }
+
+        console.log("Storing Broker Client");
+
+        this.$swal.fire({
+          title: `${isNew ? "Creating" : "Updating"} Broker Client`,
+          html: `One moment while we ${
+            isNew ? "create" : "update"
+          } the Account`,
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+
+        try {
+          await axios.post("store-broker-client", client);
+          await this.$swal(`Account created`);
+          this.$swal.close();
+          //setTimeout(location.reload.bind(location), 1000);
+        } catch (error) {
+          console.error(error);
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message &&
+            error.response.data.message.includes("Duplicate entry")
+          ) {
+            await this.$swal(
+              `An Account with this email address already exists. Please try using a different email`
+            );
+          } else {
+            this.$swal("Oops...", "Something went wrong!", "error");
+          }
         }
 
         this.resetModal();
@@ -227,17 +249,19 @@ export default {
         });
       }
     },
-    async getClients(broker) {
+
+    async getClients() {
       try {
-        const { data } = await axios.get("trading-accounts", broker);
+        const { data } = await axios.get("trading-accounts");
         console.log("get clients", data);
-        this.local_broker_clients = [];
         var broker = data[0];
         this.local_broker_clients = broker.clients;
       } catch (error) {}
     },
+
     async brokerClientHandler(b) {
-      this.broker = b;
+      this.modalTitle = "Client Account Update";
+      this.client = b;
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -251,6 +275,7 @@ export default {
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
       });
+
       if (result.value) {
         this.$bvModal.show("modal-1");
       }
@@ -259,50 +284,44 @@ export default {
         await this.$swal("Deleted!", "Client Has Been Removed.", "success");
       }
     },
-    async storeBrokerClient(broker) {
-      console.log(this.broker);
-      const result = await this.$swal.fire({
-        title: "Creating Client Account",
-        html: "One moment while we setup  a new Client Account",
-        timerProgressBar: true,
-        onBeforeOpen: () => {
-          this.$swal.showLoading();
-        }
-      });
-      console.log("Storing Broker Client");
-      try {
-        await axios.post("store-broker-client", broker);
-        await this.$swal(`Account created`);
-        setTimeout(location.reload.bind(location), 1000);
-      } catch (error) {
-        if (error.response.data.message.includes("Duplicate entry")) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        }
-      }
+
+    addBrokerClient() {
+      this.modalTitle = "Create Client Account";
+      this.$bvModal.show("modal-1");
     },
-    add() {
-      this.create = true;
-    },
+
     async destroy(id) {
-      await axios.delete(`client-broker-delete/${id}`);
-      await this.getClients();
+      try {
+        this.$swal.fire({
+          title: `Broker Client`,
+          html: "Deleting Client.......",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        await axios.delete(`client-broker-delete/${id}`);
+        await this.getClients();
+        this.$swal("Deleted!", "Broker Client Has Been Removed.", "success");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Oops...", "Something went wrong!", "error");
+      }
     }
   },
+
   async mounted() {
-    var client_data = JSON.parse(this.broker_traders);
-    var clients = client_data[0].clients;
-    this.local_broker_clients = clients;
+    console.log("this.broker_traders", this.broker_traders);
+    const client_data = JSON.parse(this.broker_traders);
+    this.local_broker_clients = client_data[0].clients;
+
     // this.getClients();
     const { data: local_brokers } = await axios.get("local-brokers");
     console.log("local brokers", local_brokers);
-    for (let i = 0; i < local_brokers.length; i++) {
-      this.local_brokers.push({
-        text: local_brokers[i].name,
-        value: local_brokers[i].id
-      });
-    }
+    this.local_brokers = local_brokers.map(broker => ({
+      text: broker.name,
+      value: broker.id
+    }));
   }
 };
 </script>
