@@ -70770,6 +70770,31 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["accounts"],
   components: {
@@ -70778,6 +70803,7 @@ __webpack_require__.r(__webpack_exports__);
   data() {
     return {
       trading_accounts: [],
+
       broker_settlement_accounts: [],
       trading_account: null,
       local_brokers: [],
@@ -70836,19 +70862,48 @@ __webpack_require__.r(__webpack_exports__);
           sortable: true
         }
       ],
-      modalTitle: "Trader Update",
       nameState: null
     };
   },
   computed: {
+    isNew() {
+      return !(this.trading_account && this.trading_account.id);
+    },
+    title() {
+      return `${this.isNew ? "Create" : "Update"} Trading Account`;
+    },
     rows() {
       return this.trading_accounts.length;
+    },
+
+    broker_settlement_accounts_options() {
+      return this.broker_settlement_accounts.map(x => ({
+        text: [
+          x.foreign_broker["name"],
+          x.local_broker["name"],
+          x.bank_name,
+          x.account
+        ].join("-"),
+        value: x.id
+      }));
     }
   },
+  watch: {},
   methods: {
-    async accountHandler(b) {
-      console.log("selected trading_account", b);
+    setCorrectBrokersIDs() {
+      const new_settlement_account = this.trading_account
+        .broker_settlement_account;
+      const correctBrokers = {};
+      correctBrokers["correct_local_broker_id"] = this.foreign_brokers.find(
+        x => x.user_id === new_settlement_account.foreign_broker_id
+      );
+      correctBrokers["correct_foreign_broker_id"] = this.foreign_brokers.find(
+        x => x.user_id === new_settlement_account.local_broker_id
+      );
+      return correctBrokers;
+    },
 
+    async accountHandler(b) {
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -70861,15 +70916,11 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
       });
-
-      console.log("result", result);
-
       if (result.value) {
         this.trading_account = b;
         this.trading_account.broker_settlement_account =
           b.broker_settlement_account_id;
       }
-
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
       }
@@ -70877,32 +70928,52 @@ __webpack_require__.r(__webpack_exports__);
 
     async handleSubmit() {
       // Exit when the form isn't valid
-      const isNew = !this.trading_account.id;
-
-      const trading_account = {
-        id: this.trading_account.id,
-        local_broker_id: this.trading_account.local_broker_id,
-        foreign_broker_id: this.trading_account.foreign_broker_id,
-        umir: this.trading_account.umir,
-        target_comp_id: this.trading_account.target_comp_id,
-        sender_comp_id: this.trading_account.sender_comp_id,
-        socket: this.trading_account.socket,
-        port: this.trading_account.port,
-        trading_account_number: this.trading_account.trading_account_number,
-        settlement_account_number: this.trading_account
-          .broker_settlement_account
-      };
-
+      let account;
       //Determine if a new client is being created or we are updating an existing client
-      if (isNew) {
-        trading_account["id"] = null;
-        trading_account["name"] = this.trading_account.name;
+
+      const {
+        correct_foreign_broker_id,
+        correct_local_broker_id
+      } = this.setCorrectBrokersIDs();
+
+      if (this.isNew) {
+        //Exclude ID
+        account = {
+          name: this.trading_account.name,
+          // local_broker_id: 1,
+          local_broker_id: correct_local_broker_id,
+          foreign_broker_id: correct_foreign_broker_id,
+          umir: this.trading_account.umir,
+          target_comp_id: this.trading_account.target_comp_id,
+          sender_comp_id: this.trading_account.sender_comp_id,
+          socket: this.trading_account.socket,
+          port: this.trading_account.port,
+          trading_account_number: this.trading_account.trading_account_number,
+          settlement_account_number: this.trading_account
+            .broker_settlement_account
+        };
+      } else {
+        //Include ID
+        account = {
+          id: this.trading_account.id,
+          local_broker_id: correct_local_broker_id,
+          foreign_broker_id: correct_foreign_broker_id,
+          umir: this.trading_account.umir,
+          target_comp_id: this.trading_account.target_comp_id,
+          sender_comp_id: this.trading_account.sender_comp_id,
+          socket: this.trading_account.socket,
+          port: this.trading_account.port,
+          trading_account_number: this.trading_account.trading_account_number,
+          settlement_account_number: this.trading_account
+            .broker_settlement_account
+        };
       }
 
-      console.log("trading_account", trading_account);
+      console.log("account", account);
+
       this.$swal.fire({
-        title: `Settlement Account`,
-        html: `${isNew ? "Creating" : "Updating"} Trading Account`,
+        title: `${this.isNew ? "Creating" : "Updating"} Trading Account`,
+        html: "One moment while we setup the Account",
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
@@ -70910,90 +70981,86 @@ __webpack_require__.r(__webpack_exports__);
       });
 
       try {
-        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-trading-account", trading_account);
-        // await axios.post("/store-settlement-broker", this.trading_account);
-        this.getTradingAccountsList();
-        this.$swal(`Account setup complete`);
-        // setTimeout(location.reload.bind(location), 2000);
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-trading-account", account);
+        await this.getTradingAccountsList();
         this.trading_account = null;
+        this.$swal.close();
+        // setTimeout(location.reload.bind(location), 2000);
       } catch (error) {
-        console.error("tarding save failed", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
-    },
 
-    async getTradingAccountsList() {
-      ({ data: this.trading_accounts } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trader-list")); //.then(response => {
-      //});
-    },
-
-    async getSettlementAccounts() {
-      const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("settlement-list"); //.then(response => {
-      this.broker_settlement_accounts = data.map(account => ({
-        text: [
-          account.foreign_broker["name"],
-          account.local_broker["name"],
-          account.bank_name,
-          account.account
-        ].join("-"),
-        value: account.id
-      }));
-    },
-
-    async storeBrokerTradingAccount() {
-      try {
-        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/store-settlement-broker", this.trading_account);
+      /*  try {
+        await axios.post("/store-settlement-broker", this.trading_account);
         //.then(response => {
         this.getTradingAccountsList();
         setTimeout(location.reload.bind(location), 1000);
-      } catch (error) {}
+        this.create = false;
+      } catch (error) {} */
+    },
+
+    async getTradingAccountsList() {
+      ({ data: this.trading_accounts } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trader-list"));
+    },
+
+    async getSettlementAccounts() {
+      ({ data: this.broker_settlement_accounts } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get(
+        "settlement-list"
+      ));
+      console.log("getSettlementAccounts", this.broker_settlement_accounts);
     },
 
     async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Trading Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
       try {
-        this.$swal.fire({
-          title: `Settlement Account`,
-          html: "Deleting Settlement Account.......",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
         await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`trading-account-delete/${id}`); //.then(response => {
         await this.getTradingAccountsList();
-        this.$swal("Deleted!", "Trading Account Has Been Removed.", "success");
+        this.trading_account = null;
+        this.$swal.close();
       } catch (error) {
         console.error("destroy", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
 
     async getLocalBrokers() {
-      const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers");
-      this.local_brokers = local_brokers.map(broker => ({
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers");
+      // console.log(local_brokers);
+      this.local_brokers = data.map(broker => ({
+        user_id: broker.user.id,
         text: broker.user.name,
         value: broker.id
       }));
+      console.log("local brokers", this.local_brokers);
     },
 
     async getForeignBrokers() {
-      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers");
-      this.foreign_brokers = foreign_brokers.map(broker => ({
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers"); //.then(response => {
+      this.foreign_brokers = data.map(broker => ({
+        user_id: broker.user.id,
         text: broker.user.name,
         value: broker.id
       }));
+      console.log("foreign brokers", this.foreign_brokers);
     }
   },
 
   async mounted() {
+    console.log("accounts", this.accounts);
     await Promise.all([
       this.getLocalBrokers(),
       this.getForeignBrokers(),
       this.getTradingAccountsList(),
       this.getSettlementAccounts()
     ]);
-
-    console.log("trading", this.trading_accounts);
   }
 });
 
@@ -71060,12 +71127,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data() {
     return {
+      create: false,
       foreign_brokers: [],
       broker: {},
       perPage: 5,
@@ -71096,7 +71166,15 @@ __webpack_require__.r(__webpack_exports__);
       return this.foreign_brokers.length;
     }
   },
-  watch: {},
+  watch: {
+    create: function(data) {
+      if (data) {
+        this.modalTitle = "Create Foreign Broker";
+      } else {
+        this.modalTitle = "Foreign Broker Update";
+      }
+    }
+  },
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
@@ -71104,61 +71182,61 @@ __webpack_require__.r(__webpack_exports__);
       return valid;
     },
     async resetModal() {
+      this.create = false;
       this.broker = {};
       await this.getBrokers();
     },
-    async handleModalOK(bvModalEvt) {
+
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
 
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
+      if (!this.checkFormValidity()) return;
 
-        const storeType = !this.broker.id ? "Created" : "Updated";
-        const titleType = !this.broker.id ? "Creating" : "Updating";
-        const contentType = !this.broker.id ? "create" : "update";
-        //Determine if a new user is being created or we are updating an existing user
+      this.$bvModal.hide("modal-1"); //Close the modal if it is open
 
-        try {
-          this.$swal.fire({
-            title: `${titleType} Foreign Broker Account`,
-            html: `One moment while we ${contentType} the Account`,
-            timerProgressBar: true,
-            onBeforeOpen: () => {
-              this.$swal.showLoading();
-            }
-          });
-
-          await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-foreign-broker", this.broker);
-          await this.getBrokers();
-          this.$swal(`Account ${storeType} for ${this.broker.email}`);
-
-          this.resetModal();
-          this.$nextTick(() => {
-            this.$bvModal.hide("modal-1");
-          });
-          this.$swal.close();
-        } catch (error) {
-          console.error("store", error);
-          this.$swal(
-            "Oops...",
-            "Something went wrong! This Email Address may already be assigned.",
-            "error"
-          );
+      //Determine if a new user is being created or we are updating an existing user
+      this.$swal.fire({
+        title: `${
+          this.create ? "Creating" : "Updating"
+        } Foreign Broker Account`,
+        html: "One moment while we setup the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
         }
-      }
-    },
+      });
 
-    async displayForeignBroker(b) {
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-foreign-broker", this.broker);
+        await this.getBrokers();
+        this.$swal(
+          `Account ${this.created ? "Created" : "Updated"}!`,
+          "success"
+        );
+        await this.resetModal();
+        await this.$nextTick();
+        this.$bvModal.hide("modal-1");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
+      }
+
+      // Push the name to submitted names
+      // this.submittedNames.push(this.name);
+      // Hide the modal manually
+      // this.$nextTick(() => {
+      //   this.$bvModal.hide("modal-1");
+      // });
+    },
+    async foreignBrokerHandler(b) {
       this.broker = b.user;
-      this.modalTitle = "Foreign Broker Update";
       const result = await this.$swal({
         title: "",
         icon: "info",
-        html: `Foreign Broker <b>(${b.user.name})</b> `,
+        html: `Would you like to Edit Or Delete the following Foreign Broker <b>(${b.user.name})</b> `,
         // showCloseButton: true,
         showCancelButton: true,
         focusConfirm: true,
@@ -71176,30 +71254,28 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     async getBrokers() {
-      ({ data: this.foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers")); //.then(response => {
+      ({ data: this.foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("foreign-brokers"));
     },
 
-    addNewBroker() {
-      this.modalTitle = "Create Foreign Broker";
-      this.$bvModal.show("modal-1");
+    add() {
+      this.create = true;
     },
-
     async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Foreign Broker Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
       try {
-        this.$swal.fire({
-          title: `Foreign Broker`,
-          html: "Deleting Broker.......",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
         await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`foreign-broker-delete/${id}`); //.then(response => {
         await this.getBrokers();
         this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
       } catch (error) {
         console.error("destroy", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     }
   },
@@ -71271,12 +71347,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data() {
     return {
+      create: false,
       local_brokers: [],
       broker: {},
       perPage: 5,
@@ -71307,7 +71386,15 @@ __webpack_require__.r(__webpack_exports__);
       return this.local_brokers.length;
     }
   },
-  watch: {},
+  watch: {
+    create: function(data) {
+      if (data) {
+        this.modalTitle = "Create Local Broker";
+      } else {
+        this.modalTitle = "Local Broker Update";
+      }
+    }
+  },
   methods: {
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
@@ -71315,48 +71402,43 @@ __webpack_require__.r(__webpack_exports__);
       return valid;
     },
     async resetModal() {
+      this.create = false;
       this.broker = {};
       await this.getBrokers();
     },
-
-    async handleModalOK(bvModalEvt) {
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
-      // Exit when the form isn't valid
+      // Trigger submit handler
 
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
-        //Determine if a new user is being created or we are updating an existing user
-        const storeType = !this.broker.id ? "Created" : "Updated";
-        const titleType = !this.broker.id ? "Creating" : "Updating";
-        const contentType = !this.broker.id ? "create" : "update";
-        try {
-          this.$swal.fire({
-            title: `${titleType} Local Broker Account`,
-            html: `One moment while we ${contentType} the Account`,
-            timerProgressBar: true,
-            onBeforeOpen: () => {
-              this.$swal.showLoading();
-            }
-          });
-          await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-local-broker", this.broker);
-          await this.getBrokers();
-          this.$swal(`Account ${storeType} for ${this.broker.email}`);
-          this.resetModal();
-          this.$nextTick(() => {
-            this.$bvModal.hide("modal-1");
-          });
-          this.$swal.close();
-        } catch (error) {
-          console.error("store", error);
-          this.$swal(
-            "Oops...",
-            "Something went wrong! This Email Address may already be assigned.",
-            "error"
-          );
+      // Exit when the form isn't valid
+      if (!this.checkFormValidity()) return;
+
+      this.$swal.fire({
+        title: `${this.create ? "Creating" : "Updating"} Local Broker Account`,
+        html: "One moment while we setup the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
         }
+      });
+
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-local-broker", this.broker);
+        await this.getBrokers();
+        this.$swal(
+          `Account ${this.created ? "Created" : "Updated"} for ${
+            this.broker.email
+          }`
+        );
+        await this.resetModal();
+        await this.$nextTick();
+        this.$bvModal.hide("modal-1");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
+
       // Push the name to submitted names
       // this.submittedNames.push(this.name);
       // Hide the modal manually
@@ -71364,14 +71446,12 @@ __webpack_require__.r(__webpack_exports__);
       //   this.$bvModal.hide("modal-1");
       // });
     },
-    async displayLocalBroker(b) {
-      console.log("displayLocalBroker broker", b);
+    async localBrokerHandler(b) {
       this.broker = b.user;
-      this.modalTitle = "Local Broker Update";
       const result = await this.$swal({
         title: "",
         icon: "info",
-        html: `Local Broker <b>(${b.user.name})</b> `,
+        html: `Would you like to Edit Or Delete the following Local Broker <b>(${b.user.name})</b> `,
         showCloseButton: true,
         showCancelButton: true,
         // focusConfirm: true,
@@ -71381,8 +71461,6 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
       }); //.then(result => {
-
-      console.log("swal result", result);
       if (result.value) {
         this.$bvModal.show("modal-1");
       }
@@ -71390,32 +71468,30 @@ __webpack_require__.r(__webpack_exports__);
         await this.destroy(b.id);
       }
     },
-
     async getBrokers() {
       ({ data: this.local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers")); //.then(response => {
       console.log("this.local_brokers", this.local_brokers);
     },
 
-    addNewBroker() {
-      this.modalTitle = "Create Local Broker";
-      this.$bvModal.show("modal-1");
+    add() {
+      this.create = true;
     },
     async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Local Broker Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
       try {
-        this.$swal.fire({
-          title: `Local Broker`,
-          html: "Deleting Broker.......",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
         await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`local-broker-delete/${id}`);
         await this.getBrokers();
         this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
       } catch (error) {
         console.error("destroy", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     }
   },
@@ -71593,7 +71669,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   components: {
@@ -71601,7 +71676,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
-      settlement_accounts: [],
+      broker_settlement_accounts: [],
       settlement_account: null,
       local_brokers: [],
       foreign_brokers: [],
@@ -71654,15 +71729,14 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   computed: {
-    formTitle() {
-      return (
-        (!!(this.settlement_account && this.settlement_account.id)
-          ? "Update"
-          : "Create") + " Settlement Account"
-      );
+    isNew() {
+      return !(this.settlement_account && this.settlement_account.id);
+    },
+    title() {
+      return `${this.isNew ? "Create" : "Update"} Broker Settlement Account`;
     },
     rows() {
-      return this.settlement_accounts.length;
+      return this.broker_settlement_accounts.length;
     }
   },
   methods: {
@@ -71680,20 +71754,20 @@ __webpack_require__.r(__webpack_exports__);
     },
     exportBalances() {
       const tableData = [];
-      for (var i = 0; i < this.settlement_accounts.length; i++) {
+      for (var i = 0; i < this.broker_settlement_accounts.length; i++) {
         tableData.push([
-          this.settlement_accounts[i].local_broker["name"],
-          this.settlement_accounts[i].foreign_broker["name"],
-          this.settlement_accounts[i].bank_name,
-          this.settlement_accounts[i].account,
-          this.settlement_accounts[i].email,
-          this.settlement_accounts[i].account_balance,
-          this.settlement_accounts[i].amount_allocated
+          this.broker_settlement_accounts[i].local_broker["name"],
+          this.broker_settlement_accounts[i].foreign_broker["name"],
+          this.broker_settlement_accounts[i].bank_name,
+          this.broker_settlement_accounts[i].account,
+          this.broker_settlement_accounts[i].email,
+          this.broker_settlement_accounts[i].account_balance,
+          this.broker_settlement_accounts[i].amount_allocated
         ]);
       }
 
-      // console.log(this.settlement_accounts[i])
-      // tableData.push(this.settlement_accounts[i]);
+      // console.log(this.broker_settlement_accounts[i])
+      // tableData.push(this.broker_settlement_accounts[i]);
 
       var doc = new jspdf__WEBPACK_IMPORTED_MODULE_0___default.a();
       //   // It can parse html:
@@ -71720,35 +71794,16 @@ __webpack_require__.r(__webpack_exports__);
     async handleSubmit() {
       // Exit when the form isn't valid
       //Determine if a new user is being created or we are updating an existing user
-      let account;
-
-      let isNew = !this.settlement_account.id;
-
-      if (isNew) {
-        //create with id = null
-        account = {
-          id: null,
-          currency: this.settlement_account.currency,
-          account: this.settlement_account.account,
-          account_balance: this.settlement_account.account_balance,
-          amount_allocated: this.settlement_account.amount_allocated,
-          bank_name: this.settlement_account.bank_name,
-          email: this.settlement_account.email,
-          foreign_broker_id: this.settlement_account.foreign_broker_id,
-          local_broker_id: this.settlement_account.local_broker_id,
-          status: "Unverified",
-          hash: this.settlement_account.hash
-        };
-      } else {
-        //update
-        account = this.settlement_account;
+      const account = { ...this.settlement_account };
+      if (this.isNew) {
+        //Exclude ID
+        account["id"] = null;
+        account["status"] = "Unverified";
       }
 
-      console.log("account", account);
-
       this.$swal.fire({
-        title: `Settlement Account`,
-        html: `${isNew ? "Creating" : "Updating"} Settlement Account`,
+        title: `${this.isNew ? "Creating" : "Updating"} Settlement Account`,
+        html: "One moment while we setup the Account",
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
@@ -71759,23 +71814,17 @@ __webpack_require__.r(__webpack_exports__);
       try {
         await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
         await this.getSettlementList();
-        this.$swal(
-          `Settlement Account ${isNew ? "created" : "updated"} for ${
-            this.settlement_account.email
-          }`
-        );
         this.settlement_account = null;
-        this.nameState = null;
+        this.$swal.close();
       } catch (error) {
-        console.error("settlement save failed", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
 
     async settlmentAccountHandler(b) {
       // console.log(b);
-      console.log(b);
-
+      console.log("selected account1", b);
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -71790,34 +71839,34 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonAriaLabel: "cancel"
       });
       if (result.value) {
-        this.settlement_account = b;
+        this.settlement_account = { ...b };
+        console.log("selected account2", this.settlement_account);
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
       }
     },
 
-    setLocalBroker() {
-      // console.log(this);
-    },
-
     async getSettlementList() {
-      ({ data: this.settlement_accounts } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(
+      ({ data: this.broker_settlement_accounts } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(
         "../settlement-list"
       )); //.then(response => {
-      console.log("settlement_accounts)", this.settlement_accounts);
+      console.log(
+        "broker_settlement_accounts",
+        this.broker_settlement_accounts
+      );
     },
 
     async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Settlement Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
       try {
-        this.$swal.fire({
-          title: `Settlement Account`,
-          html: "Deleting Settlement Account.......",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
         await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
         await this.getSettlementList();
         this.$swal(
@@ -71827,29 +71876,31 @@ __webpack_require__.r(__webpack_exports__);
         );
       } catch (error) {
         console.error("destroy", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
 
     async getlocalBrokers() {
-      const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../local-brokers");
-      this.local_brokers = local_brokers.map(({ user }) => ({
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../local-brokers");
+      this.local_brokers = data.map(({ user }) => ({
         text: user.name,
         value: user.id
       }));
+      console.log("local brokers", this.local_brokers);
     },
-    async getForeiognBrokers() {
-      const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../foreign-brokers");
-      this.foreign_brokers = foreign_brokers.map(({ user }) => ({
+    async getForeignBrokers() {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../foreign-brokers");
+      this.foreign_brokers = data.map(({ user }) => ({
         text: user.name,
         value: user.id
       }));
+      console.log("foreign brokers", this.foreign_brokers);
     }
   },
   async mounted() {
     await Promise.all([
       this.getlocalBrokers(),
-      this.getForeiognBrokers(),
+      this.getForeignBrokers(),
       this.getSettlementList()
     ]);
   }
@@ -71954,6 +72005,20 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["broker_traders"],
   components: {
@@ -71964,7 +72029,7 @@ __webpack_require__.r(__webpack_exports__);
       local_broker_clients: [],
       local_brokers: [],
       trading_accounts: [],
-      client: {},
+      broker_client: null,
       perPage: 5,
       currentPage: 1,
       fields: [
@@ -72029,111 +72094,57 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   computed: {
+    isNew() {
+      return !(this.broker_client && this.broker_client.id);
+    },
+    title() {
+      return `${this.isNew ? "Create" : "Update"} Client Account`;
+    },
     rows() {
       return this.local_broker_clients.length;
     }
   },
   watch: {},
   methods: {
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
-
-    async resetModal() {
-      this.client = {};
-      this.getClients();
-    },
-
-    async handleOk(bvModalEvt) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault();
-      // Trigger submit handler
+    async handleSubmit() {
       // Exit when the form isn't valid
-      if (this.checkFormValidity()) {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
-        //Determine if a new client is being created or we are updating an existing client
-
-        const isNew = !this.client.id;
-
-        const result = await this.$swal.fire({
-          title: `${isNew ? "Creating" : "Updating"} Client Account`,
-          html: "One moment while we setup  a new Client Account",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
-
-        const client = {
-          id: this.client.id,
+      //Determine if a new client is being created or we are updating an existing client
+      let account;
+      if (this.isNew) {
+        //Exclude ID
+        account = {
+          name: this.broker_client.name,
           local_broker_id: parseInt(this.$userId),
-          open_orders: this.client.open_orders,
-          account_balance: this.client.account_balance,
-          name: this.client.name,
-          email: this.client.email,
-          jcsd: this.client.jcsd,
+          open_orders: this.broker_client.open_orders,
+          account_balance: this.broker_client.account_balance,
+          email: this.broker_client.email,
+          jcsd: this.broker_client.jcsd,
           status: "Unverified"
         };
-
-        if (isNew) {
-          client["id"] = null;
-        }
-
-        console.log("Storing Broker Client");
-
-        this.$swal.fire({
-          title: `${isNew ? "Creating" : "Updating"} Broker Client`,
-          html: `One moment while we ${
-            isNew ? "create" : "update"
-          } the Account`,
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
-
-        try {
-          await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-broker-client", client);
-          await this.$swal(`Account created`);
-          this.$swal.close();
-          //setTimeout(location.reload.bind(location), 1000);
-        } catch (error) {
-          console.error(error);
-          if (
-            error.response &&
-            error.response.data &&
-            error.response.data.message &&
-            error.response.data.message.includes("Duplicate entry")
-          ) {
-            await this.$swal(
-              `An Account with this email address already exists. Please try using a different email`
-            );
-          } else {
-            this.$swal("Oops...", "Something went wrong!", "error");
-          }
-        }
-
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+        // this.getClients();
+      } else {
+        //Include ID
+        account = {
+          id: this.broker_client.id,
+          local_broker_id: parseInt(this.$userId),
+          open_orders: this.broker_client.open_orders,
+          account_balance: this.broker_client.account_balance,
+          name: this.broker_client.name,
+          email: this.broker_client.email,
+          jcsd: this.broker_client.jcsd,
+          status: "Unverified"
+        };
       }
+      await this.storeBrokerClient(account);
     },
-
-    async getClients() {
-      try {
-        const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trading-accounts");
-        console.log("get clients", data);
-        var broker = data[0];
-        this.local_broker_clients = broker.clients;
-      } catch (error) {}
+    async getClients(broker) {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trading-accounts", broker);
+      console.log("get clients", data);
+      var broker = data[0];
+      this.local_broker_clients = broker.clients;
     },
 
     async brokerClientHandler(b) {
-      this.modalTitle = "Client Account Update";
-      this.client = b;
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -72147,9 +72158,8 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonText: "Delete",
         cancelButtonAriaLabel: "cancel"
       });
-
       if (result.value) {
-        this.$bvModal.show("modal-1");
+        this.broker_client = b;
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
@@ -72157,43 +72167,71 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
 
-    addBrokerClient() {
-      this.modalTitle = "Create Client Account";
-      this.$bvModal.show("modal-1");
+    async storeBrokerClient(client) {
+      console.log(this.broker_client);
+      const result = this.$swal.fire({
+        title: "Creating Client Account",
+        html: "One moment while we setup  a new Client Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+      console.log("Storing Broker Client");
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("store-broker-client", client);
+        await this.getClients();
+        this.$swal.close();
+        this.broker_client = null;
+        //setTimeout(location.reload.bind(location), 1000);
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message.includes("Duplicate entry")
+        ) {
+          await this.$swal(
+            `An Account with this email address already exists. Please try using a different email`
+          );
+        } else {
+          this.$swal("Ouch!", "Something went wrong.", "error");
+        }
+      }
     },
 
     async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Client Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
       try {
-        this.$swal.fire({
-          title: `Broker Client`,
-          html: "Deleting Client.......",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
         await axios__WEBPACK_IMPORTED_MODULE_0___default.a.delete(`client-broker-delete/${id}`);
         await this.getClients();
-        this.$swal("Deleted!", "Broker Client Has Been Removed.", "success");
+        this.$swal.close();
+        this.broker_client = null;
       } catch (error) {
         console.error("destroy", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     }
   },
-
   async mounted() {
-    console.log("this.broker_traders", this.broker_traders);
-    const client_data = JSON.parse(this.broker_traders);
-    this.local_broker_clients = client_data[0].clients;
-
+    var client_data = JSON.parse(this.broker_traders);
+    var clients = client_data[0].clients;
+    this.local_broker_clients = clients;
     // this.getClients();
     const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("local-brokers");
     console.log("local brokers", local_brokers);
-    this.local_brokers = local_brokers.map(broker => ({
-      text: broker.name,
-      value: broker.id
-    }));
+    for (let i = 0; i < local_brokers.length; i++) {
+      this.local_brokers.push({
+        text: local_brokers[i].name,
+        value: local_brokers[i].id
+      });
+    }
   }
 });
 
@@ -72970,6 +73008,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -72981,11 +73031,12 @@ __webpack_require__.r(__webpack_exports__);
   data() {
     return {
       // messageDownload: [],
-      modalTitle: "New Order",
+      filter: null,
       expiration: false,
       order_template_data: [],
       file: "",
       order_option_input: false,
+      filterOn: ["clordid", "side"],
       template: false,
       broker_trading_account_options: [],
       client_trading_account_options: [],
@@ -72995,8 +73046,7 @@ __webpack_require__.r(__webpack_exports__);
       local_broker: [],
       foreign_broker: [],
       selected: null,
-      create: false,
-      order: {},
+      order: null,
       fields: [
         // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
@@ -73252,6 +73302,16 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   computed: {
+    isNew() {
+      return !(this.order && this.order.id);
+    },
+    title() {
+      if (this.isNew) {
+        return "Create New Order";
+      } else {
+        return `Viewing Order ${this.order.clordid}`;
+      }
+    },
     rows() {
       return this.broker_client_orders.length;
     }
@@ -73294,43 +73354,6 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     async brokerOrderHandler(o) {
-      this.disabled = true;
-      this.order = {};
-      this.order = o;
-
-      // console.log("order", o);
-
-      //Pre Select Client And Trading Accounts
-      // var data = { ...this.orders };
-      var data = JSON.parse(this.orders);
-
-      var clients = data[0].clients;
-      var trading = data[0].trading;
-      var i, j;
-      // console.log(trading);
-      for (i = 0; i < clients.length; i++) {
-        if (o.broker_client_id === clients[i].id) {
-          this.order.client_trading_account = clients[i].id;
-        }
-      }
-      for (j = 0; j < trading.length; j++) {
-        if (parseInt(o.trading_account_id) === trading[j].id) {
-          this.order.trading_account = trading[j].id;
-        }
-      }
-      // ============================================================================================
-      //Check if we already parsed to json if we didnt do so now.
-      if (typeof o.time_in_force === "string") {
-        // Parse stringified data from database back to json for viewing in the multiselect dropdown
-        // let handling = JSON.parse(o.handling_instructions);
-        // console.log("order", this.order);
-        this.order.handling_instructions = JSON.parse(o.handling_instructions);
-        this.order.symbol = JSON.parse(o.symbol);
-        this.order.currency = JSON.parse(o.currency);
-        this.order.side = JSON.parse(o.side);
-        this.order.order_type = JSON.parse(JSON.parse(o.order_type));
-        this.order.time_in_force = JSON.parse(o.time_in_force);
-      }
       // this.$refs.selectedOrder.clearSelected();
       // =============================================================================================
       const result = await this.$swal({
@@ -73343,15 +73366,51 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
         footer: "<a href='orders' >Exit</a>"
-      }).then(result => {
+      });
+
       if (result.value) {
-        this.$bvModal.show("jse-new-order");
-        this.modalTitle = `Viewing Order ${o.clordid}`;
+        this.order = o;
+
+        this.disabled = true;
+
+        // console.log("order", o);
+        //Pre Select Client And Trading Accounts
+        // var data = { ...this.orders };
+        var data = JSON.parse(this.orders);
+
+        var clients = data[0].clients;
+        var trading = data[0].trading;
+        var i, j;
+        // console.log(trading);
+        for (i = 0; i < clients.length; i++) {
+          if (o.broker_client_id === clients[i].id) {
+            this.order.client_trading_account = clients[i].id;
+          }
+        }
+        for (j = 0; j < trading.length; j++) {
+          if (parseInt(o.trading_account_id) === trading[j].id) {
+            this.order.trading_account = trading[j].id;
+          }
+        }
+        // ============================================================================================
+        //Check if we already parsed to json if we didnt do so now.
+        if (typeof o.time_in_force === "string") {
+          // Parse stringified data from database back to json for viewing in the multiselect dropdown
+          // let handling = JSON.parse(o.handling_instructions);
+          // console.log("order", this.order);
+          this.order.handling_instructions = JSON.parse(
+            o.handling_instructions
+          );
+          this.order.symbol = JSON.parse(o.symbol);
+          this.order.currency = JSON.parse(o.currency);
+          this.order.side = JSON.parse(o.side);
+          this.order.order_type = JSON.parse(JSON.parse(o.order_type));
+          this.order.time_in_force = JSON.parse(o.time_in_force);
+        }
       }
       if (result.dismiss === "cancel") {
         this.destroy(o.clordid);
       }
-      });
     },
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
@@ -73375,6 +73434,7 @@ __webpack_require__.r(__webpack_exports__);
       this.order_option_inputs = this.order_template_data.order_options;
       this.template = false;
     },
+
     async saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
@@ -73383,8 +73443,6 @@ __webpack_require__.r(__webpack_exports__);
 
       delete order_data.order_standard["trading_account"];
       //  Hide new order modal to allow inserting of new template name
-      this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
-
       //Allow the user to create a file name before saving the file to their machine
       const result = await this.$swal({
         title:
@@ -73418,26 +73476,23 @@ __webpack_require__.r(__webpack_exports__);
         this.$bvModal.show("jse-new-order");
       }
     },
+
     async tradingAccounts() {
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-trading-accounts"); //.then(response => {
       //let data = response.data;
       console.log("tradingAccounts", data);
-      for (let i = 0; i < data.length; i++) {
-        //console.log(data[i]);
-        this.broker_trading_account_options.push({
-          text:
-            data[i].foreign_broker +
-            " : " +
-            data[i].bank +
-            "-" +
-            data[i].trading_account_number +
-            " : " +
-            data[i].account,
-          value: data[i].id,
-          data: data[i]
-        });
-      }
-      // });
+      this.broker_trading_account_options = data.map(x => ({
+        text:
+          x.foreign_broker +
+          " : " +
+          x.bank +
+          "-" +
+          x.trading_account_number +
+          " : " +
+          x.account,
+        value: x.id,
+        data: x
+      }));
     },
 
     /* setTradingAccounts() {
@@ -73463,49 +73518,41 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     }, */
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
+
     async getBrokers() {
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-list"); //.then(response => {
       //let data = response.data;
-      for (let i = 0; i < data.length; i++) {
-        this.local_broker.push({
-          text: data[i].name,
-          value: data[i].id
-        });
-      }
+      this.local_broker = data.map(x => ({
+        text: x.name,
+        value: x.id
+      }));
+
       // this.broker_client_orders = data;
       // });
       let { data: fdata } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("foreign-broker-list"); //.then(fresponse => {
       // let fdata = fresponse.data;
-      for (let j = 0; j < fdata.length; j++) {
-        this.foreign_broker.push({
-          text: fdata[j].name,
-          value: fdata[j].id
-        });
-      }
-      // });
+      this.foreign_broker = data.map(x => ({
+        text: x.name,
+        value: x.id
+      }));
     },
     async createBrokerClientOrder(broker) {
       //Notes:
       console.log("broker", broker);
-      /*  await this.$swal.fire({
+      this.$swal.fire({
         title: "Creating Client Order",
         html: "One moment while we setup the current order",
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
         }
-      }); */
+      });
       // .then(result => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
-      if (!broker.trading_account || !broker.client_trading_account) {
+      /*  if (!broker.trading_account || !broker.client_trading_account) {
         this.$swal(
           "You need to select a Trading Account & Client Account to continue"
         );
@@ -73515,46 +73562,55 @@ __webpack_require__.r(__webpack_exports__);
       if (broker.price > broker.stop_price) {
         this.$swal("Price must be less than or equal to the Stop Price");
         return;
-      }
+      } */
 
       try {
         const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("store-broker-client-order", broker);
         //  .then(response => {
         // let data = response.data;
+        console.log("data", data);
         let valid = data.isvalid;
-        console.log("post data",data);
-        if (valid) {
+        console.log("post data", data);
+        /* if (valid) {
           console.log(data);
           this.$swal(data.errors);
           // setTimeout(location.reload.bind(location), 2000);
         } else {
           this.$swal(data.errors);
           // setTimeout(location.reload.bind(location), 2000);
-        }
-        setTimeout(location.reload.bind(location), 2000);
+        } */
+        this.reloadPage();
         // })
       } catch (error) {
-        var s = error.response.data.message;
-        var field = s.match(/'([^']+)'/)[1];
-        if (error.response.data.message.includes("cannot be null")) {
+        console.log("error", error);
+        const s =
+          error.response && error.response.data && error.response.data.message;
+        if (s.includes("cannot be null")) {
+          const field = s.match(/'([^']+)'/)[1];
           this.$swal(
             `When creating an order ${field} cannot be null. Please try creating the order again.`
           );
+        } else {
+          console.error("create order error", error);
+          this.$swal("Ouch!", "Something went wrong.", "error");
         }
       } //);
     },
+
+    reloadPage() {
+      window.location.reload();
+    },
+
     async getSymbols() {
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json"); //.then(response => {
       this.symbols = data;
       // });
     },
 
-    add() {
+    displayNewOrder() {
       this.disabled = false;
-      this.modalTitle = "New Order";
-      this.create = true;
       var dt = new Date();
-
+      this.order = {};
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         "ORD" +
@@ -73594,7 +73650,7 @@ __webpack_require__.r(__webpack_exports__);
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
-      this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
+
       var new_order = {};
       this.order["handling_instructions"] = JSON.stringify(
         this.order.handling_instructions
@@ -73608,15 +73664,17 @@ __webpack_require__.r(__webpack_exports__);
       this.order["order_type"] = JSON.stringify(this.order.order_type);
       await this.createBrokerClientOrder(this.order);
       // }
-    },
-    resetModal() {
-      this.create = false;
-      this.$refs.selectedOrder.clearSelected();
-      this.order = {};
-    },
-    handleSubmit() {}
+    }
   },
   async mounted() {
+    this.$swal.fire({
+      title: "Loading Orders",
+      html: "One moment while we load the current orders",
+      timerProgressBar: true,
+      onBeforeOpen: () => {
+        this.$swal.showLoading();
+      }
+    });
     await this.getSymbols();
     //await this.getBrokers();
     await this.tradingAccounts();
@@ -73630,6 +73688,8 @@ __webpack_require__.r(__webpack_exports__);
       return b.client_order_number > a.client_order_number ? -1 : 1;
     });
     this.client_trading_account_options = client_accounts;
+
+    this.$swal.close();
 
     // var local = JSON.parse(this.local_brokers);
     // let i;
@@ -73883,6 +73943,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["settlement_accounts"],
   components: {
@@ -73890,9 +73955,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
-      create: false,
       broker_settlement_account: this.settlement_accounts,
-      settlement_account: {},
+      settlement_account: null,
       local_brokers: [],
       foreign_brokers: [],
       perPage: 5,
@@ -73933,7 +73997,7 @@ __webpack_require__.r(__webpack_exports__);
           sortable: true
         }
       ],
-      modalTitle: "Create Broker Settlement Account",
+     
       nameState: null
     };
   },
@@ -73981,70 +74045,54 @@ __webpack_require__.r(__webpack_exports__);
       });
       doc.save("BrokerSettlementReport.pdf");
     },
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
-    resetModal() {
-      this.create = false;
-      this.settlement_account = {};
-    },
-    async handleOk(bvModalEvt) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault();
-      // Trigger submit handler
-      await this.handleSubmit();
-    },
+
     async handleSubmit() {
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
-        //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          await this.storeBrokerSettlementAccount({
-            account: this.settlement_account.account,
-            account_balance: this.settlement_account.account_balance,
-            amount_allocated: this.settlement_account.amount_allocated,
-            bank_name: this.settlement_account.bank_name,
-            email: this.settlement_account.email,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            status: "Unverified"
-          });
+      let account = {
+        account: this.settlement_account.account,
+        account_balance: this.settlement_account.account_balance,
+        amount_allocated: this.settlement_account.amount_allocated,
+        bank_name: this.settlement_account.bank_name,
+        email: this.settlement_account.email,
+        foreign_broker_id: this.settlement_account.foreign_broker_id,
+        id: this.settlement_account.id,
+        local_broker_id: this.settlement_account.local_broker_id,
+        status: "Unverified"
+      };
+
+      this.$swal.fire({
+        title: `Updating Settlement Account`,
+        html: "One moment while we setup the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+
+      // console.log(account);
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
+        //.then(response => {
+        await this.getSettlementList();
+        setTimeout(location.reload.bind(location));
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message.includes("Duplicate entry")
+        ) {
           await this.$swal(
-            `Account created for ${this.settlement_account.email}`
+            `An Account with this email address already exists. Please try using a different email`
           );
         } else {
-          //Include ID
-          await this.storeBrokerSettlementAccount({
-            account: this.settlement_account.account,
-            account_balance: this.settlement_account.account_balance,
-            amount_allocated: this.settlement_account.amount_allocated,
-            bank_name: this.settlement_account.bank_name,
-            email: this.settlement_account.email,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            id: this.settlement_account.id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            status: "Unverified"
-          });
+          console.error("destroy", error);
+          this.$swal("Ouch!", "Something went wrong.", "error");
         }
-
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
       }
-
-      this.nameState = null;
     },
+
     async settlmentAccountHandler(b) {
-      // console.log(b);
-      this.settlement_account = {};
       console.log(b);
-      this.settlement_account = b;
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -74059,15 +74107,10 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonAriaLabel: "cancel"
       });
       if (result.value) {
-        this.$bvModal.show("modal-1");
+        this.settlement_account = b;
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        await this.$swal(
-          "Deleted!",
-          "Settlement Account Has Been Removed.",
-          "success"
-        );
       }
     },
     setLocalBroker() {
@@ -74082,49 +74125,46 @@ __webpack_require__.r(__webpack_exports__);
       // });
       // setTimeout(location.reload.bind(location));
     },
-    async storeBrokerSettlementAccount(account) {
-      // console.log(account);
-      try {
-        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
-        //.then(response => {
-        await this.getSettlementList();
-        this.create = false;
-      } catch (error) {
-        if (error.response.data.message.includes("Duplicate entry")) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
+
+    async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Settlement Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
         }
+      });
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
+        await this.getSettlementList();
+        this.$swal.close();
+        setTimeout(location.reload.bind(location));
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
-    add() {
-      this.create = true;
+
+    async getlocalBrokers() {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("local-brokers");
+      this.local_brokers = data.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
+      console.log("local brokers", this.local_brokers);
     },
-    async destroy(id) {
-      await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
-      await this.getSettlementList();
+    async getForeignBrokers() {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("foreign-broker-list");
+      this.foreign_brokers = data.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
+      console.log("foreign brokers", this.foreign_brokers);
     }
   },
   async mounted() {
-    const { data: local_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("local-brokers");
-
-    for (let i = 0; i < local_brokers.length; i++) {
-      this.local_brokers.push({
-        text: local_brokers[i].user.name,
-        value: local_brokers[i].user.id
-      });
-    }
-
-    const { data: foreign_brokers } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("foreign-broker-list");
-
-    for (let i = 0; i < foreign_brokers.length; i++) {
-      // console.log(foreign_brokers[i].user );
-      const foreign_broker = foreign_brokers[i].user;
-      this.foreign_brokers.push({
-        text: foreign_broker.name,
-        value: foreign_broker.id
-      });
-    }
+    await Promise.all([this.getlocalBrokers(), this.getForeignBrokers()]);
 
     // await this.getSettlementList();
   }
@@ -76329,7 +76369,8 @@ var render = function() {
           [
             !_vm.trading_account
               ? _c(
-                  "div",
+                  "b-card",
+                  { attrs: { title: "Trading Accounts" } },
                   [
                     _c("b-table", {
                       attrs: {
@@ -76378,13 +76419,6 @@ var render = function() {
                     _c(
                       "b-button",
                       {
-                        directives: [
-                          {
-                            name: "b-modal",
-                            rawName: "v-b-modal.modal-1",
-                            modifiers: { "modal-1": true }
-                          }
-                        ],
                         on: {
                           click: function($event) {
                             _vm.trading_account = {}
@@ -76396,7 +76430,7 @@ var render = function() {
                   ],
                   1
                 )
-              : _c("b-card", { attrs: { title: _vm.modalTitle } }, [
+              : _c("b-card", { attrs: { title: _vm.title } }, [
                   _c("p", { staticClass: "my-4" }, [
                     _vm._v("Please update the fields below as required!")
                   ]),
@@ -76404,6 +76438,7 @@ var render = function() {
                   _c(
                     "form",
                     {
+                      ref: "form",
                       on: {
                         submit: function($event) {
                           $event.stopPropagation()
@@ -76431,7 +76466,7 @@ var render = function() {
                               "invalid-feedback":
                                 "A Settlement Account is required",
                               sm: "",
-                              options: _vm.broker_settlement_accounts
+                              options: _vm.broker_settlement_accounts_options
                             },
                             model: {
                               value:
@@ -76642,7 +76677,7 @@ var render = function() {
                       _c(
                         "b-button",
                         {
-                          attrs: { type: "button", variant: "warning" },
+                          attrs: { variant: "danger" },
                           on: {
                             click: function($event) {
                               _vm.trading_account = null
@@ -76695,65 +76730,76 @@ var render = function() {
           "div",
           { staticClass: "content" },
           [
-            _c("b-table", {
-              attrs: {
-                striped: "",
-                hover: "",
-                "show-empty": "",
-                "empty-text":
-                  "No Foreign Brokers have been Created. Create a Foreign Broker below.",
-                id: "foreign-brokers",
-                items: _vm.foreign_brokers,
-                fields: _vm.fields,
-                "per-page": _vm.perPage,
-                "current-page": _vm.currentPage
-              },
-              on: { "row-clicked": _vm.displayForeignBroker },
-              scopedSlots: _vm._u([
-                {
-                  key: "index",
-                  fn: function(row) {
-                    return [_vm._v(_vm._s(row))]
-                  }
-                }
-              ])
-            }),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "foreign-brokers"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
             _c(
-              "b-button",
-              {
-                directives: [
-                  {
-                    name: "b-modal",
-                    rawName: "v-b-modal.modal-1",
-                    modifiers: { "modal-1": true }
+              "b-card",
+              { attrs: { title: "Foreign Brokers" } },
+              [
+                _c("b-table", {
+                  attrs: {
+                    striped: "",
+                    hover: "",
+                    "show-empty": "",
+                    "empty-text":
+                      "No Foreign Brokers have been Created. Create a Foreign Broker below.",
+                    id: "foreign-brokers",
+                    items: _vm.foreign_brokers,
+                    fields: _vm.fields,
+                    "per-page": _vm.perPage,
+                    "current-page": _vm.currentPage
+                  },
+                  on: { "row-clicked": _vm.foreignBrokerHandler },
+                  scopedSlots: _vm._u([
+                    {
+                      key: "index",
+                      fn: function(row) {
+                        return [_vm._v(_vm._s(row))]
+                      }
+                    }
+                  ])
+                }),
+                _vm._v(" "),
+                _c("b-pagination", {
+                  attrs: {
+                    "total-rows": _vm.rows,
+                    "per-page": _vm.perPage,
+                    "aria-controls": "foreign-brokers"
+                  },
+                  model: {
+                    value: _vm.currentPage,
+                    callback: function($$v) {
+                      _vm.currentPage = $$v
+                    },
+                    expression: "currentPage"
                   }
-                ],
-                on: { click: _vm.addNewBroker }
-              },
-              [_vm._v("Create Foreign Broker")]
+                }),
+                _vm._v(" "),
+                _c(
+                  "b-button",
+                  {
+                    directives: [
+                      {
+                        name: "b-modal",
+                        rawName: "v-b-modal.modal-1",
+                        modifiers: { "modal-1": true }
+                      }
+                    ],
+                    on: {
+                      click: function($event) {
+                        _vm.create = true
+                      }
+                    }
+                  },
+                  [_vm._v("Create Foreign Broker")]
+                )
+              ],
+              1
             ),
             _vm._v(" "),
             _c(
               "b-modal",
               {
                 attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleModalOK, hidden: _vm.resetModal }
+                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
               },
               [
                 _c("p", { staticClass: "my-4" }, [
@@ -76926,65 +76972,76 @@ var render = function() {
           "div",
           { staticClass: "content" },
           [
-            _c("b-table", {
-              attrs: {
-                striped: "",
-                hover: "",
-                "show-empty": "",
-                "empty-text":
-                  "No Local Brokers  have been Created. Create a Local Broker below.",
-                id: "local-brokers",
-                items: _vm.local_brokers,
-                fields: _vm.fields,
-                "per-page": _vm.perPage,
-                "current-page": _vm.currentPage
-              },
-              on: { "row-clicked": _vm.displayLocalBroker },
-              scopedSlots: _vm._u([
-                {
-                  key: "index",
-                  fn: function(row) {
-                    return [_vm._v(_vm._s(row))]
-                  }
-                }
-              ])
-            }),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "local-brokers"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
             _c(
-              "b-button",
-              {
-                directives: [
-                  {
-                    name: "b-modal",
-                    rawName: "v-b-modal.modal-1",
-                    modifiers: { "modal-1": true }
+              "b-card",
+              { attrs: { title: "Local Brokers" } },
+              [
+                _c("b-table", {
+                  attrs: {
+                    striped: "",
+                    hover: "",
+                    "show-empty": "",
+                    "empty-text":
+                      "No Local Brokers  have been Created. Create a Local Broker below.",
+                    id: "local-brokers",
+                    items: _vm.local_brokers,
+                    fields: _vm.fields,
+                    "per-page": _vm.perPage,
+                    "current-page": _vm.currentPage
+                  },
+                  on: { "row-clicked": _vm.localBrokerHandler },
+                  scopedSlots: _vm._u([
+                    {
+                      key: "index",
+                      fn: function(row) {
+                        return [_vm._v(_vm._s(row))]
+                      }
+                    }
+                  ])
+                }),
+                _vm._v(" "),
+                _c("b-pagination", {
+                  attrs: {
+                    "total-rows": _vm.rows,
+                    "per-page": _vm.perPage,
+                    "aria-controls": "local-brokers"
+                  },
+                  model: {
+                    value: _vm.currentPage,
+                    callback: function($$v) {
+                      _vm.currentPage = $$v
+                    },
+                    expression: "currentPage"
                   }
-                ],
-                on: { click: _vm.addNewBroker }
-              },
-              [_vm._v("Create Local Broker")]
+                }),
+                _vm._v(" "),
+                _c(
+                  "b-button",
+                  {
+                    directives: [
+                      {
+                        name: "b-modal",
+                        rawName: "v-b-modal.modal-1",
+                        modifiers: { "modal-1": true }
+                      }
+                    ],
+                    on: {
+                      click: function($event) {
+                        _vm.create = true
+                      }
+                    }
+                  },
+                  [_vm._v("Create Local Broker")]
+                )
+              ],
+              1
             ),
             _vm._v(" "),
             _c(
               "b-modal",
               {
                 attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleModalOK, hidden: _vm.resetModal }
+                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
               },
               [
                 _c("p", { staticClass: "my-4" }, [
@@ -76993,7 +77050,16 @@ var render = function() {
                 _vm._v(" "),
                 _c(
                   "form",
-                  { ref: "form" },
+                  {
+                    ref: "form",
+                    on: {
+                      submit: function($event) {
+                        $event.stopPropagation()
+                        $event.preventDefault()
+                        return _vm.handleSubmit($event)
+                      }
+                    }
+                  },
                   [
                     _c(
                       "b-form-group",
@@ -77097,7 +77163,8 @@ var render = function() {
           [
             !_vm.settlement_account
               ? _c(
-                  "div",
+                  "b-card",
+                  { attrs: { title: "Settlement Accounts" } },
                   [
                     _c("b-table", {
                       attrs: {
@@ -77108,7 +77175,7 @@ var render = function() {
                         "empty-text":
                           "No Settlement Accounts have been Created. Create a Settlement Account below.",
                         id: "foreign-brokers",
-                        items: _vm.settlement_accounts,
+                        items: _vm.broker_settlement_accounts,
                         fields: _vm.fields,
                         "per-page": _vm.perPage,
                         "current-page": _vm.currentPage
@@ -77166,316 +77233,303 @@ var render = function() {
                   ],
                   1
                 )
-              : _c(
-                  "b-card",
-                  { attrs: { id: "modal-1", title: _vm.formTitle } },
-                  [
-                    _c("p", { staticClass: "my-4" }, [
-                      _vm._v("Please update the fields below as required!")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "form",
-                      {
-                        ref: "form",
-                        on: {
-                          submit: function($event) {
-                            $event.stopPropagation()
-                            $event.preventDefault()
-                            return _vm.handleSubmit($event)
-                          }
+              : _c("b-card", { attrs: { id: "modal-1", title: _vm.title } }, [
+                  _c("p", { staticClass: "my-4" }, [
+                    _vm._v("Please update the fields below as required!")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "form",
+                    {
+                      ref: "form",
+                      on: {
+                        submit: function($event) {
+                          $event.stopPropagation()
+                          $event.preventDefault()
+                          return _vm.handleSubmit($event)
                         }
-                      },
-                      [
-                        _c(
-                          "b-form-group",
-                          {
+                      }
+                    },
+                    [
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            sm: "",
+                            label: "Local Broker",
+                            "label-for": "name-input",
+                            "invalid-feedback": "Name is required"
+                          }
+                        },
+                        [
+                          _c("b-form-select", {
                             attrs: {
-                              sm: "",
                               label: "Local Broker",
-                              "label-for": "name-input",
-                              "invalid-feedback": "Name is required"
-                            }
-                          },
-                          [
-                            _c("b-form-select", {
-                              attrs: {
-                                required: "",
-                                label: "Local Broker",
-                                "label-for": "localBroker-input",
-                                "invalid-feedback":
-                                  "A Local Broker is required",
-                                sm: "",
-                                options: _vm.local_brokers
-                              },
-                              model: {
-                                value: _vm.settlement_account.local_broker_id,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.settlement_account,
-                                    "local_broker_id",
-                                    $$v
-                                  )
-                                },
-                                expression: "settlement_account.local_broker_id"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
-                              label: "Foreign Broker",
-                              "label-for": "foreign-input",
-                              "invalid-feedback": "Foreign Broker is required"
-                            }
-                          },
-                          [
-                            _c("b-form-select", {
-                              attrs: {
-                                required: "",
-                                options: _vm.foreign_brokers
-                              },
-                              model: {
-                                value: _vm.settlement_account.foreign_broker_id,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.settlement_account,
-                                    "foreign_broker_id",
-                                    $$v
-                                  )
-                                },
-                                expression:
-                                  "settlement_account.foreign_broker_id"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
-                              label: "Bank",
-                              "label-for": "bank-input",
-                              "invalid-feedback": " Bank is required"
-                            }
-                          },
-                          [
-                            _c("b-form-input", {
-                              attrs: {
-                                id: "bank-input",
-                                state: _vm.nameState,
-                                required: ""
-                              },
-                              model: {
-                                value: _vm.settlement_account.bank_name,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.settlement_account,
-                                    "bank_name",
-                                    $$v
-                                  )
-                                },
-                                expression: "settlement_account.bank_name"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
-                              label: "Account Number",
-                              "label-for": "account-input",
-                              "invalid-feedback": " Account is required"
-                            }
-                          },
-                          [
-                            _c("b-form-input", {
-                              attrs: {
-                                id: "account-input",
-                                state: _vm.nameState,
-                                required: ""
-                              },
-                              model: {
-                                value: _vm.settlement_account.account,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.settlement_account,
-                                    "account",
-                                    $$v
-                                  )
-                                },
-                                expression: "settlement_account.account"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
-                              label: "Settlement Agent Email",
-                              "label-for": "email-input",
-                              "invalid-feedback": " Email is required"
-                            }
-                          },
-                          [
-                            _c("b-form-input", {
-                              attrs: {
-                                id: "email-input",
-                                state: _vm.nameState,
-                                required: ""
-                              },
-                              model: {
-                                value: _vm.settlement_account.email,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.settlement_account, "email", $$v)
-                                },
-                                expression: "settlement_account.email"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
+                              "label-for": "localBroker-input",
+                              "invalid-feedback": "A Local Broker is required",
                               sm: "",
-                              label: "Account Currency",
-                              "label-for": "currency-input",
-                              "invalid-feedback": "currency is required"
-                            }
-                          },
-                          [
-                            _c("b-form-select", {
-                              attrs: {
-                                required: "",
-                                label: "Currency",
-                                "label-for": "Currency-input",
-                                "invalid-feedback": "A currency is required",
-                                sm: "",
-                                options: _vm.currencies
+                              options: _vm.local_brokers,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.local_broker_id,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.settlement_account,
+                                  "local_broker_id",
+                                  $$v
+                                )
                               },
-                              model: {
-                                value: _vm.settlement_account.currency,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.settlement_account,
-                                    "currency",
-                                    $$v
-                                  )
-                                },
-                                expression: "settlement_account.currency"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
+                              expression: "settlement_account.local_broker_id"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Foreign Broker",
+                            "label-for": "foreign-input",
+                            "invalid-feedback": "Foreign Broker is required"
+                          }
+                        },
+                        [
+                          _c("b-form-select", {
                             attrs: {
-                              label: "Account Balance ",
-                              "label-for": "umir-input",
-                              "invalid-feedback":
-                                " Account Balance  is required"
-                            }
-                          },
-                          [
-                            _c("b-form-input", {
-                              attrs: {
-                                id: "balance-input",
-                                state: _vm.nameState,
-                                type: "number",
-                                required: ""
+                              options: _vm.foreign_brokers,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.foreign_broker_id,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.settlement_account,
+                                  "foreign_broker_id",
+                                  $$v
+                                )
                               },
-                              model: {
-                                value: _vm.settlement_account.account_balance,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.settlement_account,
-                                    "account_balance",
-                                    $$v
-                                  )
-                                },
-                                expression: "settlement_account.account_balance"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
+                              expression: "settlement_account.foreign_broker_id"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Bank",
+                            "label-for": "bank-input",
+                            "invalid-feedback": " Bank is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
                             attrs: {
-                              label: "Amount Allocated ",
-                              "label-for": "umir-input",
-                              "invalid-feedback":
-                                " Amount Allocated  is required"
-                            }
-                          },
-                          [
-                            _c("b-form-input", {
-                              attrs: {
-                                id: "allocated-input",
-                                state: _vm.nameState,
-                                type: "number",
-                                required: ""
+                              id: "bank-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.bank_name,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.settlement_account,
+                                  "bank_name",
+                                  $$v
+                                )
                               },
-                              model: {
-                                value: _vm.settlement_account.amount_allocated,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.settlement_account,
-                                    "amount_allocated",
-                                    $$v
-                                  )
-                                },
-                                expression:
-                                  "settlement_account.amount_allocated"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-button",
-                          { attrs: { type: "submit", variant: "primary" } },
-                          [_vm._v("Submit")]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-button",
-                          {
-                            attrs: { type: "button", variant: "warning" },
-                            on: {
-                              click: function($event) {
-                                _vm.settlement_account = null
-                              }
+                              expression: "settlement_account.bank_name"
                             }
-                          },
-                          [_vm._v("Cancel")]
-                        )
-                      ],
-                      1
-                    )
-                  ]
-                )
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Account Number",
+                            "label-for": "account-input",
+                            "invalid-feedback": " Account is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "account-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.account,
+                              callback: function($$v) {
+                                _vm.$set(_vm.settlement_account, "account", $$v)
+                              },
+                              expression: "settlement_account.account"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Settlement Agent Email",
+                            "label-for": "email-input",
+                            "invalid-feedback": " Email is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "email-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.email,
+                              callback: function($$v) {
+                                _vm.$set(_vm.settlement_account, "email", $$v)
+                              },
+                              expression: "settlement_account.email"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            sm: "",
+                            label: "Account Currency",
+                            "label-for": "currency-input",
+                            "invalid-feedback": "currency is required"
+                          }
+                        },
+                        [
+                          _c("b-form-select", {
+                            attrs: {
+                              label: "Currency",
+                              "label-for": "Currency-input",
+                              "invalid-feedback": "A currency is required",
+                              sm: "",
+                              options: _vm.currencies,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.currency,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.settlement_account,
+                                  "currency",
+                                  $$v
+                                )
+                              },
+                              expression: "settlement_account.currency"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Account Balance ",
+                            "label-for": "umir-input",
+                            "invalid-feedback": " Account Balance  is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "balance-input",
+                              state: _vm.nameState,
+                              type: "number",
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.account_balance,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.settlement_account,
+                                  "account_balance",
+                                  $$v
+                                )
+                              },
+                              expression: "settlement_account.account_balance"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Amount Allocated ",
+                            "label-for": "umir-input",
+                            "invalid-feedback": " Amount Allocated  is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "allocated-input",
+                              state: _vm.nameState,
+                              type: "number",
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.amount_allocated,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.settlement_account,
+                                  "amount_allocated",
+                                  $$v
+                                )
+                              },
+                              expression: "settlement_account.amount_allocated"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-button",
+                        { attrs: { type: "submit", variant: "primary" } },
+                        [_vm._v("Submit")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-button",
+                        {
+                          attrs: { variant: "danger" },
+                          on: {
+                            click: function($event) {
+                              _vm.settlement_account = null
+                            }
+                          }
+                        },
+                        [_vm._v("Cancel")]
+                      )
+                    ],
+                    1
+                  )
+                ])
           ],
           1
         )
@@ -77516,232 +77570,264 @@ var render = function() {
           "div",
           { staticClass: "content" },
           [
-            _c("b-table", {
-              attrs: {
-                striped: "",
-                hover: "",
-                responsive: "",
-                "show-empty": "",
-                "empty-text":
-                  "No Clients have been Created. Create a Client below.",
-                id: "local-brokers",
-                items: _vm.local_broker_clients,
-                fields: _vm.fields,
-                "per-page": _vm.perPage,
-                "current-page": _vm.currentPage
-              },
-              on: { "row-clicked": _vm.brokerClientHandler },
-              scopedSlots: _vm._u([
-                {
-                  key: "index",
-                  fn: function(row) {
-                    return [_vm._v(_vm._s(row))]
-                  }
-                }
-              ])
-            }),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "local-brokers"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
-            _c(
-              "b-button",
-              {
-                directives: [
-                  {
-                    name: "b-modal",
-                    rawName: "v-b-modal.modal-1",
-                    modifiers: { "modal-1": true }
-                  }
-                ],
-                on: { click: _vm.addBrokerClient }
-              },
-              [_vm._v("Create Client")]
-            ),
-            _vm._v(" "),
-            _c(
-              "b-modal",
-              {
-                attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
-              },
-              [
-                _c("p", { staticClass: "my-4" }, [
-                  _vm._v("Please update the fields below as required!")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "form",
-                  {
-                    ref: "form",
-                    on: {
-                      submit: function($event) {
-                        $event.stopPropagation()
-                        $event.preventDefault()
-                        return _vm.handleSubmit($event)
-                      }
-                    }
-                  },
+            !_vm.broker_client
+              ? _c(
+                  "b-card",
+                  { attrs: { title: "Broker Clients" } },
                   [
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "JCSD",
-                          "label-for": "JCSD-input",
-                          "invalid-feedback": "JCSD is required"
-                        }
+                    _c("b-table", {
+                      attrs: {
+                        striped: "",
+                        hover: "",
+                        responsive: "",
+                        "show-empty": "",
+                        "empty-text":
+                          "No Clients have been Created. Create a Client below.",
+                        id: "local-brokers",
+                        items: _vm.local_broker_clients,
+                        fields: _vm.fields,
+                        "per-page": _vm.perPage,
+                        "current-page": _vm.currentPage
                       },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "JCSD-input",
-                            type: "number",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.client.jcsd,
-                            callback: function($$v) {
-                              _vm.$set(_vm.client, "jcsd", $$v)
-                            },
-                            expression: "client.jcsd"
+                      on: { "row-clicked": _vm.brokerClientHandler },
+                      scopedSlots: _vm._u(
+                        [
+                          {
+                            key: "index",
+                            fn: function(row) {
+                              return [_vm._v(_vm._s(row))]
+                            }
                           }
-                        })
-                      ],
-                      1
-                    ),
+                        ],
+                        null,
+                        false,
+                        131414210
+                      )
+                    }),
+                    _vm._v(" "),
+                    _c("b-pagination", {
+                      attrs: {
+                        "total-rows": _vm.rows,
+                        "per-page": _vm.perPage,
+                        "aria-controls": "local-brokers"
+                      },
+                      model: {
+                        value: _vm.currentPage,
+                        callback: function($$v) {
+                          _vm.currentPage = $$v
+                        },
+                        expression: "currentPage"
+                      }
+                    }),
                     _vm._v(" "),
                     _c(
-                      "b-form-group",
+                      "b-button",
                       {
-                        attrs: {
-                          label: "Name",
-                          "label-for": "name-input",
-                          "invalid-feedback": "Name is required"
+                        directives: [
+                          {
+                            name: "b-modal",
+                            rawName: "v-b-modal.modal-1",
+                            modifiers: { "modal-1": true }
+                          }
+                        ],
+                        on: {
+                          click: function($event) {
+                            _vm.broker_client = {}
+                          }
                         }
                       },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "name-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.client.name,
-                            callback: function($$v) {
-                              _vm.$set(_vm.client, "name", $$v)
-                            },
-                            expression: "client.name"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Email",
-                          "label-for": "email-input",
-                          "invalid-feedback": "Email is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "name-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.client.email,
-                            callback: function($$v) {
-                              _vm.$set(_vm.client, "email", $$v)
-                            },
-                            expression: "client.email"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Account Balance",
-                          "label-for": "JCSD-input",
-                          "invalid-feedback": "Account Balance is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "Account Balance-input",
-                            state: _vm.nameState,
-                            type: "number",
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.client.account_balance,
-                            callback: function($$v) {
-                              _vm.$set(_vm.client, "account_balance", $$v)
-                            },
-                            expression: "client.account_balance"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Open Orders",
-                          "label-for": "open-orders-input",
-                          "invalid-feedback": "Open Orders is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "Open Orders-input",
-                            state: _vm.nameState,
-                            type: "number",
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.client.open_orders,
-                            callback: function($$v) {
-                              _vm.$set(_vm.client, "open_orders", $$v)
-                            },
-                            expression: "client.open_orders"
-                          }
-                        })
-                      ],
-                      1
+                      [_vm._v("Create Client")]
                     )
                   ],
                   1
                 )
-              ]
-            )
+              : _c("b-card", { attrs: { title: _vm.title } }, [
+                  _c("p", { staticClass: "my-4" }, [
+                    _vm._v("Please update the fields below as required!")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "form",
+                    {
+                      ref: "form",
+                      on: {
+                        submit: function($event) {
+                          $event.stopPropagation()
+                          $event.preventDefault()
+                          return _vm.handleSubmit($event)
+                        }
+                      }
+                    },
+                    [
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "JCSD",
+                            "label-for": "JCSD-input",
+                            "invalid-feedback": "JCSD is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "JCSD-input",
+                              type: "number",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker_client.jcsd,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker_client, "jcsd", $$v)
+                              },
+                              expression: "broker_client.jcsd"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Name",
+                            "label-for": "name-input",
+                            "invalid-feedback": "Name is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "name-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker_client.name,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker_client, "name", $$v)
+                              },
+                              expression: "broker_client.name"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Email",
+                            "label-for": "email-input",
+                            "invalid-feedback": "Email is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "name-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker_client.email,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker_client, "email", $$v)
+                              },
+                              expression: "broker_client.email"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Account Balance",
+                            "label-for": "JCSD-input",
+                            "invalid-feedback": "Account Balance is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "Account Balance-input",
+                              state: _vm.nameState,
+                              type: "number",
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker_client.account_balance,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.broker_client,
+                                  "account_balance",
+                                  $$v
+                                )
+                              },
+                              expression: "broker_client.account_balance"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Open Orders",
+                            "label-for": "open-orders-input",
+                            "invalid-feedback": "Open Orders is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "Open Orders-input",
+                              state: _vm.nameState,
+                              type: "number",
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker_client.open_orders,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker_client, "open_orders", $$v)
+                              },
+                              expression: "broker_client.open_orders"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-button",
+                        { attrs: { type: "submit", variant: "primary" } },
+                        [_vm._v("Submit")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-button",
+                        {
+                          attrs: { variant: "danger" },
+                          on: {
+                            click: function($event) {
+                              _vm.broker_client = null
+                            }
+                          }
+                        },
+                        [_vm._v("Cancel")]
+                      )
+                    ],
+                    1
+                  )
+                ])
           ],
           1
         )
@@ -77951,213 +78037,356 @@ var render = function() {
       _c("head-nav"),
       _vm._v(" "),
       _c("div", { staticClass: "container-fluid" }, [
-        _c("h1", [_vm._v("Current Orders")]),
-        _vm._v(" "),
         _c(
           "div",
           { staticClass: "content" },
           [
-            _c("b-table", {
-              ref: "selectedOrder",
-              attrs: {
-                responsive: "",
-                "empty-text":
-                  "No Orders have been Created. Create an Order below.",
-                id: "orders-table",
-                items: _vm.broker_client_orders,
-                "per-page": _vm.perPage,
-                "current-page": _vm.currentPage,
-                striped: "",
-                hover: "",
-                fields: _vm.fields
-              },
-              on: { "row-clicked": _vm.brokerOrderHandler }
-            }),
-            _vm._v(" "),
-            !_vm.create ? _c("div") : _vm._e(),
-            _vm._v(" "),
-            _c(
-              "b-modal",
-              {
-                ref: "modal",
-                attrs: {
-                  "hide-footer": !_vm.create,
-                  id: "jse-new-order",
-                  size: "xl",
-                  title: _vm.modalTitle
-                },
-                on: { ok: _vm.handleJSEOrder, hidden: _vm.resetModal }
-              },
-              [
-                _c(
-                  "form",
-                  { ref: "form" },
+            !_vm.order
+              ? _c(
+                  "b-card",
+                  { attrs: { title: "Current Orders" } },
                   [
                     _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
+                      "div",
+                      { staticClass: "float-right" },
+                      [
+                        _c("b-input", {
+                          staticClass: "mb-2 mr-sm-2 mb-sm-0",
+                          attrs: {
+                            id: "search_content",
+                            type: "text",
+                            placeholder: "Filter Orders..."
+                          },
+                          model: {
+                            value: _vm.filter,
+                            callback: function($$v) {
+                              _vm.filter = $$v
+                            },
+                            expression: "filter"
+                          }
+                        })
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c("b-table", {
+                      ref: "selectedOrder",
+                      attrs: {
+                        responsive: "",
+                        "empty-text":
+                          "No Orders have been Created. Create an Order below.",
+                        id: "orders-table",
+                        items: _vm.broker_client_orders,
+                        "per-page": _vm.perPage,
+                        "current-page": _vm.currentPage,
+                        filterIncludedFields: _vm.filterOn,
+                        striped: "",
+                        hover: "",
+                        fields: _vm.fields,
+                        filter: _vm.filter
+                      },
+                      on: { "row-clicked": _vm.brokerOrderHandler }
+                    }),
+                    _vm._v(" "),
+                    _c("b-pagination", {
+                      attrs: {
+                        "total-rows": _vm.rows,
+                        "per-page": _vm.perPage,
+                        "aria-controls": "orders-table"
+                      },
+                      model: {
+                        value: _vm.currentPage,
+                        callback: function($$v) {
+                          _vm.currentPage = $$v
+                        },
+                        expression: "currentPage"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("b-button", { on: { click: _vm.displayNewOrder } }, [
+                      _vm._v("Create New Order")
+                    ])
+                  ],
+                  1
+                )
+              : _c(
+                  "b-card",
+                  {
+                    staticClass: "text-center",
+                    attrs: { id: "jse-new-order", title: _vm.title }
+                  },
+                  [
+                    _c(
+                      "form",
+                      {
+                        ref: "form",
+                        on: {
+                          submit: function($event) {
+                            $event.stopPropagation()
+                            $event.preventDefault()
+                            return _vm.handleJSEOrder($event)
+                          }
+                        }
+                      },
                       [
                         _c(
-                          "b-row",
+                          "b-container",
+                          { staticClass: "bv-example-row" },
                           [
                             _c(
-                              "b-col",
+                              "b-row",
                               [
                                 _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Trading Account",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Trading Account is required"
-                                    }
-                                  },
-                                  [
-                                    _c("b-form-select", {
-                                      staticClass: "mb-3",
-                                      attrs: {
-                                        options:
-                                          _vm.broker_trading_account_options,
-                                        disabled: _vm.disabled
-                                      },
-                                      on: {
-                                        change: function($event) {
-                                          return _vm.currencyHandler(
-                                            _vm.order.trading_account
-                                          )
-                                        }
-                                      },
-                                      scopedSlots: _vm._u([
-                                        {
-                                          key: "first",
-                                          fn: function() {
-                                            return [
-                                              _c(
-                                                "b-form-select-option",
-                                                {
-                                                  attrs: {
-                                                    value: null,
-                                                    disabled: ""
-                                                  }
-                                                },
-                                                [
-                                                  _vm._v(
-                                                    "\n                        -- Please select a Trading\n                        Account--\n                      "
-                                                  )
-                                                ]
-                                              )
-                                            ]
-                                          },
-                                          proxy: true
-                                        }
-                                      ]),
-                                      model: {
-                                        value: _vm.order.trading_account,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "trading_account",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "order.trading_account"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Client Account",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Client Account is required"
-                                    }
-                                  },
+                                  "b-col",
                                   [
                                     _c(
-                                      "b-form-select",
+                                      "b-form-group",
                                       {
-                                        staticClass: "mb-3",
                                         attrs: {
-                                          options:
-                                            _vm.client_trading_account_options
-                                              .trading_account,
-                                          disabled: _vm.disabled
-                                        },
-                                        scopedSlots: _vm._u([
-                                          {
-                                            key: "first",
-                                            fn: function() {
-                                              return [
-                                                _c(
-                                                  "b-form-select-option",
-                                                  {
-                                                    attrs: {
-                                                      value: null,
-                                                      disabled: ""
-                                                    }
-                                                  },
-                                                  [
-                                                    _vm._v(
-                                                      "\n                        -- Please select a Client\n                        Account--\n                      "
-                                                    )
-                                                  ]
-                                                )
-                                              ]
-                                            },
-                                            proxy: true
-                                          }
-                                        ]),
-                                        model: {
-                                          value:
-                                            _vm.order.client_trading_account,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              _vm.order,
-                                              "client_trading_account",
-                                              $$v
-                                            )
-                                          },
-                                          expression:
-                                            "order.client_trading_account"
+                                          label: "Trading Account",
+                                          "label-for": "broker-input",
+                                          "invalid-feedback":
+                                            "Trading Account is required"
                                         }
                                       },
                                       [
-                                        _vm._v(" "),
-                                        _vm._l(
-                                          _vm.client_trading_account_options,
-                                          function(b) {
-                                            return _c(
-                                              "b-form-select-option",
-                                              {
-                                                key: b.id,
-                                                attrs: { value: b.id }
+                                        _c("b-form-select", {
+                                          staticClass: "mb-3",
+                                          attrs: {
+                                            options:
+                                              _vm.broker_trading_account_options,
+                                            disabled: _vm.disabled
+                                          },
+                                          on: {
+                                            change: function($event) {
+                                              return _vm.currencyHandler(
+                                                _vm.order.trading_account
+                                              )
+                                            }
+                                          },
+                                          scopedSlots: _vm._u([
+                                            {
+                                              key: "first",
+                                              fn: function() {
+                                                return [
+                                                  _c(
+                                                    "b-form-select-option",
+                                                    {
+                                                      attrs: {
+                                                        value: null,
+                                                        disabled: ""
+                                                      }
+                                                    },
+                                                    [
+                                                      _vm._v(
+                                                        "\n                        -- Please select a Trading\n                        Account--\n                      "
+                                                      )
+                                                    ]
+                                                  )
+                                                ]
                                               },
-                                              [
-                                                _vm._v(
-                                                  "\n                      JCSD-" +
-                                                    _vm._s(b.jcsd) +
-                                                    " :\n                      " +
-                                                    _vm._s(b.name) +
-                                                    ' "Investor"\n                    '
-                                                )
-                                              ]
-                                            )
+                                              proxy: true
+                                            }
+                                          ]),
+                                          model: {
+                                            value: _vm.order.trading_account,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "trading_account",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "order.trading_account"
                                           }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Client Account",
+                                          "label-for": "broker-input",
+                                          "invalid-feedback":
+                                            "Client Account is required"
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "b-form-select",
+                                          {
+                                            staticClass: "mb-3",
+                                            attrs: {
+                                              options:
+                                                _vm
+                                                  .client_trading_account_options
+                                                  .trading_account,
+                                              disabled: _vm.disabled
+                                            },
+                                            scopedSlots: _vm._u([
+                                              {
+                                                key: "first",
+                                                fn: function() {
+                                                  return [
+                                                    _c(
+                                                      "b-form-select-option",
+                                                      {
+                                                        attrs: {
+                                                          value: null,
+                                                          disabled: ""
+                                                        }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          "\n                        -- Please select a Client\n                        Account--\n                      "
+                                                        )
+                                                      ]
+                                                    )
+                                                  ]
+                                                },
+                                                proxy: true
+                                              }
+                                            ]),
+                                            model: {
+                                              value:
+                                                _vm.order
+                                                  .client_trading_account,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.order,
+                                                  "client_trading_account",
+                                                  $$v
+                                                )
+                                              },
+                                              expression:
+                                                "order.client_trading_account"
+                                            }
+                                          },
+                                          [
+                                            _vm._v(" "),
+                                            _vm._l(
+                                              _vm.client_trading_account_options,
+                                              function(b) {
+                                                return _c(
+                                                  "b-form-select-option",
+                                                  {
+                                                    key: b.id,
+                                                    attrs: { value: b.id }
+                                                  },
+                                                  [
+                                                    _vm._v(
+                                                      "\n                      JCSD-" +
+                                                        _vm._s(b.jcsd) +
+                                                        " :\n                      " +
+                                                        _vm._s(b.name) +
+                                                        ' "Investor"\n                    '
+                                                    )
+                                                  ]
+                                                )
+                                              }
+                                            )
+                                          ],
+                                          2
                                         )
                                       ],
-                                      2
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          id:
+                                            "input-group-1-client-order-number",
+                                          label: "Client Order Number",
+                                          "label-for":
+                                            "input-1-client-order-number"
+                                        }
+                                      },
+                                      [
+                                        _c("b-form-input", {
+                                          attrs: {
+                                            disabled: "",
+                                            id: "input-10",
+                                            type: "text",
+                                            placeholder:
+                                              "Enter Client Order Number"
+                                          },
+                                          model: {
+                                            value:
+                                              _vm.order.client_order_number,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "client_order_number",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "order.client_order_number"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          id:
+                                            "input-group-1-market-order-number",
+                                          label: "Market Order Number",
+                                          "label-for":
+                                            "input-1-market-order-number"
+                                        }
+                                      },
+                                      [
+                                        _c("b-form-input", {
+                                          attrs: {
+                                            id: "input-1",
+                                            type: "text",
+                                            placeholder:
+                                              "Enter Market Order Number",
+                                            disabled: _vm.disabled
+                                          },
+                                          model: {
+                                            value:
+                                              _vm.order.market_order_number,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "market_order_number",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "order.market_order_number"
+                                          }
+                                        })
+                                      ],
+                                      1
                                     )
                                   ],
                                   1
@@ -78167,75 +78396,501 @@ var render = function() {
                             ),
                             _vm._v(" "),
                             _c(
-                              "b-col",
+                              "b-row",
                               [
                                 _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      id: "input-group-1-client-order-number",
-                                      label: "Client Order Number",
-                                      "label-for": "input-1-client-order-number"
-                                    }
-                                  },
+                                  "b-col",
                                   [
-                                    _c("b-form-input", {
-                                      attrs: {
-                                        disabled: "",
-                                        id: "input-10",
-                                        type: "text",
-                                        placeholder: "Enter Client Order Number"
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Symbol",
+                                          "label-for": "order-input",
+                                          "invalid-feedback":
+                                            "Symbol is required"
+                                        }
                                       },
-                                      model: {
-                                        value: _vm.order.client_order_number,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "client_order_number",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "order.client_order_number"
-                                      }
-                                    })
+                                      [
+                                        _c("multiselect", {
+                                          attrs: {
+                                            placeholder: "Select a symbol",
+                                            label: "text",
+                                            options: _vm.symbols,
+                                            disabled: _vm.disabled
+                                          },
+                                          model: {
+                                            value: _vm.order.symbol,
+                                            callback: function($$v) {
+                                              _vm.$set(_vm.order, "symbol", $$v)
+                                            },
+                                            expression: "order.symbol"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Currency",
+                                          "label-for": "broker-input",
+                                          "invalid-feedback":
+                                            "Currency is required"
+                                        }
+                                      },
+                                      [
+                                        _c("multiselect", {
+                                          attrs: {
+                                            placeholder: "Select a currency",
+                                            label: "text",
+                                            options: _vm.currencies,
+                                            disabled: _vm.disabled
+                                          },
+                                          model: {
+                                            value: _vm.order.currency,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "currency",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "order.currency"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Value",
+                                          "label-for": "order-input",
+                                          "invalid-feedback":
+                                            "value is required"
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "b-input-group",
+                                          {
+                                            attrs: { size: "md", prepend: "$" }
+                                          },
+                                          [
+                                            _c("b-form-input", {
+                                              attrs: {
+                                                id: "value-input1",
+                                                state: _vm.nameState,
+                                                type: "number",
+                                                disabled: _vm.disabled
+                                              },
+                                              model: {
+                                                value: _vm.order.value,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.order,
+                                                    "value",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "order.value"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Stop Price",
+                                          "label-for": "limit-input",
+                                          "invalid-feedback":
+                                            "Limit is required"
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "b-input-group",
+                                          {
+                                            attrs: { size: "md", prepend: "$" }
+                                          },
+                                          [
+                                            _c("b-form-input", {
+                                              attrs: {
+                                                required: "",
+                                                id: "value-input",
+                                                state: _vm.nameState,
+                                                type: "number",
+                                                disabled: _vm.disabled
+                                              },
+                                              model: {
+                                                value: _vm.order.stop_price,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.order,
+                                                    "stop_price",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "order.stop_price"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
                                   ],
                                   1
                                 )
                               ],
                               1
-                            ),
-                            _vm._v(" "),
+                            )
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-container",
+                          { staticClass: "bv-example-row" },
+                          [
                             _c(
-                              "b-col",
+                              "b-row",
                               [
                                 _c(
-                                  "b-form-group",
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Quantity",
+                                          "label-for": "broker-input",
+                                          "invalid-feedback":
+                                            "Quantity is required"
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "b-input-group",
+                                          { attrs: { size: "md" } },
+                                          [
+                                            _c("b-form-input", {
+                                              attrs: {
+                                                id: "quantity-input",
+                                                state: _vm.nameState,
+                                                disabled: _vm.disabled
+                                              },
+                                              model: {
+                                                value: _vm.order.quantity,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.order,
+                                                    "quantity",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "order.quantity"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Price",
+                                          "label-for": "order-input",
+                                          "invalid-feedback":
+                                            "Price is required"
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "b-input-group",
+                                          {
+                                            attrs: { size: "md", prepend: "$" }
+                                          },
+                                          [
+                                            _c("b-form-input", {
+                                              attrs: {
+                                                id: "price-input",
+                                                state: _vm.nameState,
+                                                type: "number",
+                                                disabled: _vm.disabled,
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.order.price,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.order,
+                                                    "price",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "order.price"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Side",
+                                          "label-for": "type-input",
+                                          "invalid-feedback": "Side is required"
+                                        }
+                                      },
+                                      [
+                                        _c("multiselect", {
+                                          attrs: {
+                                            placeholder: "Select a Side",
+                                            label: "text",
+                                            options: _vm.side_options,
+                                            disabled: _vm.disabled
+                                          },
+                                          model: {
+                                            value: _vm.order.side,
+                                            callback: function($$v) {
+                                              _vm.$set(_vm.order, "side", $$v)
+                                            },
+                                            expression: "order.side"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Order Type",
+                                          "label-for": "type-input",
+                                          "invalid-feedback":
+                                            "Order Type is required"
+                                        }
+                                      },
+                                      [
+                                        _c("multiselect", {
+                                          attrs: {
+                                            placeholder: "Select an Order Type",
+                                            label: "text",
+                                            options: _vm.order_types,
+                                            disabled: _vm.disabled
+                                          },
+                                          model: {
+                                            value: _vm.order.order_type,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "order_type",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "order.order_type"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-container",
+                          { staticClass: "bv-example-row" },
+                          [
+                            _c(
+                              "b-row",
+                              [
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Handling Instructions",
+                                          "label-for": "broker-input",
+                                          "invalid-feedback":
+                                            "Handling Instructions is required"
+                                        }
+                                      },
+                                      [
+                                        _c("multiselect", {
+                                          attrs: {
+                                            placeholder:
+                                              "Select an Instruction",
+                                            label: "text",
+                                            options: _vm.handling_options,
+                                            disabled: _vm.disabled
+                                          },
+                                          model: {
+                                            value:
+                                              _vm.order.handling_instructions,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "handling_instructions",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "order.handling_instructions"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Time In Force",
+                                          "label-for": "broker-input",
+                                          "invalid-feedback":
+                                            "Option Type is required"
+                                        }
+                                      },
+                                      [
+                                        _c("multiselect", {
+                                          attrs: {
+                                            placeholder:
+                                              "Select a Time In Force",
+                                            order:
+                                              "order_option_inputs[][option_type]",
+                                            label: "text",
+                                            options: _vm.time_in_force,
+                                            disabled: _vm.disabled
+                                          },
+                                          model: {
+                                            value: _vm.order.time_in_force,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "time_in_force",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "order.time_in_force"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "b-col",
                                   {
-                                    attrs: {
-                                      id: "input-group-1-market-order-number",
-                                      label: "Market Order Number",
-                                      "label-for": "input-1-market-order-number"
-                                    }
+                                    directives: [
+                                      {
+                                        name: "show",
+                                        rawName: "v-show",
+                                        value: _vm.expiration,
+                                        expression: "expiration"
+                                      }
+                                    ]
                                   },
                                   [
-                                    _c("b-form-input", {
+                                    _c(
+                                      "label",
+                                      { attrs: { for: "example-datepicker" } },
+                                      [_vm._v("Expiration Date")]
+                                    ),
+                                    _vm._v(" "),
+                                    _c("b-form-datepicker", {
+                                      staticClass: "mb-2",
                                       attrs: {
-                                        id: "input-1",
-                                        type: "text",
-                                        placeholder:
-                                          "Enter Market Order Number",
+                                        id: "example-datepicker",
                                         disabled: _vm.disabled
                                       },
                                       model: {
-                                        value: _vm.order.market_order_number,
+                                        value: _vm.order.expiration_date,
                                         callback: function($$v) {
                                           _vm.$set(
                                             _vm.order,
-                                            "market_order_number",
+                                            "expiration_date",
                                             $$v
                                           )
                                         },
-                                        expression: "order.market_order_number"
+                                        expression: "order.expiration_date"
                                       }
                                     })
                                   ],
@@ -78249,627 +78904,180 @@ var render = function() {
                         ),
                         _vm._v(" "),
                         _c(
-                          "b-row",
+                          "b-container",
+                          { staticClass: "bv-example-row" },
                           [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Symbol",
-                                      "label-for": "order-input",
-                                      "invalid-feedback": "Symbol is required"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a symbol",
-                                        label: "text",
-                                        options: _vm.symbols,
-                                        disabled: _vm.disabled
-                                      },
-                                      model: {
-                                        value: _vm.order.symbol,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "symbol", $$v)
-                                        },
-                                        expression: "order.symbol"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
+                            _c("label", [_vm._v("Iceberg Options")]),
                             _vm._v(" "),
                             _c(
-                              "b-col",
+                              "b-row",
                               [
                                 _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Currency",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback": "Currency is required"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a currency",
-                                        label: "text",
-                                        options: _vm.currencies,
-                                        disabled: _vm.disabled
-                                      },
-                                      model: {
-                                        value: _vm.order.currency,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "currency", $$v)
-                                        },
-                                        expression: "order.currency"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Value",
-                                      "label-for": "order-input",
-                                      "invalid-feedback": "value is required"
-                                    }
-                                  },
+                                  "b-col",
                                   [
                                     _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "$" } },
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Display Range",
+                                          "label-for": "order-input",
+                                          "invalid-feedback":
+                                            "Display Range is required"
+                                        }
+                                      },
                                       [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "value-input1",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled
+                                        _c(
+                                          "b-input-group",
+                                          {
+                                            attrs: { size: "md", prepend: "+-" }
                                           },
-                                          model: {
-                                            value: _vm.order.value,
-                                            callback: function($$v) {
-                                              _vm.$set(_vm.order, "value", $$v)
-                                            },
-                                            expression: "order.value"
-                                          }
-                                        })
+                                          [
+                                            _c("b-form-input", {
+                                              attrs: {
+                                                id: "display_range-input",
+                                                state: _vm.nameState,
+                                                type: "number",
+                                                disabled: _vm.disabled
+                                              },
+                                              model: {
+                                                value: _vm.order.display_range,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.order,
+                                                    "display_range",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "order.display_range"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
                                       ],
                                       1
                                     )
                                   ],
                                   1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Stop Price",
-                                      "label-for": "limit-input",
-                                      "invalid-feedback": "Limit is required"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "$" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            required: "",
-                                            id: "value-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled
-                                          },
-                                          model: {
-                                            value: _vm.order.stop_price,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "stop_price",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "order.stop_price"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
-                      [
-                        _c(
-                          "b-row",
-                          [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Quantity",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback": "Quantity is required"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "quantity-input",
-                                            state: _vm.nameState,
-                                            disabled: _vm.disabled
-                                          },
-                                          model: {
-                                            value: _vm.order.quantity,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "quantity",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "order.quantity"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Price",
-                                      "label-for": "order-input",
-                                      "invalid-feedback": "Price is required"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "$" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "price-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled,
-                                            required: ""
-                                          },
-                                          model: {
-                                            value: _vm.order.price,
-                                            callback: function($$v) {
-                                              _vm.$set(_vm.order, "price", $$v)
-                                            },
-                                            expression: "order.price"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Side",
-                                      "label-for": "type-input",
-                                      "invalid-feedback": "Side is required"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a Side",
-                                        label: "text",
-                                        options: _vm.side_options,
-                                        disabled: _vm.disabled
-                                      },
-                                      model: {
-                                        value: _vm.order.side,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "side", $$v)
-                                        },
-                                        expression: "order.side"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Order Type",
-                                      "label-for": "type-input",
-                                      "invalid-feedback":
-                                        "Order Type is required"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select an Order Type",
-                                        label: "text",
-                                        options: _vm.order_types,
-                                        disabled: _vm.disabled
-                                      },
-                                      model: {
-                                        value: _vm.order.order_type,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "order_type", $$v)
-                                        },
-                                        expression: "order.order_type"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
-                      [
-                        _c(
-                          "b-row",
-                          [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Handling Instructions",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Handling Instructions is required"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select an Instruction",
-                                        label: "text",
-                                        options: _vm.handling_options,
-                                        disabled: _vm.disabled
-                                      },
-                                      model: {
-                                        value: _vm.order.handling_instructions,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "handling_instructions",
-                                            $$v
-                                          )
-                                        },
-                                        expression:
-                                          "order.handling_instructions"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Time In Force",
-                                      "label-for": "broker-input",
-                                      "invalid-feedback":
-                                        "Option Type is required"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a Time In Force",
-                                        order:
-                                          "order_option_inputs[][option_type]",
-                                        label: "text",
-                                        options: _vm.time_in_force,
-                                        disabled: _vm.disabled
-                                      },
-                                      model: {
-                                        value: _vm.order.time_in_force,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "time_in_force",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "order.time_in_force"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              {
-                                directives: [
-                                  {
-                                    name: "show",
-                                    rawName: "v-show",
-                                    value: _vm.expiration,
-                                    expression: "expiration"
-                                  }
-                                ]
-                              },
-                              [
-                                _c(
-                                  "label",
-                                  { attrs: { for: "example-datepicker" } },
-                                  [_vm._v("Expiration Date")]
                                 ),
                                 _vm._v(" "),
-                                _c("b-form-datepicker", {
-                                  staticClass: "mb-2",
-                                  attrs: {
-                                    id: "example-datepicker",
-                                    disabled: _vm.disabled
-                                  },
-                                  model: {
-                                    value: _vm.order.expiration_date,
-                                    callback: function($$v) {
-                                      _vm.$set(
-                                        _vm.order,
-                                        "expiration_date",
-                                        $$v
-                                      )
-                                    },
-                                    expression: "order.expiration_date"
-                                  }
-                                })
+                                _c(
+                                  "b-col",
+                                  [
+                                    _c(
+                                      "b-form-group",
+                                      {
+                                        attrs: {
+                                          label: "Max Floor",
+                                          "label-for": "order-input",
+                                          "invalid-feedback":
+                                            "Max Floor is required"
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "b-input-group",
+                                          {
+                                            attrs: { size: "md", prepend: "^" }
+                                          },
+                                          [
+                                            _c("b-form-input", {
+                                              attrs: {
+                                                id: "max_floor-input",
+                                                state: _vm.nameState,
+                                                type: "number",
+                                                disabled: _vm.disabled
+                                              },
+                                              model: {
+                                                value: _vm.order.max_floor,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.order,
+                                                    "max_floor",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "order.max_floor"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("b-col")
                               ],
                               1
                             )
                           ],
                           1
-                        )
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
-                      [
-                        _c("label", [_vm._v("Iceberg Options")]),
+                        ),
                         _vm._v(" "),
                         _c(
-                          "b-row",
+                          "b-container",
+                          { staticClass: "bv-example-row" },
                           [
                             _c(
-                              "b-col",
+                              "b-row",
                               [
                                 _c(
-                                  "b-form-group",
+                                  "b-col",
                                   {
-                                    attrs: {
-                                      label: "Display Range",
-                                      "label-for": "order-input",
-                                      "invalid-feedback":
-                                        "Display Range is required"
-                                    }
+                                    staticClass: "text-center",
+                                    attrs: { cols: "12" }
                                   },
                                   [
                                     _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "+-" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "display_range-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled
-                                          },
-                                          model: {
-                                            value: _vm.order.display_range,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "display_range",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "order.display_range"
+                                      "b-button",
+                                      {
+                                        directives: [
+                                          {
+                                            name: "show",
+                                            rawName: "v-show",
+                                            value: _vm.isNew,
+                                            expression: "isNew"
                                           }
-                                        })
-                                      ],
-                                      1
+                                        ],
+                                        attrs: {
+                                          type: "submit",
+                                          variant: "primary"
+                                        }
+                                      },
+                                      [_vm._v("Create Order")]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "b-button",
+                                      {
+                                        attrs: { variant: "danger" },
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.reloadPage()
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("Exit")]
                                     )
                                   ],
                                   1
                                 )
                               ],
                               1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Max Floor",
-                                      "label-for": "order-input",
-                                      "invalid-feedback":
-                                        "Max Floor is required"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "^" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "max_floor-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled
-                                          },
-                                          model: {
-                                            value: _vm.order.max_floor,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "max_floor",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "order.max_floor"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c("b-col")
+                            )
                           ],
                           1
                         )
                       ],
                       1
                     )
-                  ],
-                  1
+                  ]
                 )
-              ]
-            ),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "orders-table"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
-            _c(
-              "b-button",
-              {
-                directives: [
-                  {
-                    name: "b-modal",
-                    rawName: "v-b-modal.jse-new-order",
-                    modifiers: { "jse-new-order": true }
-                  }
-                ],
-                on: { click: _vm.add }
-              },
-              [_vm._v("Create New Order")]
-            )
           ],
           1
         )
@@ -79080,290 +79288,332 @@ var render = function() {
           "div",
           { staticClass: "content" },
           [
-            _c("b-table", {
-              attrs: {
-                striped: "",
-                hover: "",
-                "show-empty": "",
-                "empty-text": "No Settlement Accounts have been created",
-                id: "foreign-brokers",
-                items: _vm.broker_settlement_account,
-                fields: _vm.fields,
-                "per-page": _vm.perPage,
-                "current-page": _vm.currentPage
-              },
-              on: { "row-clicked": _vm.settlmentAccountHandler },
-              scopedSlots: _vm._u([
-                {
-                  key: "index",
-                  fn: function(row) {
-                    return [_vm._v(_vm._s(row))]
-                  }
-                }
-              ])
-            }),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "foreign-brokers"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
-            _c("b-button", { on: { click: _vm.exportBalances } }, [
-              _vm._v("Export Balances")
-            ]),
-            _vm._v(" "),
-            _c(
-              "b-modal",
-              {
-                attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
-              },
-              [
-                _c("p", { staticClass: "my-4" }, [
-                  _vm._v("Please update the fields below as required!")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "form",
-                  {
-                    ref: "form",
-                    on: {
-                      submit: function($event) {
-                        $event.stopPropagation()
-                        $event.preventDefault()
-                        return _vm.handleSubmit($event)
-                      }
-                    }
-                  },
+            !_vm.settlement_account
+              ? _c(
+                  "b-card",
+                  { attrs: { title: "Settlement Accounts" } },
                   [
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          sm: "",
-                          label: "Local Broker",
-                          "label-for": "name-input",
-                          "invalid-feedback": "Name is required"
-                        }
+                    _c("b-table", {
+                      attrs: {
+                        striped: "",
+                        hover: "",
+                        "show-empty": "",
+                        "empty-text":
+                          "No Settlement Accounts have been created",
+                        id: "foreign-brokers",
+                        items: _vm.broker_settlement_account,
+                        fields: _vm.fields,
+                        "per-page": _vm.perPage,
+                        "current-page": _vm.currentPage
                       },
-                      [
-                        _c("b-form-select", {
-                          attrs: {
-                            label: "Local Broker",
-                            "label-for": "localBroker-input",
-                            "invalid-feedback": "A Local Broker is required",
-                            sm: "",
-                            options: _vm.local_brokers
-                          },
-                          model: {
-                            value: _vm.settlement_account.local_broker_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "local_broker_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.local_broker_id"
+                      on: { "row-clicked": _vm.settlmentAccountHandler },
+                      scopedSlots: _vm._u(
+                        [
+                          {
+                            key: "index",
+                            fn: function(row) {
+                              return [_vm._v(_vm._s(row))]
+                            }
                           }
-                        })
-                      ],
-                      1
-                    ),
+                        ],
+                        null,
+                        false,
+                        131414210
+                      )
+                    }),
                     _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Foreign Broker",
-                          "label-for": "foreign-input",
-                          "invalid-feedback": "Foreign Broker is required"
-                        }
+                    _c("b-pagination", {
+                      attrs: {
+                        "total-rows": _vm.rows,
+                        "per-page": _vm.perPage,
+                        "aria-controls": "foreign-brokers"
                       },
-                      [
-                        _c("b-form-select", {
-                          attrs: { options: _vm.foreign_brokers },
-                          model: {
-                            value: _vm.settlement_account.foreign_broker_id,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "foreign_broker_id",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.foreign_broker_id"
-                          }
-                        })
-                      ],
-                      1
-                    ),
+                      model: {
+                        value: _vm.currentPage,
+                        callback: function($$v) {
+                          _vm.currentPage = $$v
+                        },
+                        expression: "currentPage"
+                      }
+                    }),
                     _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Bank",
-                          "label-for": "bank-input",
-                          "invalid-feedback": " Bank is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "bank-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.bank_name,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "bank_name", $$v)
-                            },
-                            expression: "settlement_account.bank_name"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Account Number",
-                          "label-for": "account-input",
-                          "invalid-feedback": " Account is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "account-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.account,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "account", $$v)
-                            },
-                            expression: "settlement_account.account"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Settlement Agent Email",
-                          "label-for": "email-input",
-                          "invalid-feedback":
-                            "Settlement Agent Email is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "email-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.email,
-                            callback: function($$v) {
-                              _vm.$set(_vm.settlement_account, "email", $$v)
-                            },
-                            expression: "settlement_account.email"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Account Balance ",
-                          "label-for": "umir-input",
-                          "invalid-feedback": " Account Balance  is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "balance-input",
-                            state: _vm.nameState,
-                            type: "number",
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.account_balance,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "account_balance",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.account_balance"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Amount Allocated ",
-                          "label-for": "umir-input",
-                          "invalid-feedback": " Amount Allocated  is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "allocated-input",
-                            state: _vm.nameState,
-                            type: "number",
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.settlement_account.amount_allocated,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settlement_account,
-                                "amount_allocated",
-                                $$v
-                              )
-                            },
-                            expression: "settlement_account.amount_allocated"
-                          }
-                        })
-                      ],
-                      1
-                    )
+                    _c("b-button", { on: { click: _vm.exportBalances } }, [
+                      _vm._v("Export Balances")
+                    ])
                   ],
                   1
                 )
-              ]
-            )
+              : _c(
+                  "b-card",
+                  { attrs: { title: "Update Settlement Account" } },
+                  [
+                    _c("p", { staticClass: "my-4" }, [
+                      _vm._v("Please update the fields below as required!")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "form",
+                      {
+                        ref: "form",
+                        on: {
+                          submit: function($event) {
+                            $event.stopPropagation()
+                            $event.preventDefault()
+                            return _vm.handleSubmit($event)
+                          }
+                        }
+                      },
+                      [
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              sm: "",
+                              label: "Local Broker",
+                              "label-for": "name-input",
+                              "invalid-feedback": "Name is required"
+                            }
+                          },
+                          [
+                            _c("b-form-select", {
+                              attrs: {
+                                label: "Local Broker",
+                                "label-for": "localBroker-input",
+                                "invalid-feedback":
+                                  "A Local Broker is required",
+                                sm: "",
+                                options: _vm.local_brokers
+                              },
+                              model: {
+                                value: _vm.settlement_account.local_broker_id,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "local_broker_id",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.local_broker_id"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Foreign Broker",
+                              "label-for": "foreign-input",
+                              "invalid-feedback": "Foreign Broker is required"
+                            }
+                          },
+                          [
+                            _c("b-form-select", {
+                              attrs: { options: _vm.foreign_brokers },
+                              model: {
+                                value: _vm.settlement_account.foreign_broker_id,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "foreign_broker_id",
+                                    $$v
+                                  )
+                                },
+                                expression:
+                                  "settlement_account.foreign_broker_id"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Bank",
+                              "label-for": "bank-input",
+                              "invalid-feedback": " Bank is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "bank-input",
+                                state: _vm.nameState,
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.bank_name,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "bank_name",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.bank_name"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Account Number",
+                              "label-for": "account-input",
+                              "invalid-feedback": " Account is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "account-input",
+                                state: _vm.nameState,
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.account,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "account",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.account"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Settlement Agent Email",
+                              "label-for": "email-input",
+                              "invalid-feedback":
+                                "Settlement Agent Email is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "email-input",
+                                state: _vm.nameState,
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.email,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.settlement_account, "email", $$v)
+                                },
+                                expression: "settlement_account.email"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Account Balance ",
+                              "label-for": "umir-input",
+                              "invalid-feedback":
+                                " Account Balance  is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "balance-input",
+                                state: _vm.nameState,
+                                type: "number",
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.account_balance,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "account_balance",
+                                    $$v
+                                  )
+                                },
+                                expression: "settlement_account.account_balance"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              label: "Amount Allocated ",
+                              "label-for": "umir-input",
+                              "invalid-feedback":
+                                " Amount Allocated  is required"
+                            }
+                          },
+                          [
+                            _c("b-form-input", {
+                              attrs: {
+                                id: "allocated-input",
+                                state: _vm.nameState,
+                                type: "number",
+                                required: ""
+                              },
+                              model: {
+                                value: _vm.settlement_account.amount_allocated,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.settlement_account,
+                                    "amount_allocated",
+                                    $$v
+                                  )
+                                },
+                                expression:
+                                  "settlement_account.amount_allocated"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-button",
+                          { attrs: { type: "submit", variant: "primary" } },
+                          [_vm._v("Submit")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-button",
+                          {
+                            attrs: { variant: "danger" },
+                            on: {
+                              click: function($event) {
+                                _vm.settlement_account = null
+                              }
+                            }
+                          },
+                          [_vm._v("Cancel")]
+                        )
+                      ],
+                      1
+                    )
+                  ]
+                )
           ],
           1
         )
