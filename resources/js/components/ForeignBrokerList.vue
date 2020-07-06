@@ -3,30 +3,32 @@
     <head-nav></head-nav>
     <div class="container-fluid">
       <div class="content">
-        <b-table
-          striped
-          hover
-          show-empty
-          :empty-text="'No Foreign Brokers have been Created. Create a Foreign Broker below.'"
-          id="foreign-brokers"
-          :items="foreign_brokers"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          @row-clicked="foreignBrokerHandler"
-        >
-          <template slot="index" slot-scope="row">{{ row }}</template>
-        </b-table>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="foreign-brokers"
-        ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create Foreign Broker</b-button>
+        <b-card title="Foreign Brokers">
+          <b-table
+            striped
+            hover
+            show-empty
+            :empty-text="'No Foreign Brokers have been Created. Create a Foreign Broker below.'"
+            id="foreign-brokers"
+            :items="foreign_brokers"
+            :fields="fields"
+            :per-page="perPage"
+            :current-page="currentPage"
+            @row-clicked="foreignBrokerHandler"
+          >
+            <template slot="index" slot-scope="row">{{ row }}</template>
+          </b-table>
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="foreign-brokers"
+          ></b-pagination>
+          <b-button v-b-modal.modal-1 @click="create = true">Create Foreign Broker</b-button>
+        </b-card>
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
-          <form ref="form" @submit.stop.prevent="handleSubmit">
+          <form ref="form">
             <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
               <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
             </b-form-group>
@@ -103,41 +105,44 @@ export default {
       this.broker = {};
       await this.getBrokers();
     },
-    handleOk(bvModalEvt) {
+
+    async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
+
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
+      if (!this.checkFormValidity()) return;
 
-        //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          this.storeForeignBroker({
-            name: this.broker.name,
-            email: this.broker.email
-          });
-          this.$swal(`Account created for ${this.broker.email}`);
-        } else {
-          //Include ID
-          this.storeForeignBroker({
-            id: this.broker.id,
-            name: this.broker.name,
-            email: this.broker.email
-          });
-          this.$swal(`Account Updated for ${this.broker.email}`);
+      this.$bvModal.hide("modal-1"); //Close the modal if it is open
+
+      //Determine if a new user is being created or we are updating an existing user
+      this.$swal.fire({
+        title: `${
+          this.create ? "Creating" : "Updating"
+        } Foreign Broker Account`,
+        html: "One moment while we setup the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
         }
+      });
 
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+      try {
+        await axios.post("store-foreign-broker", this.broker);
+        await this.getBrokers();
+        this.$swal(
+          `Account ${this.created ? "Created" : "Updated"}!`,
+          "success"
+        );
+        await this.resetModal();
+        await this.$nextTick();
+        this.$bvModal.hide("modal-1");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
+
       // Push the name to submitted names
       // this.submittedNames.push(this.name);
       // Hide the modal manually
@@ -165,40 +170,32 @@ export default {
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
       }
     },
     async getBrokers() {
-      ({ data: this.foreign_brokers } = await axios.get("foreign-brokers")); //.then(response => {
+      ({ data: this.foreign_brokers } = await axios.get("foreign-brokers"));
     },
 
-    async storeForeignBroker(broker) {
-      try {
-        this.$swal.fire({
-          title: "Creating Foreign Broker Account",
-          html: "One moment while we setup the Account",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
-        await axios.post("store-foreign-broker", broker);
-        await this.getBrokers();
-        this.$swal(
-          "Account Created!",
-          // "Foreign Broker Has Been Removed.",
-          "success"
-        );
-      } catch (error) {
-      } finally {
-      }
-    },
     add() {
       this.create = true;
     },
     async destroy(id) {
-      await axios.delete(`foreign-broker-delete/${id}`); //.then(response => {
-      await this.getBrokers();
+      this.$swal.fire({
+        title: `Deleting Foreign Broker Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+      try {
+        await axios.delete(`foreign-broker-delete/${id}`); //.then(response => {
+        await this.getBrokers();
+        this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
+      }
     }
   },
   async mounted() {

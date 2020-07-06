@@ -3,29 +3,32 @@
     <head-nav></head-nav>
     <div class="container-fluid">
       <div class="content">
-        <b-table
-          striped
-          hover
-          show-empty
-          :empty-text="'No Settlement Accounts have been created'"
-          id="foreign-brokers"
-          :items="broker_settlement_account"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          @row-clicked="settlmentAccountHandler"
-        >
-          <template slot="index" slot-scope="row">{{ row }}</template>
-        </b-table>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="foreign-brokers"
-        ></b-pagination>
-        <!-- <b-button v-b-modal.modal-1 @click="create = true">Create Settlement Account</b-button> -->
-        <b-button @click="exportBalances">Export Balances</b-button>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+        <b-card title="Settlement Accounts" v-if="!settlement_account">
+          <b-table
+            striped
+            hover
+            show-empty
+            :empty-text="'No Settlement Accounts have been created'"
+            id="foreign-brokers"
+            :items="broker_settlement_account"
+            :fields="fields"
+            :per-page="perPage"
+            :current-page="currentPage"
+            @row-clicked="settlmentAccountHandler"
+          >
+            <template slot="index" slot-scope="row">{{ row }}</template>
+          </b-table>
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="foreign-brokers"
+          ></b-pagination>
+          <!-- <b-button v-b-modal.modal-1 @click="create = true">Create Settlement Account</b-button> -->
+          <b-button @click="exportBalances">Export Balances</b-button>
+        </b-card>
+
+        <b-card title="Update Settlement Account" v-else>
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
             <b-form-group
@@ -111,8 +114,10 @@
                 required
               ></b-form-input>
             </b-form-group>
+            <b-button type="submit" variant="primary">Submit</b-button>
+            <b-button variant="danger" @click="settlement_account=null">Cancel</b-button>
           </form>
-        </b-modal>
+        </b-card>
       </div>
     </div>
   </div>
@@ -129,9 +134,8 @@ export default {
   },
   data() {
     return {
-      create: false,
       broker_settlement_account: this.settlement_accounts,
-      settlement_account: {},
+      settlement_account: null,
       local_brokers: [],
       foreign_brokers: [],
       perPage: 5,
@@ -172,7 +176,7 @@ export default {
           sortable: true
         }
       ],
-      modalTitle: "Create Broker Settlement Account",
+     
       nameState: null
     };
   },
@@ -220,70 +224,54 @@ export default {
       });
       doc.save("BrokerSettlementReport.pdf");
     },
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
-    resetModal() {
-      this.create = false;
-      this.settlement_account = {};
-    },
-    async handleOk(bvModalEvt) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault();
-      // Trigger submit handler
-      await this.handleSubmit();
-    },
+
     async handleSubmit() {
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
-        //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          await this.storeBrokerSettlementAccount({
-            account: this.settlement_account.account,
-            account_balance: this.settlement_account.account_balance,
-            amount_allocated: this.settlement_account.amount_allocated,
-            bank_name: this.settlement_account.bank_name,
-            email: this.settlement_account.email,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            status: "Unverified"
-          });
+      let account = {
+        account: this.settlement_account.account,
+        account_balance: this.settlement_account.account_balance,
+        amount_allocated: this.settlement_account.amount_allocated,
+        bank_name: this.settlement_account.bank_name,
+        email: this.settlement_account.email,
+        foreign_broker_id: this.settlement_account.foreign_broker_id,
+        id: this.settlement_account.id,
+        local_broker_id: this.settlement_account.local_broker_id,
+        status: "Unverified"
+      };
+
+      this.$swal.fire({
+        title: `Updating Settlement Account`,
+        html: "One moment while we setup the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
+
+      // console.log(account);
+      try {
+        await axios.post("../store-settlement-broker", account);
+        //.then(response => {
+        await this.getSettlementList();
+        setTimeout(location.reload.bind(location));
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message.includes("Duplicate entry")
+        ) {
           await this.$swal(
-            `Account created for ${this.settlement_account.email}`
+            `An Account with this email address already exists. Please try using a different email`
           );
         } else {
-          //Include ID
-          await this.storeBrokerSettlementAccount({
-            account: this.settlement_account.account,
-            account_balance: this.settlement_account.account_balance,
-            amount_allocated: this.settlement_account.amount_allocated,
-            bank_name: this.settlement_account.bank_name,
-            email: this.settlement_account.email,
-            foreign_broker_id: this.settlement_account.foreign_broker_id,
-            id: this.settlement_account.id,
-            local_broker_id: this.settlement_account.local_broker_id,
-            status: "Unverified"
-          });
+          console.error("destroy", error);
+          this.$swal("Ouch!", "Something went wrong.", "error");
         }
-
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
       }
-
-      this.nameState = null;
     },
+
     async settlmentAccountHandler(b) {
-      // console.log(b);
-      this.settlement_account = {};
       console.log(b);
-      this.settlement_account = b;
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -298,15 +286,10 @@ export default {
         cancelButtonAriaLabel: "cancel"
       });
       if (result.value) {
-        this.$bvModal.show("modal-1");
+        this.settlement_account = b;
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        await this.$swal(
-          "Deleted!",
-          "Settlement Account Has Been Removed.",
-          "success"
-        );
       }
     },
     setLocalBroker() {
@@ -321,49 +304,46 @@ export default {
       // });
       // setTimeout(location.reload.bind(location));
     },
-    async storeBrokerSettlementAccount(account) {
-      // console.log(account);
-      try {
-        await axios.post("../store-settlement-broker", account);
-        //.then(response => {
-        await this.getSettlementList();
-        this.create = false;
-      } catch (error) {
-        if (error.response.data.message.includes("Duplicate entry")) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
+
+    async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Settlement Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
         }
+      });
+      try {
+        await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
+        await this.getSettlementList();
+        this.$swal.close();
+        setTimeout(location.reload.bind(location));
+      } catch (error) {
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
-    add() {
-      this.create = true;
+
+    async getlocalBrokers() {
+      const { data } = await axios.get("local-brokers");
+      this.local_brokers = data.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
+      console.log("local brokers", this.local_brokers);
     },
-    async destroy(id) {
-      await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
-      await this.getSettlementList();
+    async getForeignBrokers() {
+      const { data } = await axios.get("foreign-broker-list");
+      this.foreign_brokers = data.map(({ user }) => ({
+        text: user.name,
+        value: user.id
+      }));
+      console.log("foreign brokers", this.foreign_brokers);
     }
   },
   async mounted() {
-    const { data: local_brokers } = await axios.get("local-brokers");
-
-    for (let i = 0; i < local_brokers.length; i++) {
-      this.local_brokers.push({
-        text: local_brokers[i].user.name,
-        value: local_brokers[i].user.id
-      });
-    }
-
-    const { data: foreign_brokers } = await axios.get("foreign-broker-list");
-
-    for (let i = 0; i < foreign_brokers.length; i++) {
-      // console.log(foreign_brokers[i].user );
-      const foreign_broker = foreign_brokers[i].user;
-      this.foreign_brokers.push({
-        text: foreign_broker.name,
-        value: foreign_broker.id
-      });
-    }
+    await Promise.all([this.getlocalBrokers(), this.getForeignBrokers()]);
 
     // await this.getSettlementList();
   }
