@@ -74732,6 +74732,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_js_mixins_Permissions_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
   components: {
@@ -80131,20 +80136,30 @@ var render = function() {
                   })
                 : _vm._e(),
               _vm._v(" "),
-              _c("b-pagination", {
-                attrs: {
-                  "total-rows": _vm.rows,
-                  "per-page": _vm.perPage,
-                  "aria-controls": "local-brokers"
-                },
-                model: {
-                  value: _vm.currentPage,
-                  callback: function($$v) {
-                    _vm.currentPage = $$v
-                  },
-                  expression: "currentPage"
-                }
-              }),
+              _vm.permissions.indexOf("read-broker-client") == -1
+                ? _c("p", { staticClass: "lead" }, [
+                    _vm._v(
+                      "You currently do not have permisions to view Broker Client accounts within the system. Please speak with your Broker Admin to have the Permissions activated on your account"
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.permissions.indexOf("read-broker-client") !== -1
+                ? _c("b-pagination", {
+                    attrs: {
+                      "total-rows": _vm.rows,
+                      "per-page": _vm.perPage,
+                      "aria-controls": "local-brokers"
+                    },
+                    model: {
+                      value: _vm.currentPage,
+                      callback: function($$v) {
+                        _vm.currentPage = $$v
+                      },
+                      expression: "currentPage"
+                    }
+                  })
+                : _vm._e(),
               _vm._v(" "),
               _vm.permissions.indexOf("create-broker-client") !== -1
                 ? _c(

@@ -18,7 +18,12 @@
         >
           <template slot="index" slot-scope="row">{{ row }}</template>
         </b-table>
+        <p
+          v-if="permissions.indexOf('read-broker-client') == -1"
+          class="lead"
+        >You currently do not have permisions to view Broker Client accounts within the system. Please speak with your Broker Admin to have the Permissions activated on your account</p>
         <b-pagination
+          v-if="permissions.indexOf('read-broker-client') !== -1"
           v-model="currentPage"
           :total-rows="rows"
           :per-page="perPage"
