@@ -75423,6 +75423,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -80084,251 +80089,258 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container-fluid" }, [
-        _c(
-          "div",
-          { staticClass: "content" },
-          [
-            _vm.permissions.indexOf("read-broker-client") !== -1
-              ? _c("b-table", {
-                  attrs: {
-                    striped: "",
-                    hover: "",
-                    "show-empty": "",
-                    "empty-text":
-                      "No Clients have been Created. Create a Client below.",
-                    id: "local-brokers",
-                    items: _vm.clients,
-                    fields: _vm.fields,
-                    "per-page": _vm.perPage,
-                    "current-page": _vm.currentPage
-                  },
-                  on: { "row-clicked": _vm.brokerClientHandler },
-                  scopedSlots: _vm._u(
-                    [
-                      {
-                        key: "index",
-                        fn: function(row) {
-                          return [_vm._v(_vm._s(row))]
+      _c(
+        "div",
+        {
+          staticClass: "container-fluid",
+          staticStyle: { "margin-top": "100px" }
+        },
+        [
+          _c(
+            "div",
+            { staticClass: "content" },
+            [
+              _vm.permissions.indexOf("read-broker-client") !== -1
+                ? _c("b-table", {
+                    attrs: {
+                      striped: "",
+                      hover: "",
+                      "show-empty": "",
+                      "empty-text":
+                        "No Clients have been Created. Create a Client below.",
+                      id: "local-brokers",
+                      items: _vm.clients,
+                      fields: _vm.fields,
+                      "per-page": _vm.perPage,
+                      "current-page": _vm.currentPage
+                    },
+                    on: { "row-clicked": _vm.brokerClientHandler },
+                    scopedSlots: _vm._u(
+                      [
+                        {
+                          key: "index",
+                          fn: function(row) {
+                            return [_vm._v(_vm._s(row))]
+                          }
                         }
-                      }
-                    ],
-                    null,
-                    false,
-                    131414210
-                  )
-                })
-              : _vm._e(),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "local-brokers"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
+                      ],
+                      null,
+                      false,
+                      131414210
+                    )
+                  })
+                : _vm._e(),
+              _vm._v(" "),
+              _c("b-pagination", {
+                attrs: {
+                  "total-rows": _vm.rows,
+                  "per-page": _vm.perPage,
+                  "aria-controls": "local-brokers"
                 },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
-            _vm.permissions.indexOf("create-broker-client") !== -1
-              ? _c(
-                  "b-button",
-                  {
-                    directives: [
-                      {
-                        name: "b-modal",
-                        rawName: "v-b-modal.modal-1",
-                        modifiers: { "modal-1": true }
-                      }
-                    ],
-                    on: {
-                      click: function($event) {
-                        _vm.create = true
-                      }
-                    }
+                model: {
+                  value: _vm.currentPage,
+                  callback: function($$v) {
+                    _vm.currentPage = $$v
                   },
-                  [_vm._v("Create Client")]
-                )
-              : _vm._e(),
-            _vm._v(" "),
-            _c(
-              "b-modal",
-              {
-                attrs: { id: "modal-1", title: _vm.modalTitle },
-                on: { ok: _vm.handleOk, hidden: _vm.resetModal }
-              },
-              [
-                _c("p", { staticClass: "my-4" }, [
-                  _vm._v("Please update the fields below as required!")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "form",
-                  {
-                    ref: "form",
-                    on: {
-                      submit: function($event) {
-                        $event.stopPropagation()
-                        $event.preventDefault()
-                        return _vm.handleSubmit($event)
+                  expression: "currentPage"
+                }
+              }),
+              _vm._v(" "),
+              _vm.permissions.indexOf("create-broker-client") !== -1
+                ? _c(
+                    "b-button",
+                    {
+                      directives: [
+                        {
+                          name: "b-modal",
+                          rawName: "v-b-modal.modal-1",
+                          modifiers: { "modal-1": true }
+                        }
+                      ],
+                      on: {
+                        click: function($event) {
+                          _vm.create = true
+                        }
                       }
-                    }
-                  },
-                  [
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Name",
-                          "label-for": "name-input",
-                          "invalid-feedback": "Name is required"
+                    },
+                    [_vm._v("Create Client")]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "b-modal",
+                {
+                  attrs: { id: "modal-1", title: _vm.modalTitle },
+                  on: { ok: _vm.handleOk, hidden: _vm.resetModal }
+                },
+                [
+                  _c("p", { staticClass: "my-4" }, [
+                    _vm._v("Please update the fields below as required!")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "form",
+                    {
+                      ref: "form",
+                      on: {
+                        submit: function($event) {
+                          $event.stopPropagation()
+                          $event.preventDefault()
+                          return _vm.handleSubmit($event)
                         }
-                      },
-                      [
-                        _c("b-form-input", {
+                      }
+                    },
+                    [
+                      _c(
+                        "b-form-group",
+                        {
                           attrs: {
-                            id: "name-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.broker.name,
-                            callback: function($$v) {
-                              _vm.$set(_vm.broker, "name", $$v)
-                            },
-                            expression: "broker.name"
+                            label: "Name",
+                            "label-for": "name-input",
+                            "invalid-feedback": "Name is required"
                           }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "Email",
-                          "label-for": "email-input",
-                          "invalid-feedback": "Email is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "name-input",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.broker.email,
-                            callback: function($$v) {
-                              _vm.$set(_vm.broker, "email", $$v)
-                            },
-                            expression: "broker.email"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          label: "JCSD Number",
-                          "label-for": "jcsd-input",
-                          "invalid-feedback": "Name is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "jcsd-input",
-                            type: "number",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.broker.jcsd,
-                            callback: function($$v) {
-                              _vm.$set(_vm.broker, "jcsd", $$v)
-                            },
-                            expression: "broker.jcsd"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-form-group",
-                      {
-                        attrs: {
-                          sm: "",
-                          label: "Account Balance",
-                          "label-for": "name-input",
-                          "invalid-feedback": "Name is required"
-                        }
-                      },
-                      [
-                        _c("b-form-input", {
-                          attrs: {
-                            id: "account-balance-input",
-                            type: "number",
-                            state: _vm.nameState,
-                            required: ""
-                          },
-                          model: {
-                            value: _vm.broker.account_balance,
-                            callback: function($$v) {
-                              _vm.$set(_vm.broker, "account_balance", $$v)
-                            },
-                            expression: "broker.account_balance"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _vm.permissions.indexOf("approve-broker-client") !== -1
-                      ? _c(
-                          "b-form-group",
-                          {
+                        },
+                        [
+                          _c("b-form-input", {
                             attrs: {
-                              label: "Client Status",
-                              "label-for": "status-input",
-                              "invalid-feedback": "Client status is required"
+                              id: "name-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker.name,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker, "name", $$v)
+                              },
+                              expression: "broker.name"
                             }
-                          },
-                          [
-                            _c("b-form-select", {
-                              attrs: { options: _vm.client_status },
-                              model: {
-                                value: _vm.broker.operator_status,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.broker, "operator_status", $$v)
-                                },
-                                expression: "broker.operator_status"
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Email",
+                            "label-for": "email-input",
+                            "invalid-feedback": "Email is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "name-input",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker.email,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker, "email", $$v)
+                              },
+                              expression: "broker.email"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "JCSD Number",
+                            "label-for": "jcsd-input",
+                            "invalid-feedback": "Name is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "jcsd-input",
+                              type: "number",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker.jcsd,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker, "jcsd", $$v)
+                              },
+                              expression: "broker.jcsd"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            sm: "",
+                            label: "Account Balance",
+                            "label-for": "name-input",
+                            "invalid-feedback": "Name is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "account-balance-input",
+                              type: "number",
+                              state: _vm.nameState,
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker.account_balance,
+                              callback: function($$v) {
+                                _vm.$set(_vm.broker, "account_balance", $$v)
+                              },
+                              expression: "broker.account_balance"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _vm.permissions.indexOf("approve-broker-client") !== -1
+                        ? _c(
+                            "b-form-group",
+                            {
+                              attrs: {
+                                label: "Client Status",
+                                "label-for": "status-input",
+                                "invalid-feedback": "Client status is required"
                               }
-                            })
-                          ],
-                          1
-                        )
-                      : _vm._e()
-                  ],
-                  1
-                )
-              ]
-            )
-          ],
-          1
-        )
-      ])
+                            },
+                            [
+                              _c("b-form-select", {
+                                attrs: { options: _vm.client_status },
+                                model: {
+                                  value: _vm.broker.operator_status,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.broker, "operator_status", $$v)
+                                  },
+                                  expression: "broker.operator_status"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        : _vm._e()
+                    ],
+                    1
+                  )
+                ]
+              )
+            ],
+            1
+          )
+        ]
+      )
     ],
     1
   )
@@ -80379,7 +80391,7 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("li", [_vm._v("Manage CLIENT ACCOUNTS")]),
         _vm._v(" "),
-        _c("li", [_vm._v("ManageZ FOREIGN MARKET ORDERS")]),
+        _c("li", [_vm._v("Manage FOREIGN MARKET ORDERS")]),
         _vm._v(" "),
         _c("li", [_vm._v("Manage your PROFILE")])
       ]
@@ -80412,143 +80424,99 @@ var render = function() {
     [
       _c("head-nav"),
       _vm._v(" "),
-      _c("div", { staticClass: "container-fluid" }, [
-        _c("h1", [_vm._v("Current Orders")]),
-        _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "content" },
-          [
-            _vm.permissions.indexOf("read-broker-order") !== -1
-              ? _c("b-table", {
-                  ref: "selectedOrder",
+      _c(
+        "div",
+        {
+          staticClass: "container-fluid",
+          staticStyle: { "margin-top": "100px" }
+        },
+        [
+          _vm.permissions.indexOf("read-broker-order") !== -1
+            ? _c("h1", [_vm._v("Current Orders")])
+            : _vm._e(),
+          _vm._v(" "),
+          _c(
+            "div",
+            { staticClass: "content" },
+            [
+              _vm.permissions.indexOf("read-broker-order") !== -1
+                ? _c("b-table", {
+                    ref: "selectedOrder",
+                    attrs: {
+                      responsive: "",
+                      "empty-text":
+                        "No Orders have been Created. Create an Order below.",
+                      id: "orders-table",
+                      items: _vm.broker_client_orders,
+                      "per-page": _vm.perPage,
+                      "current-page": _vm.currentPage,
+                      striped: "",
+                      hover: "",
+                      fields: _vm.fields
+                    },
+                    on: { "row-clicked": _vm.brokerOrderHandler }
+                  })
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.permissions.indexOf("read-broker-order") == -1
+                ? _c("p", { staticClass: "lead" }, [
+                    _vm._v(
+                      "You currently do not have permisions to view orders within the system. Please speak with your Broker Admin to have the Permissions activated on your account"
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              !_vm.create ? _c("div") : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "b-modal",
+                {
+                  ref: "modal",
                   attrs: {
-                    responsiveS: "",
-                    "empty-text":
-                      "No Orders have been Created. Create an Order below.",
-                    id: "orders-table",
-                    items: _vm.broker_client_orders,
-                    "per-page": _vm.perPage,
-                    "current-page": _vm.currentPage,
-                    striped: "",
-                    hover: "",
-                    fields: _vm.fields
+                    "hide-footer": !_vm.create,
+                    id: "jse-new-order",
+                    size: "xl",
+                    title: _vm.modalTitle
                   },
-                  on: { "row-clicked": _vm.brokerOrderHandler }
-                })
-              : _vm._e(),
-            _vm._v(" "),
-            !_vm.create ? _c("div") : _vm._e(),
-            _vm._v(" "),
-            _c(
-              "b-modal",
-              {
-                ref: "modal",
-                attrs: {
-                  "hide-footer": !_vm.create,
-                  id: "jse-new-order",
-                  size: "xl",
-                  title: _vm.modalTitle
+                  on: { ok: _vm.handleJSEOrder, hidden: _vm.resetModal }
                 },
-                on: { ok: _vm.handleJSEOrder, hidden: _vm.resetModal }
-              },
-              [
-                _c(
-                  "form",
-                  { ref: "form" },
-                  [
-                    _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
-                      [
-                        _c(
-                          "b-row",
-                          [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Trading Account",
-                                      "label-for": "broker-input"
-                                    }
-                                  },
-                                  [
-                                    _c("b-form-select", {
-                                      staticClass: "mb-3",
+                [
+                  _c(
+                    "form",
+                    { ref: "form" },
+                    [
+                      _c(
+                        "b-container",
+                        { staticClass: "bv-example-row" },
+                        [
+                          _c(
+                            "b-row",
+                            [
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
                                       attrs: {
-                                        options:
-                                          _vm.broker_trading_account_options,
-                                        disabled: _vm.disabled == 1
-                                      },
-                                      on: {
-                                        change: function($event) {
-                                          return _vm.currencyHandler(
-                                            _vm.order.trading_account
-                                          )
-                                        }
-                                      },
-                                      scopedSlots: _vm._u([
-                                        {
-                                          key: "first",
-                                          fn: function() {
-                                            return [
-                                              _c(
-                                                "b-form-select-option",
-                                                { attrs: { value: null } },
-                                                [
-                                                  _vm._v(
-                                                    "-- Please select a Trading Account--"
-                                                  )
-                                                ]
-                                              )
-                                            ]
-                                          },
-                                          proxy: true
-                                        }
-                                      ]),
-                                      model: {
-                                        value: _vm.order.trading_account,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "trading_account",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "order.trading_account"
+                                        label: "Trading Account",
+                                        "label-for": "broker-input"
                                       }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Client Account",
-                                      "label-for": "broker-input"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-form-select",
-                                      {
+                                    },
+                                    [
+                                      _c("b-form-select", {
                                         staticClass: "mb-3",
                                         attrs: {
                                           options:
-                                            _vm.client_trading_account_options
-                                              .trading_account,
+                                            _vm.broker_trading_account_options,
                                           disabled: _vm.disabled == 1
+                                        },
+                                        on: {
+                                          change: function($event) {
+                                            return _vm.currencyHandler(
+                                              _vm.order.trading_account
+                                            )
+                                          }
                                         },
                                         scopedSlots: _vm._u([
                                           {
@@ -80560,7 +80528,7 @@ var render = function() {
                                                   { attrs: { value: null } },
                                                   [
                                                     _vm._v(
-                                                      "-- Please select a Client Account--"
+                                                      "-- Please select a Trading Account--"
                                                     )
                                                   ]
                                                 )
@@ -80570,744 +80538,826 @@ var render = function() {
                                           }
                                         ]),
                                         model: {
-                                          value:
-                                            _vm.order.client_trading_account,
+                                          value: _vm.order.trading_account,
                                           callback: function($$v) {
                                             _vm.$set(
                                               _vm.order,
-                                              "client_trading_account",
+                                              "trading_account",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "order.trading_account"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Client Account",
+                                        "label-for": "broker-input"
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "b-form-select",
+                                        {
+                                          staticClass: "mb-3",
+                                          attrs: {
+                                            options:
+                                              _vm.client_trading_account_options
+                                                .trading_account,
+                                            disabled: _vm.disabled == 1
+                                          },
+                                          scopedSlots: _vm._u([
+                                            {
+                                              key: "first",
+                                              fn: function() {
+                                                return [
+                                                  _c(
+                                                    "b-form-select-option",
+                                                    { attrs: { value: null } },
+                                                    [
+                                                      _vm._v(
+                                                        "-- Please select a Client Account--"
+                                                      )
+                                                    ]
+                                                  )
+                                                ]
+                                              },
+                                              proxy: true
+                                            }
+                                          ]),
+                                          model: {
+                                            value:
+                                              _vm.order.client_trading_account,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.order,
+                                                "client_trading_account",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "order.client_trading_account"
+                                          }
+                                        },
+                                        [
+                                          _vm._v(" "),
+                                          _vm._l(
+                                            _vm.client_trading_account_options,
+                                            function(b) {
+                                              return _c(
+                                                "b-form-select-option",
+                                                {
+                                                  key: b.id,
+                                                  attrs: { value: b.id }
+                                                },
+                                                [
+                                                  _vm._v(
+                                                    "JCSD-" +
+                                                      _vm._s(b.jcsd) +
+                                                      " : " +
+                                                      _vm._s(b.name) +
+                                                      ' "Investor"'
+                                                  )
+                                                ]
+                                              )
+                                            }
+                                          )
+                                        ],
+                                        2
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        id: "input-group-1-client-order-number",
+                                        label: "Client Order Number",
+                                        "label-for":
+                                          "input-1-client-order-number"
+                                      }
+                                    },
+                                    [
+                                      _c("b-form-input", {
+                                        attrs: {
+                                          id: "input-10",
+                                          type: "text",
+                                          placeholder:
+                                            "Enter Client Order Number",
+                                          disabled: 1 || false
+                                        },
+                                        model: {
+                                          value: _vm.order.client_order_number,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.order,
+                                              "client_order_number",
                                               $$v
                                             )
                                           },
                                           expression:
-                                            "order.client_trading_account"
+                                            "order.client_order_number"
                                         }
-                                      },
-                                      [
-                                        _vm._v(" "),
-                                        _vm._l(
-                                          _vm.client_trading_account_options,
-                                          function(b) {
-                                            return _c(
-                                              "b-form-select-option",
-                                              {
-                                                key: b.id,
-                                                attrs: { value: b.id }
-                                              },
-                                              [
-                                                _vm._v(
-                                                  "JCSD-" +
-                                                    _vm._s(b.jcsd) +
-                                                    " : " +
-                                                    _vm._s(b.name) +
-                                                    ' "Investor"'
-                                                )
-                                              ]
-                                            )
-                                          }
-                                        )
-                                      ],
-                                      2
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      id: "input-group-1-client-order-number",
-                                      label: "Client Order Number",
-                                      "label-for": "input-1-client-order-number"
-                                    }
-                                  },
-                                  [
-                                    _c("b-form-input", {
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
                                       attrs: {
-                                        id: "input-10",
-                                        type: "text",
-                                        placeholder:
-                                          "Enter Client Order Number",
-                                        disabled: 1 || false
-                                      },
-                                      model: {
-                                        value: _vm.order.client_order_number,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "client_order_number",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "order.client_order_number"
+                                        id: "input-group-1-market-order-number",
+                                        label: "Market Order Number",
+                                        "label-for":
+                                          "input-1-market-order-number"
                                       }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      id: "input-group-1-market-order-number",
-                                      label: "Market Order Number",
-                                      "label-for": "input-1-market-order-number"
-                                    }
-                                  },
-                                  [
-                                    _c("b-form-input", {
-                                      attrs: {
-                                        id: "input-1",
-                                        type: "text",
-                                        placeholder:
-                                          "Enter Market Order Number",
-                                        disabled: _vm.disabled == 1
-                                      },
-                                      model: {
-                                        value: _vm.order.market_order_number,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "market_order_number",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "order.market_order_number"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-row",
-                          [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Symbol",
-                                      "label-for": "order-input"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a symbol",
-                                        label: "text",
-                                        options: _vm.symbols,
-                                        disabled: _vm.disabled == 1
-                                      },
-                                      model: {
-                                        value: _vm.order.symbol,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "symbol", $$v)
-                                        },
-                                        expression: "order.symbol"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Currency",
-                                      "label-for": "broker-input"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a currency",
-                                        label: "text",
-                                        options: _vm.currencies,
-                                        disabled: 1 || false
-                                      },
-                                      model: {
-                                        value: _vm.order.currency,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "currency", $$v)
-                                        },
-                                        expression: "order.currency"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Value",
-                                      "label-for": "order-input"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "$" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "value-input1",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled == 1
-                                          },
-                                          model: {
-                                            value: _vm.order.value,
-                                            callback: function($$v) {
-                                              _vm.$set(_vm.order, "value", $$v)
-                                            },
-                                            expression: "order.value"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Stop Price",
-                                      "label-for": "limit-input"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "$" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "value-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled == 1
-                                          },
-                                          model: {
-                                            value: _vm.order.stop_price,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "stop_price",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "order.stop_price"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
-                      [
-                        _c(
-                          "b-row",
-                          [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Quantity",
-                                      "label-for": "broker-input"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "quantity-input",
-                                            state: _vm.nameState,
-                                            disabled: _vm.disabled == 1
-                                          },
-                                          model: {
-                                            value: _vm.order.quantity,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "quantity",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "order.quantity"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Price",
-                                      "label-for": "order-input"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "$" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "price-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled == 1
-                                          },
-                                          model: {
-                                            value: _vm.order.price,
-                                            callback: function($$v) {
-                                              _vm.$set(_vm.order, "price", $$v)
-                                            },
-                                            expression: "order.price"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Side",
-                                      "label-for": "type-input"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a Side",
-                                        label: "text",
-                                        options: _vm.side_options,
-                                        disabled: _vm.disabled == 1
-                                      },
-                                      model: {
-                                        value: _vm.order.side,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "side", $$v)
-                                        },
-                                        expression: "order.side"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Order Type",
-                                      "label-for": "type-input"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select an Order Type",
-                                        label: "text",
-                                        options: _vm.order_types,
-                                        disabled: _vm.disabled == 1
-                                      },
-                                      model: {
-                                        value: _vm.order.order_type,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.order, "order_type", $$v)
-                                        },
-                                        expression: "order.order_type"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
-                      [
-                        _c(
-                          "b-row",
-                          [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Handling Instructions",
-                                      "label-for": "broker-input"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select an Instruction",
-                                        label: "text",
-                                        options: _vm.handling_options,
-                                        disabled: _vm.disabled == 1
-                                      },
-                                      model: {
-                                        value: _vm.order.handling_instructions,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "handling_instructions",
-                                            $$v
-                                          )
-                                        },
-                                        expression:
-                                          "order.handling_instructions"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Time In Force",
-                                      "label-for": "broker-input"
-                                    }
-                                  },
-                                  [
-                                    _c("multiselect", {
-                                      attrs: {
-                                        placeholder: "Select a Time In Force",
-                                        order:
-                                          "order_option_inputs[][option_type]",
-                                        label: "text",
-                                        options: _vm.time_in_force,
-                                        disabled: _vm.disabled == 1
-                                      },
-                                      model: {
-                                        value: _vm.order.time_in_force,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.order,
-                                            "time_in_force",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "order.time_in_force"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              {
-                                directives: [
-                                  {
-                                    name: "show",
-                                    rawName: "v-show",
-                                    value: _vm.expiration,
-                                    expression: "expiration"
-                                  }
-                                ]
-                              },
-                              [
-                                _c(
-                                  "label",
-                                  { attrs: { for: "example-datepicker" } },
-                                  [_vm._v("Expiration Date")]
-                                ),
-                                _vm._v(" "),
-                                _c("b-form-datepicker", {
-                                  staticClass: "mb-2",
-                                  attrs: {
-                                    id: "example-datepicker",
-                                    disabled: _vm.disabled == 1
-                                  },
-                                  model: {
-                                    value: _vm.order.expiration_date,
-                                    callback: function($$v) {
-                                      _vm.$set(
-                                        _vm.order,
-                                        "expiration_date",
-                                        $$v
-                                      )
                                     },
-                                    expression: "order.expiration_date"
-                                  }
-                                })
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-container",
-                      { staticClass: "bv-example-row" },
-                      [
-                        _c("label", [_vm._v("Iceberg Options")]),
-                        _vm._v(" "),
-                        _c(
-                          "b-row",
-                          [
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Display Range",
-                                      "label-for": "order-input"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "+-" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "display_range-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled == 1
+                                    [
+                                      _c("b-form-input", {
+                                        attrs: {
+                                          id: "input-1",
+                                          type: "text",
+                                          placeholder:
+                                            "Enter Market Order Number",
+                                          disabled: _vm.disabled == 1
+                                        },
+                                        model: {
+                                          value: _vm.order.market_order_number,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.order,
+                                              "market_order_number",
+                                              $$v
+                                            )
                                           },
-                                          model: {
-                                            value: _vm.order.display_range,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "display_range",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "order.display_range"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-col",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  {
-                                    attrs: {
-                                      label: "Max Floor",
-                                      "label-for": "order-input"
-                                    }
-                                  },
-                                  [
-                                    _c(
-                                      "b-input-group",
-                                      { attrs: { size: "md", prepend: "^" } },
-                                      [
-                                        _c("b-form-input", {
-                                          attrs: {
-                                            id: "max_floor-input",
-                                            state: _vm.nameState,
-                                            type: "number",
-                                            disabled: _vm.disabled == 1
+                                          expression:
+                                            "order.market_order_number"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "b-row",
+                            [
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Symbol",
+                                        "label-for": "order-input"
+                                      }
+                                    },
+                                    [
+                                      _c("multiselect", {
+                                        attrs: {
+                                          placeholder: "Select a symbol",
+                                          label: "text",
+                                          options: _vm.symbols,
+                                          disabled: _vm.disabled == 1
+                                        },
+                                        model: {
+                                          value: _vm.order.symbol,
+                                          callback: function($$v) {
+                                            _vm.$set(_vm.order, "symbol", $$v)
                                           },
-                                          model: {
-                                            value: _vm.order.max_floor,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.order,
-                                                "max_floor",
-                                                $$v
-                                              )
+                                          expression: "order.symbol"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Currency",
+                                        "label-for": "broker-input"
+                                      }
+                                    },
+                                    [
+                                      _c("multiselect", {
+                                        attrs: {
+                                          placeholder: "Select a currency",
+                                          label: "text",
+                                          options: _vm.currencies,
+                                          disabled: 1 || false
+                                        },
+                                        model: {
+                                          value: _vm.order.currency,
+                                          callback: function($$v) {
+                                            _vm.$set(_vm.order, "currency", $$v)
+                                          },
+                                          expression: "order.currency"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Value",
+                                        "label-for": "order-input"
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "b-input-group",
+                                        { attrs: { size: "md", prepend: "$" } },
+                                        [
+                                          _c("b-form-input", {
+                                            attrs: {
+                                              id: "value-input1",
+                                              state: _vm.nameState,
+                                              type: "number",
+                                              disabled: _vm.disabled == 1
                                             },
-                                            expression: "order.max_floor"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c("b-col")
-                          ],
-                          1
-                        )
-                      ],
-                      1
-                    )
-                  ],
-                  1
-                )
-              ]
-            ),
-            _vm._v(" "),
-            _c("b-pagination", {
-              attrs: {
-                "total-rows": _vm.rows,
-                "per-page": _vm.perPage,
-                "aria-controls": "orders-table"
-              },
-              model: {
-                value: _vm.currentPage,
-                callback: function($$v) {
-                  _vm.currentPage = $$v
-                },
-                expression: "currentPage"
-              }
-            }),
-            _vm._v(" "),
-            _vm.permissions.indexOf("create-broker-order") !== -1
-              ? _c(
-                  "b-button",
-                  {
-                    directives: [
-                      {
-                        name: "b-modal",
-                        rawName: "v-b-modal.jse-new-order",
-                        modifiers: { "jse-new-order": true }
-                      }
+                                            model: {
+                                              value: _vm.order.value,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.order,
+                                                  "value",
+                                                  $$v
+                                                )
+                                              },
+                                              expression: "order.value"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Stop Price",
+                                        "label-for": "limit-input"
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "b-input-group",
+                                        { attrs: { size: "md", prepend: "$" } },
+                                        [
+                                          _c("b-form-input", {
+                                            attrs: {
+                                              id: "value-input",
+                                              state: _vm.nameState,
+                                              type: "number",
+                                              disabled: _vm.disabled == 1
+                                            },
+                                            model: {
+                                              value: _vm.order.stop_price,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.order,
+                                                  "stop_price",
+                                                  $$v
+                                                )
+                                              },
+                                              expression: "order.stop_price"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-container",
+                        { staticClass: "bv-example-row" },
+                        [
+                          _c(
+                            "b-row",
+                            [
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Quantity",
+                                        "label-for": "broker-input"
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "b-input-group",
+                                        { attrs: { size: "md" } },
+                                        [
+                                          _c("b-form-input", {
+                                            attrs: {
+                                              id: "quantity-input",
+                                              state: _vm.nameState,
+                                              disabled: _vm.disabled == 1
+                                            },
+                                            model: {
+                                              value: _vm.order.quantity,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.order,
+                                                  "quantity",
+                                                  $$v
+                                                )
+                                              },
+                                              expression: "order.quantity"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Price",
+                                        "label-for": "order-input"
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "b-input-group",
+                                        { attrs: { size: "md", prepend: "$" } },
+                                        [
+                                          _c("b-form-input", {
+                                            attrs: {
+                                              id: "price-input",
+                                              state: _vm.nameState,
+                                              type: "number",
+                                              disabled: _vm.disabled == 1
+                                            },
+                                            model: {
+                                              value: _vm.order.price,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.order,
+                                                  "price",
+                                                  $$v
+                                                )
+                                              },
+                                              expression: "order.price"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Side",
+                                        "label-for": "type-input"
+                                      }
+                                    },
+                                    [
+                                      _c("multiselect", {
+                                        attrs: {
+                                          placeholder: "Select a Side",
+                                          label: "text",
+                                          options: _vm.side_options,
+                                          disabled: _vm.disabled == 1
+                                        },
+                                        model: {
+                                          value: _vm.order.side,
+                                          callback: function($$v) {
+                                            _vm.$set(_vm.order, "side", $$v)
+                                          },
+                                          expression: "order.side"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Order Type",
+                                        "label-for": "type-input"
+                                      }
+                                    },
+                                    [
+                                      _c("multiselect", {
+                                        attrs: {
+                                          placeholder: "Select an Order Type",
+                                          label: "text",
+                                          options: _vm.order_types,
+                                          disabled: _vm.disabled == 1
+                                        },
+                                        model: {
+                                          value: _vm.order.order_type,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.order,
+                                              "order_type",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "order.order_type"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-container",
+                        { staticClass: "bv-example-row" },
+                        [
+                          _c(
+                            "b-row",
+                            [
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Handling Instructions",
+                                        "label-for": "broker-input"
+                                      }
+                                    },
+                                    [
+                                      _c("multiselect", {
+                                        attrs: {
+                                          placeholder: "Select an Instruction",
+                                          label: "text",
+                                          options: _vm.handling_options,
+                                          disabled: _vm.disabled == 1
+                                        },
+                                        model: {
+                                          value:
+                                            _vm.order.handling_instructions,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.order,
+                                              "handling_instructions",
+                                              $$v
+                                            )
+                                          },
+                                          expression:
+                                            "order.handling_instructions"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Time In Force",
+                                        "label-for": "broker-input"
+                                      }
+                                    },
+                                    [
+                                      _c("multiselect", {
+                                        attrs: {
+                                          placeholder: "Select a Time In Force",
+                                          order:
+                                            "order_option_inputs[][option_type]",
+                                          label: "text",
+                                          options: _vm.time_in_force,
+                                          disabled: _vm.disabled == 1
+                                        },
+                                        model: {
+                                          value: _vm.order.time_in_force,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.order,
+                                              "time_in_force",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "order.time_in_force"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                {
+                                  directives: [
+                                    {
+                                      name: "show",
+                                      rawName: "v-show",
+                                      value: _vm.expiration,
+                                      expression: "expiration"
+                                    }
+                                  ]
+                                },
+                                [
+                                  _c(
+                                    "label",
+                                    { attrs: { for: "example-datepicker" } },
+                                    [_vm._v("Expiration Date")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("b-form-datepicker", {
+                                    staticClass: "mb-2",
+                                    attrs: {
+                                      id: "example-datepicker",
+                                      disabled: _vm.disabled == 1
+                                    },
+                                    model: {
+                                      value: _vm.order.expiration_date,
+                                      callback: function($$v) {
+                                        _vm.$set(
+                                          _vm.order,
+                                          "expiration_date",
+                                          $$v
+                                        )
+                                      },
+                                      expression: "order.expiration_date"
+                                    }
+                                  })
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-container",
+                        { staticClass: "bv-example-row" },
+                        [
+                          _c("label", [_vm._v("Iceberg Options")]),
+                          _vm._v(" "),
+                          _c(
+                            "b-row",
+                            [
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Display Range",
+                                        "label-for": "order-input"
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "b-input-group",
+                                        {
+                                          attrs: { size: "md", prepend: "+-" }
+                                        },
+                                        [
+                                          _c("b-form-input", {
+                                            attrs: {
+                                              id: "display_range-input",
+                                              state: _vm.nameState,
+                                              type: "number",
+                                              disabled: _vm.disabled == 1
+                                            },
+                                            model: {
+                                              value: _vm.order.display_range,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.order,
+                                                  "display_range",
+                                                  $$v
+                                                )
+                                              },
+                                              expression: "order.display_range"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "b-col",
+                                [
+                                  _c(
+                                    "b-form-group",
+                                    {
+                                      attrs: {
+                                        label: "Max Floor",
+                                        "label-for": "order-input"
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "b-input-group",
+                                        { attrs: { size: "md", prepend: "^" } },
+                                        [
+                                          _c("b-form-input", {
+                                            attrs: {
+                                              id: "max_floor-input",
+                                              state: _vm.nameState,
+                                              type: "number",
+                                              disabled: _vm.disabled == 1
+                                            },
+                                            model: {
+                                              value: _vm.order.max_floor,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.order,
+                                                  "max_floor",
+                                                  $$v
+                                                )
+                                              },
+                                              expression: "order.max_floor"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c("b-col")
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
                     ],
-                    on: { click: _vm.add }
-                  },
-                  [_vm._v("Create New Order")]
-                )
-              : _vm._e()
-          ],
-          1
-        )
-      ])
+                    1
+                  )
+                ]
+              ),
+              _vm._v(" "),
+              _vm.permissions.indexOf("read-broker-order") !== -1
+                ? _c("b-pagination", {
+                    attrs: {
+                      "total-rows": _vm.rows,
+                      "per-page": _vm.perPage,
+                      "aria-controls": "orders-table"
+                    },
+                    model: {
+                      value: _vm.currentPage,
+                      callback: function($$v) {
+                        _vm.currentPage = $$v
+                      },
+                      expression: "currentPage"
+                    }
+                  })
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.permissions.indexOf("create-broker-order") !== -1
+                ? _c(
+                    "b-button",
+                    {
+                      directives: [
+                        {
+                          name: "b-modal",
+                          rawName: "v-b-modal.jse-new-order",
+                          modifiers: { "jse-new-order": true }
+                        }
+                      ],
+                      on: { click: _vm.add }
+                    },
+                    [_vm._v("Create New Order")]
+                  )
+                : _vm._e()
+            ],
+            1
+          )
+        ]
+      )
     ],
     1
   )
