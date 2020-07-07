@@ -73571,15 +73571,15 @@ __webpack_require__.r(__webpack_exports__);
         console.log("data", data);
         let valid = data.isvalid;
         console.log("post data", data);
-        /* if (valid) {
+        if (valid) {
           console.log(data);
           this.$swal(data.errors);
-          // setTimeout(location.reload.bind(location), 2000);
+          this.reloadPage();
         } else {
           this.$swal(data.errors);
-          // setTimeout(location.reload.bind(location), 2000);
-        } */
-        this.reloadPage();
+          this.reloadPage();
+        }
+
         // })
       } catch (error) {
         console.log("error", error);
