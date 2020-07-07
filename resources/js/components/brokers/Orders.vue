@@ -1067,11 +1067,14 @@ export default {
         let valid = data.isvalid;
         console.log("post data", data);
         if (valid) {
-          this.$swal("Success", data.errors, "success");
+          console.log(data);
+          this.$swal(data.errors);
+          this.reloadPage();
         } else {
-          this.$swal("Problem", data.errors, "error");
+          this.$swal(data.errors);
+          this.reloadPage();
         }
-        this.reloadPage();
+
         // })
       } catch (error) {
         console.log("error", error);

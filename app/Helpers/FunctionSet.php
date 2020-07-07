@@ -244,7 +244,7 @@ class FunctionSet
             case "Please Check the endpoint /MessageDownload/Download for message queue":
                 // If the order is successfull create a log
                 $this->LogActivity->addToLog('Order Successfull' . '-' . $request->client_order_number);
-                $this->executionBalanceUpdate($sender_sub_id);
+                $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
                 return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
                 break;
             default:
@@ -623,7 +623,7 @@ class FunctionSet
         return $order_status;
     }
 
-    public function executionBalanceUpdate($sender_sub_id)
+    public function executionBalanceUpdate($sender_sub_id, $trading_account_number)
     {
         // Call fix and return excutiun report for the required SensderSubID
         //$url = "http://35.155.69.248:8020/api/messagedownload/download";
@@ -680,13 +680,11 @@ class FunctionSet
             $order = BrokerClientOrder::where('clordid', $order_number)->first();
 
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
-            $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $sender_sub_id)
+            $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $trading_account_number)
                 ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
                 ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
                 ->get();
-
             $array = json_decode(json_encode($settlement_account), true);
-            // return $array;
             if ($order && $broker_client) {
                 // return $order;
                 $od = $order;

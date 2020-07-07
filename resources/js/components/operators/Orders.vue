@@ -1,11 +1,11 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid">
-      <h1>Current Orders</h1>
+    <div class="container-fluid" style="margin-top:100px;">
+      <h1 v-if="permissions.indexOf('read-broker-order') !== -1">Current Orders</h1>
       <div class="content">
         <b-table
-          responsiveS
+          responsive
           v-if="permissions.indexOf('read-broker-order') !== -1"
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
@@ -18,6 +18,10 @@
           :fields="fields"
           @row-clicked="brokerOrderHandler"
         ></b-table>
+        <p
+          v-if="permissions.indexOf('read-broker-order') == -1"
+          class="lead"
+        >You currently do not have permisions to view orders within the system. Please speak with your Broker Admin to have the Permissions activated on your account</p>
         <!-- <pre>{{broker_client_orders}}</pre> -->
         <div v-if="!create"></div>
         <b-modal
@@ -417,6 +421,7 @@
           </form>
         </b-modal>
         <b-pagination
+        v-if="permissions.indexOf('read-broker-order') !== -1"
           v-model="currentPage"
           :total-rows="rows"
           :per-page="perPage"
