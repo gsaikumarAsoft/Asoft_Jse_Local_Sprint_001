@@ -3,7 +3,7 @@
     <head-nav></head-nav>
     <div class="container-fluid">
       <div class="content">
-        <div v-if="!settlement_account">
+        <b-card title="Settlement Accounts" v-if="!settlement_account">
           <b-table
             responsive
             striped
@@ -11,7 +11,7 @@
             show-empty
             :empty-text="'No Settlement Accounts have been Created. Create a Settlement Account below.'"
             id="foreign-brokers"
-            :items="settlement_accounts"
+            :items="broker_settlement_accounts"
             :fields="fields"
             :per-page="perPage"
             :current-page="currentPage"
@@ -28,8 +28,8 @@
           <b-button @click="settlement_account={}">Create Settlement Account</b-button>
           <b-button @click="importAccounts">Import Accounts</b-button>
           <b-button @click="exportBalances">Export Balances</b-button>
-        </div>
-        <b-card v-else id="modal-1" :title="formTitle">
+        </b-card>
+        <b-card id="modal-1" :title="title" v-else>
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
             <b-form-group
@@ -39,13 +39,13 @@
               invalid-feedback="Name is required"
             >
               <b-form-select
-                required
                 label="Local Broker"
                 label-for="localBroker-input"
                 invalid-feedback="A Local Broker is required"
                 sm
                 v-model="settlement_account.local_broker_id"
                 :options="local_brokers"
+                required
               ></b-form-select>
             </b-form-group>
             <b-form-group
@@ -54,9 +54,9 @@
               invalid-feedback="Foreign Broker is required"
             >
               <b-form-select
-                required
                 v-model="settlement_account.foreign_broker_id"
                 :options="foreign_brokers"
+                required
               ></b-form-select>
             </b-form-group>
             <b-form-group label="Bank" label-for="bank-input" invalid-feedback=" Bank is required">
@@ -98,13 +98,13 @@
               invalid-feedback="currency is required"
             >
               <b-form-select
-                required
                 label="Currency"
                 label-for="Currency-input"
                 invalid-feedback="A currency is required"
                 sm
                 v-model="settlement_account.currency"
                 :options="currencies"
+                required
               ></b-form-select>
             </b-form-group>
             <b-form-group
@@ -133,9 +133,8 @@
                 required
               ></b-form-input>
             </b-form-group>
-
             <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button type="button" variant="warning" @click="settlement_account = null">Cancel</b-button>
+            <b-button variant="danger" @click="settlement_account=null">Cancel</b-button>
           </form>
         </b-card>
       </div>
@@ -155,7 +154,7 @@ export default {
   },
   data() {
     return {
-      settlement_accounts: [],
+      broker_settlement_accounts: [],
       settlement_account: null,
       local_brokers: [],
       foreign_brokers: [],
@@ -208,15 +207,14 @@ export default {
     };
   },
   computed: {
-    formTitle() {
-      return (
-        (!!(this.settlement_account && this.settlement_account.id)
-          ? "Update"
-          : "Create") + " Settlement Account"
-      );
+    isNew() {
+      return !(this.settlement_account && this.settlement_account.id);
+    },
+    title() {
+      return `${this.isNew ? "Create" : "Update"} Broker Settlement Account`;
     },
     rows() {
-      return this.settlement_accounts.length;
+      return this.broker_settlement_accounts.length;
     }
   },
   methods: {
@@ -234,20 +232,20 @@ export default {
     },
     exportBalances() {
       const tableData = [];
-      for (var i = 0; i < this.settlement_accounts.length; i++) {
+      for (var i = 0; i < this.broker_settlement_accounts.length; i++) {
         tableData.push([
-          this.settlement_accounts[i].local_broker["name"],
-          this.settlement_accounts[i].foreign_broker["name"],
-          this.settlement_accounts[i].bank_name,
-          this.settlement_accounts[i].account,
-          this.settlement_accounts[i].email,
-          this.settlement_accounts[i].account_balance,
-          this.settlement_accounts[i].amount_allocated
+          this.broker_settlement_accounts[i].local_broker["name"],
+          this.broker_settlement_accounts[i].foreign_broker["name"],
+          this.broker_settlement_accounts[i].bank_name,
+          this.broker_settlement_accounts[i].account,
+          this.broker_settlement_accounts[i].email,
+          this.broker_settlement_accounts[i].account_balance,
+          this.broker_settlement_accounts[i].amount_allocated
         ]);
       }
 
-      // console.log(this.settlement_accounts[i])
-      // tableData.push(this.settlement_accounts[i]);
+      // console.log(this.broker_settlement_accounts[i])
+      // tableData.push(this.broker_settlement_accounts[i]);
 
       var doc = new jsPDF();
       //   // It can parse html:
@@ -274,35 +272,16 @@ export default {
     async handleSubmit() {
       // Exit when the form isn't valid
       //Determine if a new user is being created or we are updating an existing user
-      let account;
-
-      let isNew = !this.settlement_account.id;
-
-      if (isNew) {
-        //create with id = null
-        account = {
-          id: null,
-          currency: this.settlement_account.currency,
-          account: this.settlement_account.account,
-          account_balance: this.settlement_account.account_balance,
-          amount_allocated: this.settlement_account.amount_allocated,
-          bank_name: this.settlement_account.bank_name,
-          email: this.settlement_account.email,
-          foreign_broker_id: this.settlement_account.foreign_broker_id,
-          local_broker_id: this.settlement_account.local_broker_id,
-          status: "Unverified",
-          hash: this.settlement_account.hash
-        };
-      } else {
-        //update
-        account = this.settlement_account;
+      const account = { ...this.settlement_account };
+      if (this.isNew) {
+        //Exclude ID
+        account["id"] = null;
+        account["status"] = "Unverified";
       }
 
-      console.log("account", account);
-
       this.$swal.fire({
-        title: `Settlement Account`,
-        html: `${isNew ? "Creating" : "Updating"} Settlement Account`,
+        title: `${this.isNew ? "Creating" : "Updating"} Settlement Account`,
+        html: "One moment while we setup the Account",
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
@@ -313,23 +292,17 @@ export default {
       try {
         await axios.post("../store-settlement-broker", account);
         await this.getSettlementList();
-        this.$swal(
-          `Settlement Account ${isNew ? "created" : "updated"} for ${
-            this.settlement_account.email
-          }`
-        );
         this.settlement_account = null;
-        this.nameState = null;
+        this.$swal.close();
       } catch (error) {
-        console.error("settlement save failed", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        console.error("destroy", error);
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
 
     async settlmentAccountHandler(b) {
       // console.log(b);
-      console.log(b);
-
+      console.log("selected account1", b);
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -344,34 +317,34 @@ export default {
         cancelButtonAriaLabel: "cancel"
       });
       if (result.value) {
-        this.settlement_account = b;
+        this.settlement_account = { ...b };
+        console.log("selected account2", this.settlement_account);
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
       }
     },
 
-    setLocalBroker() {
-      // console.log(this);
-    },
-
     async getSettlementList() {
-      ({ data: this.settlement_accounts } = await axios.get(
+      ({ data: this.broker_settlement_accounts } = await axios.get(
         "../settlement-list"
       )); //.then(response => {
-      console.log("settlement_accounts)", this.settlement_accounts);
+      console.log(
+        "broker_settlement_accounts",
+        this.broker_settlement_accounts
+      );
     },
 
     async destroy(id) {
+      this.$swal.fire({
+        title: `Deleting Settlement Account`,
+        html: "One moment while we delete the Account",
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
+      });
       try {
-        this.$swal.fire({
-          title: `Settlement Account`,
-          html: "Deleting Settlement Account.......",
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            this.$swal.showLoading();
-          }
-        });
         await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
         await this.getSettlementList();
         this.$swal(
@@ -381,29 +354,31 @@ export default {
         );
       } catch (error) {
         console.error("destroy", error);
-        this.$swal("Oops...", "Something went wrong!", "error");
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
 
     async getlocalBrokers() {
-      const { data: local_brokers } = await axios.get("../local-brokers");
-      this.local_brokers = local_brokers.map(({ user }) => ({
+      const { data } = await axios.get("../local-brokers");
+      this.local_brokers = data.map(({ user }) => ({
         text: user.name,
         value: user.id
       }));
+      console.log("local brokers", this.local_brokers);
     },
-    async getForeiognBrokers() {
-      const { data: foreign_brokers } = await axios.get("../foreign-brokers");
-      this.foreign_brokers = foreign_brokers.map(({ user }) => ({
+    async getForeignBrokers() {
+      const { data } = await axios.get("../foreign-brokers");
+      this.foreign_brokers = data.map(({ user }) => ({
         text: user.name,
         value: user.id
       }));
+      console.log("foreign brokers", this.foreign_brokers);
     }
   },
   async mounted() {
     await Promise.all([
       this.getlocalBrokers(),
-      this.getForeiognBrokers(),
+      this.getForeignBrokers(),
       this.getSettlementList()
     ]);
   }

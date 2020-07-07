@@ -2,32 +2,43 @@
   <div>
     <head-nav></head-nav>
     <div class="container-fluid">
-      <h1>Current Orders</h1>
       <div class="content">
-        <b-table
-          responsive
-          ref="selectedOrder"
-          :empty-text="'No Orders have been Created. Create an Order below.'"
-          id="orders-table"
-          :items="broker_client_orders"
-          :per-page="perPage"
-          :current-page="currentPage"
-          striped
-          hover
-          :fields="fields"
-          @row-clicked="brokerOrderHandler"
-        ></b-table>
-        <div v-if="!create"></div>
-        <b-modal
-          :hide-footer="!create"
-          id="jse-new-order"
-          size="xl"
-          ref="modal"
-          @ok="handleJSEOrder"
-          @hidden="resetModal"
-          :title="modalTitle"
-        >
-          <form ref="form">
+        <b-card title="Current Orders" v-if="!order">
+          <div class="float-right">
+            <b-input
+              id="search_content"
+              v-model="filter"
+              type="text"
+              placeholder="Filter Orders..."
+              class="mb-2 mr-sm-2 mb-sm-0"
+            ></b-input>
+          </div>
+
+          <b-table
+            responsive
+            ref="selectedOrder"
+            :empty-text="'No Orders have been Created. Create an Order below.'"
+            id="orders-table"
+            :items="broker_client_orders"
+            :per-page="perPage"
+            :current-page="currentPage"
+            :filterIncludedFields="filterOn"
+            striped
+            hover
+            :fields="fields"
+            :filter="filter"
+            @row-clicked="brokerOrderHandler"
+          ></b-table>
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="orders-table"
+          ></b-pagination>
+          <b-button @click="displayNewOrder">Create New Order</b-button>
+        </b-card>
+        <b-card v-else id="jse-new-order" :title="title" class="text-center">
+          <form ref="form" @submit.stop.prevent="handleJSEOrder">
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
@@ -145,7 +156,7 @@
                       v-model="order.currency"
                       label="text"
                       :options="currencies"
-                      :disabled="disabled"
+                      :disabled="true"
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -479,15 +490,16 @@
                 </b-col>
               </b-row>
             </b-container>
+            <b-container class="bv-example-row">
+              <b-row>
+                <b-col cols="12" class="text-center">
+                  <b-button type="submit" variant="primary" v-show="isNew">Create Order</b-button>
+                  <b-button variant="danger" @click="reloadPage()">Exit</b-button>
+                </b-col>
+              </b-row>
+            </b-container>
           </form>
-        </b-modal>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="orders-table"
-        ></b-pagination>
-        <b-button v-b-modal.jse-new-order @click="add">Create New Order</b-button>
+        </b-card>
       </div>
     </div>
   </div>
@@ -509,11 +521,12 @@ export default {
   data() {
     return {
       // messageDownload: [],
-      modalTitle: "New Order",
+      filter: null,
       expiration: false,
       order_template_data: [],
       file: "",
       order_option_input: false,
+      filterOn: ["clordid", "side"],
       template: false,
       broker_trading_account_options: [],
       client_trading_account_options: [],
@@ -523,8 +536,7 @@ export default {
       local_broker: [],
       foreign_broker: [],
       selected: null,
-      create: false,
-      order: {},
+      order: null,
       fields: [
         // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
@@ -780,6 +792,16 @@ export default {
     };
   },
   computed: {
+    isNew() {
+      return !(this.order && this.order.id);
+    },
+    title() {
+      if (this.isNew) {
+        return "Create New Order";
+      } else {
+        return `Viewing Order ${this.order.clordid}`;
+      }
+    },
     rows() {
       return this.broker_client_orders.length;
     }
@@ -822,43 +844,6 @@ export default {
       }
     },
     async brokerOrderHandler(o) {
-      this.disabled = true;
-      this.order = {};
-      this.order = o;
-
-      // console.log("order", o);
-
-      //Pre Select Client And Trading Accounts
-      // var data = { ...this.orders };
-      var data = JSON.parse(this.orders);
-
-      var clients = data[0].clients;
-      var trading = data[0].trading;
-      var i, j;
-      // console.log(trading);
-      for (i = 0; i < clients.length; i++) {
-        if (o.broker_client_id === clients[i].id) {
-          this.order.client_trading_account = clients[i].id;
-        }
-      }
-      for (j = 0; j < trading.length; j++) {
-        if (parseInt(o.trading_account_id) === trading[j].id) {
-          this.order.trading_account = trading[j].id;
-        }
-      }
-      // ============================================================================================
-      //Check if we already parsed to json if we didnt do so now.
-      if (typeof o.time_in_force === "string") {
-        // Parse stringified data from database back to json for viewing in the multiselect dropdown
-        // let handling = JSON.parse(o.handling_instructions);
-        // console.log("order", this.order);
-        this.order.handling_instructions = JSON.parse(o.handling_instructions);
-        this.order.symbol = JSON.parse(o.symbol);
-        this.order.currency = JSON.parse(o.currency);
-        this.order.side = JSON.parse(o.side);
-        this.order.order_type = JSON.parse(JSON.parse(o.order_type));
-        this.order.time_in_force = JSON.parse(o.time_in_force);
-      }
       // this.$refs.selectedOrder.clearSelected();
       // =============================================================================================
       const result = await this.$swal({
@@ -871,15 +856,51 @@ export default {
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
         footer: "<a href='orders' >Exit</a>"
-      }).then(result => {
+      });
+
       if (result.value) {
-        this.$bvModal.show("jse-new-order");
-        this.modalTitle = `Viewing Order ${o.clordid}`;
+        this.order = o;
+
+        this.disabled = true;
+
+        // console.log("order", o);
+        //Pre Select Client And Trading Accounts
+        // var data = { ...this.orders };
+        var data = JSON.parse(this.orders);
+
+        var clients = data[0].clients;
+        var trading = data[0].trading;
+        var i, j;
+        // console.log(trading);
+        for (i = 0; i < clients.length; i++) {
+          if (o.broker_client_id === clients[i].id) {
+            this.order.client_trading_account = clients[i].id;
+          }
+        }
+        for (j = 0; j < trading.length; j++) {
+          if (parseInt(o.trading_account_id) === trading[j].id) {
+            this.order.trading_account = trading[j].id;
+          }
+        }
+        // ============================================================================================
+        //Check if we already parsed to json if we didnt do so now.
+        if (typeof o.time_in_force === "string") {
+          // Parse stringified data from database back to json for viewing in the multiselect dropdown
+          // let handling = JSON.parse(o.handling_instructions);
+          // console.log("order", this.order);
+          this.order.handling_instructions = JSON.parse(
+            o.handling_instructions
+          );
+          this.order.symbol = JSON.parse(o.symbol);
+          this.order.currency = JSON.parse(o.currency);
+          this.order.side = JSON.parse(o.side);
+          this.order.order_type = JSON.parse(JSON.parse(o.order_type));
+          this.order.time_in_force = JSON.parse(o.time_in_force);
+        }
       }
       if (result.dismiss === "cancel") {
         this.destroy(o.clordid);
       }
-      });
     },
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
@@ -903,6 +924,7 @@ export default {
       this.order_option_inputs = this.order_template_data.order_options;
       this.template = false;
     },
+
     async saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
@@ -911,8 +933,6 @@ export default {
 
       delete order_data.order_standard["trading_account"];
       //  Hide new order modal to allow inserting of new template name
-      this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
-
       //Allow the user to create a file name before saving the file to their machine
       const result = await this.$swal({
         title:
@@ -946,26 +966,23 @@ export default {
         this.$bvModal.show("jse-new-order");
       }
     },
+
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
       //let data = response.data;
       console.log("tradingAccounts", data);
-      for (let i = 0; i < data.length; i++) {
-        //console.log(data[i]);
-        this.broker_trading_account_options.push({
-          text:
-            data[i].foreign_broker +
-            " : " +
-            data[i].bank +
-            "-" +
-            data[i].trading_account_number +
-            " : " +
-            data[i].account,
-          value: data[i].id,
-          data: data[i]
-        });
-      }
-      // });
+      this.broker_trading_account_options = data.map(x => ({
+        text:
+          x.foreign_broker +
+          " : " +
+          x.bank +
+          "-" +
+          x.trading_account_number +
+          " : " +
+          x.account,
+        value: x.id,
+        data: x
+      }));
     },
 
     /* setTradingAccounts() {
@@ -991,98 +1008,102 @@ export default {
         }
       });
     }, */
-    checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.nameState = valid;
-      return valid;
-    },
+
     async getBrokers() {
       const { data } = await axios.get("broker-list"); //.then(response => {
       //let data = response.data;
-      for (let i = 0; i < data.length; i++) {
-        this.local_broker.push({
-          text: data[i].name,
-          value: data[i].id
-        });
-      }
+      this.local_broker = data.map(x => ({
+        text: x.name,
+        value: x.id
+      }));
+
       // this.broker_client_orders = data;
       // });
       let { data: fdata } = await axios.get("foreign-broker-list"); //.then(fresponse => {
       // let fdata = fresponse.data;
-      for (let j = 0; j < fdata.length; j++) {
-        this.foreign_broker.push({
-          text: fdata[j].name,
-          value: fdata[j].id
-        });
-      }
-      // });
+      this.foreign_broker = data.map(x => ({
+        text: x.name,
+        value: x.id
+      }));
     },
-    async createBrokerClientOrder(broker) {
+    async createBrokerClientOrder() {
       //Notes:
-      console.log("broker", broker);
-      /*  await this.$swal.fire({
-        title: "Creating Client Order",
-        html: "One moment while we setup the current order",
-        timerProgressBar: true,
-        onBeforeOpen: () => {
-          this.$swal.showLoading();
-        }
-      }); */
+      console.log("order", this.order);
+
       // .then(result => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
-      // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
+      // •	The “Account” represents the “JCSD #” from the “Client Account” for the this.order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
-      if (!broker.trading_account || !broker.client_trading_account) {
-        this.$swal(
-          "You need to select a Trading Account & Client Account to continue"
-        );
-        return;
-      }
-
-      if (broker.price > broker.stop_price) {
-        this.$swal("Price must be less than or equal to the Stop Price");
-        return;
-      }
 
       try {
-        const { data } = await axios.post("store-broker-client-order", broker);
+        const { value: side_type } = JSON.parse(this.order.side);
+        console.log("side_type", side_type);
+
+        if (!this.order.trading_account || !this.order.client_trading_account) {
+          throw new Error(
+            "You need to select a Trading Account & Client Account to continue"
+          );
+        }
+        if (side_type === "Buy" && this.order.price > this.order.stop_price) {
+          throw new Error("Price must be less than or equal to the Stop Price");
+        }
+
+        this.$swal.fire({
+          title: "Creating Client Order",
+          html: "One moment while we setup the current order",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        const { data } = await axios.post(
+          "store-broker-client-order",
+          this.order
+        );
         //  .then(response => {
         // let data = response.data;
+        console.log("data", data);
         let valid = data.isvalid;
-        console.log("post data",data);
+        console.log("post data", data);
         if (valid) {
-          console.log(data);
-          this.$swal(data.errors);
-          // setTimeout(location.reload.bind(location), 2000);
+          this.$swal("Success", data.errors, "success");
         } else {
-          this.$swal(data.errors);
-          // setTimeout(location.reload.bind(location), 2000);
+          this.$swal("Problem", data.errors, "error");
         }
-        setTimeout(location.reload.bind(location), 2000);
+        this.reloadPage();
         // })
       } catch (error) {
-        var s = error.response.data.message;
-        var field = s.match(/'([^']+)'/)[1];
-        if (error.response.data.message.includes("cannot be null")) {
+        console.log("error", error);
+        const s =
+          error.response && error.response.data && error.response.data.message;
+        if (s && s.includes("cannot be null")) {
+          const field = s.match(/'([^']+)'/)[1];
           this.$swal(
             `When creating an order ${field} cannot be null. Please try creating the order again.`
           );
+        } else {
+          console.error("create order error", error);
+          this.$swal("Error Detected", error.message, "error");
         }
       } //);
+      //
     },
+
+    reloadPage() {
+      window.location.reload();
+    },
+
     async getSymbols() {
       const { data } = await axios.get("/apis/symbols.json"); //.then(response => {
       this.symbols = data;
       // });
     },
 
-    add() {
+    displayNewOrder() {
       this.disabled = false;
-      this.modalTitle = "New Order";
-      this.create = true;
       var dt = new Date();
-
+      this.order = {};
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         "ORD" +
@@ -1122,7 +1143,7 @@ export default {
       // Exit when the form isn't valid
       // if (!this.checkFormValidity()) {
       // } else {
-      this.$bvModal.hide("jse-new-order"); //Close the modal if it is open
+
       var new_order = {};
       this.order["handling_instructions"] = JSON.stringify(
         this.order.handling_instructions
@@ -1134,17 +1155,19 @@ export default {
       this.order["time_in_force"] = JSON.stringify(this.order.time_in_force);
       this.order["option_type"] = JSON.stringify(this.order.option_type);
       this.order["order_type"] = JSON.stringify(this.order.order_type);
-      await this.createBrokerClientOrder(this.order);
+      await this.createBrokerClientOrder();
       // }
-    },
-    resetModal() {
-      this.create = false;
-      this.$refs.selectedOrder.clearSelected();
-      this.order = {};
-    },
-    handleSubmit() {}
+    }
   },
   async mounted() {
+    this.$swal.fire({
+      title: "Loading Orders",
+      html: "One moment while we load the current orders",
+      timerProgressBar: true,
+      onBeforeOpen: () => {
+        this.$swal.showLoading();
+      }
+    });
     await this.getSymbols();
     //await this.getBrokers();
     await this.tradingAccounts();
@@ -1158,6 +1181,8 @@ export default {
       return b.client_order_number > a.client_order_number ? -1 : 1;
     });
     this.client_trading_account_options = client_accounts;
+
+    this.$swal.close();
 
     // var local = JSON.parse(this.local_brokers);
     // let i;

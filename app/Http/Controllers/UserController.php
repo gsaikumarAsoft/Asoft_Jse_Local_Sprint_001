@@ -25,22 +25,23 @@ class UserController extends Controller
     public function index()
     {
         $user = auth()->user();
-        // return $user;
         $a = BrokerUser::with('user')->where('dma_broker_id', $user->id)->get();
-        // return $a;
-        foreach ($a as $key => $user) {
+        if (count($a) > 0) {
+            foreach ($a as $key => $user) {
 
-            $user = $a[$key]->user;
-            $broker_user[$key] = [];
-            $broker_user[$key]['id'] = $user->id;
-            $broker_user[$key]['name'] = $user->name;
-            $broker_user[$key]['email'] = $user->email;
-            $broker_user[$key]['status'] = $user->status;
-            $broker_user[$key]['permissions'] = $user->permissions;
-            $broker_user[$key]['broker_trading_account_id'] = (int)$a[$key]->broker_trading_account_id;
-          
+                $user = $a[$key]->user;
+                $broker_user[$key] = [];
+                $broker_user[$key]['id'] = $user->id;
+                $broker_user[$key]['name'] = $user->name;
+                $broker_user[$key]['email'] = $user->email;
+                $broker_user[$key]['status'] = $user->status;
+                $broker_user[$key]['permissions'] = $user->permissions;
+                $broker_user[$key]['broker_trading_account_id'] = (int) $a[$key]->broker_trading_account_id;
+            }
+            return $broker_user;
+        } else {
+            return $a;
         }
-        return $broker_user;
     }
     function store(Request $request)
     {

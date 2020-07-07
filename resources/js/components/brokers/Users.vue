@@ -3,31 +3,33 @@
     <head-nav></head-nav>
     <div class="container-fluid">
       <div class="content">
-        <b-table
-          responsive
-          show-empty
-          :empty-text="'No Users have been Created. Create a user below.'"
-          striped
-          hover
-          id="local-brokers"
-          :items="local_broker_users"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          @row-clicked="brokerUserHandler"
-        >
-          <template slot="index" slot-scope="row">{{ row }}</template>
-        </b-table>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="local-brokers"
-        ></b-pagination>
-        <b-button v-b-modal.modal-1 @click="create = true">Create User</b-button>
+        <b-card title="Users">
+          <b-table
+            responsive
+            show-empty
+            :empty-text="'No Users have been Created. Create a user below.'"
+            striped
+            hover
+            id="local-brokers"
+            :items="local_broker_users"
+            :fields="fields"
+            :per-page="perPage"
+            :current-page="currentPage"
+            @row-clicked="brokerUserHandler"
+          >
+            <template slot="index" slot-scope="row">{{ row }}</template>
+          </b-table>
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="local-brokers"
+          ></b-pagination>
+          <b-button v-b-modal.modal-1 @click="create = true">Create User</b-button>
+        </b-card>
         <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
-          <form ref="form" @submit.stop.prevent="handleSubmit">
+          <form ref="form">
             <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
               <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
             </b-form-group>
@@ -169,6 +171,7 @@ export default {
   methods: {
     async getUserRole() {
       const { data } = await axios.put(`/nv9w8yp8rbwg4t`);
+      console.log("getUserRole data", data);
       let role = data.roles[0];
       let broker_account = data.broker;
       // console.log(broker_account);
@@ -233,64 +236,68 @@ export default {
     async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
-      // Trigger submit handler
-      await this.handleSubmit();
-    },
-    async handleSubmit() {
       // console.log(this.broker);
       // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-      } else {
-        this.$bvModal.hide("modal-1"); //Close the modal if it is open
-        if (this.broker.selected_client_permissions == null) {
-          this.broker.selected_client_permissions = [];
-        }
-        if (this.broker.selected_broker_permissions == null) {
-          this.broker.selected_broker_permissions = [];
-        }
-        //Determine if a new user is being created or we are updating an existing user
-        if (this.create) {
-          //Exclude ID
-          await this.storeBrokerUser({
-            local_broker_id: parseInt(this.$userId),
-            broker_trading_account_id: this.broker.broker_trading_account_id,
-            name: this.broker.name,
-            email: this.broker.email,
-            status: "Unverified",
-            permissions: this.broker.selected_client_permissions.concat(
-              this.broker.selected_broker_permissions
-            ),
-            target: this.broker.target
-          });
-        } else {
-          //Include ID
-          await this.storeBrokerUser({
-            id: this.broker.id,
-            local_broker_id: parseInt(this.$userId),
-            broker_trading_account_id: this.broker.broker_trading_account_id,
-            name: this.broker.name,
-            email: this.broker.email,
-            status: "Unverified",
-            permissions: this.broker.selected_client_permissions.concat(
-              this.broker.selected_broker_permissions
-            ),
-            target: this.broker.target
-          });
-          await this.$swal(`Account Updated for ${this.broker.email}`);
-        }
+      if (!this.checkFormValidity()) return;
 
-        this.resetModal();
-        this.$nextTick(() => {
-          this.$bvModal.hide("modal-1");
-        });
+      if (this.broker.selected_client_permissions == null) {
+        this.broker.selected_client_permissions = [];
       }
-      // Push the name to submitted names
-      // this.submittedNames.push(this.name);
-      // Hide the modal manually
-      this.$nextTick(() => {
-        this.$bvModal.hide("modal-1");
+      if (this.broker.selected_broker_permissions == null) {
+        this.broker.selected_broker_permissions = [];
+      }
+      const account = {
+        local_broker_id: parseInt(this.$userId),
+        broker_trading_account_id: this.broker.broker_trading_account_id,
+        name: this.broker.name,
+        email: this.broker.email,
+        status: "Unverified",
+        permissions: this.broker.selected_client_permissions.concat(
+          this.broker.selected_broker_permissions
+        ),
+        target: this.broker.target
+      };
+
+      //Determine if a new user is being created or we are updating an existing user
+      if (this.create) {
+        //Exclude ID
+        account["id"] = null;
+      } else {
+        //Include ID
+        account["id"] = this.broker.id;
+      }
+      this.$swal.fire({
+        title: `${this.create ? "Creating" : "Updating"} User Account`,
+        html: `One moment while we ${
+          this.create ? "setup" : "update"
+        } the User Account`,
+        timerProgressBar: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        }
       });
+
+      try {
+        await axios.post("store-broker", account);
+        await this.getBrokerUsers();
+        //location.reload();
+        this.$swal(
+          `Account ${this.create ? "Created" : "Updated"} for ${
+            this.broker.email
+          }`
+        );
+        this.resetModal();
+        await this.$nextTick();
+        this.$bvModal.hide("modal-1");
+      } catch (error) {
+        if (error.response.data.message.includes("Duplicate entry")) {
+          await this.$swal(
+            `An Account with this email address already exists. Please try using a different email`
+          );
+        }
+      }
     },
+
     async brokerUserHandler(b) {
       this.broker = b;
       this.broker.selected_permissions = this.broker.types;
@@ -313,121 +320,100 @@ export default {
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
-        await this.$swal("Deleted!", "User Has Been Removed.", "success");
       }
       //});
     },
-    async getBrokers() {
-      const { data } = await axios.get("broker-users");
-      // console.log(response);
-      // let data = response.data;
-      let user_permissions = [];
-      this.local_broker_users = data;
+    async getBrokerUsers() {
+      try {
+        ({ data: this.local_broker_users } = await axios.get("broker-users"));
+        console.log("this.local_broker_users", this.local_broker_users);
+        //Handle Permissions
+        for (let i = 0; i < this.local_broker_users.length; i++) {
+          // console.log(this.local_broker_users[i].permissions)
+          this.local_broker_users[i].types = [];
+          this.local_broker_users[i].selected_client_permissions = [];
+          this.local_broker_users[i].selected_broker_permissions = [];
 
-      //Handle Permissions
-      for (let i = 0; i < this.local_broker_users.length; i++) {
-        // console.log(this.local_broker_users[i].permissions)
-        this.local_broker_users[i].types = [];
-        this.local_broker_users[i].selected_client_permissions = [];
-        this.local_broker_users[i].selected_broker_permissions = [];
+          const user_permissions = this.local_broker_users[i].permissions;
+          for (let k = 0; k < user_permissions.length; k++) {
+            var specific_permission = user_permissions[k].name;
+            this.local_broker_users[i].types.push(specific_permission);
 
-        user_permissions = this.local_broker_users[i].permissions;
-        for (let k = 0; k < user_permissions.length; k++) {
-          var specific_permission = user_permissions[k].name;
-          this.local_broker_users[i].types.push(specific_permission);
+            if (specific_permission.includes("client")) {
+              this.local_broker_users[i].selected_client_permissions.push(
+                specific_permission
+              );
+            }
 
-          if (specific_permission.includes("client")) {
-            this.local_broker_users[i].selected_client_permissions.push(
-              specific_permission
-            );
-          }
-
-          if (specific_permission.includes("order")) {
-            this.local_broker_users[i].selected_broker_permissions.push(
-              specific_permission
-            );
+            if (specific_permission.includes("order")) {
+              this.local_broker_users[i].selected_broker_permissions.push(
+                specific_permission
+              );
+            }
           }
         }
+        this.broker.selected_permissions = this.local_broker_users.types;
+      } catch (error) {
+        console.error("getBrokerUsers", error);
+        throw error;
       }
-
-      this.broker.selected_permissions = this.local_broker_users.types;
-      // });
     },
+
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts");
-
-      for (let i = 0; i < data.length; i++) {
-        // console.log(data[i]);
-        this.broker_trading_account_options.push({
-          text:
-            data[i].foreign_broker +
-            " : " +
-            data[i].bank +
-            "-" +
-            data[i].trading_account_number +
-            " : " +
-            data[i].account,
-          value: data[i].id
-        });
-      }
+      console.log("tradingAccounts", data);
+      this.broker_trading_account_options = data.map(x => ({
+        text: `${x.foreign_broker} : ${x.bank}-${x.trading_account_number} : ${x.account}`,
+        value: x.id
+      }));
     },
-    async storeBrokerUser(broker) {
-      const result = await this.$swal.fire({
-        title: "Creating User Account",
-        html: "One moment while we setup the User Account",
+
+    add() {
+      this.create = true;
+    },
+    async destroy(id) {
+      this.$swal.fire({
+        title: "Deleting User Account",
+        html: "One moment while we delete the User Account",
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
         }
       });
-
       try {
-        await axios.post("store-broker", broker);
-
-        await this.$swal(`Account created for ${broker.email}`);
-        // setTimeout(location.reload.bind(location), 2000);
-        await this.getBrokers();
+        await axios.delete(`user-broker-delete/${id}`);
+        this.getBrokerUsers();
+        this.$swal.close();
       } catch (error) {
-        if (error.response.data.message.includes("Duplicate entry")) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        }
+        this.$swal("Ouch!", "Something went wrong.", "error");
       }
     },
-    add() {
-      this.create = true;
-    },
-    async destroy(id) {
-      await axios.delete(`user-broker-delete/${id}`);
-      // this.getBrokers();
-      window.location.reload();
+    async getLocalBrokers() {
+      const { data } = await axios.get("local-brokers");
+      console.log("local_brokers", data);
+      this.local_brokers = data.map(x => ({
+        text: x.name,
+        value: x.id
+      }));
     }
   },
   async mounted() {
-    await this.getUserRole();
-
-    // //Define Permission On Front And Back End
-    // let p = JSON.parse(this.$userPermissions);
-    // //Looop through and identify all permission to validate against actions
-    // for (let i = 0; i < p.length; i++) {
-    //   this.permissions.push(p[i].name);
-    //   // console.log(p[i].name);
-    // }
-    const { data: local_brokers } = await axios.get("local-brokers"); //.then(response => {
-
-    console.log("local_brokers", local_brokers);
-    for (let i = 0; i < local_brokers.length; i++) {
-      this.local_brokers.push({
-        text: local_brokers[i].name,
-        value: local_brokers[i].id
-      });
-    }
-
-    await this.getBrokers();
-    await this.tradingAccounts();
-
-    console.log("permissions",this.permissions);
+    this.$swal.fire({
+      title: "Loading User Data..",
+      html: "One moment while we load user data",
+      timerProgressBar: true,
+      onBeforeOpen: () => {
+        this.$swal.showLoading();
+      }
+    });
+    await Promise.all([
+      this.getBrokerUsers(),
+      this.tradingAccounts(),
+      this.getUserRole(),
+      this.getLocalBrokers()
+    ]);
+    this.$swal.close();
+    console.log("permissions", this.permissions);
   }
 };
 </script>
