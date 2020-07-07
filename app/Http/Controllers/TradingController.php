@@ -21,6 +21,7 @@ class TradingController extends Controller
     {
         $this->middleware('auth');
         $this->HelperClass = new FunctionSet;
+        $this->LogActivity = new LogActivity;
     }
     public function accounts()
     {
@@ -46,7 +47,7 @@ class TradingController extends Controller
 
 
         if ($request->id) {
-            LogActivity::addToLog('Update Broker Trading Account Details');
+            $this->LogActivity::addToLog('Update Broker Trading Account: umir = '.$request->umir.', trading_account_number = '.$request->trading_account_number.', broker_settlement_account_id = '.$request->settlement_account_number.', target_comp_id = '.$request->target_comp_id.', sender_comp_id = '.$request->sender_comp_id.', socket = '.$request->socket.', port = '.$request->port.',status = Unverified');
 
             $b2b = BrokerTradingAccount::find($request->id);
             $b2b->update(
@@ -88,6 +89,7 @@ class TradingController extends Controller
              that is assigned to a trading account
              is notified via email when it is added
             */
+            $this->LogActivity::addToLog('Created New Broker Trading Account: umir = '.$request->umir.', trading_account_number = '.$request->trading_account_number.', broker_settlement_account_id = '.$request->settlement_account_number.', target_comp_id = '.$request->target_comp_id.', sender_comp_id = '.$request->sender_comp_id.', socket = '.$request->socket.', port = '.$request->port.',status = Unverified');
             Mail::to($foreign_broker->email)->send(new TradingAccount($request));
         }
     }
