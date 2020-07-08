@@ -8,6 +8,7 @@ use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
 use App\BrokerUser;
 use App\Helpers\FunctionSet;
+use App\Helpers\LogActivity;
 use App\LocalBroker;
 use Illuminate\Http\Request;
 
@@ -18,6 +19,7 @@ class OperatorController extends Controller
 
         $this->middleware('auth');
         $this->HelperClass = new FunctionSet;
+        $this->LogActivity = new LogActivity;
     }
 
     public function index()
@@ -90,6 +92,11 @@ class OperatorController extends Controller
         // // Client Account Information
         $c_account = BrokerClient::find($request['client_trading_account'])->first();
 
+        // Check if the client account status is approved before continueing the order. If not Kill it
+        if ($c_account->status != 'Verified') {
+            $this->LogActivity->addToLog('ORDER BLOCKED: JCSD:' . $c_account->jcsd . '-' . $c_account->name . 's account status needs to be updated from ' . $c_account->status . ' to Verified');
+            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $c_account->name . 's account status needs to be updated from ' . $c_account->status . ' to Verified']);
+        }
 
         // Calculations Before Creating A New Order
         $order_value = $request->price * $request->quantity;
