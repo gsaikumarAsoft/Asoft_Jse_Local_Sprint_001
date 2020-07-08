@@ -26,6 +26,14 @@ class UserTableSeeder extends Seeder
 
 
         $admin = new User();
+        $admin->name = 'JSE DMA Admin';
+        $admin->email = 'admin@innovate10x.com';
+        $admin->password = bcrypt('Secur!ty12310x');
+        $admin->status = 'Approved';
+        $admin->save();
+        $admin->roles()->attach($role_ADMD);
+
+        $admin = new User();
         $admin->name = 'JSE DMA Admin1';
         $admin->email = 'admin1@innovate10x.com';
         $admin->password = bcrypt('Secur!ty12310x');
