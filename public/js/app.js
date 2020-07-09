@@ -72295,6 +72295,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["execution_reports"],
   components: {
@@ -72303,6 +72313,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   data() {
     return {
+      filterOn: ["clordid", "qTradeacc", "buyorSell", "status"],
+      filter: null,
       fields: [
         { key: "clordid", sortable: true, label: "Order Number" },
         { key: "qTradeacc", sortable: true, label: "Client Account" },
@@ -72410,7 +72422,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     report_data() {
-      return JSON.parse(this.execution_reports);
+      const data = JSON.parse(this.execution_reports);
+      console.log("this.execution_reports", data);
+      return data;
     },
     rows() {
       return this.report_data.length;
@@ -73036,7 +73050,7 @@ __webpack_require__.r(__webpack_exports__);
       order_template_data: [],
       file: "",
       order_option_input: false,
-      filterOn: ["clordid", "side"],
+      filterOn: ["clordid", "side", "jcsd", "client_name"],
       template: false,
       broker_trading_account_options: [],
       client_trading_account_options: [],
@@ -73053,7 +73067,7 @@ __webpack_require__.r(__webpack_exports__);
         { key: "clordid", label: "Order#", sortable: true },
         {
           key: "order_type.text",
-          label: "Order Type",
+          label: "Type",
           sortable: true,
           formatter: (value, key, item) => {
             var type = JSON.parse(item.order_type);
@@ -73061,15 +73075,15 @@ __webpack_require__.r(__webpack_exports__);
             return order.text;
           }
         },
+        { key: "client_name", label: "Client", sortable: true },
+        { key: "jcsd", label: "JCSD", sortable: true },
         {
           key: "symbol.text",
           label: "Symbol",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.symbol);
-            var s = data;
-
-            return s.text;
+            const data = JSON.parse(item.symbol);
+            return data.text;
             // return symbol.text;
           }
         },
@@ -73080,9 +73094,7 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             if (value) {
               var data = JSON.parse(item.time_in_force);
-              var s = data;
-
-              return s.text;
+              return data.value;
             } else {
               return "N/A";
             }
@@ -73098,7 +73110,7 @@ __webpack_require__.r(__webpack_exports__);
               var data = JSON.parse(item.currency);
               var s = data;
 
-              return s.text;
+              return s.value;
             } else {
               return "N/A";
             }
@@ -73121,10 +73133,11 @@ __webpack_require__.r(__webpack_exports__);
             // return symbol.text;
           }
         },
-        { key: "order_quantity", sortable: true },
+        { key: "order_quantity", label: "Qty", sortable: true },
         { key: "price", sortable: true },
         {
           key: "order_status",
+          label: "Status",
           sortable: true,
           formatter: (value, key, item) => {
             // return value;
@@ -73619,16 +73632,17 @@ __webpack_require__.r(__webpack_exports__);
       this.order = {};
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
-       Math.floor(1000 + Math.random() * 9000) + '' +
+        Math.floor(1000 + Math.random() * 9000) +
+        "" +
         dt.getFullYear() +
-        '' +
+        "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
-        '' +
+        "" +
         dt
           .getDate()
           .toString()
           .padStart(2, "0") +
-        '' +
+        "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },
@@ -73684,12 +73698,26 @@ __webpack_require__.r(__webpack_exports__);
     await this.getSymbols();
     //await this.getBrokers();
     await this.tradingAccounts();
-    var order_data = JSON.parse(this.orders);
-    var client_accounts_data = JSON.parse(this.client_accounts);
-    var orders = order_data[0]["order"];
-    var client_accounts = client_accounts_data[0]["clients"];
+    const order_data = JSON.parse(this.orders);
+    console.log("order_data", order_data);
+    const client_accounts_data = JSON.parse(this.client_accounts);
+    //var orders = order_data[0]["order"];
+
+    const { order: orders } = order_data[0];
+
+    const { clients: client_accounts } = client_accounts_data[0];
+
+    console.log("client_accounts", client_accounts);
+
     console.log("orders", orders);
-    this.broker_client_orders = orders;
+    this.broker_client_orders = orders.map(x => {
+      x.client = client_accounts.find(y => y.id === x.broker_client_id);
+      x.jcsd = x.client.jcsd;
+      x.client_name = x.client.name;
+      return x;
+    });
+    console.log("this.broker_client_orders", this.broker_client_orders);
+
     this.broker_client_orders.sort(function(a, b) {
       return b.client_order_number > a.client_order_number ? -1 : 1;
     });
@@ -77911,6 +77939,29 @@ var render = function() {
             "div",
             { staticClass: "content table-responsive" },
             [
+              _c(
+                "div",
+                { staticClass: "float-right" },
+                [
+                  _c("b-input", {
+                    staticClass: "mb-2 mr-sm-2 mb-sm-0",
+                    attrs: {
+                      id: "search_content",
+                      type: "text",
+                      placeholder: "Filter Orders..."
+                    },
+                    model: {
+                      value: _vm.filter,
+                      callback: function($$v) {
+                        _vm.filter = $$v
+                      },
+                      expression: "filter"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
               _c("b-table", {
                 ref: "selectedOrder",
                 attrs: {
@@ -77922,9 +77973,10 @@ var render = function() {
                   "current-page": _vm.currentPage,
                   striped: "",
                   hover: "",
-                  fields: _vm.fields
-                },
-                on: { "row-clicked": _vm.brokerOrderHandler }
+                  fields: _vm.fields,
+                  filterIncludedFields: _vm.filterOn,
+                  filter: _vm.filter
+                }
               })
             ],
             1
@@ -96468,8 +96520,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

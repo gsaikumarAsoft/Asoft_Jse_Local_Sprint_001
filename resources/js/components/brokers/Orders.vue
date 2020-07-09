@@ -526,7 +526,7 @@ export default {
       order_template_data: [],
       file: "",
       order_option_input: false,
-      filterOn: ["clordid", "side"],
+      filterOn: ["clordid", "side", "jcsd", "client_name"],
       template: false,
       broker_trading_account_options: [],
       client_trading_account_options: [],
@@ -543,7 +543,7 @@ export default {
         { key: "clordid", label: "Order#", sortable: true },
         {
           key: "order_type.text",
-          label: "Order Type",
+          label: "Type",
           sortable: true,
           formatter: (value, key, item) => {
             var type = JSON.parse(item.order_type);
@@ -551,15 +551,15 @@ export default {
             return order.text;
           }
         },
+        { key: "client_name", label: "Client", sortable: true },
+        { key: "jcsd", label: "JCSD", sortable: true },
         {
           key: "symbol.text",
           label: "Symbol",
           sortable: true,
           formatter: (value, key, item) => {
-            var data = JSON.parse(item.symbol);
-            var s = data;
-
-            return s.text;
+            const data = JSON.parse(item.symbol);
+            return data.text;
             // return symbol.text;
           }
         },
@@ -570,9 +570,7 @@ export default {
           formatter: (value, key, item) => {
             if (value) {
               var data = JSON.parse(item.time_in_force);
-              var s = data;
-
-              return s.text;
+              return data.value;
             } else {
               return "N/A";
             }
@@ -588,7 +586,7 @@ export default {
               var data = JSON.parse(item.currency);
               var s = data;
 
-              return s.text;
+              return s.value;
             } else {
               return "N/A";
             }
@@ -611,10 +609,11 @@ export default {
             // return symbol.text;
           }
         },
-        { key: "order_quantity", sortable: true },
+        { key: "order_quantity", label: "Qty", sortable: true },
         { key: "price", sortable: true },
         {
           key: "order_status",
+          label: "Status",
           sortable: true,
           formatter: (value, key, item) => {
             // return value;
@@ -1109,16 +1108,17 @@ export default {
       this.order = {};
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
-       Math.floor(1000 + Math.random() * 9000) + '' +
+        Math.floor(1000 + Math.random() * 9000) +
+        "" +
         dt.getFullYear() +
-        '' +
+        "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
-        '' +
+        "" +
         dt
           .getDate()
           .toString()
           .padStart(2, "0") +
-        '' +
+        "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },
@@ -1174,12 +1174,26 @@ export default {
     await this.getSymbols();
     //await this.getBrokers();
     await this.tradingAccounts();
-    var order_data = JSON.parse(this.orders);
-    var client_accounts_data = JSON.parse(this.client_accounts);
-    var orders = order_data[0]["order"];
-    var client_accounts = client_accounts_data[0]["clients"];
+    const order_data = JSON.parse(this.orders);
+    console.log("order_data", order_data);
+    const client_accounts_data = JSON.parse(this.client_accounts);
+    //var orders = order_data[0]["order"];
+
+    const { order: orders } = order_data[0];
+
+    const { clients: client_accounts } = client_accounts_data[0];
+
+    console.log("client_accounts", client_accounts);
+
     console.log("orders", orders);
-    this.broker_client_orders = orders;
+    this.broker_client_orders = orders.map(x => {
+      x.client = client_accounts.find(y => y.id === x.broker_client_id);
+      x.jcsd = x.client.jcsd;
+      x.client_name = x.client.name;
+      return x;
+    });
+    console.log("this.broker_client_orders", this.broker_client_orders);
+
     this.broker_client_orders.sort(function(a, b) {
       return b.client_order_number > a.client_order_number ? -1 : 1;
     });
