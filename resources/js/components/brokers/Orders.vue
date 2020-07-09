@@ -185,7 +185,7 @@
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
-                        required
+                        
                         id="value-input"
                         v-model="order.stop_price"
                         :state="nameState"
@@ -1069,10 +1069,10 @@ export default {
         if (valid) {
           console.log(data);
           this.$swal(data.errors);
-          this.reloadPage();
+          // this.reloadPage();
         } else {
           this.$swal(data.errors);
-          this.reloadPage();
+          // this.reloadPage();
         }
 
         // })

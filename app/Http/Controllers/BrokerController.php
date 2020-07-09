@@ -179,6 +179,9 @@ class BrokerController extends Controller
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 
+    public function mdTest(){
+        return $this->HelperClass->executionBalanceUpdate("BARITA", 'JSE_TRADER3');
+    }
     public function logExecution(Request $request)
     {
         $execution_report = $request->executionReports;
@@ -227,9 +230,10 @@ class BrokerController extends Controller
         //     ->join('local_brokers', 'broker_client_orders.local_broker_id', 'local_brokers.id')
         //     ->get();
         $user = auth()->user();
-        // return $user;
         $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->get();
-        // return $orders;
+        foreach($orders[0]['trading'] as $b2b){
+            $this->HelperClass->executionBalanceUpdate($user->name, $b2b->trading_account_number);
+        }
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
         // return $broker_traders;
         return view('brokers.order')->with('orders', $orders)->with('client_accounts', $broker_traders);

@@ -82,6 +82,9 @@ export default {
             if (value === "8") {
               return "Rejected";
             }
+            if(value === "Submitted"){
+              return 'Submitted';
+            }
           }
         },
         {

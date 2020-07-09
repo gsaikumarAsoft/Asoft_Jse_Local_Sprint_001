@@ -72342,6 +72342,9 @@ __webpack_require__.r(__webpack_exports__);
             if (value === "8") {
               return "Rejected";
             }
+            if(value === "Submitted"){
+              return 'Submitted';
+            }
           }
         },
         {
@@ -73579,10 +73582,10 @@ __webpack_require__.r(__webpack_exports__);
         if (valid) {
           console.log(data);
           this.$swal(data.errors);
-          this.reloadPage();
+          // this.reloadPage();
         } else {
           this.$swal(data.errors);
-          this.reloadPage();
+          // this.reloadPage();
         }
 
         // })
@@ -76046,18 +76049,11 @@ __webpack_require__.r(__webpack_exports__);
       this.order_option_inputs.splice(index, 1);
     },
     async destroy(id) {
-      // this.$swal("Proccessing Order Cancellation");
-      // // Fix Wrapper
-      // axios
-      //   .post(
-      //     "https://cors-anywhere.herokuapp.com/" +
-      //      this.$fixApi+"api/OrderManagement/OrderCancelRequest",
-      //     order_sample,
-      //     { crossDomain: true }
-      //   )
-      //   .then(response => {
-      //     this.$swal("Order Cancelled");
-      //   });
+      this.$swal("Proccessing Order Cancellation");
+      await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`); //.then(response => {
+      this.$swal("Cancelled");
+      await this.timeout(1000);
+      window.location.reload.bind(window.location);
     },
     async handleJSEOrder() {
       // Exit when the form isn't valid
@@ -78547,7 +78543,6 @@ var render = function() {
                                           [
                                             _c("b-form-input", {
                                               attrs: {
-                                                required: "",
                                                 id: "value-input",
                                                 state: _vm.nameState,
                                                 type: "number",
