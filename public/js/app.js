@@ -73595,10 +73595,10 @@ __webpack_require__.r(__webpack_exports__);
         if (valid) {
           console.log(data);
           this.$swal(data.errors);
-          // this.reloadPage();
+          this.reloadPage();
         } else {
           this.$swal(data.errors);
-          // this.reloadPage();
+          this.reloadPage();
         }
 
         // })
