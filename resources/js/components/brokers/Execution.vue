@@ -4,6 +4,15 @@
     <div class="container-fluid" style="margin-top: 100px;">
       <h1>Order Execution Reports</h1>
       <div class="content table-responsive">
+        <div class="float-right">
+          <b-input
+            id="search_content"
+            v-model="filter"
+            type="text"
+            placeholder="Filter Orders..."
+            class="mb-2 mr-sm-2 mb-sm-0"
+          ></b-input>
+        </div>
         <b-table
           ref="selectedOrder"
           :empty-text="'No Orders have been Created. Create an Order below.'"
@@ -14,7 +23,8 @@
           striped
           hover
           :fields="fields"
-          @row-clicked="brokerOrderHandler"
+          :filterIncludedFields="filterOn"
+          :filter="filter"
         ></b-table>
         <!-- <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button> -->
       </div>
@@ -43,6 +53,8 @@ export default {
   },
   data() {
     return {
+      filterOn: ["clordid", "qTradeacc", "buyorSell", "status"],
+      filter: null,
       fields: [
         { key: "clordid", sortable: true, label: "Order Number" },
         { key: "qTradeacc", sortable: true, label: "Client Account" },
@@ -153,7 +165,9 @@ export default {
   },
   computed: {
     report_data() {
-      return JSON.parse(this.execution_reports);
+      const data = JSON.parse(this.execution_reports);
+      console.log("this.execution_reports", data);
+      return data;
     },
     rows() {
       return this.report_data.length;
