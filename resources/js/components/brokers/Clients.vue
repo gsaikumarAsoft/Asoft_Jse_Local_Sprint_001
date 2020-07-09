@@ -139,7 +139,20 @@ export default {
         {
           key: "open_orders",
           label: "Open Orders",
-          sortable: true
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var nf = Intl.NumberFormat();
+            var cal = item.open_orders;
+            return nf.format(cal);
+
+            // return formatter(cal);
+            // return formatter.format(cal);
+          }
         },
         // {
         //   key: "orders_limit",
