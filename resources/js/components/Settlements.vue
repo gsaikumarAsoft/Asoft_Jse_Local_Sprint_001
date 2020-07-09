@@ -187,11 +187,29 @@ export default {
         },
         {
           key: "account_balance",
-          sortable: true
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.account_balance;
+            return formatter.format(cal);
+          }
         },
         {
           key: "amount_allocated",
-          sortable: true
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.amount_allocated;
+            return formatter.format(cal);
+          }
         },
         {
           key: "currency",
