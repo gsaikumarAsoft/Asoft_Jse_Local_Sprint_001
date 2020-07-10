@@ -14,7 +14,7 @@ class UpdateBrokerClientOrdersPriceColumnToDecimal extends Migration
     public function up()
     {
         Schema::table('broker_client_orders', function (Blueprint $table) {
-            $table->decimal('price', 5, 2)->change();
+            $table->decimal('price')->change();
             // $table->decimal('stop_price', 5, 2)->change();
         });
     }
