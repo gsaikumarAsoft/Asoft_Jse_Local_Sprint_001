@@ -188,7 +188,7 @@
                         id="value-input"
                         v-model="order.stop_price"
                         :state="nameState"
-                        type="number"
+                        type="text"
                         :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
@@ -241,7 +241,7 @@
                         id="price-input"
                         v-model="order.price"
                         :state="nameState"
-                        type="number"
+                        type="text"
                         :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
