@@ -711,7 +711,7 @@ class FunctionSet
                     $fil_or = $bc->filled_orders + ($quantity * $price);
                     // if ($array) {
                     $sa = $array[0];
-                    $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
+                    $settlement_allocated = (int)$sa['amount_allocated'] - ($quantity * $price);
                     $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
                     //If offer is (Rejected, Cancelled, Expired)
                     // return $status .'-'.$od->id;
