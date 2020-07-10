@@ -78649,7 +78649,7 @@ var render = function() {
                                               attrs: {
                                                 id: "value-input",
                                                 state: _vm.nameState,
-                                                type: "number",
+                                                type: "text",
                                                 disabled: _vm.disabled
                                               },
                                               model: {
@@ -78757,7 +78757,7 @@ var render = function() {
                                               attrs: {
                                                 id: "price-input",
                                                 state: _vm.nameState,
-                                                type: "number",
+                                                type: "text",
                                                 disabled: _vm.disabled
                                               },
                                               model: {
