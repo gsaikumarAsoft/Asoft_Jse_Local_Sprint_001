@@ -88,7 +88,7 @@ Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], fun
 
 
 Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
-    // Route::get('/md-test', "BrokerController@mdTest");
+    Route::get('/md-test', "BrokerController@mdTest");
     Route::get('/', "BrokerController@index");
     Route::get('/get-users', 'BrokerController@getUsers');
     Route::get('/local-brokers', 'ApplicationController@brokerList');

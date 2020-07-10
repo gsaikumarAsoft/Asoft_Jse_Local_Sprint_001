@@ -256,7 +256,7 @@ class FunctionSet
                 // return '3';
                 // If the response fails create a record in the audit log and in the execution reports as well
                 $data['text'] = "Order Submission Failed: " . $fix_status['result'];
-                $data['status'] = 'Failed';
+                $data['status'] = '8';
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
