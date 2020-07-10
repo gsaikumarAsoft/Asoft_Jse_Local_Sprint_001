@@ -718,7 +718,8 @@ class FunctionSet
                     if (
                         $status === $this->OrderStatus->Expired() ||
                         $status === $this->OrderStatus->Cancelled() ||
-                        $status === $this->OrderStatus->Rejected()
+                        $status === $this->OrderStatus->Rejected() ||
+                        $status === $this->OrderStatus->_New() 
                     ) {
 
                         // return '1';
