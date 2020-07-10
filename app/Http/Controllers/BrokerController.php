@@ -180,11 +180,7 @@ class BrokerController extends Controller
     }
 
     public function mdTest(){
-        $offset=5*60*60; //converting 4 hours to seconds.
-        $dateFormat="Y-m-d H:i"; //set the date format
-        $timeNdate=gmdate($dateFormat, time()-$offset); //get GMT date - 4
-        return $timeNdate;
-        // return $this->HelperClass->executionBalanceUpdate("BARITA", 'JSE_TRADER3');
+        return $this->HelperClass->executionBalanceUpdate("BARITA", 'JSE_TRADER3');
     }
     public function logExecution(Request $request)
     {
