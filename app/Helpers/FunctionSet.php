@@ -175,8 +175,8 @@ class FunctionSet
             // "Host" => "20.156.185.101",
             // "Port" => 6544,
             // ========================================================================================
-            'StartTime' => "2020-07-09 11:00:00.000",
-            'EndTime' => "2020-07-09 21:00:00.000",
+            'StartTime' => date("Y-m-d")." 11:00:00.000",
+            'EndTime' => date("Y-m-d")." 21:00:00.000",
             'OrderID' => $request->client_order_number,
             'BuyorSell' => $this->jsonStrip(json_decode($request->side, true), 'fix_value'),
             'OrdType' => $this->jsonStrip(json_decode($type, true), 'fix_value'),
@@ -292,10 +292,12 @@ class FunctionSet
 
         // return $request;
         $execution_report = $request['executionReports'];
-        // return $execution_report;
-        // BrokerOrderExecutionReport::truncate();
+        $offset=5*60*60; //converting 4 hours to seconds.
+        $dateFormat="Y-m-d H:i"; //set the date format
+        $timeNdate=gmdate($dateFormat, time()-$offset); //get GMT date - 4
         DB::table('broker_client_order_execution_reports')->where('orderID', '!=', '000000-000000-0')->delete();
         foreach ($execution_report as $report) {
+
             $clients[] = $report;
             // $broker_order_execution_report = BrokerOrderExecutionReport::updateOrCreate(
             // ['clOrdID' => $report['clOrdID'] ],
@@ -320,8 +322,8 @@ class FunctionSet
             $broker_order_execution_report->execType = $report['execType'] ?? 0;
             $broker_order_execution_report->senderSubID = $report['senderSubID'] ?? $report['SenderSubID'];
             $broker_order_execution_report->seqNum = $report['seqNum'] ?? 0;
-            $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? 0;
-            $broker_order_execution_report->messageDate = $report['messageDate'] ?? 0;
+            $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? $timeNdate;
+            $broker_order_execution_report->messageDate = $report['messageDate'] ?? $timeNdate;
             $broker_order_execution_report->save();
         }
     }
@@ -642,8 +644,8 @@ class FunctionSet
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $sender_sub_id,
             "seqNum" => 0,
-            'StartTime' => "2020-07-09 11:00:00.000",
-            'EndTime' => "2020-07-09 21:00:00.000",
+            'StartTime' => date("Y-m-d")." 11:00:00.000",
+            'EndTime' => date("Y-m-d")." 21:00:00.000",
         );
         $postdata = json_encode($data);
 

@@ -82,7 +82,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth', 'verified']], function (
 
 Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], function () {
     Route::get('/', 'ProfileController@index')->name('home');
-    Route::post('/store', "ProfileController@store");
+    Route::post('/store', "ProfileController@store"); 
 });
 
 
