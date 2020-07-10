@@ -73066,8 +73066,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -73597,14 +73595,19 @@ __webpack_require__.r(__webpack_exports__);
         const { value: side_type } = JSON.parse(this.order.side);
         console.log("side_type", side_type);
 
-        if (!this.order.trading_account || !this.order.client_trading_account) {
+       /*  if (!this.order.trading_account || !this.order.client_trading_account) {
           throw new Error(
             "You need to select a Trading Account & Client Account to continue"
           );
         }
-        if (side_type === "Buy" && this.order.price > this.order.stop_price) {
+        if (
+          this.order.price &&
+          this.order.stop_price &&
+          side_type === "Buy" &&
+          this.order.price > this.order.stop_price
+        ) {
           throw new Error("Price must be less than or equal to the Stop Price");
-        }
+        } */
 
         this.$swal.fire({
           title: "Creating Client Order",
@@ -78755,8 +78758,7 @@ var render = function() {
                                                 id: "price-input",
                                                 state: _vm.nameState,
                                                 type: "number",
-                                                disabled: _vm.disabled,
-                                                required: ""
+                                                disabled: _vm.disabled
                                               },
                                               model: {
                                                 value: _vm.order.price,
@@ -96564,8 +96566,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

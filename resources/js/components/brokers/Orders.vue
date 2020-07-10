@@ -185,7 +185,6 @@
                   >
                     <b-input-group size="md" prepend="$">
                       <b-form-input
-                        
                         id="value-input"
                         v-model="order.stop_price"
                         :state="nameState"
@@ -244,7 +243,6 @@
                         :state="nameState"
                         type="number"
                         :disabled="disabled"
-                        required
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>
@@ -1039,14 +1037,19 @@ export default {
         const { value: side_type } = JSON.parse(this.order.side);
         console.log("side_type", side_type);
 
-        if (!this.order.trading_account || !this.order.client_trading_account) {
+       /*  if (!this.order.trading_account || !this.order.client_trading_account) {
           throw new Error(
             "You need to select a Trading Account & Client Account to continue"
           );
         }
-        if (side_type === "Buy" && this.order.price > this.order.stop_price) {
+        if (
+          this.order.price &&
+          this.order.stop_price &&
+          side_type === "Buy" &&
+          this.order.price > this.order.stop_price
+        ) {
           throw new Error("Price must be less than or equal to the Stop Price");
-        }
+        } */
 
         this.$swal.fire({
           title: "Creating Client Order",
