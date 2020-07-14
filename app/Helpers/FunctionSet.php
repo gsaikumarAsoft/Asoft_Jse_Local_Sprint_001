@@ -169,6 +169,7 @@ class FunctionSet
             'Host' => $trading->socket,
             'Port' => (int) $trading->port,
             // =======================================================================================
+            //Temporary Fix Testing Scripts
             // "TargetCompID" => "CIBC_TEST",
             // "SenderCompID" => "JSE_TST2",
             // // "SenderSubID" => "BARITA",
@@ -253,39 +254,19 @@ class FunctionSet
                 return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
                 break;
             default:
-                // return '3';
+                
                 // If the response fails create a record in the audit log and in the execution reports as well
                 $data['text'] = "Order Submission Failed: " . $fix_status['result'];
-                $data['status'] = '8';
+                $data['status'] = $this->OrderStatus->Failed();
+                // ============================================================================================
+                DB::table('broker_client_orders')
+                    ->where('id', $broker_client_order->id)
+                    ->update(['order_status' => $this->OrderStatus->Failed()]);
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
                 break;
         }
-
-        // return $fix_status['result'];
-        // if ($fix_status['status'] === 400) {
-        //     // If the response fails create a record in the audit log and in the execution reports as well
-        //     $data['text'] = "Order Failed: " . $fix_status['status'] . '.  ' . $fix_status['title'] . ' TraceID = [' . $fix_status['traceId'] . ']';
-        //     $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-        //     $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
-        //     return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
-        // }
-
-        // if ($fix_status['result'] === "Please Check the endpoint /MessageDownload/Download for message queue") {
-        //     // If the order is successfull create a log
-        //     $this->LogActivity->addToLog('Order Successfull');
-        //     $this->executionBalanceUpdate($sender_sub_id);
-        //     return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
-        // } else {
-        //     $this->LogActivity->addToLog('Order Failed:' . $fix_status['result']);
-        //     $data['text'] = 'Failed';
-        //     $order = DB::table('broker_client_orders')
-        //         ->where('id', $broker_client_order->id)
-        //         ->update(['order_status' => 'Failed']);
-        //     $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
-        //     return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result']]);
-        // }
     }
     public function logExecution($request)
     {
@@ -660,7 +641,7 @@ class FunctionSet
         $request = json_decode($result, true);
         $account = $request['executionReports'];
         // $total_reports = count($account);
-        
+
         return $request;
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
