@@ -274,15 +274,19 @@ class FunctionSet
         $offset = 5 * 60 * 60; //converting 4 hours to seconds.
         $dateFormat = "Y-m-d H:i"; //set the date format
         $timeNdate = gmdate($dateFormat, time() - $offset); //get GMT date - 4
-        DB::table('broker_client_order_execution_reports')->where('orderID', '!=', '000000-000000-0')->delete();
+        // DB::table('broker_client_order_execution_reports')->where('orde	759320200714027rID', '!=', '000000-000000-0')->delete();
         foreach ($execution_report as $report) {
 
             $clients[] = $report;
-            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('sendingTime', array_values($report)[18]);
+            // return array_values($report)[1];
+            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
             if ($record->exists()) {
                 // return 'Exists';
                 //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
             } else {
+                // return $report['clOrdID'];
+                // return "Does Not Exist";
+
                 // IF IT IS A NEW RECORD INSERT IT AND UPDATE THE BALANCES
                 $broker_order_execution_report = new BrokerOrderExecutionReport();
                 $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
@@ -306,7 +310,6 @@ class FunctionSet
                 $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? $timeNdate;
                 $broker_order_execution_report->messageDate = $report['messageDate'] ?? $timeNdate;
                 $broker_order_execution_report->save();
-
                 // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
                 $this->clientSettlementBalanceUpdate($report);
             }
@@ -655,6 +658,8 @@ class FunctionSet
 
     public function clientSettlementBalanceUpdate($data)
     {
+
+        // return $data;
         // iterate through all reports and update accounts as required
         $order_number = array_values($data)[1];
         $sender_sub_id = array_values($data)[16];
@@ -670,124 +675,127 @@ class FunctionSet
 
         //Find the broker order linked to this execution report (account number)
         $order = BrokerClientOrder::where('clordid', $order_number)->first();
+        // return $order;
+        if ($order) {
+            //Trading Account Information
+            $trading = BrokerTradingAccount::find($order->trading_account_id)->first();
 
-        //Trading Account Information
-        $trading = BrokerTradingAccount::find($order->trading_account_id)->first();
-        $trading_account_number = $trading->trading_account_number;
+            //Find the broker settlement account linked to this execution report (account number (senderSubID)
+            $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $trading["trading_account_number"])
+                ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
+                ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+                ->get();
+            $array = json_decode(json_encode($settlement_account), true);
+            if ($order && $broker_client) {
+                // return $order;
+                $od = $order;
+                $bc = $broker_client;
+                // return $bc;
+                if ($od->id) {
+                    $order_status = $this->orderStatus($od->id);
 
-        //Find the broker settlement account linked to this execution report (account number (senderSubID)
-        $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $trading_account_number)
-            ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
-            ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
-            ->get();
-        $array = json_decode(json_encode($settlement_account), true);
-        if ($order && $broker_client) {
-            // return $order;
-            $od = $order;
-            $bc = $broker_client;
-            // return $bc;
-            if ($od->id) {
-                $order_status = $this->orderStatus($od->id);
+                    // Define the open order amount
+                    $op_or = $bc->open_orders - ($quantity * $price);
+                    $fil_or = $bc->filled_orders + ($quantity * $price);
+                    $order_value = $quantity * $price;
+                    $sa = $array[0];
+                    $settlement_allocated = $sa['amount_allocated'] + ($quantity * $price);
+                    $settlement_account_balance = $sa['account_balance'];
+                    // $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
+                    $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
+                    //If offer is (Rejected, Cancelled, Expired)
+                    if (
+                        $status === $this->OrderStatus->Expired() ||
+                        $status === $this->OrderStatus->Cancelled()
+                    ) {
 
-                // Define the open order amount
-                $op_or = $bc->open_orders - ($quantity * $price);
-                $fil_or = $bc->filled_orders + ($quantity * $price);
-                $order_value = $quantity * $price;
-                $sa = $array[0];
-                $settlement_allocated = $sa['amount_allocated'] + ($quantity * $price);
-                $settlement_account_balance = $sa['account_balance'];
-                // $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
-                $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
-                //If offer is (Rejected, Cancelled, Expired)
-                if (
-                    $status === $this->OrderStatus->Expired() ||
-                    $status === $this->OrderStatus->Cancelled()
-                ) {
-
-                    BrokerClientOrder::updateOrCreate(
-                        ['id' => $od->id],
-                        ['order_status' => $status]
-
-                    );
-                    // }
-                } else if ($status === $this->OrderStatus->Failed()) {
-
-                    return "Order Failed";
-                } else if ($status === $this->OrderStatus->Filled()) {
-
-                    if ((int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
-                        // Release Funds When Rejected
                         BrokerClientOrder::updateOrCreate(
                             ['id' => $od->id],
                             ['order_status' => $status]
 
                         );
-                        BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['fix_update' => 1, 'filled_orders' => $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
-                        );
-                        BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['filled_orders' => $order_value]
-                        );
-                    }
-                } else if ($status === $this->OrderStatus->Rejected()) {
+                        // }
+                    } else if ($status === $this->OrderStatus->Failed()) {
 
-                    if ((int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
-                        // Release Funds When Rejected
+                        return "Order Failed";
+                    } else if ($status === $this->OrderStatus->Filled()) {
+
+                        if ((int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
+                            // Release Funds When Rejected
+                            BrokerClientOrder::updateOrCreate(
+                                ['id' => $od->id],
+                                ['order_status' => $status]
+
+                            );
+                            BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                ['fix_update' => 1, 'filled_orders' => $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                            );
+                            BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['filled_orders' => $order_value]
+                            );
+                        }
+                    } else if ($status === $this->OrderStatus->Rejected()) {
+
+                        if ((int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
+                            // Release Funds When Rejected
+                            BrokerClientOrder::updateOrCreate(
+                                ['id' => $od->id],
+                                ['order_status' => $status]
+
+                            );
+                            BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                ['fix_update' => 1, 'account_balance' => (int) $sa['amount_allocated'] + (int) $sa['account_balance'], 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                            );
+                            BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['open_orders' => $bc->open_orders - (int) $order_value]
+                            );
+                        }
+                    } else if ($status === $this->OrderStatus->_New()) {
+                        //If the order status is new update the status only
                         BrokerClientOrder::updateOrCreate(
                             ['id' => $od->id],
                             ['order_status' => $status]
 
                         );
-                        BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['fix_update' => 1, 'account_balance' => (int) $sa['amount_allocated'] + (int) $sa['account_balance'], 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                    } else if ($status === $this->OrderStatus->PartialFilled()) {
+
+                        BrokerClientOrder::updateOrCreate(
+                            ['id' => $od->id],
+                            ['order_status' => $this->OrderStatus->PartialFilled()]
+
                         );
+
                         BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
-                            ['open_orders' => $bc->open_orders - (int) $order_value]
+                            ['open_orders' => $op_or, 'filled_orders' => $fil_or]
+                        );
+                    } else {
+
+                        BrokerClient::updateOrCreate(
+                            ['id' => $bc->id],
+                            ['open_orders' => $op_or, 'filled_orders' => $fil_or]
+                        );
+
+                        BrokerSettlementAccount::updateOrCreate(
+                            ['id' => $sa['id']],
+                            ['amount_allocated' => $settlement_allocated, 'filled_orders', $settlement_fil_ord]
+                        );
+                        $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $sa['account'] . ', Balance: ' . $sa['account_balance'] . ', Amount Allocated: ' . $sa['amount_allocated']);
+
+
+                        BrokerClientOrder::updateOrCreate(
+                            ['id' => $od->id],
+                            ['order_status' => $status]
                         );
                     }
-                } else if ($status === $this->OrderStatus->_New()) {
-                    //If the order status is new update the status only
-                    BrokerClientOrder::updateOrCreate(
-                        ['id' => $od->id],
-                        ['order_status' => $status]
-
-                    );
-                } else if ($status === $this->OrderStatus->PartialFilled()) {
-
-                    BrokerClientOrder::updateOrCreate(
-                        ['id' => $od->id],
-                        ['order_status' => $this->OrderStatus->PartialFilled()]
-
-                    );
-
-                    BrokerClient::updateOrCreate(
-                        ['id' => $bc->id],
-                        ['open_orders' => $op_or, 'filled_orders' => $fil_or]
-                    );
-                } else {
-
-                    BrokerClient::updateOrCreate(
-                        ['id' => $bc->id],
-                        ['open_orders' => $op_or, 'filled_orders' => $fil_or]
-                    );
-
-                    BrokerSettlementAccount::updateOrCreate(
-                        ['id' => $sa['id']],
-                        ['amount_allocated' => $settlement_allocated, 'filled_orders', $settlement_fil_ord]
-                    );
-                    $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $sa['account'] . ', Balance: ' . $sa['account_balance'] . ', Amount Allocated: ' . $sa['amount_allocated']);
-
-
-                    BrokerClientOrder::updateOrCreate(
-                        ['id' => $od->id],
-                        ['order_status' => $status]
-                    );
                 }
             }
+        } else {
+            return '0';
         }
     }
 }
