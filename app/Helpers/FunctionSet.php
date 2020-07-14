@@ -254,7 +254,7 @@ class FunctionSet
                 return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
                 break;
             default:
-                
+
                 // If the response fails create a record in the audit log and in the execution reports as well
                 $data['text'] = "Order Submission Failed: " . $fix_status['result'];
                 $data['status'] = $this->OrderStatus->Failed();
@@ -278,31 +278,33 @@ class FunctionSet
         foreach ($execution_report as $report) {
 
             $clients[] = $report;
-            // return $report;
-            // sendersubID => array_values($report)[16]
-            // return array_values($report)[5];
-            $broker_order_execution_report = new BrokerOrderExecutionReport();
-            $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
-            $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
-            $broker_order_execution_report->text = $report['text'];
-            $broker_order_execution_report->ordRejRes = $report['ordRejRes'] ?? null;
-            $broker_order_execution_report->status = $report['status'] ?? 8;
-            $broker_order_execution_report->buyorSell = $report['buyorSell'] ?? $report['BuyorSell'];
-            $broker_order_execution_report->securitySubType = 0;
-            $broker_order_execution_report->time = $report['time'] ?? null;
-            $broker_order_execution_report->ordType = $report['ordType'] ?? $report['OrdType'];
-            $broker_order_execution_report->orderQty = $report['orderQty'] ?? $report['OrderQty'] ?? 0;
-            $broker_order_execution_report->timeInForce = $report['timeInForce'] ?? 0;
-            $broker_order_execution_report->symbol = $report['symbol'] ?? $report['Symbol'];
-            $broker_order_execution_report->qTradeacc = $report['qTradeacc'] ?? $report['Account'];
-            $broker_order_execution_report->price = $report['price'] ?? $report['Price'];
-            $broker_order_execution_report->stopPx = $report['stopPx'] ?? 0;
-            $broker_order_execution_report->execType = $report['execType'] ?? 0;
-            $broker_order_execution_report->senderSubID = $report['senderSubID'] ?? $report['SenderSubID'];
-            $broker_order_execution_report->seqNum = $report['seqNum'] ?? 0;
-            $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? $timeNdate;
-            $broker_order_execution_report->messageDate = $report['messageDate'] ?? $timeNdate;
-            $broker_order_execution_report->save();
+            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('sendingTime', array_values($report)[18]);
+            if ($record->exists()) {
+                // return 'Exists';
+            } else {
+                $broker_order_execution_report = new BrokerOrderExecutionReport();
+                $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
+                $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
+                $broker_order_execution_report->text = $report['text'];
+                $broker_order_execution_report->ordRejRes = $report['ordRejRes'] ?? null;
+                $broker_order_execution_report->status = $report['status'] ?? 8;
+                $broker_order_execution_report->buyorSell = $report['buyorSell'] ?? $report['BuyorSell'];
+                $broker_order_execution_report->securitySubType = 0;
+                $broker_order_execution_report->time = $report['time'] ?? null;
+                $broker_order_execution_report->ordType = $report['ordType'] ?? $report['OrdType'];
+                $broker_order_execution_report->orderQty = $report['orderQty'] ?? $report['OrderQty'] ?? 0;
+                $broker_order_execution_report->timeInForce = $report['timeInForce'] ?? 0;
+                $broker_order_execution_report->symbol = $report['symbol'] ?? $report['Symbol'];
+                $broker_order_execution_report->qTradeacc = $report['qTradeacc'] ?? $report['Account'];
+                $broker_order_execution_report->price = $report['price'] ?? $report['Price'];
+                $broker_order_execution_report->stopPx = $report['stopPx'] ?? 0;
+                $broker_order_execution_report->execType = $report['execType'] ?? 0;
+                $broker_order_execution_report->senderSubID = $report['senderSubID'] ?? $report['SenderSubID'];
+                $broker_order_execution_report->seqNum = $report['seqNum'] ?? 0;
+                $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? $timeNdate;
+                $broker_order_execution_report->messageDate = $report['messageDate'] ?? $timeNdate;
+                $broker_order_execution_report->save();
+            }
         }
     }
     public function defineLocalBroker($id)
@@ -642,18 +644,8 @@ class FunctionSet
         $account = $request['executionReports'];
         // $total_reports = count($account);
 
-        return $request;
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
-
-        //Find the very last exucution sequence number for this particular broker
-        $seq_last = DB::table('broker_client_order_execution_reports')->orderBy('id', 'desc')->limit(1)->get();
-        // Check latest sequence number coming from the fix
-        //  $incomingSeq =  $account[$total_reports]['seqNum'];
-
-        //  if($seq_last){
-        //      return $seq_last[0]->seqNum.' = '.$incomingSeq;
-        //  }
 
         // iterate through all reports and update accounts as required
         foreach ($account as $key => $value) {
