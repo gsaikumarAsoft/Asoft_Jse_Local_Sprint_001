@@ -254,7 +254,7 @@ class FunctionSet
                 return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
                 break;
             default:
-
+                
                 // If the response fails create a record in the audit log and in the execution reports as well
                 $data['text'] = "Order Submission Failed: " . $fix_status['result'];
                 $data['status'] = $this->OrderStatus->Failed();
@@ -274,22 +274,13 @@ class FunctionSet
         $offset = 5 * 60 * 60; //converting 4 hours to seconds.
         $dateFormat = "Y-m-d H:i"; //set the date format
         $timeNdate = gmdate($dateFormat, time() - $offset); //get GMT date - 4
-        // DB::table('broker_client_order_execution_reports')->where('orderID', '!=', '000000-000000-0')->delete();
+        DB::table('broker_client_order_execution_reports')->where('orderID', '!=', '000000-000000-0')->delete();
         foreach ($execution_report as $report) {
 
             $clients[] = $report;
             // return $report;
             // sendersubID => array_values($report)[16]
-            // clordid = array_values($report)[1];
-            // sequence # array_values($report)[17];
-            // return array_values($report)[18];
-
-            // $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('sendingTime', array_values($report)[18]);
-            // if ($record->exists()) {
-            //     return 'Exists';
-            // } else {
-            //     return 'Doest Not Exist';
-            // }
+            // return array_values($report)[5];
             $broker_order_execution_report = new BrokerOrderExecutionReport();
             $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
             $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
@@ -651,7 +642,7 @@ class FunctionSet
         $account = $request['executionReports'];
         // $total_reports = count($account);
 
-
+        return $request;
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
 
