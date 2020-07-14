@@ -128,11 +128,13 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
+import checkErrorMixin from "../../mixins/CheckError.js";
 export default {
   props: ["settlement_accounts"],
   components: {
     "head-nav": headNav
   },
+   mixins: [checkErrorMixin],
   data() {
     return {
       broker_settlement_account: this.settlement_accounts,
@@ -279,18 +281,7 @@ export default {
         await this.getSettlementList();
         setTimeout(location.reload.bind(location));
       } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message.includes("Duplicate entry")
-        ) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        } else {
-          console.error("destroy", error);
-          this.$swal("Ouch!", "Something went wrong.", "error");
-        }
+       this.checkDuplicateError(error);
       }
     },
 
@@ -344,8 +335,7 @@ export default {
         this.$swal.close();
         setTimeout(location.reload.bind(location));
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
 

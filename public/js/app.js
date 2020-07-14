@@ -70649,6 +70649,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -70800,6 +70802,7 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
+   mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__["default"]],
   data() {
     return {
       trading_accounts: [],
@@ -70987,8 +70990,7 @@ __webpack_require__.r(__webpack_exports__);
         this.$swal.close();
         // setTimeout(location.reload.bind(location), 2000);
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+       this.checkDuplicateError(error);
       }
 
       /*  try {
@@ -71026,8 +71028,7 @@ __webpack_require__.r(__webpack_exports__);
         this.trading_account = null;
         this.$swal.close();
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
 
@@ -71079,6 +71080,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -71133,6 +71136,7 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
+   mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__["default"]],
   data() {
     return {
       create: false,
@@ -71220,8 +71224,7 @@ __webpack_require__.r(__webpack_exports__);
         await this.$nextTick();
         this.$bvModal.hide("modal-1");
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDuplicateError(error);
       }
 
       // Push the name to submitted names
@@ -71274,8 +71277,7 @@ __webpack_require__.r(__webpack_exports__);
         await this.getBrokers();
         this.$swal("Deleted!", "Foreign Broker Has Been Removed.", "success");
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     }
   },
@@ -71299,6 +71301,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -71353,6 +71357,9 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
+   
+  mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__["default"]],
+   
   data() {
     return {
       create: false,
@@ -71435,8 +71442,7 @@ __webpack_require__.r(__webpack_exports__);
         await this.$nextTick();
         this.$bvModal.hide("modal-1");
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDuplicateError(error);
       }
 
       // Push the name to submitted names
@@ -71490,8 +71496,7 @@ __webpack_require__.r(__webpack_exports__);
         await this.getBrokers();
         this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     }
   },
@@ -71520,6 +71525,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 /* harmony import */ var _mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../mixins/Currencies.js */ "./resources/js/mixins/Currencies.js");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -71670,7 +71677,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
+  mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__["default"]],
   components: {
     "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
@@ -71835,8 +71842,7 @@ __webpack_require__.r(__webpack_exports__);
         this.settlement_account = null;
         this.$swal.close();
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+         this.checkDuplicateError(error);
       }
     },
 
@@ -71893,8 +71899,7 @@ __webpack_require__.r(__webpack_exports__);
           "success"
         );
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
 
@@ -71939,6 +71944,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -72042,6 +72049,7 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
+  mixins:[_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__["default"]],
   data() {
     return {
       local_broker_clients: [],
@@ -72216,17 +72224,7 @@ __webpack_require__.r(__webpack_exports__);
         this.broker_client = null;
         //setTimeout(location.reload.bind(location), 1000);
       } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message.includes("Duplicate entry")
-        ) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        } else {
-          this.$swal("Ouch!", "Something went wrong.", "error");
-        }
+        this.checkDuplicateError(error);
       }
     },
 
@@ -72245,8 +72243,7 @@ __webpack_require__.r(__webpack_exports__);
         this.$swal.close();
         this.broker_client = null;
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     }
   },
@@ -72556,6 +72553,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
 /* harmony import */ var _mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../mixins/Currencies.js */ "./resources/js/mixins/Currencies.js");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -73073,7 +73072,7 @@ __webpack_require__.r(__webpack_exports__);
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
     Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default())
   },
-  mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
+  mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__["default"]],
   data() {
     return {
       // messageDownload: [],
@@ -73595,7 +73594,7 @@ __webpack_require__.r(__webpack_exports__);
         const { value: side_type } = JSON.parse(this.order.side);
         console.log("side_type", side_type);
 
-       /*  if (!this.order.trading_account || !this.order.client_trading_account) {
+        /*  if (!this.order.trading_account || !this.order.client_trading_account) {
           throw new Error(
             "You need to select a Trading Account & Client Account to continue"
           );
@@ -73634,23 +73633,9 @@ __webpack_require__.r(__webpack_exports__);
           this.$swal(data.errors);
           this.reloadPage();
         }
-
-        // })
       } catch (error) {
-        console.log("error", error);
-        const s =
-          error.response && error.response.data && error.response.data.message;
-        if (s && s.includes("cannot be null")) {
-          const field = s.match(/'([^']+)'/)[1];
-          this.$swal(
-            `When creating an order ${field} cannot be null. Please try creating the order again.`
-          );
-        } else {
-          console.error("create order error", error);
-          this.$swal("Error Detected", error.message, "error");
-        }
-      } //);
-      //
+        this.checkOrderError(error);
+      }
     },
 
     reloadPage() {
@@ -73890,6 +73875,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -74025,6 +74012,7 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
+   mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   data() {
     return {
       broker_settlement_account: this.settlement_accounts,
@@ -74171,18 +74159,7 @@ __webpack_require__.r(__webpack_exports__);
         await this.getSettlementList();
         setTimeout(location.reload.bind(location));
       } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message.includes("Duplicate entry")
-        ) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        } else {
-          console.error("destroy", error);
-          this.$swal("Ouch!", "Something went wrong.", "error");
-        }
+       this.checkDuplicateError(error);
       }
     },
 
@@ -74236,8 +74213,7 @@ __webpack_require__.r(__webpack_exports__);
         this.$swal.close();
         setTimeout(location.reload.bind(location));
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
 
@@ -74281,6 +74257,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -74375,7 +74353,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  mixins: [_js_mixins_Permissions_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
+  mixins: [_js_mixins_Permissions_js__WEBPACK_IMPORTED_MODULE_0__["default"],_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_3__["default"]],
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
@@ -74573,11 +74551,7 @@ __webpack_require__.r(__webpack_exports__);
         await this.$nextTick();
         this.$bvModal.hide("modal-1");
       } catch (error) {
-        if (error.response.data.message.includes("Duplicate entry")) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        }
+        this.checkDuplicateError(error);
       }
     },
 
@@ -74668,7 +74642,7 @@ __webpack_require__.r(__webpack_exports__);
         this.getBrokerUsers();
         this.$swal.close();
       } catch (error) {
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
     async getLocalBrokers() {
@@ -95973,6 +95947,47 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/mixins/CheckError.js":
+/*!*******************************************!*\
+  !*** ./resources/js/mixins/CheckError.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ({
+  methods: {
+    checkDeleteError: function checkDeleteError(error) {
+      console.error("delete error", error);
+      this.$swal("Error Detected!", "Contact System Administrator For Assistance.", "error");
+    },
+    checkDuplicateError: function checkDuplicateError(error) {
+      var systemMessage = error.response && error.response.data && error.response.data.message;
+
+      if (systemMessage && systemMessage.includes("Duplicate entry")) {
+        this.$swal("An Account with this email address already exists. Please try using a different email");
+      } else {
+        console.error("submit error", error);
+        this.$swal("Error Detected!", "Contact System Administrator For Assistance.", "error");
+      }
+    },
+    checkOrderError: function checkOrderError(error) {
+      var systemMessage = error.response && error.response.data && error.response.data.message;
+
+      if (systemMessage && systemMessage.includes("cannot be null")) {
+        var field = systemMessage.match(/'([^']+)'/)[1];
+        this.$swal("When creating an order ".concat(field, " cannot be null. Please try creating the order again."));
+      } else {
+        console.error("submit error", error);
+        this.$swal("Error Detected!", "Contact System Administrator For Assistance.", "error");
+      }
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./resources/js/mixins/Currencies.js":
 /*!*******************************************!*\
   !*** ./resources/js/mixins/Currencies.js ***!
@@ -96572,8 +96587,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
