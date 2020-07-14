@@ -14,7 +14,7 @@ class AddFixUpdateToBrokerSettlementAccountsTable extends Migration
     public function up()
     {
         Schema::table('broker_settlement_accounts', function (Blueprint $table) {
-            $table->boolean('fix_update');
+            // $table->boolean('fix_update');
         });
     }
 
