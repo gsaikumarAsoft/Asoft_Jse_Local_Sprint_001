@@ -147,8 +147,9 @@ import autoTable from "jspdf-autotable";
 import axios from "axios";
 import headNav from "./partials/Nav.vue";
 import currenciesMixin from "./../mixins/Currencies.js";
+import checkErrorMixin from "./../mixins/CheckError.js";
 export default {
-  mixins: [currenciesMixin],
+  mixins: [currenciesMixin, checkErrorMixin],
   components: {
     "head-nav": headNav
   },
@@ -313,8 +314,7 @@ export default {
         this.settlement_account = null;
         this.$swal.close();
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+         this.checkDuplicateError(error);
       }
     },
 
@@ -371,8 +371,7 @@ export default {
           "success"
         );
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
 

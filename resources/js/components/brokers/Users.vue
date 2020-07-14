@@ -91,8 +91,9 @@
 import permissionMixin from "./../../../js/mixins/Permissions.js";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
+import checkErrorMixin from "../../mixins/CheckError.js";
 export default {
-  mixins: [permissionMixin],
+  mixins: [permissionMixin,checkErrorMixin],
   components: {
     headNav
   },
@@ -290,11 +291,7 @@ export default {
         await this.$nextTick();
         this.$bvModal.hide("modal-1");
       } catch (error) {
-        if (error.response.data.message.includes("Duplicate entry")) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        }
+        this.checkDuplicateError(error);
       }
     },
 
@@ -385,7 +382,7 @@ export default {
         this.getBrokerUsers();
         this.$swal.close();
       } catch (error) {
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
     async getLocalBrokers() {

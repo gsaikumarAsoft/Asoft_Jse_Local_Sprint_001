@@ -96,11 +96,13 @@
 <script lang="ts">
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
+import checkErrorMixin from "../../mixins/CheckError.js";
 export default {
   props: ["broker_traders"],
   components: {
     headNav
   },
+  mixins:[checkErrorMixin],
   data() {
     return {
       local_broker_clients: [],
@@ -275,17 +277,7 @@ export default {
         this.broker_client = null;
         //setTimeout(location.reload.bind(location), 1000);
       } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message.includes("Duplicate entry")
-        ) {
-          await this.$swal(
-            `An Account with this email address already exists. Please try using a different email`
-          );
-        } else {
-          this.$swal("Ouch!", "Something went wrong.", "error");
-        }
+        this.checkDuplicateError(error);
       }
     },
 
@@ -304,8 +296,7 @@ export default {
         this.$swal.close();
         this.broker_client = null;
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     }
   },

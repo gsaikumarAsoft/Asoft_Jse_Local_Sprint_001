@@ -144,11 +144,13 @@
 <script lang="ts">
 import axios from "axios";
 import headNav from "./partials/Nav.vue";
+import checkErrorMixin from "./../mixins/CheckError.js";
 export default {
   props: ["accounts"],
   components: {
     "head-nav": headNav
   },
+   mixins: [checkErrorMixin],
   data() {
     return {
       trading_accounts: [],
@@ -336,8 +338,7 @@ export default {
         this.$swal.close();
         // setTimeout(location.reload.bind(location), 2000);
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+       this.checkDuplicateError(error);
       }
 
       /*  try {
@@ -375,8 +376,7 @@ export default {
         this.trading_account = null;
         this.$swal.close();
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     },
 

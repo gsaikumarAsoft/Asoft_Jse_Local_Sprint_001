@@ -508,6 +508,7 @@ import Multiselect from "vue-multiselect";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
 import currenciesMixin from "../../mixins/Currencies.js";
+import checkErrorMixin from "../../mixins/CheckError.js";
 // import jsonfile from 'jsonfile';
 export default {
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -515,7 +516,7 @@ export default {
     headNav,
     Multiselect
   },
-  mixins: [currenciesMixin],
+  mixins: [currenciesMixin, checkErrorMixin],
   data() {
     return {
       // messageDownload: [],
@@ -1037,7 +1038,7 @@ export default {
         const { value: side_type } = JSON.parse(this.order.side);
         console.log("side_type", side_type);
 
-       /*  if (!this.order.trading_account || !this.order.client_trading_account) {
+        /*  if (!this.order.trading_account || !this.order.client_trading_account) {
           throw new Error(
             "You need to select a Trading Account & Client Account to continue"
           );
@@ -1076,23 +1077,9 @@ export default {
           this.$swal(data.errors);
           this.reloadPage();
         }
-
-        // })
       } catch (error) {
-        console.log("error", error);
-        const s =
-          error.response && error.response.data && error.response.data.message;
-        if (s && s.includes("cannot be null")) {
-          const field = s.match(/'([^']+)'/)[1];
-          this.$swal(
-            `When creating an order ${field} cannot be null. Please try creating the order again.`
-          );
-        } else {
-          console.error("create order error", error);
-          this.$swal("Error Detected", error.message, "error");
-        }
-      } //);
-      //
+        this.checkOrderError(error);
+      }
     },
 
     reloadPage() {

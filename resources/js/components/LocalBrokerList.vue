@@ -48,10 +48,14 @@
 <script lang="ts">
 import axios from "axios";
 import headNav from "./partials/Nav.vue";
+import checkErrorMixin from "./../mixins/CheckError.js";
 export default {
   components: {
     headNav
   },
+   
+  mixins: [checkErrorMixin],
+   
   data() {
     return {
       create: false,
@@ -134,8 +138,7 @@ export default {
         await this.$nextTick();
         this.$bvModal.hide("modal-1");
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDuplicateError(error);
       }
 
       // Push the name to submitted names
@@ -189,8 +192,7 @@ export default {
         await this.getBrokers();
         this.$swal("Deleted!", "Local Broker Has Been Removed.", "success");
       } catch (error) {
-        console.error("destroy", error);
-        this.$swal("Ouch!", "Something went wrong.", "error");
+        this.checkDeleteError(error);
       }
     }
   },
