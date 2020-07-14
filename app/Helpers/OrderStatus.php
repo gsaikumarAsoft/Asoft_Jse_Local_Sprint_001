@@ -33,6 +33,10 @@ class OrderStatus
     {
         return "4";
     }
+    public static function  PendingCancel()
+    {
+        return "6";
+    }
     public static function  Replaced()
     {
         return "5";
@@ -49,7 +53,7 @@ class OrderStatus
     {
         return "U";
     }
-    public static function  Inactive()
+    public static function  PendingReplace()
     {
         return "E";
     }
@@ -60,5 +64,9 @@ class OrderStatus
     public static function  Failed()
     {
         return "Failed";
+    }
+    public static function  DoneForDay()
+    {
+        return "3";
     }
 }

@@ -27,6 +27,7 @@ Route::get('/home', function () {
     return redirect('/');
 });
 
+Route::get('/md-test', "BrokerController@mdTest");
 
 Route::group(['prefix' => '/verify'], function () {
     Route::get('/{id}/{action}', 'AccountVerificationController@verifyForeign');
@@ -89,6 +90,7 @@ Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], fun
 
 Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
     Route::get('/md-test', "BrokerController@mdTest");
+    Route::get('/reset-unsettled-trades', "BrokerController@resetTrades");
     Route::get('/', "BrokerController@index");
     Route::get('/get-users', 'BrokerController@getUsers');
     Route::get('/local-brokers', 'ApplicationController@brokerList');

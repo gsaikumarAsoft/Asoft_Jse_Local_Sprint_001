@@ -175,8 +175,8 @@ class FunctionSet
             // "Host" => "20.156.185.101",
             // "Port" => 6544,
             // ========================================================================================
-            'StartTime' => date("Y-m-d")." 11:00:00.000",
-            'EndTime' => date("Y-m-d")." 21:00:00.000",
+            'StartTime' => date("Y-m-d") . " 11:00:00.000",
+            'EndTime' => date("Y-m-d") . " 21:00:00.000",
             'OrderID' => $request->client_order_number,
             'BuyorSell' => $this->jsonStrip(json_decode($request->side, true), 'fix_value'),
             'OrdType' => $this->jsonStrip(json_decode($type, true), 'fix_value'),
@@ -249,7 +249,7 @@ class FunctionSet
                 // return '2';
                 // If the order is successfull create a log
                 $this->LogActivity->addToLog('Order Successfull: Please Check the endpoint /MessageDownload/Download for message queue' . '-' . $request->client_order_number);
-                $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
+                return $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
                 return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
                 break;
             default:
@@ -289,20 +289,17 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-
-        // return $request;
         $execution_report = $request['executionReports'];
-        $offset=5*60*60; //converting 4 hours to seconds.
-        $dateFormat="Y-m-d H:i"; //set the date format
-        $timeNdate=gmdate($dateFormat, time()-$offset); //get GMT date - 4
+        $offset = 5 * 60 * 60; //converting 4 hours to seconds.
+        $dateFormat = "Y-m-d H:i"; //set the date format
+        $timeNdate = gmdate($dateFormat, time() - $offset); //get GMT date - 4
         DB::table('broker_client_order_execution_reports')->where('orderID', '!=', '000000-000000-0')->delete();
         foreach ($execution_report as $report) {
 
             $clients[] = $report;
-            // $broker_order_execution_report = BrokerOrderExecutionReport::updateOrCreate(
-            // ['clOrdID' => $report['clOrdID'] ],
-            // ['orderID' => $report['orderID'], 'text' => $report['text'], 'ordRejRes' => $report['ordRejRes'], 'status' => $report['status'],'buyorSell' => $report['buyorSell'],'securitySubType' => 0,'time' => $report['time'],'ordType' => $report['ordType'],'orderQty' => $report['orderQty'], 'timeInForce' => $report['timeInForce'], 'symbol' => $report['symbol'], 'qTradeacc' => $report['qTradeacc'], 'price' => $report['price'], 'stopPx' => $report['stopPx'], 'execType' => $report['execType'], 'senderSubID' => $report['senderSubID'], 'seqNum' => $report['seqNum'], 'sendingTime' => $report['sendingTime'], 'messageDate' => $report['messageDate'] ]
-            // );
+            // return $report;
+            // sendersubID => array_values($report)[16]
+            // return array_values($report)[5];
             $broker_order_execution_report = new BrokerOrderExecutionReport();
             $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
             $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
@@ -644,8 +641,8 @@ class FunctionSet
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $sender_sub_id,
             "seqNum" => 0,
-            'StartTime' => date("Y-m-d")." 11:00:00.000",
-            'EndTime' => date("Y-m-d")." 21:00:00.000",
+            'StartTime' => date("Y-m-d") . " 11:00:00.000",
+            'EndTime' => date("Y-m-d") . " 21:00:00.000",
         );
         $postdata = json_encode($data);
 
@@ -662,8 +659,9 @@ class FunctionSet
 
         $request = json_decode($result, true);
         $account = $request['executionReports'];
-        $total_reports = count($account);
-
+        // $total_reports = count($account);
+        
+        // return $request;
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
 
@@ -709,17 +707,18 @@ class FunctionSet
                     // Define the open order amount
                     $op_or = $bc->open_orders - ($quantity * $price);
                     $fil_or = $bc->filled_orders + ($quantity * $price);
+                    $order_value = $quantity * $price;
                     // if ($array) {
                     $sa = $array[0];
-                    $settlement_allocated = (int)$sa['amount_allocated'] - ($quantity * $price);
+                    $settlement_allocated = $sa['amount_allocated'] + ($quantity * $price);
+                    $settlement_account_balance = $sa['account_balance'];
+                    // $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
                     $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
                     //If offer is (Rejected, Cancelled, Expired)
                     // return $status .'-'.$od->id;
                     if (
                         $status === $this->OrderStatus->Expired() ||
-                        $status === $this->OrderStatus->Cancelled() ||
-                        $status === $this->OrderStatus->Rejected() ||
-                        $status === $this->OrderStatus->_New() 
+                        $status === $this->OrderStatus->Cancelled()
                     ) {
 
                         // return '1';
@@ -737,6 +736,49 @@ class FunctionSet
 
                         );
                         // }
+                    } else if ($status === $this->OrderStatus->Filled()) {
+
+                        if ($sa['fix_update'] === 0 && (int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
+                            // Release Funds When Rejected
+                            BrokerClientOrder::updateOrCreate(
+                                ['id' => $od->id],
+                                ['order_status' => $status]
+
+                            );
+                            BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                ['fix_update' => 1, 'filled_orders' => $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                            );
+                            BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['filled_orders' => $order_value]
+                            );
+                        }
+                    } else if ($status === $this->OrderStatus->Rejected()) {
+
+                        if ($sa['fix_update'] === 0 && (int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
+                            // Release Funds When Rejected
+                            BrokerClientOrder::updateOrCreate(
+                                ['id' => $od->id],
+                                ['order_status' => $status]
+
+                            );
+                            BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                ['fix_update' => 1, 'account_balance' => (int) $sa['amount_allocated'] + (int) $sa['account_balance'], 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                            );
+                            BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['open_orders' => $bc->open_orders - (int) $order_value]
+                            );
+                        }
+                    } else if ($status === $this->OrderStatus->_New()) {
+                        //If the order status is new update the status only
+                        BrokerClientOrder::updateOrCreate(
+                            ['id' => $od->id],
+                            ['order_status' => $status]
+
+                        );
                     } else if ($status === $this->OrderStatus->PartialFilled()) {
                         // return '2';
                         //If the order was previously (Rejected, Cancelled, Expired Or Previously Filled)

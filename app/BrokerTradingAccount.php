@@ -8,7 +8,7 @@ class BrokerTradingAccount extends Model
 {
 
 
-    // protected $guarded = ['id'];
+    protected $guarded = ['id'];
     protected $fillable = [
         'local_broker_id',
         'foreign_broker_id',

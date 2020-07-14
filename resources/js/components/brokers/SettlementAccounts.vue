@@ -3,6 +3,7 @@
     <head-nav></head-nav>
     <div class="container-fluid">
       <div class="content">
+        <!-- <pre>{{broker_settlement_account}}</pre> -->
         <b-card title="Settlement Accounts" v-if="!settlement_account">
           <b-table
             striped
@@ -157,6 +158,11 @@ export default {
         },
         {
           key: "email",
+          sortable: true
+        },
+                {
+          key: "filled_orders",
+          label: "Unsettled Trades",
           sortable: true
         },
         {

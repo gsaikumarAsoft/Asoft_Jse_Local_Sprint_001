@@ -36,6 +36,10 @@ class BrokerController extends Controller
         return view('brokers.index');
     }
 
+    public function resetTrades(){
+        $update = DB::table('broker_client_orders')->update(['filled_orders' => 0]);
+        return $update;
+    }
     function storeBrokerClient(Request $request)
     {
         if ($request->id) {
@@ -179,7 +183,8 @@ class BrokerController extends Controller
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 
-    public function mdTest(){
+    public function mdTest()
+    {
         return $this->HelperClass->executionBalanceUpdate("BARITA", 'JSE_TRADER3');
     }
     public function logExecution(Request $request)
@@ -231,7 +236,7 @@ class BrokerController extends Controller
         //     ->get();
         $user = auth()->user();
         $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->get();
-        foreach($orders[0]['trading'] as $b2b){
+        foreach ($orders[0]['trading'] as $b2b) {
             $this->HelperClass->executionBalanceUpdate($user->name, $b2b->trading_account_number);
         }
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
@@ -278,9 +283,9 @@ class BrokerController extends Controller
 
 
         // Check if the client account status is approved before continueing the order. If not Kill it
-        if($c_account->status != 'Verified'){
-            $this->LogActivity->addToLog('ORDER BLOCKED: JCSD:'.$c_account->jcsd.'-'.$c_account->name.'s account status needs to be updated from '. $c_account->status.' to Verified');
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: '.$c_account->name.'s account status needs to be updated from '. $c_account->status.' to Verified']);
+        if ($c_account->status != 'Verified') {
+            $this->LogActivity->addToLog('ORDER BLOCKED: JCSD:' . $c_account->jcsd . '-' . $c_account->name . 's account status needs to be updated from ' . $c_account->status . ' to Verified');
+            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $c_account->name . 's account status needs to be updated from ' . $c_account->status . ' to Verified']);
         }
 
         // Calculations Before Creating A New Order
@@ -289,8 +294,8 @@ class BrokerController extends Controller
 
 
         //Beta 2
-        $settlement_available = (int)$settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
-        $client_available = (int)$c_account->account_balance - ($c_account->open_orders + $c_account->filled_orders);
+        $settlement_available = (int) $settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
+        $client_available = (int) $c_account->account_balance - ($c_account->open_orders + $c_account->filled_orders);
         //=========================================================================
         // return $settlement_available ."=". $order_value;
 
@@ -301,7 +306,7 @@ class BrokerController extends Controller
             if ($settlement_available < $order_value) {
 
                 // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
-                
+
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
             } else if ($client_available < $order_value) {
 
@@ -309,16 +314,16 @@ class BrokerController extends Controller
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                $settlement_allocated = (int)$settlement->amount_allocated + $order_value;
+                $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
-                $client_open_orders = (int)$c_account->open_orders + $order_value;
+                $client_open_orders = (int) $c_account->open_orders + $order_value;
 
 
                 // Update Settlement Account Balances
                 BrokerSettlementAccount::updateOrCreate(
                     ['id' => $trading->broker_settlement_account_id],
-                    ['amount_allocated' => $settlement_allocated]
+                    ['amount_allocated' => $settlement_allocated, 'account_balance' => (int) $settlement->account_balance - $settlement_allocated]
                 );
 
 
@@ -328,8 +333,8 @@ class BrokerController extends Controller
                     ['open_orders' => $client_open_orders]
                 );
 
-                $this->LogActivity->addToLog('ORDER Submitted: JCSD:'.$c_account->jcsd.'-'.$c_account->name.': Balance:'.$c_account->account_balance.', Open Orders:'.$client_open_orders);
-                $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$settlement['account'].', Balance: '.$settlement['account_balance']. ', Amount Allocated: '.$settlement['amount_allocated']);
+                $this->LogActivity->addToLog('ORDER Submitted: JCSD:' . $c_account->jcsd . '-' . $c_account->name . ': Balance:' . $c_account->account_balance . ', Open Orders:' . $client_open_orders);
+                $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $settlement['account'] . ', Balance: ' . $settlement['account_balance'] . ', Amount Allocated: ' . $settlement['amount_allocated']);
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             }
