@@ -661,7 +661,7 @@ class FunctionSet
         $account = $request['executionReports'];
         // $total_reports = count($account);
         
-        // return $request;
+        return $request;
         //Store Execution reports for above sender_Sub_id to database before updating account balances
         $this->logExecution($request);
 
@@ -738,7 +738,7 @@ class FunctionSet
                         // }
                     } else if ($status === $this->OrderStatus->Filled()) {
 
-                        if ($sa['fix_update'] === 0 && (int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
+                        if ((int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
                             // Release Funds When Rejected
                             BrokerClientOrder::updateOrCreate(
                                 ['id' => $od->id],
@@ -756,7 +756,7 @@ class FunctionSet
                         }
                     } else if ($status === $this->OrderStatus->Rejected()) {
 
-                        if ($sa['fix_update'] === 0 && (int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
+                        if ((int) $sa['amount_allocated'] > 0 && $bc->open_orders > 0) {
                             // Release Funds When Rejected
                             BrokerClientOrder::updateOrCreate(
                                 ['id' => $od->id],
