@@ -72382,8 +72382,11 @@ __webpack_require__.r(__webpack_exports__);
             if (value === "8") {
               return "Rejected";
             }
-            if(value === "Submitted"){
-              return 'Submitted';
+            if (value === "Submitted") {
+              return "Submitted";
+            }
+            if (value === "Failed") {
+              return "Failed";
             }
           }
         },
