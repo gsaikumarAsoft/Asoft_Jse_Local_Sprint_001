@@ -654,7 +654,7 @@ class FunctionSet
 
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        return $this->logExecution($request);
+        $this->logExecution($request);
 
         //Find the very last exucution sequence number for this particular broker
         $seq_last = DB::table('broker_client_order_execution_reports')->orderBy('id', 'desc')->limit(1)->get();
