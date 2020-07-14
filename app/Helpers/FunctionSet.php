@@ -249,7 +249,7 @@ class FunctionSet
                 // return '2';
                 // If the order is successfull create a log
                 $this->LogActivity->addToLog('Order Successfull: Please Check the endpoint /MessageDownload/Download for message queue' . '-' . $request->client_order_number);
-                return $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
+                $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
                 return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
                 break;
             default:
