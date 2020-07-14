@@ -17,7 +17,6 @@ class BrokerSettlementAccount extends Model
         'bank_name',
         'filled_orders',
         'account',
-        'fix_update',
         'status',
         'currency',
         'email',

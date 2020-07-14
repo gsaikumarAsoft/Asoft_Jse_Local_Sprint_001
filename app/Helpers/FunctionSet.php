@@ -270,6 +270,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
+        return $request;
         $execution_report = $request['executionReports'];
         $offset = 5 * 60 * 60; //converting 4 hours to seconds.
         $dateFormat = "Y-m-d H:i"; //set the date format
@@ -738,7 +739,7 @@ class FunctionSet
                             );
                             BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['fix_update' => 1, 'filled_orders' => $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                                ['filled_orders' => $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
                             );
                             BrokerClient::updateOrCreate(
                                 ['id' => $bc->id],
@@ -756,7 +757,7 @@ class FunctionSet
                             );
                             BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['fix_update' => 1, 'account_balance' => (int) $sa['amount_allocated'] + (int) $sa['account_balance'], 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                                ['account_balance' => (int) $sa['amount_allocated'] + (int) $sa['account_balance'], 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
                             );
                             BrokerClient::updateOrCreate(
                                 ['id' => $bc->id],
