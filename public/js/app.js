@@ -73684,7 +73684,7 @@ __webpack_require__.r(__webpack_exports__);
       await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`); //.then(response => {
       this.$swal("Cancelled");
       await this.timeout(1000);
-      window.location.reload.bind(window.location);
+      // window.location.reload.bind(window.location);
     },
 
     //sleep function

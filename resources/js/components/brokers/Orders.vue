@@ -1125,7 +1125,7 @@ export default {
       await axios.delete(`destroy-broker-client-order/${id}`); //.then(response => {
       this.$swal("Cancelled");
       await this.timeout(1000);
-      window.location.reload.bind(window.location);
+      // window.location.reload.bind(window.location);
     },
 
     //sleep function

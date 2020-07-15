@@ -54,16 +54,18 @@ class FunctionSet
             $o->side == "BUY");
     }
 
-    public function cancelOrder($order)
+    public function cancelOrder($id)
     {
-        $mytime = Carbon::now();
-        $cancel_cordid = "ORD" . $mytime->format('YmdH') . "N" . rand(100, 1000); //Create a New cancel order id
+        $order = BrokerClientOrder::where('clordid', $id)->first();
+        // $mytime = Carbon::now();
+        // $cancel_cordid = "ORD" . $mytime->format('YmdH') . "N" . rand(100, 1000); //Create a New cancel order id
 
         //Trading Account Information
         $trading = BrokerTradingAccount::with('settlement_account')->find($order->trading_account_id)->first();
 
-        //Settlement Account Information
+        // //Settlement Account Information
         $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
+
         $url = $this->fix_wrapper_url("api/OrderManagement/OrderCancelRequest");
         $data = array(
             'BeginString' => 'FIX.4.2',
@@ -71,7 +73,8 @@ class FunctionSet
             'SenderCompID' => $trading->sender_comp_id,
             'SenderSubID' => $trading->trading_account_number,
             'Host' => $trading->socket,
-            'OrderID' => $cancel_cordid,
+            'OrderID' => $order->clordid,
+            // "OriginalOrderID" => $order->clordid,
             "OrigClOrdID" => $order->clordid,
             "OrderQty" => $order->quantity,
             'BuyorSell' => $this->jsonStrip(json_decode($order->side, true), 'fix_value'),
@@ -80,6 +83,8 @@ class FunctionSet
             'Symbol' => $this->jsonStrip(json_decode($order->symbol, true), 'text'),
             'ClientID' => $trading->trading_account_number,
             'AccountType' => 'CL',
+            'StartTime' => date("Y-m-d") . " 11:00:00.000",
+            'EndTime' => date("Y-m-d") . " 21:00:00.000",
         );
 
         $postdata = json_encode($data);
@@ -95,7 +100,7 @@ class FunctionSet
         $result = curl_exec($ch);
 
         curl_close($ch);
-        // return $result;
+        return $result;
     }
 
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
@@ -272,43 +277,45 @@ class FunctionSet
     {
         // return $request;
         $execution_report = $request['executionReports'];
-        $offset = 5 * 60 * 60; //converting 4 hours to seconds.
-        $dateFormat = "Y-m-d H:i"; //set the date format
-        $timeNdate = gmdate($dateFormat, time() - $offset); //get GMT date - 4
-        // DB::table('broker_client_order_execution_reports')->where('orde	759320200714027rID', '!=', '000000-000000-0')->delete();
-        foreach ($execution_report as $report) {
-            $clients[] = $report;
-            // return array_values($report)[15];
-            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
-            if ($record->exists()) {
-                //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
-            } else {
-                // IF IT IS A NEW RECORD INSERT IT AND UPDATE THE BALANCES
-                $broker_order_execution_report = new BrokerOrderExecutionReport();
-                $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
-                $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
-                $broker_order_execution_report->text = $report['text'];
-                $broker_order_execution_report->ordRejRes = $report['ordRejRes'] ?? null;
-                $broker_order_execution_report->status = $report['status'] ?? 8;
-                $broker_order_execution_report->buyorSell = $report['buyorSell'] ?? $report['BuyorSell'];
-                $broker_order_execution_report->securitySubType = 0;
-                $broker_order_execution_report->time = $report['time'] ?? null;
-                $broker_order_execution_report->ordType = $report['ordType'] ?? $report['OrdType'];
-                $broker_order_execution_report->orderQty = $report['orderQty'] ?? $report['OrderQty'] ?? 0;
-                $broker_order_execution_report->timeInForce = $report['timeInForce'] ?? 0;
-                $broker_order_execution_report->symbol = $report['symbol'] ?? $report['Symbol'];
-                $broker_order_execution_report->qTradeacc = $report['qTradeacc'] ?? $report['Account'];
-                $broker_order_execution_report->price = $report['price'] ?? $report['Price'];
-                $broker_order_execution_report->stopPx = $report['stopPx'] ?? 0;
-                $broker_order_execution_report->execType = $report['execType'] ?? 0;
-                $broker_order_execution_report->senderSubID = $report['senderSubID'] ?? $report['SenderSubID'];
-                $broker_order_execution_report->seqNum = $report['seqNum'] ?? 0;
-                $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? $timeNdate;
-                $broker_order_execution_report->messageDate = $report['messageDate'] ?? $timeNdate;
-                $broker_order_execution_report->save();
+        if ($execution_report) {
+            $offset = 5 * 60 * 60; //converting 4 hours to seconds.
+            $dateFormat = "Y-m-d H:i"; //set the date format
+            $timeNdate = gmdate($dateFormat, time() - $offset); //get GMT date - 4
+            // DB::table('broker_client_order_execution_reports')->where('orde	759320200714027rID', '!=', '000000-000000-0')->delete();
+            foreach ($execution_report as $report) {
+                $clients[] = $report;
+                // return array_values($report)[15];
+                $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
+                if ($record->exists()) {
+                    //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
+                } else {
+                    // IF IT IS A NEW RECORD INSERT IT AND UPDATE THE BALANCES
+                    $broker_order_execution_report = new BrokerOrderExecutionReport();
+                    $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
+                    $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
+                    $broker_order_execution_report->text = $report['text'];
+                    $broker_order_execution_report->ordRejRes = $report['ordRejRes'] ?? null;
+                    $broker_order_execution_report->status = $report['status'] ?? 8;
+                    $broker_order_execution_report->buyorSell = $report['buyorSell'] ?? $report['BuyorSell'];
+                    $broker_order_execution_report->securitySubType = 0;
+                    $broker_order_execution_report->time = $report['time'] ?? null;
+                    $broker_order_execution_report->ordType = $report['ordType'] ?? $report['OrdType'];
+                    $broker_order_execution_report->orderQty = $report['orderQty'] ?? $report['OrderQty'] ?? 0;
+                    $broker_order_execution_report->timeInForce = $report['timeInForce'] ?? 0;
+                    $broker_order_execution_report->symbol = $report['symbol'] ?? $report['Symbol'];
+                    $broker_order_execution_report->qTradeacc = $report['qTradeacc'] ?? $report['Account'];
+                    $broker_order_execution_report->price = $report['price'] ?? $report['Price'];
+                    $broker_order_execution_report->stopPx = $report['stopPx'] ?? 0;
+                    $broker_order_execution_report->execType = $report['execType'] ?? 0;
+                    $broker_order_execution_report->senderSubID = $report['senderSubID'] ?? $report['SenderSubID'];
+                    $broker_order_execution_report->seqNum = $report['seqNum'] ?? 0;
+                    $broker_order_execution_report->sendingTime = $report['sendingTime'] ?? $timeNdate;
+                    $broker_order_execution_report->messageDate = $report['messageDate'] ?? $timeNdate;
+                    $broker_order_execution_report->save();
 
-                // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
-                $this->clientSettlementBalanceUpdate($report);
+                    // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
+                    $this->clientSettlementBalanceUpdate($report);
+                }
             }
         }
     }
@@ -649,7 +656,7 @@ class FunctionSet
         // $total_reports = count($account);
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        return $this->logExecution($request);
+        $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
@@ -713,7 +720,7 @@ class FunctionSet
                         // }
                     } else if ($status === $this->OrderStatus->Failed()) {
                         //If the order Fails Return Balances to settlement & Client Account
-          
+
                     } else if ($status === $this->OrderStatus->Filled()) {
 
                         // Release Funds When Rejected

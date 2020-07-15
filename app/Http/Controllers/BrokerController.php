@@ -255,12 +255,12 @@ class BrokerController extends Controller
 
     public function destroyOrder($id)
     {
-        $order = BrokerClientOrder::updateOrCreate(
-            ['clordid' => $id],
-            ['order_status' => 4]
-        );
+        // $order = BrokerClientOrder::updateOrCreate(
+        //     ['clordid' => $id],
+        //     ['order_status' => 4]
+        // );
 
-        return $this->HelperClass->cancelOrder($order);
+        return $this->HelperClass->cancelOrder($id);
     }
     public function clientOrder(Request $request)
     {
