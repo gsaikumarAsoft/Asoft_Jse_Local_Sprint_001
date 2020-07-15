@@ -649,19 +649,19 @@ class FunctionSet
         // $total_reports = count($account);
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        $this->logExecution($request);
+        return $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
     {
 
+        // return $data;
         // iterate through all reports and update accounts as required
         $order_number = array_values($data)[1];
         $sender_sub_id = array_values($data)[16];
         $price = array_values($data)[13];
         $quantity = array_values($data)[9];
         $status = array_values($data)[5];
-
         $jcsd_num = array_values($data)[12];
         // return $order_number;
         $jcsd = str_replace('JCSD', "", $jcsd_num);
@@ -713,16 +713,9 @@ class FunctionSet
                         // }
                     } else if ($status === $this->OrderStatus->Failed()) {
                         //If the order Fails Return Balances to settlement & Client Account
-                        BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['account_balance' => 0]
-                        );
-                        BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $bc->open_orders - (int) $order_value]
-                        );
-
+          
                     } else if ($status === $this->OrderStatus->Filled()) {
+
                         // Release Funds When Rejected
                         BrokerClientOrder::updateOrCreate(
                             ['id' => $od->id],
