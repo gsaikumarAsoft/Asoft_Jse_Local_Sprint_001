@@ -96591,8 +96591,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
