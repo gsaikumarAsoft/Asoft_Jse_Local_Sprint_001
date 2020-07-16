@@ -314,27 +314,15 @@ class BrokerController extends Controller
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
+                // $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
-                $client_open_orders = (int) $c_account->open_orders + $order_value;
+                // $client_open_orders = (int) $c_account->open_orders + $order_value;
 
 
-                // Update Settlement Account Balances
-                BrokerSettlementAccount::updateOrCreate(
-                    ['id' => $trading->broker_settlement_account_id],
-                    ['amount_allocated' => $settlement_allocated, 'account_balance' => (int) $settlement->account_balance - $settlement_allocated]
-                );
-
-
-                // Update Broker Clients Open Orders
-                BrokerClient::updateOrCreate(
-                    ['id' => $request['client_trading_account']],
-                    ['open_orders' => $client_open_orders]
-                );
-
-                $this->LogActivity->addToLog('ORDER Submitted: JCSD:' . $c_account->jcsd . '-' . $c_account->name . ': Balance:' . $c_account->account_balance . ', Open Orders:' . $client_open_orders);
-                $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $settlement['account'] . ', Balance: ' . $settlement['account_balance'] . ', Amount Allocated: ' . $settlement['amount_allocated']);
+       
+                // $this->LogActivity->addToLog('ORDER Submitted: JCSD:' . $c_account->jcsd . '-' . $c_account->name . ': Balance:' . $c_account->account_balance . ', Open Orders:' . $client_open_orders);
+                // $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $settlement['account'] . ', Balance: ' . $settlement['account_balance'] . ', Amount Allocated: ' . $settlement['amount_allocated']);
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             }

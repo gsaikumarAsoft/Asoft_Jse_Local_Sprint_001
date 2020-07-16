@@ -273,11 +273,11 @@ class FunctionSet
                 // Replenish Settlement Account Balance
                 BrokerSettlementAccount::updateOrCreate(
                     ['id' => $trading->broker_settlement_account_id],
-                    ['amount_allocated' => $settlement->amount_allocated - $order_value, 'account_balance' => (int) $settlement->account_balance + $order_value]
+                    ['amount_allocated' => (int)$settlement->amount_allocated - $order_value, 'account_balance' => (int) $settlement->account_balance + $order_value]
                 );
                 BrokerClient::updateOrCreate(
                     ['id' => $client_id],
-                    ['open_orders' => $client->open_orders - $order_value]
+                    ['open_orders' => (int)$client->open_orders - (int)$order_value]
                 );
 
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
@@ -706,16 +706,16 @@ class FunctionSet
                 // return $bc;
                 if ($od->id) {
                     $order_status = $this->orderStatus($od->id);
-
-                    // Define the open order amount
-                    $op_or = $bc->open_orders - ($quantity * $price);
-                    $fil_or = $bc->filled_orders + ($quantity * $price);
-                    $order_value = $quantity * $price;
                     $sa = $array[0];
-                    $settlement_allocated = $sa['amount_allocated'] + ($quantity * $price);
-                    $settlement_account_balance = $sa['account_balance'];
-                    // $settlement_allocated = $sa['amount_allocated'] - ($quantity * $price);
-                    $settlement_fil_ord = $bc->filled_orders + ($quantity * $price);
+
+                    $order_value = $quantity * $price;
+
+                    // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
+                    $settlement_allocated = (int) $sa['amount_allocated'] + $order_value;
+
+                    // [Client Open Orders] = [Client Open Orders] + [Order Value]
+                    $client_open_orders = (int) $bc['open_orders'] + $order_value;
+
                     //If offer is (Rejected, Cancelled, Expired)
                     if (
                         $status === $this->OrderStatus->Expired() ||
@@ -729,15 +729,11 @@ class FunctionSet
                         );
                         // }
                     } else if ($status === $this->OrderStatus->Failed()) {
-                        //If the order Fails Return Balances to settlement & Client Account
-                        BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['filled_orders' => $sa['filled_orders'] - $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                        BrokerClientOrder::updateOrCreate(
+                            ['id' => $od->id],
+                            ['order_status' => $status]
+
                         );
-                        // BrokerClient::updateOrCreate(
-                        //     ['id' => $bc->id],
-                        //     ['open_orders' => "911"]
-                        // );
                     } else if ($status === $this->OrderStatus->Filled()) {
 
                         // Release Funds When Rejected
@@ -746,30 +742,24 @@ class FunctionSet
                             ['order_status' => $status]
 
                         );
+
+                        // Update Settlement Account Balances
                         BrokerSettlementAccount::updateOrCreate(
                             ['id' => $sa['id']],
-                            ['filled_orders' => $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                            ['amount_allocated' => (int) $sa['amount_allocated'] + $order_value, 'account_balance' => (int) $sa['account_balance'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
                         );
+
+
+                        // Update Broker Clients Open Orders
                         BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
-                            ['filled_orders' => $order_value]
+                            ['open_orders' => $client_open_orders, 'filled_orders' => $bc->filled_orders + (int)$order_value]
                         );
                     } else if ($status === $this->OrderStatus->Rejected()) {
 
-
-                        // Release Funds When Rejected
                         BrokerClientOrder::updateOrCreate(
                             ['id' => $od->id],
                             ['order_status' => $status]
-
-                        );
-                        BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['account_balance' => (int) $sa['amount_allocated'] + (int) $sa['account_balance'], 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
-                        );
-                        BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $bc->open_orders - (int) $order_value]
                         );
                     } else if ($status === $this->OrderStatus->_New()) {
                         //If the order status is new update the status only
@@ -778,36 +768,54 @@ class FunctionSet
                             ['order_status' => $status]
 
                         );
+
+                        // Update Settlement Account Balances
+                        BrokerSettlementAccount::updateOrCreate(
+                            ['id' => $trading->broker_settlement_account_id],
+                            ['amount_allocated' => $settlement_allocated, 'account_balance' => (int) $sa['account_balance'] - $settlement_allocated]
+                        );
+
+
+                        // Update Broker Clients Open Orders
+                        BrokerClient::updateOrCreate(
+                            ['id' => $bc['id']],
+                            ['open_orders' => $client_open_orders]
+                        );
                     } else if ($status === $this->OrderStatus->PartialFilled()) {
 
-                        BrokerClientOrder::updateOrCreate(
-                            ['id' => $od->id],
-                            ['order_status' => $this->OrderStatus->PartialFilled()]
+                        // BrokerClientOrder::updateOrCreate(
+                        //     ['id' => $od->id],
+                        //     ['order_status' => $this->OrderStatus->PartialFilled()]
 
-                        );
+                        // );
 
-                        BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $op_or, 'filled_orders' => $fil_or]
-                        );
+                        // BrokerClient::updateOrCreate(
+                        //     ['id' => $bc->id],
+                        //     ['open_orders' => $op_or, 'filled_orders' => $fil_or]
+                        // );
+
+                        // BrokerSettlementAccount::updateOrCreate(
+                        //     ['id' => $sa['id']],
+                        //     ['filled_orders' => $sa['filled_orders'] + $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] + (int) $order_value]
+                        // );
                     } else {
 
-                        BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $op_or, 'filled_orders' => $fil_or]
-                        );
+                        // BrokerClient::updateOrCreate(
+                        //     ['id' => $bc->id],
+                        //     ['open_orders' => $op_or, 'filled_orders' => $fil_or]
+                        // );
 
-                        BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['amount_allocated' => $settlement_allocated, 'filled_orders', $settlement_fil_ord]
-                        );
-                        $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $sa['account'] . ', Balance: ' . $sa['account_balance'] . ', Amount Allocated: ' . $sa['amount_allocated']);
+                        // BrokerSettlementAccount::updateOrCreate(
+                        //     ['id' => $sa['id']],
+                        //     ['amount_allocated' => $settlement_allocated, 'filled_orders', $settlement_fil_ord]
+                        // );
+                        // $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $sa['account'] . ', Balance: ' . $sa['account_balance'] . ', Amount Allocated: ' . $sa['amount_allocated']);
 
 
-                        BrokerClientOrder::updateOrCreate(
-                            ['id' => $od->id],
-                            ['order_status' => $status]
-                        );
+                        // BrokerClientOrder::updateOrCreate(
+                        //     ['id' => $od->id],
+                        //     ['order_status' => $status]
+                        // );
                     }
                 }
             }
