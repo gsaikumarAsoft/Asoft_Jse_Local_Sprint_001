@@ -72103,6 +72103,24 @@ __webpack_require__.r(__webpack_exports__);
             // return formatter.format(cal);
           }
         },
+                {
+          key: "filled_orders",
+          label: "Unsettled Trades",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var nf = Intl.NumberFormat();
+            var cal = item.filled_orders;
+            return nf.format(cal);
+
+            // return formatter(cal);
+            // return formatter.format(cal);
+          }
+        },
         // {
         //   key: "orders_limit",
         //   label: "Available",

@@ -275,16 +275,16 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        // return $request;
+        return $request;
         $execution_report = $request['executionReports'];
         if ($execution_report) {
-            $offset = 5 * 60 * 60; //converting 4 hours to seconds.
-            $dateFormat = "Y-m-d H:i"; //set the date format
-            $timeNdate = gmdate($dateFormat, time() - $offset); //get GMT date - 4
-            // DB::table('broker_client_order_execution_reports')->where('orde	759320200714027rID', '!=', '000000-000000-0')->delete();
+            $offset = 5 * 60 * 60; 
+            $dateFormat = "Y-m-d H:i"; 
+            $timeNdate = gmdate($dateFormat, time() - $offset); 
+        
             foreach ($execution_report as $report) {
                 $clients[] = $report;
-                // return array_values($report)[15];
+        
                 $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
                 if ($record->exists()) {
                     //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
@@ -656,7 +656,7 @@ class FunctionSet
         // $total_reports = count($account);
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        $this->logExecution($request);
+       return $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
@@ -720,6 +720,14 @@ class FunctionSet
                         // }
                     } else if ($status === $this->OrderStatus->Failed()) {
                         //If the order Fails Return Balances to settlement & Client Account
+                        BrokerSettlementAccount::updateOrCreate(
+                            ['id' => $sa['id']],
+                            ['filled_orders' => $sa['filled_orders'] - $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
+                        );
+                        BrokerClient::updateOrCreate(
+                            ['id' => $bc->id],
+                            ['open_orders' => $bc->open_orders - $order_value]
+                        );
 
                     } else if ($status === $this->OrderStatus->Filled()) {
 
