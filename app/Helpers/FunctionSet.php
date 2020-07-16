@@ -275,7 +275,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        return $request;
+        // return $request;
         $execution_report = $request['executionReports'];
         if ($execution_report) {
             $offset = 5 * 60 * 60; 
@@ -656,7 +656,7 @@ class FunctionSet
         // $total_reports = count($account);
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-       return $this->logExecution($request);
+       $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
