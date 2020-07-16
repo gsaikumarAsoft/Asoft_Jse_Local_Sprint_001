@@ -68,7 +68,7 @@
                 id="Account Balance-input"
                 v-model="broker_client.account_balance"
                 :state="nameState"
-                type="number"
+                type="text"
                 required
               ></b-form-input>
             </b-form-group>

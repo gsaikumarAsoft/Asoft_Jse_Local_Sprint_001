@@ -171,7 +171,7 @@
                         id="value-input1"
                         v-model="order.value"
                         :state="nameState"
-                        type="number"
+                        type="text"
                         :disabled="disabled"
                       ></b-form-input>
                     </b-input-group>
@@ -205,7 +205,7 @@
                         id="value-input"
                         v-model="order.stop_px"
                         :state="nameState"
-                        type="number"
+                        type="text"
                       ></b-form-input>
                     </b-input-group>
                   </b-form-group>

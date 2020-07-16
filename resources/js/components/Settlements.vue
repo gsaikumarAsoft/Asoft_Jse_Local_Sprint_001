@@ -116,7 +116,7 @@
                 id="balance-input"
                 v-model="settlement_account.account_balance"
                 :state="nameState"
-                type="number"
+                type="text"
                 required
               ></b-form-input>
             </b-form-group>
@@ -129,7 +129,7 @@
                 id="allocated-input"
                 v-model="settlement_account.amount_allocated"
                 :state="nameState"
-                type="number"
+                type="text"
                 required
               ></b-form-input>
             </b-form-group>
