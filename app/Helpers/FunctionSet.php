@@ -754,6 +754,25 @@ class FunctionSet
                             ['open_orders' => $client_open_orders, 'filled_orders' => $bc->filled_orders + (int)$order_value]
                         );
                     } else if ($status === $this->OrderStatus->PartialFilled()) {
+                        // UPDATE THE ORDER STATUS 
+                        BrokerClientOrder::updateOrCreate(
+                            ['id' => $od->id],
+                            ['order_status' => $status]
+
+                        );
+
+                        // Update Settlement Account Balances
+                        BrokerSettlementAccount::updateOrCreate(
+                            ['id' => $sa['id']],
+                            ['amount_allocated' => (int) $sa['amount_allocated'] + $order_value, 'account_balance' => (int) $sa['account_balance'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
+                        );
+
+
+                        // Update Broker Clients Open Orders
+                        BrokerClient::updateOrCreate(
+                            ['id' => $bc->id],
+                            ['open_orders' => $client_open_orders, 'filled_orders' => $bc->filled_orders + (int)$order_value]
+                        );
                     } else {
                     }
                 }
