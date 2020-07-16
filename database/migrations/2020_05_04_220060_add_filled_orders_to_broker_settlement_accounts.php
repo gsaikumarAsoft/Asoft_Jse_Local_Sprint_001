@@ -14,7 +14,7 @@ class AddFilledOrdersToBrokerSettlementAccounts extends Migration
     public function up()
     {
         Schema::table('broker_settlement_accounts', function (Blueprint $table) {
-            $table->string('filled_orders')->nullable();
+            $table->string('filled_orders')->default('0');
         }); 
     }
 

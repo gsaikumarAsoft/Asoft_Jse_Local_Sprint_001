@@ -267,6 +267,19 @@ class FunctionSet
                 DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
                     ->update(['order_status' => $this->OrderStatus->Failed()]);
+                //Settlement Account Information
+                $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
+                $order_value = $request->price * $request->quantity;
+                // Replenish Settlement Account Balance
+                BrokerSettlementAccount::updateOrCreate(
+                    ['id' => $trading->broker_settlement_account_id],
+                    ['amount_allocated' => $settlement->amount_allocated - $order_value, 'account_balance' => (int) $settlement->account_balance + $order_value]
+                );
+                BrokerClient::updateOrCreate(
+                    ['id' => $client_id],
+                    ['open_orders' => $client->open_orders - $order_value]
+                );
+
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
@@ -275,16 +288,15 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        // return $request;
         $execution_report = $request['executionReports'];
         if ($execution_report) {
-            $offset = 5 * 60 * 60; 
-            $dateFormat = "Y-m-d H:i"; 
-            $timeNdate = gmdate($dateFormat, time() - $offset); 
-        
+            $offset = 5 * 60 * 60;
+            $dateFormat = "Y-m-d H:i";
+            $timeNdate = gmdate($dateFormat, time() - $offset);
+
             foreach ($execution_report as $report) {
                 $clients[] = $report;
-        
+
                 $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
                 if ($record->exists()) {
                     //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
@@ -314,7 +326,7 @@ class FunctionSet
                     $broker_order_execution_report->save();
 
                     // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
-                    $this->clientSettlementBalanceUpdate($report);
+                    return $this->clientSettlementBalanceUpdate($report);
                 }
             }
         }
@@ -656,13 +668,11 @@ class FunctionSet
         // $total_reports = count($account);
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-       $this->logExecution($request);
+        $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
     {
-
-        // return $data;
         // iterate through all reports and update accounts as required
         $order_number = array_values($data)[1];
         $sender_sub_id = array_values($data)[16];
@@ -724,11 +734,10 @@ class FunctionSet
                             ['id' => $sa['id']],
                             ['filled_orders' => $sa['filled_orders'] - $order_value, 'amount_allocated' => (int) $sa['amount_allocated'] - (int) $order_value]
                         );
-                        BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $bc->open_orders - $order_value]
-                        );
-
+                        // BrokerClient::updateOrCreate(
+                        //     ['id' => $bc->id],
+                        //     ['open_orders' => "911"]
+                        // );
                     } else if ($status === $this->OrderStatus->Filled()) {
 
                         // Release Funds When Rejected

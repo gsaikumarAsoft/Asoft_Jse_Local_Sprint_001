@@ -14,7 +14,7 @@ class AddFilledOrdersToBrokerClientOrdersTable extends Migration
     public function up()
     {
         Schema::table('broker_client_orders', function (Blueprint $table) {
-            $table->string('filled_orders')->nullable();
+            $table->string('filled_orders')->default('0');
         });
     }
 
