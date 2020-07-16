@@ -215,6 +215,8 @@ class FunctionSet
         }
         if ($request->has('handling_instructions')) {
             $data['HandlInst'] = $this->jsonStrip(json_decode($request->handling_instructions, true), 'fix_value');
+        }else{
+            $data['HandlInst'] = "1";
         }
 
         $postdata = json_encode($data);
@@ -326,7 +328,7 @@ class FunctionSet
                     $broker_order_execution_report->save();
 
                     // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
-                    return $this->clientSettlementBalanceUpdate($report);
+                    $this->clientSettlementBalanceUpdate($report);
                 }
             }
         }
@@ -668,7 +670,7 @@ class FunctionSet
         // $total_reports = count($account);
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        $this->logExecution($request);
+        return $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
@@ -768,19 +770,18 @@ class FunctionSet
                             ['order_status' => $status]
 
                         );
+                        // // Update Settlement Account Balances
+                        // BrokerSettlementAccount::updateOrCreate(
+                        //     ['id' => $trading->broker_settlement_account_id],
+                        //     ['amount_allocated' => $settlement_allocated, 'account_balance' => (int) $sa['account_balance'] - $settlement_allocated]
+                        // );
 
-                        // Update Settlement Account Balances
-                        BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $trading->broker_settlement_account_id],
-                            ['amount_allocated' => $settlement_allocated, 'account_balance' => (int) $sa['account_balance'] - $settlement_allocated]
-                        );
 
-
-                        // Update Broker Clients Open Orders
-                        BrokerClient::updateOrCreate(
-                            ['id' => $bc['id']],
-                            ['open_orders' => $client_open_orders]
-                        );
+                        // // Update Broker Clients Open Orders
+                        // BrokerClient::updateOrCreate(
+                        //     ['id' => $bc['id']],
+                        //     ['open_orders' => $client_open_orders]
+                        // );
                     } else if ($status === $this->OrderStatus->PartialFilled()) {
 
                         // BrokerClientOrder::updateOrCreate(
