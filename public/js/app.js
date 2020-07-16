@@ -74184,28 +74184,11 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
 
-    async settlmentAccountHandler(b) {
-      console.log(b);
-      const result = await this.$swal({
-        title: "",
-        icon: "info",
-        html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
-        // showCloseButton: true,
-        showCancelButton: true,
-        focusConfirm: true,
-        cancelButtonColor: "#DD6B55",
-        confirmButtonText: "Edit",
-        confirmButtonAriaLabel: "delete",
-        cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
-      });
-      if (result.value) {
-        this.settlement_account = b;
-      }
-      if (result.dismiss === "cancel") {
-        await this.destroy(b.id);
-      }
+    settlmentAccountHandler(b) {
+      console.log(b);    
+      this.settlement_account = b;      
     },
+    
     setLocalBroker() {
       // console.log(this);
     },
@@ -77535,7 +77518,7 @@ var render = function() {
                             attrs: {
                               id: "balance-input",
                               state: _vm.nameState,
-                              type: "number",
+                              type: "text",
                               required: ""
                             },
                             model: {
@@ -77568,7 +77551,7 @@ var render = function() {
                             attrs: {
                               id: "allocated-input",
                               state: _vm.nameState,
-                              type: "number",
+                              type: "text",
                               required: ""
                             },
                             model: {
@@ -77837,7 +77820,7 @@ var render = function() {
                             attrs: {
                               id: "Account Balance-input",
                               state: _vm.nameState,
-                              type: "number",
+                              type: "text",
                               required: ""
                             },
                             model: {
@@ -78601,7 +78584,7 @@ var render = function() {
                                               attrs: {
                                                 id: "value-input1",
                                                 state: _vm.nameState,
-                                                type: "number",
+                                                type: "text",
                                                 disabled: _vm.disabled
                                               },
                                               model: {
@@ -79638,7 +79621,7 @@ var render = function() {
                               attrs: {
                                 id: "balance-input",
                                 state: _vm.nameState,
-                                type: "number",
+                                type: "text",
                                 required: ""
                               },
                               model: {
@@ -79672,7 +79655,7 @@ var render = function() {
                               attrs: {
                                 id: "allocated-input",
                                 state: _vm.nameState,
-                                type: "number",
+                                type: "text",
                                 required: ""
                               },
                               model: {
@@ -96608,8 +96591,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/jlawrence/10x/owned/JSE_BROKER_DMA_tool/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\cwalk\GitHub\JSE_DMA\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

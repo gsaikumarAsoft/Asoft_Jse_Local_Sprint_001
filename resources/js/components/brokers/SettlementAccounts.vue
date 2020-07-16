@@ -98,7 +98,7 @@
                 id="balance-input"
                 v-model="settlement_account.account_balance"
                 :state="nameState"
-                type="number"
+                type="text"
                 required
               ></b-form-input>
             </b-form-group>
@@ -111,7 +111,7 @@
                 id="allocated-input"
                 v-model="settlement_account.amount_allocated"
                 :state="nameState"
-                type="number"
+                type="text"
                 required
               ></b-form-input>
             </b-form-group>
@@ -285,28 +285,11 @@ export default {
       }
     },
 
-    async settlmentAccountHandler(b) {
-      console.log(b);
-      const result = await this.$swal({
-        title: "",
-        icon: "info",
-        html: `Would you like to Edit Or Delete the following Settlement Account</b> `,
-        // showCloseButton: true,
-        showCancelButton: true,
-        focusConfirm: true,
-        cancelButtonColor: "#DD6B55",
-        confirmButtonText: "Edit",
-        confirmButtonAriaLabel: "delete",
-        cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
-      });
-      if (result.value) {
-        this.settlement_account = b;
-      }
-      if (result.dismiss === "cancel") {
-        await this.destroy(b.id);
-      }
+    settlmentAccountHandler(b) {
+      console.log(b);    
+      this.settlement_account = b;      
     },
+    
     setLocalBroker() {
       // console.log(this);
     },
