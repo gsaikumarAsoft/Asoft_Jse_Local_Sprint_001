@@ -84,7 +84,7 @@ class FunctionSet
             'ClientID' => $trading->trading_account_number,
             'AccountType' => 'CL',
             'StartTime' => "11:00:00.000",
-            'EndTime' => "21:00:00.000",
+            'EndTime' => "22:00:00.000",
         );
 
         $postdata = json_encode($data);
@@ -182,7 +182,7 @@ class FunctionSet
             // "Port" => 6544,
             // ========================================================================================
             'StartTime' => "11:00:00.000",
-            'EndTime' => "21:00:00.000",
+            'EndTime' => "22:00:00.000",
             'OrderID' => $request->client_order_number,
             'BuyorSell' => $this->jsonStrip(json_decode($request->side, true), 'fix_value'),
             'OrdType' => $this->jsonStrip(json_decode($type, true), 'fix_value'),
@@ -650,7 +650,7 @@ class FunctionSet
             "SenderSubID" => $sender_sub_id,
             "seqNum" => 0,
             'StartTime' => "11:00:00.000",
-            'EndTime' => "21:00:00.000",
+            'EndTime' => "22:00:00.000",
         );
         $postdata = json_encode($data);
 
