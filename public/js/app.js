@@ -73262,7 +73262,7 @@ __webpack_require__.r(__webpack_exports__);
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
           fix_value: "1"
-        },
+        }
         // {
         //   text: "Automated execution order, public, Broker intervention OK",
         //   value: "Automated execution order, public, Broker intervention OK",
@@ -73680,12 +73680,9 @@ __webpack_require__.r(__webpack_exports__);
         let valid = data.isvalid;
         console.log("post data", data);
         if (valid) {
-          console.log(data);
-          this.$swal(data.errors);
-          this.reloadPage();
+          this.notify('Order Created',data.errors, 'success');
         } else {
-          this.$swal(data.errors);
-          this.reloadPage();
+          this.notify('Order Failed',data.errors,'warning');
         }
       } catch (error) {
         this.checkOrderError(error);
@@ -73695,7 +73692,16 @@ __webpack_require__.r(__webpack_exports__);
     reloadPage() {
       window.location.reload();
     },
-
+    notify(title,message,type) {
+      this.$swal(
+        {
+          tite: title,
+          text: message,
+          type: type
+        }).then(function() {
+          window.location.reload();
+        });
+    },
     async getSymbols() {
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json"); //.then(response => {
       this.symbols = data;
