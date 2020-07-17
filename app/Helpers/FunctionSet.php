@@ -83,8 +83,8 @@ class FunctionSet
             'Symbol' => $this->jsonStrip(json_decode($order->symbol, true), 'text'),
             'ClientID' => $trading->trading_account_number,
             'AccountType' => 'CL',
-            'StartTime' => date("Y-m-d") . " 11:00:00.000",
-            'EndTime' => date("Y-m-d") . " 21:00:00.000",
+            'StartTime' => "11:00:00.000",
+            'EndTime' => "21:00:00.000",
         );
 
         $postdata = json_encode($data);
@@ -181,8 +181,8 @@ class FunctionSet
             // "Host" => "20.156.185.101",
             // "Port" => 6544,
             // ========================================================================================
-            'StartTime' => date("Y-m-d") . " 11:00:00.000",
-            'EndTime' => date("Y-m-d") . " 21:00:00.000",
+            'StartTime' => "11:00:00.000",
+            'EndTime' => "21:00:00.000",
             'OrderID' => $request->client_order_number,
             'BuyorSell' => $this->jsonStrip(json_decode($request->side, true), 'fix_value'),
             'OrdType' => $this->jsonStrip(json_decode($type, true), 'fix_value'),
@@ -269,18 +269,18 @@ class FunctionSet
                 DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
                     ->update(['order_status' => $this->OrderStatus->Failed()]);
-                //Settlement Account Information
-                $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
-                $order_value = $request->price * $request->quantity;
-                // Replenish Settlement Account Balance
-                BrokerSettlementAccount::updateOrCreate(
-                    ['id' => $trading->broker_settlement_account_id],
-                    ['amount_allocated' => (int)$settlement->amount_allocated - $order_value, 'account_balance' => (int) $settlement->account_balance + $order_value]
-                );
-                BrokerClient::updateOrCreate(
-                    ['id' => $client_id],
-                    ['open_orders' => (int)$client->open_orders - (int)$order_value]
-                );
+                // //Settlement Account Information
+                // $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
+                // $order_value = $request->price * $request->quantity;
+                // // Replenish Settlement Account Balance
+                // BrokerSettlementAccount::updateOrCreate(
+                //     ['id' => $trading->broker_settlement_account_id],
+                //     ['amount_allocated' => (int)$settlement->amount_allocated - $order_value, 'account_balance' => (int) $settlement->account_balance + $order_value]
+                // );
+                // BrokerClient::updateOrCreate(
+                //     ['id' => $client_id],
+                //     ['open_orders' => (int)$client->open_orders - (int)$order_value]
+                // );
 
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
@@ -649,8 +649,8 @@ class FunctionSet
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $sender_sub_id,
             "seqNum" => 0,
-            'StartTime' => date("Y-m-d") . " 11:00:00.000",
-            'EndTime' => date("Y-m-d") . " 21:00:00.000",
+            'StartTime' => "11:00:00.000",
+            'EndTime' => "21:00:00.000",
         );
         $postdata = json_encode($data);
 
@@ -670,7 +670,7 @@ class FunctionSet
         // $total_reports = count($account);
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        return $this->logExecution($request);
+        $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)

@@ -73230,21 +73230,21 @@ __webpack_require__.r(__webpack_exports__);
           value: "Automated execution order, private, no Broker intervention",
           fix_value: "1"
         },
-        {
-          text: "Automated execution order, public, Broker intervention OK",
-          value: "Automated execution order, public, Broker intervention OK",
-          fix_value: "2"
-        },
-        {
-          text: "Manual order, best execution",
-          value: "Manual order, best execution",
-          fix_value: "3"
-        },
-        {
-          text: "Automated execution order, private, no Broker intervention",
-          value: "Automated execution order, private, no Broker intervention",
-          fix_value: "4"
-        }
+        // {
+        //   text: "Automated execution order, public, Broker intervention OK",
+        //   value: "Automated execution order, public, Broker intervention OK",
+        //   fix_value: "2"
+        // },
+        // {
+        //   text: "Manual order, best execution",
+        //   value: "Manual order, best execution",
+        //   fix_value: "3"
+        // },
+        // {
+        //   text: "Automated execution order, private, no Broker intervention",
+        //   value: "Automated execution order, private, no Broker intervention",
+        //   fix_value: "4"
+        // }
       ],
       jason_order: [],
       option_values: [
