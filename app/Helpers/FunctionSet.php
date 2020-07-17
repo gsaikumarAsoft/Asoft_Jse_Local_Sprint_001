@@ -10,7 +10,9 @@ use App\BrokerTradingAccount;
 use App\BrokerUser;
 use App\ForeignBroker;
 use App\LocalBroker;
+use App\Mail\ClientDetailsUpdate;
 use App\Mail\LocalBrokerClient;
+use App\Mail\LocalBrokerDetailsUpdate;
 use App\Mail\LocalBrokerUser;
 use App\Role;
 use App\User;
@@ -502,11 +504,13 @@ class FunctionSet
                     'email' => $request->email,
                     'status' => 'Unverified',
                     'open_orders' => $request->open_orders,
+                    'filled_orders' => $request->filled_orders,
                     'jcsd' => $request->jcsd,
                     'account_balance' => $request->account_balance,
                 ]
 
             );
+            Mail::to($broker_user['email'])->send(new ClientDetailsUpdate($request));
         } else {
             //Notify Local Broker that
             // For future Sprint
@@ -533,6 +537,7 @@ class FunctionSet
             $broker_client->orders_limit = $request->account_balance;
             $broker_client->account_balance = $request->account_balance;
             $broker_client->open_orders = $request->open_orders;
+            $broker_client->filled_orders = $request->filled_orders;
             $broker_client->jcsd = $request->jcsd;
             $broker_client->status = 'Un-verified';
             $broker_client->save();
@@ -541,7 +546,7 @@ class FunctionSet
 
             //Adds Permissions Selected For Sprint Final
             // $this->HelperClass->addPermission($request->permission, $broker_client->id, 'Broker Client');
-            $this->LogActivity::addToLog('Created Client Account: JCSD: ' . $request->jcsd . ', Balance: ' . $request->account_balance . ', Open Orders: ' . $request->open_orders);
+            $this->LogActivity::addToLog('Created Client Account: JCSD: ' . $request->jcsd . ', Balance: ' . $request->account_balance . ', Open Orders: ' . $request->open_orders. ', Filed Orders: ' . $request->filled_orders);
             Mail::to($broker_user['email'])->send(new LocalBrokerClient($request));
         }
     }

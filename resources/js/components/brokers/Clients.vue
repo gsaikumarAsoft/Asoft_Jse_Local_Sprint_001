@@ -85,6 +85,19 @@
                 required
               ></b-form-input>
             </b-form-group>
+            <b-form-group
+              label="Unsettled Orders"
+              label-for="open-orders-input"
+              invalid-feedback="OUnsettledOrders is required"
+            >
+              <b-form-input
+                id="Unsettled Orders-input"
+                v-model="broker_client.filled_orders"
+                :state="nameState"
+                type="number"
+                required
+              ></b-form-input>
+            </b-form-group>
             <b-button type="submit" variant="primary">Submit</b-button>
             <b-button variant="danger" @click="broker_client=null">Cancel</b-button>
           </form>
@@ -102,7 +115,7 @@ export default {
   components: {
     headNav
   },
-  mixins:[checkErrorMixin],
+  mixins: [checkErrorMixin],
   data() {
     return {
       local_broker_clients: [],
@@ -156,7 +169,7 @@ export default {
             // return formatter.format(cal);
           }
         },
-                {
+        {
           key: "filled_orders",
           label: "Unsettled Trades",
           sortable: true,
@@ -226,6 +239,7 @@ export default {
           name: this.broker_client.name,
           local_broker_id: parseInt(this.$userId),
           open_orders: this.broker_client.open_orders,
+          filled_orders: this.broker_client.filled_orders,
           account_balance: this.broker_client.account_balance,
           email: this.broker_client.email,
           jcsd: this.broker_client.jcsd,
@@ -238,6 +252,7 @@ export default {
           id: this.broker_client.id,
           local_broker_id: parseInt(this.$userId),
           open_orders: this.broker_client.open_orders,
+          filled_orders: this.broker_client.filled_orders,
           account_balance: this.broker_client.account_balance,
           name: this.broker_client.name,
           email: this.broker_client.email,

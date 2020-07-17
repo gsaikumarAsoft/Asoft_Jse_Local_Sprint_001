@@ -13,6 +13,7 @@
         <li>JCSD #: <b>{{$user['jcsd']}}</b></li>
         <li>Account Balance: <b>${{ number_format($user['account_balance'])}}</b></li>
         <li>Open Orders: <b>{{$user['open_orders']}}</b></li>
+        <li>Unsettled Trades: <b>{{$user['filled_orders']}}</b></li>
         
 
        <p> Please provide your verification of these settings using the links below:</p>

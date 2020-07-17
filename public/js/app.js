@@ -72044,12 +72044,25 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["broker_traders"],
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
-  mixins:[_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__["default"]],
+  mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_2__["default"]],
   data() {
     return {
       local_broker_clients: [],
@@ -72103,7 +72116,7 @@ __webpack_require__.r(__webpack_exports__);
             // return formatter.format(cal);
           }
         },
-                {
+        {
           key: "filled_orders",
           label: "Unsettled Trades",
           sortable: true,
@@ -72173,6 +72186,7 @@ __webpack_require__.r(__webpack_exports__);
           name: this.broker_client.name,
           local_broker_id: parseInt(this.$userId),
           open_orders: this.broker_client.open_orders,
+          filled_orders: this.broker_client.filled_orders,
           account_balance: this.broker_client.account_balance,
           email: this.broker_client.email,
           jcsd: this.broker_client.jcsd,
@@ -72185,6 +72199,7 @@ __webpack_require__.r(__webpack_exports__);
           id: this.broker_client.id,
           local_broker_id: parseInt(this.$userId),
           open_orders: this.broker_client.open_orders,
+          filled_orders: this.broker_client.filled_orders,
           account_balance: this.broker_client.account_balance,
           name: this.broker_client.name,
           email: this.broker_client.email,
@@ -77862,6 +77877,39 @@ var render = function() {
                                 _vm.$set(_vm.broker_client, "open_orders", $$v)
                               },
                               expression: "broker_client.open_orders"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Unsettled Orders",
+                            "label-for": "open-orders-input",
+                            "invalid-feedback": "OUnsettledOrders is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "Unsettled Orders-input",
+                              state: _vm.nameState,
+                              type: "number",
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.broker_client.filled_orders,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.broker_client,
+                                  "filled_orders",
+                                  $$v
+                                )
+                              },
+                              expression: "broker_client.filled_orders"
                             }
                           })
                         ],
