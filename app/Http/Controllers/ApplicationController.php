@@ -43,7 +43,8 @@ class ApplicationController extends Controller
         $this->HelperClass = new FunctionSet;
     }
 
-    function audit(){
+    function audit()
+    {
 
         $data = AppLogActivity::with('user')->get();
         return $data;
@@ -165,7 +166,8 @@ class ApplicationController extends Controller
 
     }
 
-    public function logActivity(){
+    public function logActivity()
+    {
         return $this->LogActivity->addToLog('Updated Settlement Account Details');
     }
     function storeSettlementBroker(Request $request)
@@ -178,7 +180,7 @@ class ApplicationController extends Controller
 
         if ($request->id) {
 
-            $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$request->account.', Balance: '.$request->account_balance. ', Amount Allocated: '.$request->amount_allocated);
+            $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $request->account . ', Balance: ' . $request->account_balance . ', Amount Allocated: ' . $request->amount_allocated);
 
             $b = BrokerSettlementAccount::find($request->id);
 
@@ -190,6 +192,7 @@ class ApplicationController extends Controller
                     'account_balance' => $request->account_balance,
                     'bank_name' => $request->bank_name,
                     'email' => $request->email,
+                    'filled_orders' => $request->filled_orders,
                     'account' => $request->account,
                     'settlement_agent_status' => 'Unverified',
                 ]
@@ -214,13 +217,13 @@ class ApplicationController extends Controller
 
             //Check if the user already exists
             if (count($this->HelperClass->getSettlementUserByEmail($request->email)) > 0) {
-                $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: '.$request->account.', Balance: '.$request->account_balance. ', Amount Allocated: '.$request->amount_allocated);
+                $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $request->account . ', Balance: ' . $request->account_balance . ', Amount Allocated: ' . $request->amount_allocated);
                 // if the user exists update password and send new email
                 $u = $this->HelperClass->getSettlementUserByEmail($request->email);
                 // return $u;
                 $u = $u[0];
-           
-               User::updateOrCreate(
+
+                User::updateOrCreate(
                     ['email' => $u->email],
                     ['password' =>  Hash::make($pass)]
 
@@ -240,6 +243,7 @@ class ApplicationController extends Controller
                 $broker_settlement_account->currency = $request->currency;
                 $broker_settlement_account->settlement_agent_status = 'Unverified';
                 $broker_settlement_account->foreign_broker_status = 'Unverified';
+                $broker_settlement_account->filled_orders = $request->filled_orders;
                 $broker_settlement_account->account_balance = $request->account_balance;
                 $broker_settlement_account->amount_allocated = $request->amount_allocated;
                 $broker_settlement_account->save();
@@ -250,6 +254,7 @@ class ApplicationController extends Controller
                 $user['foreign_broker'] = $foreign_broker_name[0]->name;
                 $user['user_name'] = $request->bank_name;
                 $user['account'] = $request->account;
+                $user['filled_orders'] = $request->filled_orders;
                 $user['id'] = $broker_settlement_account->id;
                 $user['hash'] = $settlement_hash;
                 $user['email'] = $request->email;
@@ -309,7 +314,7 @@ class ApplicationController extends Controller
                 Mail::to($request->email)->send(new SettlementAccountConfirmation($data, $user));
 
 
-                $this->LogActivity::addToLog('Created A New Settlement. Account Number: '.$request->account.', Balance: '.$request->account_balance. ', Amount Allocated: '.$request->amount_allocated);
+                $this->LogActivity::addToLog('Created A New Settlement. Account Number: ' . $request->account . ', Balance: ' . $request->account_balance . ', Amount Allocated: ' . $request->amount_allocated);
             }
         }
     }

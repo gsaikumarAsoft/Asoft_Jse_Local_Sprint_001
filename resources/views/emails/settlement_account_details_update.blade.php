@@ -11,6 +11,7 @@
         <li>Account Number:<b>{{$user['account']}}</b></li>
         <li>Foreign Broker: <b>{{$user['foreign_broker']}}</b></li>
         <li>Local Broker: <b>{{$user['local_broker']}}</b></li>
+        <li>Unsettled Trades: <b>{{$user['filled_orders']}}</b></li>
         
         <p>Credentials to verify:</p>
         <li>Username: <b>{{$user['email']}}</b></li>

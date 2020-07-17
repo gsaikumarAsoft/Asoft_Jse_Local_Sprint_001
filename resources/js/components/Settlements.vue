@@ -26,7 +26,7 @@
             aria-controls="foreign-brokers"
           ></b-pagination>
           <b-button @click="settlement_account={}">Create Settlement Account</b-button>
-          <b-button @click="importAccounts">Import Accounts</b-button>
+          <!-- <b-button @click="importAccounts">Import Accounts</b-button> -->
           <b-button @click="exportBalances">Export Balances</b-button>
         </b-card>
         <b-card id="modal-1" :title="title" v-else>
@@ -133,6 +133,19 @@
                 required
               ></b-form-input>
             </b-form-group>
+            <b-form-group
+              label="Unsettled Trades "
+              label-for="umir-input"
+              invalid-feedback=" Unsettled Trades  is required"
+            >
+              <b-form-input
+                id="allocated-input"
+                v-model="settlement_account.filled_orders"
+                :state="nameState"
+                type="text"
+                required
+              ></b-form-input>
+            </b-form-group>
             <b-button type="submit" variant="primary">Submit</b-button>
             <b-button variant="danger" @click="settlement_account=null">Cancel</b-button>
           </form>
@@ -184,6 +197,11 @@ export default {
         {
           key: "email",
           label: "Settlement Agent Email",
+          sortable: true
+        },
+        {
+          key: "filled_orders",
+          label: "Unsettled Trades",
           sortable: true
         },
         {
@@ -314,7 +332,7 @@ export default {
         this.settlement_account = null;
         this.$swal.close();
       } catch (error) {
-         this.checkDuplicateError(error);
+        this.checkDuplicateError(error);
       }
     },
 

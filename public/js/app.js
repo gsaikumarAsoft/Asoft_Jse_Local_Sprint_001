@@ -71676,6 +71676,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__["default"]],
   components: {
@@ -71712,6 +71725,11 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: "email",
           label: "Settlement Agent Email",
+          sortable: true
+        },
+        {
+          key: "filled_orders",
+          label: "Unsettled Trades",
           sortable: true
         },
         {
@@ -71842,7 +71860,7 @@ __webpack_require__.r(__webpack_exports__);
         this.settlement_account = null;
         this.$swal.close();
       } catch (error) {
-         this.checkDuplicateError(error);
+        this.checkDuplicateError(error);
       }
     },
 
@@ -77300,10 +77318,6 @@ var render = function() {
                       [_vm._v("Create Settlement Account")]
                     ),
                     _vm._v(" "),
-                    _c("b-button", { on: { click: _vm.importAccounts } }, [
-                      _vm._v("Import Accounts")
-                    ]),
-                    _vm._v(" "),
                     _c("b-button", { on: { click: _vm.exportBalances } }, [
                       _vm._v("Export Balances")
                     ])
@@ -77579,6 +77593,39 @@ var render = function() {
                                 )
                               },
                               expression: "settlement_account.amount_allocated"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "b-form-group",
+                        {
+                          attrs: {
+                            label: "Unsettled Trades ",
+                            "label-for": "umir-input",
+                            "invalid-feedback": " Unsettled Trades  is required"
+                          }
+                        },
+                        [
+                          _c("b-form-input", {
+                            attrs: {
+                              id: "allocated-input",
+                              state: _vm.nameState,
+                              type: "text",
+                              required: ""
+                            },
+                            model: {
+                              value: _vm.settlement_account.filled_orders,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.settlement_account,
+                                  "filled_orders",
+                                  $$v
+                                )
+                              },
+                              expression: "settlement_account.filled_orders"
                             }
                           })
                         ],
