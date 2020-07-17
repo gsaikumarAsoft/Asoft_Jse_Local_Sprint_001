@@ -1072,10 +1072,10 @@ export default {
         if (valid) {
           console.log(data);
           this.$swal(data.errors);
-          // this.reloadPage();
+          this.reloadPage();
         } else {
           this.$swal(data.errors);
-          // this.reloadPage();
+          this.reloadPage();
         }
       } catch (error) {
         this.checkOrderError(error);
