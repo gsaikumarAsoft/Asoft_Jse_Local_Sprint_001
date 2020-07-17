@@ -73695,7 +73695,7 @@ __webpack_require__.r(__webpack_exports__);
     notify(title,message,type) {
       this.$swal(
         {
-          tite: title,
+          title: title,
           text: message,
           type: type
         }).then(function() {
