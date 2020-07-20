@@ -74186,7 +74186,8 @@ __webpack_require__.r(__webpack_exports__);
           sortable: true
         },
         {
-          key: "status",
+          key: "settlement_agent_status",
+          label: "Status",
           sortable: true
         }
       ],
