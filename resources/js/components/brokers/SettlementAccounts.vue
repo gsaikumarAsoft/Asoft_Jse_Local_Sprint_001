@@ -223,7 +223,8 @@ export default {
           sortable: true
         },
         {
-          key: "status",
+          key: "settlement_agent_status",
+          label: "Status",
           sortable: true
         }
       ],
