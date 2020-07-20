@@ -71746,6 +71746,19 @@ __webpack_require__.r(__webpack_exports__);
           }
         },
         {
+          key: "available_balance",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.account_balance - item.amount_allocated;
+            return formatter.format(cal);
+          }
+        },
+        {
           key: "amount_allocated",
           sortable: true,
           formatter: (value, key, item) => {
