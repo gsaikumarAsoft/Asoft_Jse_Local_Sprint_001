@@ -73712,11 +73712,11 @@ __webpack_require__.r(__webpack_exports__);
         let valid = data.isvalid;
         console.log("post data", data);
         if (valid) {
-          this.notify('Order Created',data.errors, 'success', true);
-        } else {
+          this.notify("Order Created", data.errors, "success", true);
           this.order = {};
-          this.notify('Order Failed',data.errors,'warning', false);
-
+        } else {
+          this.notify("Order Failed", data.errors, "warning", false);
+          this.order = {};
         }
       } catch (error) {
         this.checkOrderError(error);
@@ -73726,16 +73726,15 @@ __webpack_require__.r(__webpack_exports__);
     reloadPage() {
       window.location.reload();
     },
-    notify(title,message,type, confirm) {
-      this.$swal(
-        {
-          title: title,
-          text: message,
-          type: type,
-          showConfirmButton: confirm,
-        }).then(function() {
-          window.location.reload();
-        });
+    notify(title, message, type, confirm) {
+      this.$swal({
+        title: title,
+        text: message,
+        type: type
+        // showConfirmButton: confirm,
+      }).then(function() {
+        window.location.reload();
+      });
     },
     async getSymbols() {
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json"); //.then(response => {
