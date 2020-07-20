@@ -176,7 +176,7 @@ class BrokerController extends Controller
             ->join('broker_trading_accounts', 'local_brokers.id', 'broker_trading_accounts.local_broker_id')
             ->join('users', 'broker_client_order_execution_reports.senderSubID', 'users.name')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
-            ->distinct()->get();
+            ->get();
 
 
         // return $execution_reports;
