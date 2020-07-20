@@ -202,7 +202,16 @@ export default {
         {
           key: "filled_orders",
           label: "Unsettled Trades",
-          sortable: true
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.filled_orders;
+            return formatter.format(cal);
+          }
         },
         {
           key: "account_balance",
@@ -226,9 +235,10 @@ export default {
               currency: "USD"
             });
 
-            var spent = Number(item.amount_allocated) + Number(item.filled_orders);
+            var spent =
+              Number(item.amount_allocated) + Number(item.filled_orders);
 
-            var cal = item.account_balance - spent
+            var cal = item.account_balance - spent;
             return formatter.format(cal);
           }
         },
