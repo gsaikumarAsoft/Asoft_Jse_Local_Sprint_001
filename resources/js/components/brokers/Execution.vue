@@ -167,13 +167,11 @@ export default {
     };
   },
   computed: {
-    // report_data() {
-    //   this.execution_reports = [];
-    //   const data = JSON.parse(this.execution_reports);
-    //   // console.log("this.execution_reports", data);
-    //   this.execution_reports = data;
-    //   return data;
-    // },
+    report_data() {
+      const data = JSON.parse(this.execution_reports);
+      console.log("this.execution_reports", data);
+      return data;
+    },
     rows() {
       return this.report_data.length;
     }
