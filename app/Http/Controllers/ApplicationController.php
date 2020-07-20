@@ -310,6 +310,7 @@ class ApplicationController extends Controller
                 $data['hash'] = $settlement_hash;
                 $data['email'] = $request->email;
                 $user['filled_orders'] = $request->filled_orders;
+                $data['filled_orders'] = $request->filled_orders;
 
                 //Notify the bank that the settlement is being created so they can verify it.
                 Mail::to($request->email)->send(new SettlementAccountConfirmation($data, $user));
