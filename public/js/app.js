@@ -74144,6 +74144,22 @@ __webpack_require__.r(__webpack_exports__);
           }
         },
         {
+          key: "available_balance",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var spent =
+              Number(item.amount_allocated) + Number(item.filled_orders);
+
+            var cal = item.account_balance - spent;
+            return formatter.format(cal);
+          }
+        },
+        {
           key: "amount_allocated",
           sortable: true,
           formatter: (value, key, item) => {
