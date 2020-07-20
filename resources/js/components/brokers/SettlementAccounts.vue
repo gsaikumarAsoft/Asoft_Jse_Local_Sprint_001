@@ -134,7 +134,7 @@ export default {
   components: {
     "head-nav": headNav
   },
-   mixins: [checkErrorMixin],
+  mixins: [checkErrorMixin],
   data() {
     return {
       broker_settlement_account: this.settlement_accounts,
@@ -162,10 +162,19 @@ export default {
           key: "email",
           sortable: true
         },
-                {
+        {
           key: "filled_orders",
           label: "Unsettled Trades",
-          sortable: true
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.filled_orders;
+            return formatter.format(cal);
+          }
         },
         {
           key: "account_balance",
@@ -297,15 +306,15 @@ export default {
         await this.getSettlementList();
         setTimeout(location.reload.bind(location));
       } catch (error) {
-       this.checkDuplicateError(error);
+        this.checkDuplicateError(error);
       }
     },
 
     settlmentAccountHandler(b) {
-      console.log(b);    
-      this.settlement_account = b;      
+      console.log(b);
+      this.settlement_account = b;
     },
-    
+
     setLocalBroker() {
       // console.log(this);
     },

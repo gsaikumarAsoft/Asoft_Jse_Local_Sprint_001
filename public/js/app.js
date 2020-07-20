@@ -74097,7 +74097,7 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
-   mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
+  mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   data() {
     return {
       broker_settlement_account: this.settlement_accounts,
@@ -74125,10 +74125,19 @@ __webpack_require__.r(__webpack_exports__);
           key: "email",
           sortable: true
         },
-                {
+        {
           key: "filled_orders",
           label: "Unsettled Trades",
-          sortable: true
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            });
+
+            var cal = item.filled_orders;
+            return formatter.format(cal);
+          }
         },
         {
           key: "account_balance",
@@ -74260,15 +74269,15 @@ __webpack_require__.r(__webpack_exports__);
         await this.getSettlementList();
         setTimeout(location.reload.bind(location));
       } catch (error) {
-       this.checkDuplicateError(error);
+        this.checkDuplicateError(error);
       }
     },
 
     settlmentAccountHandler(b) {
-      console.log(b);    
-      this.settlement_account = b;      
+      console.log(b);
+      this.settlement_account = b;
     },
-    
+
     setLocalBroker() {
       // console.log(this);
     },
