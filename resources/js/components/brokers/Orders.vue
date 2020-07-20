@@ -1073,7 +1073,9 @@ export default {
         if (valid) {
           this.notify('Order Created',data.errors, 'success', true);
         } else {
+          this.order = {};
           this.notify('Order Failed',data.errors,'warning', false);
+
         }
       } catch (error) {
         this.checkOrderError(error);

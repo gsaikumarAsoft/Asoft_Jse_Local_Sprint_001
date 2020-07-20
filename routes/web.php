@@ -159,7 +159,7 @@ Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\Ad
     Route::get('foreign-broker-list/', 'ApplicationController@indexCad');
     Route::get('/foreign-brokers', 'ApplicationController@foreignBrokerList');
     Route::get('/local-broker-list', 'LocalBrokerController@index');
-    Route::get('/local-brokers', 'ApplicationController@brokerList');
+    Route::get('/local-brokers', 'ApplicationController@brokerList'); 
     Route::get('/settlements', 'ApplicationController@settlements');
     Route::get('/settlement-list', 'ApplicationController@settlementBrokerList');
     Route::post('/settlement-broker-update/{id}', 'ApplicationController@updateLocalBroker');
