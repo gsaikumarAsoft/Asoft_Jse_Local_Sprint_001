@@ -72258,6 +72258,7 @@ __webpack_require__.r(__webpack_exports__);
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("trading-accounts", broker);
       var broker = data[0];
       this.local_broker_clients = broker.clients;
+      window.location.reload();
     },
 
     async brokerClientHandler(b) {

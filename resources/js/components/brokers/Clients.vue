@@ -268,6 +268,7 @@ export default {
       const { data } = await axios.get("trading-accounts", broker);
       var broker = data[0];
       this.local_broker_clients = broker.clients;
+      window.location.reload();
     },
 
     async brokerClientHandler(b) {
