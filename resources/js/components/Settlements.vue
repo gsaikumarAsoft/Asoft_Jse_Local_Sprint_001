@@ -226,7 +226,9 @@ export default {
               currency: "USD"
             });
 
-            var cal = item.account_balance - item.amount_allocated;
+            var spent = Number(item.amount_allocated) + Number(item.filled_orders);
+
+            var cal = item.account_balance - spent
             return formatter.format(cal);
           }
         },
