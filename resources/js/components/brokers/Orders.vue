@@ -1073,9 +1073,11 @@ export default {
         if (valid) {
           this.notify("Order Created", data.errors, "success", true);
           this.order = {};
+          this.newOrderNumber();
         } else {
           this.notify("Order Failed", data.errors, "warning", false);
           this.order = {};
+          this.newOrderNumber();
         }
       } catch (error) {
         this.checkOrderError(error);
@@ -1092,7 +1094,7 @@ export default {
         type: type
         // showConfirmButton: confirm,
       }).then(function() {
-        window.location.reload();
+        // window.location.reload();
       });
     },
     async getSymbols() {
@@ -1106,6 +1108,23 @@ export default {
       var dt = new Date();
       this.order = {};
       // The “OrderID” must be unique per request submitted.
+      this.order.client_order_number =
+        Math.floor(1000 + Math.random() * 9000) +
+        "" +
+        dt.getFullYear() +
+        "" +
+        (dt.getMonth() + 1).toString().padStart(2, "0") +
+        "" +
+        dt
+          .getDate()
+          .toString()
+          .padStart(2, "0") +
+        "" +
+        ("" + Math.random()).substring(2, 5);
+      // ===============================================/
+    },
+    newOrderNumber() {
+      var dt = new Date();
       this.order.client_order_number =
         Math.floor(1000 + Math.random() * 9000) +
         "" +
