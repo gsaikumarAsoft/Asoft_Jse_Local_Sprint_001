@@ -1056,6 +1056,7 @@ export default {
           title: "Creating Client Order",
           html: "One moment while we setup the current order",
           timerProgressBar: true,
+          showCancelButton: false,
           onBeforeOpen: () => {
             this.$swal.showLoading();
           }
@@ -1070,9 +1071,9 @@ export default {
         let valid = data.isvalid;
         console.log("post data", data);
         if (valid) {
-          this.notify('Order Created',data.errors, 'success');
+          this.notify('Order Created',data.errors, 'success', true);
         } else {
-          this.notify('Order Failed',data.errors,'warning');
+          this.notify('Order Failed',data.errors,'warning', false);
         }
       } catch (error) {
         this.checkOrderError(error);
@@ -1082,12 +1083,13 @@ export default {
     reloadPage() {
       window.location.reload();
     },
-    notify(title,message,type) {
+    notify(title,message,type, confirm) {
       this.$swal(
         {
           title: title,
           text: message,
-          type: type
+          type: type,
+          showConfirmButton: confirm,
         }).then(function() {
           window.location.reload();
         });
