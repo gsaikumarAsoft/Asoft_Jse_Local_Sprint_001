@@ -82,6 +82,7 @@
                 v-model="broker_client.open_orders"
                 :state="nameState"
                 type="number"
+                step="any"
                 required
               ></b-form-input>
             </b-form-group>
@@ -95,6 +96,7 @@
                 v-model="broker_client.filled_orders"
                 :state="nameState"
                 type="number"
+                step="any"
                 required
               ></b-form-input>
             </b-form-group>

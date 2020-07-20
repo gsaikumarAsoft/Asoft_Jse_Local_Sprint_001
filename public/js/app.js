@@ -72100,6 +72100,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["broker_traders"],
   components: {
@@ -77973,6 +77975,7 @@ var render = function() {
                               id: "Open Orders-input",
                               state: _vm.nameState,
                               type: "number",
+                              step: "any",
                               required: ""
                             },
                             model: {
@@ -78002,6 +78005,7 @@ var render = function() {
                               id: "Unsettled Orders-input",
                               state: _vm.nameState,
                               type: "number",
+                              step: "any",
                               required: ""
                             },
                             model: {
