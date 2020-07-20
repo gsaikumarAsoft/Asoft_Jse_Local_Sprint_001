@@ -182,7 +182,7 @@ export default {
             });
 
             var nf = Intl.NumberFormat();
-            var cal = item.filled_orders;
+            var cal = Number(item.filled_orders);
             return nf.format(cal);
 
             // return formatter(cal);
@@ -204,8 +204,12 @@ export default {
               currency: "USD"
             });
 
-            var cal = item.orders_limit - item.open_orders;
+            var spent =
+              Number(item.filled_orders) + Number(item.open_orders);
+
+            var cal = item.account_balance - spent;
             return formatter.format(cal);
+
           }
         },
         {

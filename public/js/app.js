@@ -72172,7 +72172,7 @@ __webpack_require__.r(__webpack_exports__);
             });
 
             var nf = Intl.NumberFormat();
-            var cal = item.filled_orders;
+            var cal = Number(item.filled_orders);
             return nf.format(cal);
 
             // return formatter(cal);
@@ -72194,8 +72194,12 @@ __webpack_require__.r(__webpack_exports__);
               currency: "USD"
             });
 
-            var cal = item.orders_limit - item.open_orders;
+            var spent =
+              Number(item.filled_orders) + Number(item.open_orders);
+
+            var cal = item.account_balance - spent;
             return formatter.format(cal);
+
           }
         },
         {
