@@ -186,7 +186,8 @@ class ApplicationController extends Controller
 
             $b->update(
                 [
-
+                    'local_broker_id' => $request->local_broker_id,
+                    'foreign_broker_id' => $request->foreign_broker_id,
                     'currency' => $request->currency,
                     'amount_allocated' => (int) $request->amount_allocated,
                     'account_balance' => $request->account_balance,
