@@ -164,6 +164,7 @@ class FunctionSet
         $broker_client_order->expiration_date = $request->expiration_date;
         $broker_client_order->time_in_force = $request->time_in_force;
         $broker_client_order->broker_client_id = $client_id;
+        $broker_client_order->remaining = $request->price * $request->quantity;
         $broker_client_order->trading_account_id = $request->trading_account;
         $broker_client_order->save();
 
@@ -293,6 +294,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
+        return $request;
 
         // //    return BrokerOrderExecutionReport::all();
         // $report = array(
