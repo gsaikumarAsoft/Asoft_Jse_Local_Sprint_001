@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div class="content">
+        <div class="content"Func>
             <div class="links">
                 <a href="/ ">Local Broker List |</a>
                 <!-- <a href="/">Foreign Broker Details</a> -->

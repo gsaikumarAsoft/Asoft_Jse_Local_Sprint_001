@@ -14,7 +14,8 @@ class AddIsPartialAndRemainingToBrokerClientOrdersTable extends Migration
     public function up()
     {
         Schema::table('broker_client_orders', function (Blueprint $table) {
-            // $table->boolean('is_partial')->default('0');
+            $table->boolean('is_partial')->default('0');
+            $table->decimal('remaining')->default('0.00');
         });
     }
 
