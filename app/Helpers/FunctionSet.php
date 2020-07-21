@@ -294,7 +294,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        return $request;
+        // return $request;
 
         // //    return BrokerOrderExecutionReport::all();
         // $report = array(
@@ -363,7 +363,7 @@ class FunctionSet
                     $broker_order_execution_report->save();
 
                     // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
-                    $this->clientSettlementBalanceUpdate($report);
+                    return $this->clientSettlementBalanceUpdate($report);
                 }
             }
         }
@@ -472,21 +472,21 @@ class FunctionSet
                     } else if ($status === $this->OrderStatus->Filled()) {
 
                         // UPDATE THE ORDER STATUS 
-                        BrokerClientOrder::updateOrCreate(
+                        $broker_client_order = BrokerClientOrder::updateOrCreate(
                             ['id' => $current_order->id],
                             ['order_status' => $status]
 
                         );
 
                         // Update Settlement Account Balances
-                        BrokerSettlementAccount::updateOrCreate(
+                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                             ['id' => $sa['id']],
                             ['amount_allocated' => (int) $sa['amount_allocated'] + $order_value, 'account_balance' => (int) $sa['account_balance'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
                         );
 
 
                         // Update Broker Clients Open Orders
-                        BrokerClient::updateOrCreate(
+                       $broker_client_account = BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
                             ['open_orders' => $client_open_orders, 'filled_orders' => $bc->filled_orders + (int)$order_value]
                         );
