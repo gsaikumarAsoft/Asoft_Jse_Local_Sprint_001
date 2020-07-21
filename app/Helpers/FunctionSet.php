@@ -294,33 +294,33 @@ class FunctionSet
     public function logExecution($request)
     {
 
-        //    return BrokerOrderExecutionReport::all();
-        $report = array(
-            "id" => 4,
-            "clordid" => "982420200720174",
-            "orderID" => "000000-000000-0",
-            "text" => "Order Filled",
-            "ordRejRes" => null,
-            "status" => "1",
-            "buyorSell" => "2",
-            "securitySubType" => "0",
-            "time" => null,
-            "ordType" => "2",
-            "orderQty" => "50",
-            "timeInForce" => "0",
-            "symbol" => "AAB.TO",
-            "qTradeacc" => "JCSD2343242",
-            "price" => "4.60",
-            "stopPx" => "0",
-            "execType" => "0",
-            "senderSubID" => "BARITA",
-            "seqNum" => "0",
-            "sendingTime" => "2020-07-20 16:39",
-            "messageDate" => "2020-07-20 16:39",
-            "created_at" => "2020-07-20 21:39:28",
-            "updated_at" => "2020-07-20 21:39:28"
-        );
-        return $this->clientSettlementBalanceUpdate($report);
+        // //    return BrokerOrderExecutionReport::all();
+        // $report = array(
+        //     "id" => 4,
+        //     "clordid" => "982420200720174",
+        //     "orderID" => "000000-000000-0",
+        //     "text" => "Order Filled",
+        //     "ordRejRes" => null,
+        //     "status" => "1",
+        //     "buyorSell" => "2",
+        //     "securitySubType" => "0",
+        //     "time" => null,
+        //     "ordType" => "2",
+        //     "orderQty" => "50",
+        //     "timeInForce" => "0",
+        //     "symbol" => "AAB.TO",
+        //     "qTradeacc" => "JCSD2343242",
+        //     "price" => "4.60",
+        //     "stopPx" => "0",
+        //     "execType" => "0",
+        //     "senderSubID" => "BARITA",
+        //     "seqNum" => "0",
+        //     "sendingTime" => "2020-07-20 16:39",
+        //     "messageDate" => "2020-07-20 16:39",
+        //     "created_at" => "2020-07-20 21:39:28",
+        //     "updated_at" => "2020-07-20 21:39:28"
+        // );
+        // return $this->clientSettlementBalanceUpdate($report);
 
         $execution_report = $request['executionReports'];
         if ($execution_report) {
@@ -405,17 +405,17 @@ class FunctionSet
         $order_number = array_values($data)[1];
         $side = array_values($data)[6];
         $sender_sub_id = array_values($data)[16];
-        // $price = array_values($data)[13];
-        // $quantity = array_values($data)[9];
-        // $status = array_values($data)[5];
-        // $jcsd_num = array_values($data)[12];
+        $price = array_values($data)[13];
+        $quantity = array_values($data)[9];
+        $status = array_values($data)[5];
+        $jcsd_num = array_values($data)[12];
         // return $order_number;
 
         //Simulation Data Variables ========================//
-        $jcsd_num = array_values($data)[13];
-        $quantity = array_values($data)[10];
-        $price = array_values($data)[14];
-        $status = array_values($data)[5];
+        // $jcsd_num = array_values($data)[13];
+        // $quantity = array_values($data)[10];
+        // $price = array_values($data)[14];
+        // $status = array_values($data)[5];
         //    ==================================================
 
 
