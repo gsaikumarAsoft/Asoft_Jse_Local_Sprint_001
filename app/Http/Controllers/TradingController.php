@@ -9,6 +9,7 @@ use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
 use App\LocalBroker;
 use App\Mail\TradingAccount;
+use App\Mail\TradingAccountUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -44,10 +45,9 @@ class TradingController extends Controller
         $foreign_broker = $this->HelperClass->getUserAll($settlement_foreign_broker);
         $local_broker = $this->HelperClass->getUserAll($settlement_local_broker);
         $settlement_data = $this->HelperClass->getSettlementData($request->settlement_account_number);
-
-
+        
         if ($request->id) {
-            $this->LogActivity::addToLog('Update Broker Trading Account: umir = '.$request->umir.', trading_account_number = '.$request->trading_account_number.', broker_settlement_account_id = '.$request->settlement_account_number.', target_comp_id = '.$request->target_comp_id.', sender_comp_id = '.$request->sender_comp_id.', socket = '.$request->socket.', port = '.$request->port.',status = Unverified');
+            $this->LogActivity::addToLog('Update Broker Trading Account: umir = ' . $request->umir . ', trading_account_number = ' . $request->trading_account_number . ', broker_settlement_account_id = ' . $request->settlement_account_number . ', target_comp_id = ' . $request->target_comp_id . ', sender_comp_id = ' . $request->sender_comp_id . ', socket = ' . $request->socket . ', port = ' . $request->port . ',status = Unverified');
 
             $b2b = BrokerTradingAccount::find($request->id);
             $b2b->update(
@@ -57,12 +57,19 @@ class TradingController extends Controller
                     'broker_settlement_account_id' =>   $request->settlement_account_number,
                     'target_comp_id' =>   $request->target_comp_id,
                     'sender_comp_id' =>   $request->sender_comp_id,
-                    'socket' =>   $request->socket, 
+                    'socket' =>   $request->socket,
                     'port' =>   $request->port,
                     'status' => 'Unverified'
                 ]
 
             );
+            $request['broker_name'] = $foreign_broker->name;
+            $request['local_broker_name'] = $local_broker->name;
+            $request['settlement_agent'] = $settlement_data['bank_name'];
+            $request['settlement_account_number'] = $settlement_data['account'];
+            // $request['hash'] = $settlement_data['hash'];
+            $request['hash'] = $b2b->hash;
+            Mail::to($foreign_broker->email)->send(new TradingAccountUpdated($request));
         } else {
             $broker = new BrokerTradingAccount();
             $broker->local_broker_id =   $request_local_broker->id;
@@ -89,7 +96,7 @@ class TradingController extends Controller
              that is assigned to a trading account
              is notified via email when it is added
             */
-            $this->LogActivity::addToLog('Created New Broker Trading Account: umir = '.$request->umir.', trading_account_number = '.$request->trading_account_number.', broker_settlement_account_id = '.$request->settlement_account_number.', target_comp_id = '.$request->target_comp_id.', sender_comp_id = '.$request->sender_comp_id.', socket = '.$request->socket.', port = '.$request->port.',status = Unverified');
+            $this->LogActivity::addToLog('Created New Broker Trading Account: umir = ' . $request->umir . ', trading_account_number = ' . $request->trading_account_number . ', broker_settlement_account_id = ' . $request->settlement_account_number . ', target_comp_id = ' . $request->target_comp_id . ', sender_comp_id = ' . $request->sender_comp_id . ', socket = ' . $request->socket . ', port = ' . $request->port . ',status = Unverified');
             Mail::to($foreign_broker->email)->send(new TradingAccount($request));
         }
     }

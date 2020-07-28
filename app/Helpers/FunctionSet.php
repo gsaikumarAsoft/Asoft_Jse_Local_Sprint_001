@@ -294,7 +294,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        // return $request;
+        return $request;
 
         // //    return BrokerOrderExecutionReport::all();
         // $report = array(
