@@ -721,11 +721,11 @@ export default {
           value: "Immediate or Cancel (IOC)",
           fix_value: "3"
         },
-        {
-          text: "Fill or Kill (FOK)",
-          value: "Fill or Kill (FOK)",
-          fix_value: "4"
-        }
+        // {
+        //   text: "Fill or Kill (FOK)",
+        //   value: "Fill or Kill (FOK)",
+        //   fix_value: "4"
+        // }
         // {
         //   text: "Good Till Crossing (GTX)",
         //   value: "Good Till Crossing (GTX)",
