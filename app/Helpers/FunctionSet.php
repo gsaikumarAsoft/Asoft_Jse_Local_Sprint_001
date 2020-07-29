@@ -246,7 +246,6 @@ class FunctionSet
 
         switch ($fix_status['result']) {
             case "Session could not be established with CIBC. Order number {0}":
-                // return '1';
                 $this->LogActivity->addToLog('Order Failed:' . $fix_status['result'] . '-' . $request->client_order_number);
                 $data['text'] = 'Order Submission Failed: ' . $fix_status['result'] . '-' . $request->client_order_number;
                 $data['status'] = 'Session Failed';
@@ -258,7 +257,6 @@ class FunctionSet
 
                 break;
             case "Please Check the endpoint /MessageDownload/Download for message queue":
-                // return '2';
                 // If the order is successfull create a log
                 $this->LogActivity->addToLog('Order Successfull: Please Check the endpoint /MessageDownload/Download for message queue' . '-' . $request->client_order_number);
                 $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
@@ -294,8 +292,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        return $request;
-
+        // return $request;
         // //    return BrokerOrderExecutionReport::all();
         // $report = array(
         //     "id" => 4,
