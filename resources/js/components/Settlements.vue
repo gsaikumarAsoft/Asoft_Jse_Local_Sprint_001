@@ -17,7 +17,11 @@
             :current-page="currentPage"
             @row-clicked="settlmentAccountHandler"
           >
-            <template slot="index" slot-scope="row">{{ row }}</template>
+            <template v-slot:cell(hash)="data">
+              <!-- `data.value` is the value after formatted by the Formatter -->
+              <b-button @click="resetFilledOrders(data)">Clear Unsettled Trades</b-button>
+              <!--{{ data.value }}-->
+            </template>
           </b-table>
           <b-pagination
             v-model="currentPage"
@@ -263,6 +267,10 @@ export default {
           key: "settlement_agent_status",
           label: "Status",
           sortable: true
+        },
+        {
+          key: "hash",
+          label: ""
         }
       ],
       nameState: null
@@ -280,6 +288,23 @@ export default {
     }
   },
   methods: {
+    async resetFilledOrders(d) {
+      console.log(d.item);
+      //Identify the settlement account based on its hash
+      const account = d.item;
+      account.filled_orders = 0;
+      try {
+        await axios.post("../store-settlement-broker", account);
+        this.$swal(
+          "Trades Updated!",
+          "Unsettled trades have been cleared.",
+          "success"
+        );
+      } catch (error) {
+        console.log(error);
+        // this.checkDuplicateError(error);
+      }
+    },
     importAccounts() {
       this.$swal
         .fire({

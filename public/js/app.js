@@ -71689,6 +71689,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__["default"]],
   components: {
@@ -71791,6 +71795,10 @@ __webpack_require__.r(__webpack_exports__);
           key: "settlement_agent_status",
           label: "Status",
           sortable: true
+        },
+        {
+          key: "hash",
+          label: ""
         }
       ],
       nameState: null
@@ -71808,6 +71816,23 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
+    async resetFilledOrders(d) {
+      console.log(d.item);
+      //Identify the settlement account based on its hash
+      const account = d.item;
+      account.filled_orders = 0;
+      try {
+        await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("../store-settlement-broker", account);
+        this.$swal(
+          "Trades Updated!",
+          "Unsettled trades have been cleared.",
+          "success"
+        );
+      } catch (error) {
+        console.log(error);
+        // this.checkDuplicateError(error);
+      }
+    },
     importAccounts() {
       this.$swal
         .fire({
@@ -77394,15 +77419,27 @@ var render = function() {
                         scopedSlots: _vm._u(
                           [
                             {
-                              key: "index",
-                              fn: function(row) {
-                                return [_vm._v(_vm._s(row))]
+                              key: "cell(hash)",
+                              fn: function(data) {
+                                return [
+                                  _c(
+                                    "b-button",
+                                    {
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.resetFilledOrders(data)
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Clear Unsettled Trades")]
+                                  )
+                                ]
                               }
                             }
                           ],
                           null,
                           false,
-                          131414210
+                          1808524901
                         )
                       }),
                       _vm._v(" "),
