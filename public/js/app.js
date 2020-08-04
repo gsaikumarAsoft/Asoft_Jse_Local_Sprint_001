@@ -73275,7 +73275,7 @@ __webpack_require__.r(__webpack_exports__);
           }
         },
         { key: "order_quantity", label: "Qty", sortable: true },
-                { key: "remaining", label:"Remainder", sortable: true },
+        { key: "remaining", label: "Remainder", sortable: true },
         { key: "price", sortable: true },
         {
           key: "order_status",
@@ -73307,7 +73307,7 @@ __webpack_require__.r(__webpack_exports__);
               return value;
             }
           }
-        },
+        }
 
         // { key: "foreign_broker", sortable: true }
       ],
@@ -73386,7 +73386,7 @@ __webpack_require__.r(__webpack_exports__);
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
           fix_value: "3"
-        },
+        }
         // {
         //   text: "Fill or Kill (FOK)",
         //   value: "Fill or Kill (FOK)",
@@ -73775,6 +73775,9 @@ __webpack_require__.r(__webpack_exports__);
       this.disabled = false;
       var dt = new Date();
       this.order = {};
+
+      // Permanently set the handling instructions.
+      this.order.handling_instructions = this.handling_options[0];
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         Math.floor(1000 + Math.random() * 9000) +
@@ -79167,7 +79170,7 @@ var render = function() {
                                                 "Select an Instruction",
                                               label: "text",
                                               options: _vm.handling_options,
-                                              disabled: _vm.disabled
+                                              disabled: true
                                             },
                                             model: {
                                               value:
