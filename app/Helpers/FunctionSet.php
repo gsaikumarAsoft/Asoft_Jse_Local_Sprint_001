@@ -342,10 +342,10 @@ class FunctionSet
                 //Define the order number we want to reject
                 $order_no = $rejRep['clOrdID'];
                 $record = BrokerOrderExecutionReport::where('clordid', $order_no)->where('text', $rejRep['text']);
-                // if ($record->exists()) {
-                //     //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
+                if ($record->exists()) {
+                    //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
 
-                // } else {
+                } else {
                     // return "Reject Record Doesnt Exist";
 
                     //Process rejection of orders
@@ -415,14 +415,14 @@ class FunctionSet
                             ['open_orders' => $client->open_orders - $partially_filled_amount, 'filled_orders' => $client->filled_orders - $partially_filled_amount]
                         );
 
-                       
+
 
                         BrokerClientOrder::updateOrCreate(
                             ['client_order_number' =>  (int)$order_no],
                             ['order_status' => $this->OrderStatus->Rejected(), 'remaining' => '0.00']
                         );
                     }
-                
+                }
             }
         }
     }
