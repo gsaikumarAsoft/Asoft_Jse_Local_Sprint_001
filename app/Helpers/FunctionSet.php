@@ -419,10 +419,9 @@ class FunctionSet
 
                         BrokerClientOrder::updateOrCreate(
                             ['client_order_number' =>  (int)$order_no],
-                            ['order_status' => $this->OrderStatus->Rejected()]
+                            ['order_status' => $this->OrderStatus->Rejected(), 'remaining' => '0.00']
                         );
                     }
-                    return $order_no;
                 
             }
         }
