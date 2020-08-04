@@ -292,10 +292,9 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        // return $request;
+        // return $request["rejectMessages"];
 
-        $execution_report = $request['executionReports'];
-        $rejection_report = $request['rejectMessages'];
+        $execution_report = $request["executionReports"];
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
@@ -339,8 +338,8 @@ class FunctionSet
             }
         }
 
-        if ($rejection_report) {
-            foreach ($rejection_report as $rejRep) {
+        if ($request["rejectMessages"]) {
+            foreach ($request["rejectMessages"] as $rejRep) {
                 // return $rejRep;
                 //Define the order number we want to reject
                 $order_no = $rejRep['clOrdID'];
