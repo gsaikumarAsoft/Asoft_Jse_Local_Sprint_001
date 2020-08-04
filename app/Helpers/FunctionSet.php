@@ -220,7 +220,7 @@ class FunctionSet
         if ($request->has('handling_instructions')) {
             $data['HandlInst'] = $this->jsonStrip(json_decode($request->handling_instructions, true), 'fix_value');
         } else {
-            $data['HandlInst'] = "1";
+            $data['HandlInst'] = '1';
         }
 
         $postdata = json_encode($data);
@@ -293,39 +293,13 @@ class FunctionSet
     public function logExecution($request)
     {
         // return $request;
-        // //    return BrokerOrderExecutionReport::all();
-        // $report = array(
-        //     "id" => 4,
-        //     "clordid" => "982420200720174",
-        //     "orderID" => "000000-000000-0",
-        //     "text" => "Order Filled",
-        //     "ordRejRes" => null,
-        //     "status" => "1",
-        //     "buyorSell" => "2",
-        //     "securitySubType" => "0",
-        //     "time" => null,
-        //     "ordType" => "2",
-        //     "orderQty" => "50",
-        //     "timeInForce" => "0",
-        //     "symbol" => "AAB.TO",
-        //     "qTradeacc" => "JCSD2343242",
-        //     "price" => "4.60",
-        //     "stopPx" => "0",
-        //     "execType" => "0",
-        //     "senderSubID" => "BARITA",
-        //     "seqNum" => "0",
-        //     "sendingTime" => "2020-07-20 16:39",
-        //     "messageDate" => "2020-07-20 16:39",
-        //     "created_at" => "2020-07-20 21:39:28",
-        //     "updated_at" => "2020-07-20 21:39:28"
-        // );
-        // return $this->clientSettlementBalanceUpdate($report);
 
         $execution_report = $request['executionReports'];
+        $rejection_report = $request['rejectMessages'];
+        $offset = 5 * 60 * 60;
+        $dateFormat = "Y-m-d H:i";
+        $timeNdate = gmdate($dateFormat, time() - $offset);
         if ($execution_report) {
-            $offset = 5 * 60 * 60;
-            $dateFormat = "Y-m-d H:i";
-            $timeNdate = gmdate($dateFormat, time() - $offset);
 
             foreach ($execution_report as $report) {
                 $clients[] = $report;
@@ -361,6 +335,89 @@ class FunctionSet
 
                     // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
                     return $this->clientSettlementBalanceUpdate($report);
+                }
+            }
+        }
+
+        if ($rejection_report) {
+            foreach ($rejection_report as $rejRep) {
+                // return $rejRep;
+                //Define the order number we want to reject
+                $order_no = $rejRep['clOrdID'];
+                $record = BrokerOrderExecutionReport::where('clordid', $order_no)->where('text', $rejRep['text']);
+                if ($record->exists()) {
+                    //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
+
+                } else {
+                    // return "Reject Record Doesnt Exist";
+
+                    //Process rejection of orders
+                    //Find the order that was peviously made based on the current $order_no
+                    $order = BrokerClientOrder::where('clordid', $order_no)->first();
+                    $order_total = number_format($order->price * $order->quantity, 2, '.', '');
+                    $remaining_balance_of_order = $order->remaining;
+
+                    //define the trading, settlement & client account for this order 
+                    $trading_account = BrokerTradingAccount::find($order->trading_account_id);
+                    $settlement_account = BrokerSettlementAccount::find($trading_account->broker_settlement_account_id);
+                    $client = BrokerClient::find($order->broker_client_id);
+
+                    $broker_order_execution_report = new BrokerOrderExecutionReport();
+                    $broker_order_execution_report->clOrdID = $order_no;
+                    $broker_order_execution_report->orderID = '000000-000000-1';
+                    $broker_order_execution_report->text = $rejRep['text'];
+                    $broker_order_execution_report->ordRejRes = null;
+                    $broker_order_execution_report->status = $this->OrderStatus->Rejected();
+                    $broker_order_execution_report->buyorSell = $this->jsonStrip(json_decode($order->side, true), 'fix_value');
+                    $broker_order_execution_report->securitySubType = 0;
+                    $broker_order_execution_report->time = null;
+                    $broker_order_execution_report->ordType = 99;
+                    $broker_order_execution_report->orderQty = 0;
+                    $broker_order_execution_report->timeInForce = 0;
+                    $broker_order_execution_report->symbol = null;
+                    $broker_order_execution_report->qTradeacc = 'JCSD' . $client->jcsd;
+                    $broker_order_execution_report->price = 0;
+                    $broker_order_execution_report->stopPx = $rejRep['stopPx'] ?? 0;
+                    $broker_order_execution_report->execType = $rejRep['execType'] ?? 0;
+                    $broker_order_execution_report->senderSubID = $rejRep['senderSubID'];
+                    $broker_order_execution_report->seqNum = $rejRep['seqNum'] ?? 0;
+                    $broker_order_execution_report->sendingTime = $rejRep['sendingTime'] ?? $timeNdate;
+                    $broker_order_execution_report->messageDate = $rejRep['messageDate'] ?? $timeNdate;
+                    $broker_order_execution_report->save();
+
+                    // return $client;
+
+                    if ($remaining_balance_of_order === $order_total) {
+                        //if the balance remaining and the order total are the same the order has not been filled or partially filled
+                        //just update the order status to rejected
+                        // Update the status to rejected and remove the remaining balance
+                        BrokerClientOrder::updateOrCreate(
+                            ['clordid' => $order_no],
+                            ['remaining' => '0', 'status' =>  $this->OrderStatus->Rejected()]
+                        );
+                        //Write to audit trail
+                    } else if ($remaining_balance_of_order < $order_total & $remaining_balance_of_order > 0) {
+                        // if the remaining balance is less than the order total: the current order has a partial fill
+                        // return the partially filled amount the client account balance and settlement account
+                        // reset the remaining amount to 0;
+
+
+                        //find how much was partially filled
+                        $partially_filled_amount = $order_total - $remaining_balance_of_order;
+
+                        //Return the partally filled amount to the client and settlement account balances.
+                        // Update Settlement Account Balances
+                        BrokerSettlementAccount::updateOrCreate(
+                            ['id' => $settlement_account->id],
+                            ['amount_allocated' => (int) $settlement_account->amount_allocated - $partially_filled_amount, 'account_balance' => (int) $settlement_account->account_balance + $partially_filled_amount, 'filled_orders' => (int) $settlement_account->filled_orders - (int) $partially_filled_amount]
+
+                        );
+                        // // Update Broker Clients Open Orders
+                        BrokerClient::updateOrCreate(
+                            ['id' => $client->id],
+                            ['open_orders' => $client->open_orders - $partially_filled_amount, 'filled_orders' => $client->filled_orders - $partially_filled_amount]
+                        );
+                    }
                 }
             }
         }
@@ -483,7 +540,7 @@ class FunctionSet
 
 
                         // Update Broker Clients Open Orders
-                       $broker_client_account = BrokerClient::updateOrCreate(
+                        $broker_client_account = BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
                             ['open_orders' => $client_open_orders, 'filled_orders' => $bc->filled_orders + (int)$order_value]
                         );
