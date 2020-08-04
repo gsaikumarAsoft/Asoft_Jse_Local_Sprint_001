@@ -292,8 +292,6 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        // return $request["rejectMessages"];
-
         $execution_report = $request["executionReports"];
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
@@ -344,10 +342,10 @@ class FunctionSet
                 //Define the order number we want to reject
                 $order_no = $rejRep['clOrdID'];
                 $record = BrokerOrderExecutionReport::where('clordid', $order_no)->where('text', $rejRep['text']);
-                if ($record->exists()) {
-                    //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
+                // if ($record->exists()) {
+                //     //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
 
-                } else {
+                // } else {
                     // return "Reject Record Doesnt Exist";
 
                     //Process rejection of orders
@@ -406,18 +404,26 @@ class FunctionSet
 
                         //Return the partally filled amount to the client and settlement account balances.
                         // Update Settlement Account Balances
-                        BrokerSettlementAccount::updateOrCreate(
+                        $bsa = BrokerSettlementAccount::updateOrCreate(
                             ['id' => $settlement_account->id],
                             ['amount_allocated' => (int) $settlement_account->amount_allocated - $partially_filled_amount, 'account_balance' => (int) $settlement_account->account_balance + $partially_filled_amount, 'filled_orders' => (int) $settlement_account->filled_orders - (int) $partially_filled_amount]
 
                         );
                         // // Update Broker Clients Open Orders
-                        BrokerClient::updateOrCreate(
+                        $bc = BrokerClient::updateOrCreate(
                             ['id' => $client->id],
                             ['open_orders' => $client->open_orders - $partially_filled_amount, 'filled_orders' => $client->filled_orders - $partially_filled_amount]
                         );
+
+                       
+
+                        BrokerClientOrder::updateOrCreate(
+                            ['client_order_number' =>  (int)$order_no],
+                            ['order_status' => $this->OrderStatus->Rejected()]
+                        );
                     }
-                }
+                    return $order_no;
+                
             }
         }
     }
