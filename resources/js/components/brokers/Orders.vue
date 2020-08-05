@@ -292,7 +292,7 @@
                       v-model="order.handling_instructions"
                       label="text"
                       :options="handling_options"
-                      :disabled="true"
+                      :disabled="disabled"
                     ></multiselect>
                     <!-- <b-form-select
                       v-model="order.local_broker"
@@ -609,7 +609,7 @@ export default {
           }
         },
         { key: "order_quantity", label: "Qty", sortable: true },
-        { key: "remaining", label: "Remainder", sortable: true },
+                { key: "remaining", label:"Remainder", sortable: true },
         { key: "price", sortable: true },
         {
           key: "order_status",
@@ -641,7 +641,7 @@ export default {
               return value;
             }
           }
-        }
+        },
 
         // { key: "foreign_broker", sortable: true }
       ],
@@ -720,7 +720,7 @@ export default {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
           fix_value: "3"
-        }
+        },
         // {
         //   text: "Fill or Kill (FOK)",
         //   value: "Fill or Kill (FOK)",
@@ -1109,9 +1109,6 @@ export default {
       this.disabled = false;
       var dt = new Date();
       this.order = {};
-
-      // Permanently set the handling instructions.
-      this.order.handling_instructions = this.handling_options[0];
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         Math.floor(1000 + Math.random() * 9000) +

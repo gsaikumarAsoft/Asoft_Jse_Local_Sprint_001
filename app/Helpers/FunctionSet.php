@@ -292,7 +292,6 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        return $request;
         $execution_report = $request["executionReports"];
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
