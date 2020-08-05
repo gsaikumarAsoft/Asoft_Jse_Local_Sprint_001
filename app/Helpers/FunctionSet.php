@@ -351,8 +351,8 @@ class FunctionSet
                     //Process rejection of orders
                     //Find the order that was peviously made based on the current $order_no
                     $order = BrokerClientOrder::where('clordid', $order_no)->first();
-                    $order_total = number_format($order->price * $order->quantity, 2, '.', '');
-                    $remaining_balance_of_order = $order->remaining;
+                    $order_total = number_format($order["price"] * $order->quantity, 2, '.', '');
+                    $remaining_balance_of_order = $order["remaining"];
 
                     //define the trading, settlement & client account for this order 
                     $trading_account = BrokerTradingAccount::find($order->trading_account_id);
