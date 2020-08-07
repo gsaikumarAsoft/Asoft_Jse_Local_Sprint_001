@@ -75,8 +75,8 @@
             <b-form-group label="Order Permissions:">
               <b-form-checkbox-group v-model="broker.selected_broker_permissions" id="checkboxes-4">
                 <b-form-checkbox value="create-broker-order">Create</b-form-checkbox>
-                <b-form-checkbox value="read-broker-order">View</b-form-checkbox>
-                <b-form-checkbox value="update-broker-order">Update</b-form-checkbox>
+                <b-form-checkbox value="read-broker-order">Read</b-form-checkbox>
+                <!-- <b-form-checkbox value="update-broker-order">Update</b-form-checkbox> -->
                 <b-form-checkbox value="delete-broker-order">Cancel</b-form-checkbox>
                 <!-- <b-form-checkbox value="approve-broker-order">Approve</b-form-checkbox> -->
               </b-form-checkbox-group>

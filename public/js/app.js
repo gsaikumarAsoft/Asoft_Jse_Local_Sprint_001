@@ -80322,13 +80322,7 @@ var render = function() {
                               _c(
                                 "b-form-checkbox",
                                 { attrs: { value: "read-broker-order" } },
-                                [_vm._v("View")]
-                              ),
-                              _vm._v(" "),
-                              _c(
-                                "b-form-checkbox",
-                                { attrs: { value: "update-broker-order" } },
-                                [_vm._v("Update")]
+                                [_vm._v("Read")]
                               ),
                               _vm._v(" "),
                               _c(
