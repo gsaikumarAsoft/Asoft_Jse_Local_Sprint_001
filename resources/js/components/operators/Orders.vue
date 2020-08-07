@@ -421,7 +421,7 @@
           </form>
         </b-modal>
         <b-pagination
-        v-if="permissions.indexOf('read-broker-order') !== -1"
+          v-if="permissions.indexOf('read-broker-order') !== -1"
           v-model="currentPage"
           :total-rows="rows"
           :per-page="perPage"
@@ -588,22 +588,22 @@ export default {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
           fix_value: "1"
-        },
-        {
-          text: "Automated execution order, public, Broker intervention OK",
-          value: "Automated execution order, public, Broker intervention OK",
-          fix_value: "2"
-        },
-        {
-          text: "Manual order, best execution",
-          value: "Manual order, best execution",
-          fix_value: "3"
-        },
-        {
-          text: "Automated execution order, private, no Broker intervention",
-          value: "Automated execution order, private, no Broker intervention",
-          fix_value: "4"
         }
+        // {
+        //   text: "Automated execution order, public, Broker intervention OK",
+        //   value: "Automated execution order, public, Broker intervention OK",
+        //   fix_value: "2"
+        // },
+        // {
+        //   text: "Manual order, best execution",
+        //   value: "Manual order, best execution",
+        //   fix_value: "3"
+        // },
+        // {
+        //   text: "Automated execution order, private, no Broker intervention",
+        //   value: "Automated execution order, private, no Broker intervention",
+        //   fix_value: "4"
+        // }
       ],
       jason_order: [],
       option_values: [
@@ -654,7 +654,7 @@ export default {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
           fix_value: "3"
-        },
+        }
         // {
         //   text: "Fill or Kill (FOK)",
         //   value: "Fill or Kill (FOK)",
@@ -1042,16 +1042,17 @@ export default {
       var dt = new Date();
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) + '' +
+        Math.floor(1000 + Math.random() * 9000) +
+        "" +
         dt.getFullYear() +
-        '' +
+        "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
-        '' +
+        "" +
         dt
           .getDate()
           .toString()
           .padStart(2, "0") +
-        '' +
+        "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },

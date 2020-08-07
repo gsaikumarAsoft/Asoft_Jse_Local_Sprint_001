@@ -74502,7 +74502,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  mixins: [_js_mixins_Permissions_js__WEBPACK_IMPORTED_MODULE_0__["default"],_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_3__["default"]],
+  mixins: [_js_mixins_Permissions_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_3__["default"]],
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
@@ -75783,22 +75783,22 @@ __webpack_require__.r(__webpack_exports__);
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
           fix_value: "1"
-        },
-        {
-          text: "Automated execution order, public, Broker intervention OK",
-          value: "Automated execution order, public, Broker intervention OK",
-          fix_value: "2"
-        },
-        {
-          text: "Manual order, best execution",
-          value: "Manual order, best execution",
-          fix_value: "3"
-        },
-        {
-          text: "Automated execution order, private, no Broker intervention",
-          value: "Automated execution order, private, no Broker intervention",
-          fix_value: "4"
         }
+        // {
+        //   text: "Automated execution order, public, Broker intervention OK",
+        //   value: "Automated execution order, public, Broker intervention OK",
+        //   fix_value: "2"
+        // },
+        // {
+        //   text: "Manual order, best execution",
+        //   value: "Manual order, best execution",
+        //   fix_value: "3"
+        // },
+        // {
+        //   text: "Automated execution order, private, no Broker intervention",
+        //   value: "Automated execution order, private, no Broker intervention",
+        //   fix_value: "4"
+        // }
       ],
       jason_order: [],
       option_values: [
@@ -75849,7 +75849,7 @@ __webpack_require__.r(__webpack_exports__);
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
           fix_value: "3"
-        },
+        }
         // {
         //   text: "Fill or Kill (FOK)",
         //   value: "Fill or Kill (FOK)",
@@ -76237,16 +76237,17 @@ __webpack_require__.r(__webpack_exports__);
       var dt = new Date();
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) + '' +
+        Math.floor(1000 + Math.random() * 9000) +
+        "" +
         dt.getFullYear() +
-        '' +
+        "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
-        '' +
+        "" +
         dt
           .getDate()
           .toString()
           .padStart(2, "0") +
-        '' +
+        "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },
@@ -80321,7 +80322,7 @@ var render = function() {
                               _c(
                                 "b-form-checkbox",
                                 { attrs: { value: "read-broker-order" } },
-                                [_vm._v("Read")]
+                                [_vm._v("View")]
                               ),
                               _vm._v(" "),
                               _c(
@@ -80333,13 +80334,7 @@ var render = function() {
                               _c(
                                 "b-form-checkbox",
                                 { attrs: { value: "delete-broker-order" } },
-                                [_vm._v("Delete")]
-                              ),
-                              _vm._v(" "),
-                              _c(
-                                "b-form-checkbox",
-                                { attrs: { value: "approve-broker-order" } },
-                                [_vm._v("Approve")]
+                                [_vm._v("Cancel")]
                               )
                             ],
                             1
