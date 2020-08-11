@@ -90,7 +90,7 @@ class FunctionSet
             'SenderSubID' => $trading->trading_account_number,
             'Host' => $trading->socket,
             'OrderID' => $order->clordid,
-            // "OriginalOrderID" => $order->clordid,
+            "OriginalOrderID" => $order->clordid,
             "OrigClOrdID" => $order->clordid,
             "OrderQty" => $order->quantity,
             'BuyorSell' => $this->jsonStrip(json_decode($order->side, true), 'fix_value'),
