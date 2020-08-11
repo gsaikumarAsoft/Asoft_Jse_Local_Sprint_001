@@ -59,6 +59,14 @@ class FunctionSet
 
     public function cancelOrder($id)
     {
+
+        $order = BrokerClientOrder::where('clordid', $id)->first();
+        $order_ex = BrokerClientOrderExecutionReports::where('clordid', $id)->where('status', 'Pending Cancel')->first();
+        // return $order_ex;
+        // if ($order->status === "Pending Cancel") {
+        //     return response()->json(['isvalid' => true, 'errors' => 'A Cancellation Request for this order has already been submitted']);
+        // }
+
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
@@ -110,7 +118,7 @@ class FunctionSet
 
         curl_close($ch);
 
-        $data['text'] = 'Order Cancel Request';
+        $data['text'] = 'Order Cancel Request Submitted';
         $data['status'] = 'Pending Cancel';
 
         // Log this cancellation request to the execution reports
@@ -131,7 +139,7 @@ class FunctionSet
         $broker_order_execution_report->price = 0;
         $broker_order_execution_report->stopPx = 0;
         $broker_order_execution_report->execType = 0;
-        $broker_order_execution_report->senderSubID = $broker_data->user->name; 
+        $broker_order_execution_report->senderSubID = $broker_data->user->name;
         $broker_order_execution_report->seqNum = 0;
         $broker_order_execution_report->sendingTime = $data['sendingTime'] ?? $timeNdate;
         $broker_order_execution_report->messageDate = $data['messageDate'] ?? $timeNdate;
