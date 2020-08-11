@@ -144,8 +144,6 @@ class FunctionSet
         $broker_order_execution_report->messageDate = $data['messageDate'] ?? $timeNdate;
         $broker_order_execution_report->save();
         return response()->json(['isvalid' => true, 'errors' => 'A Cancellation Request for this order has been submitted']);
-        // $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
-        // return $result;
     }
 
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
@@ -219,14 +217,6 @@ class FunctionSet
             'SenderSubID' => $sender_sub_id,
             'Host' => $trading->socket,
             'Port' => (int) $trading->port,
-            // =======================================================================================
-            //Temporary Fix Testing Scripts
-            // "TargetCompID" => "CIBC_TEST",
-            // "SenderCompID" => "JSE_TST2",
-            // // "SenderSubID" => "BARITA",
-            // "Host" => "20.156.185.101",
-            // "Port" => 6544,
-            // ========================================================================================
             'StartTime' => "11:00:00.000",
             'EndTime' => "23:30:00.000",
             'OrderID' => $request->client_order_number,
@@ -314,19 +304,6 @@ class FunctionSet
                 DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
                     ->update(['order_status' => $this->OrderStatus->Failed()]);
-                // //Settlement Account Information
-                // $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
-                // $order_value = $request->price * $request->quantity;
-                // // Replenish Settlement Account Balance
-                // BrokerSettlementAccount::updateOrCreate(
-                //     ['id' => $trading->broker_settlement_account_id],
-                //     ['amount_allocated' => (int)$settlement->amount_allocated - $order_value, 'account_balance' => (int) $settlement->account_balance + $order_value]
-                // );
-                // BrokerClient::updateOrCreate(
-                //     ['id' => $client_id],
-                //     ['open_orders' => (int)$client->open_orders - (int)$order_value]
-                // );
-
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
@@ -759,23 +736,6 @@ class FunctionSet
             );
         } else {
 
-            // For future Sprint
-            // $broker_trader = new User();
-
-            // $broker_trader->local_broker_id = $request->local_broker_id;
-            // $broker_trader->name = $request->name;
-            // $broker_trader->email = $request->email;
-            // $broker_trader->password = bcrypt('password');
-            // $broker_trader->status = 'Un-Verified';
-            // $broker_trader->save();
-            // $request['id'] = $broker_trader->id;
-            // $broker_trader->roles()->attach($role_TRDB);
-            // ========================================
-
-            //Create Broker Client
-
-            // return $local_broker['id'];
-            // $role_TRDB = Role::where('name', 'TRDB')->first();
             $broker_client = new BrokerClient;
             $broker_client->local_broker_id = $local_broker->id;
             $broker_client->name = $request->name;
@@ -800,8 +760,6 @@ class FunctionSet
         // return $request;
         $local_broker = LocalBroker::with('user')->where('user_id', $request->local_broker_id)->first();
 
-        // $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
-        // return $request['local_broker_id'];
         $broker_user = $local_broker['user'];
 
         if ($request->id) {
@@ -821,24 +779,7 @@ class FunctionSet
             );
             Mail::to($broker_user['email'])->send(new ClientDetailsUpdate($request));
         } else {
-            //Notify Local Broker that
-            // For future Sprint
-            // $broker_trader = new User();
 
-            // $broker_trader->local_broker_id = $request->local_broker_id;
-            // $broker_trader->name = $request->name;
-            // $broker_trader->email = $request->email;
-            // $broker_trader->password = bcrypt('password');
-            // $broker_trader->status = 'Un-Verified';
-            // $broker_trader->save();
-            // $request['id'] = $broker_trader->id;
-            // $broker_trader->roles()->attach($role_TRDB);
-            // ========================================
-
-            //Create Broker Client
-
-            // return $local_broker['id'];
-            // $role_TRDB = Role::where('name', 'TRDB')->first();
             $broker_client = new BrokerClient;
             $broker_client->local_broker_id = $local_broker->id;
             $broker_client->name = $request->name;
