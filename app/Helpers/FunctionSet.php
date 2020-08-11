@@ -61,11 +61,10 @@ class FunctionSet
     {
 
         $order = BrokerClientOrder::where('clordid', $id)->first();
-        // $order_ex = BrokerClientOrderExecutionReports::where('clordid', $id)->where('status', 'Pending Cancel')->first();
-        // return $order_ex;
-        // if ($order->status === "Pending Cancel") {
-        //     return response()->json(['isvalid' => true, 'errors' => 'A Cancellation Request for this order has already been submitted']);
-        // }
+        $order_ex = BrokerOrderExecutionReport::where('clordid', $id)->where('status', 'Pending Cancel')->first();
+        if ($order_ex['status'] === "Pending Cancel") {
+            return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
+        }
 
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
@@ -144,7 +143,7 @@ class FunctionSet
         $broker_order_execution_report->sendingTime = $data['sendingTime'] ?? $timeNdate;
         $broker_order_execution_report->messageDate = $data['messageDate'] ?? $timeNdate;
         $broker_order_execution_report->save();
-        return $broker_order_execution_report;
+        return response()->json(['isvalid' => true, 'errors' => 'A Cancellation Request for this order has been submitted']);
         // $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
         // return $result;
     }

@@ -1153,10 +1153,13 @@ export default {
 
     async destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-      await axios.delete(`destroy-broker-client-order/${id}`); //.then(response => {
-      this.$swal("Cancel Request Sent");
-      await this.timeout(1000);
-      // window.location.reload.bind(window.location);
+      const { data } = await axios.delete(`destroy-broker-client-order/${id}`);
+      let valid = data;
+      if (valid.isvalid) {
+        this.notify("Request Sent", data.errors, "success", true);
+      } else {
+        this.notify("Warning", data.errors, "warning", false);
+      }
     },
 
     //sleep function

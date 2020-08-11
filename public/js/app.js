@@ -73822,10 +73822,13 @@ __webpack_require__.r(__webpack_exports__);
 
     async destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-      await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`); //.then(response => {
-      this.$swal("Cancel Request Sent");
-      await this.timeout(1000);
-      // window.location.reload.bind(window.location);
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`);
+      let valid = data;
+      if (valid.isvalid) {
+        this.notify("Request Sent", data.errors, "success", true);
+      } else {
+        this.notify("Warning", data.errors, "warning", false);
+      }
     },
 
     //sleep function
