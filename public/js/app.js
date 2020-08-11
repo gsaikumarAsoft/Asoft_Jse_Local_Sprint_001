@@ -72444,7 +72444,7 @@ __webpack_require__.r(__webpack_exports__);
   props: ["execution_reports"],
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
-    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_2___default())
+    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_2___default()),
   },
   data() {
     return {
@@ -72495,7 +72495,10 @@ __webpack_require__.r(__webpack_exports__);
             if (value === "Failed") {
               return "Failed";
             }
-          }
+            if (value === "Pending Cancel") {
+              return "Pending Cancel";
+            }
+          },
         },
         {
           key: "buyorSell",
@@ -72526,22 +72529,22 @@ __webpack_require__.r(__webpack_exports__);
             if (value === "Y") {
               return "SellCross (Fill for the Sell side of a Cross)";
             }
-          }
+          },
         },
         {
           key: "settlement_account_number",
           formatter: (value, key, item) => {
             var agent = item.settlement_agent;
             return agent + "-" + value;
-          }
+          },
         },
         {
           key: "messageDate",
           sortable: true,
           formatter: (value, key, item) => {
             return moment__WEBPACK_IMPORTED_MODULE_0___default()(String(value));
-          }
-        }
+          },
+        },
         // { key: "settlement_amount_allocated" }
         // {
         //   key: "order_type.text",
@@ -72558,7 +72561,7 @@ __webpack_require__.r(__webpack_exports__);
       broker: {},
       perPage: 5,
       currentPage: 1,
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
@@ -72569,11 +72572,11 @@ __webpack_require__.r(__webpack_exports__);
     },
     rows() {
       return this.report_data.length;
-    }
+    },
   },
   methods: {
     exportBalances() {
-      const tableData = this.report_data.map(r =>
+      const tableData = this.report_data.map((r) =>
         //for (var i = 0; i < this.report_data.length; i++) {
         //tableData.push([
         [
@@ -72594,7 +72597,7 @@ __webpack_require__.r(__webpack_exports__);
           r.stopPx,
           // r.execType,
           r.senderSub,
-          r.seqNum
+          r.seqNum,
           // r.sendingTime,
           // r.messageDate
         ]
@@ -72628,19 +72631,19 @@ __webpack_require__.r(__webpack_exports__);
             "stopPx",
             // "execType",
             "senderSubID",
-            "seqNum"
+            "seqNum",
             // "sendingTime",
             // "messageDate"
-          ]
+          ],
         ],
-        body: tableData
+        body: tableData,
       });
       doc.save("JSE-ORDER-EXECUTION-REPORT.pdf");
-    }
+    },
   },
   mounted() {
     console.log(this);
-  }
+  },
 });
 
 

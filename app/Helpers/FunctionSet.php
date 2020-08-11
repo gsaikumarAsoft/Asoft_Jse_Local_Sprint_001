@@ -63,16 +63,19 @@ class FunctionSet
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
         $order = BrokerClientOrder::where('clordid', $id)->first();
+        $client = BrokerClient::find($order->broker_client_id);
         $mytime = Carbon::now();
         $cancel_cordid = "ORD" . $mytime->format('YmdH') . "N" . rand(100, 1000); //Create a New cancel order id
 
         // //Trading Account Information
         $trading = BrokerTradingAccount::with('settlement_account')->find($order->trading_account_id)->first();
+        // return $trading->local_broker_id;
+        $broker_data = LocalBroker::with('user')->where('id', $trading->local_broker_id)->first();
 
         // // //Settlement Account Information
         // $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
 
-        // $url = $this->fix_wrapper_url("api/OrderManagement/OrderCancelRequest");
+        $url = $this->fix_wrapper_url("api/OrderManagement/OrderCancelRequest");
         $data = array(
             'BeginString' => 'FIX.4.2',
             'TargetCompID' => $trading->target_comp_id,
@@ -93,24 +96,22 @@ class FunctionSet
             'EndTime' => "23:30:00.000",
         );
 
-        // $postdata = json_encode($data);
+        $postdata = json_encode($data);
 
-        // $ch = curl_init($url);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        // curl_setopt($ch, CURLOPT_POST, 1);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        // $result = curl_exec($ch);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
 
-        // curl_close($ch);
+        curl_close($ch);
 
         $data['text'] = 'Order Cancel Request';
-        $data['status'] = 'Submitted Cancel';
-
-
+        $data['status'] = 'Pending Cancel';
 
         // Log this cancellation request to the execution reports
         $broker_order_execution_report = new BrokerOrderExecutionReport();
@@ -122,15 +123,15 @@ class FunctionSet
         $broker_order_execution_report->buyorSell = $data['buyorSell'] ?? $data['BuyorSell'];
         $broker_order_execution_report->securitySubType = 0;
         $broker_order_execution_report->time = $data['time'] ?? null;
-        $broker_order_execution_report->ordType = 'Cancel';
+        $broker_order_execution_report->ordType = '2';
         $broker_order_execution_report->orderQty = $data['orderQty'] ?? $data['OrderQty'] ?? 0;
         $broker_order_execution_report->timeInForce = $data['timeInForce'] ?? 0;
         $broker_order_execution_report->symbol = $data['symbol'] ?? $data['Symbol'];
-        $broker_order_execution_report->qTradeacc = 'Cancel';
+        $broker_order_execution_report->qTradeacc = 'JCSD' . $client->jcsd;
         $broker_order_execution_report->price = 0;
         $broker_order_execution_report->stopPx = 0;
         $broker_order_execution_report->execType = 0;
-        $broker_order_execution_report->senderSubID = 0;
+        $broker_order_execution_report->senderSubID = $broker_data->user->name; 
         $broker_order_execution_report->seqNum = 0;
         $broker_order_execution_report->sendingTime = $data['sendingTime'] ?? $timeNdate;
         $broker_order_execution_report->messageDate = $data['messageDate'] ?? $timeNdate;

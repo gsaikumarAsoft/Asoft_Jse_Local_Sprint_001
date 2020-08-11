@@ -49,7 +49,7 @@ export default {
   props: ["execution_reports"],
   components: {
     headNav,
-    Multiselect
+    Multiselect,
   },
   data() {
     return {
@@ -100,7 +100,10 @@ export default {
             if (value === "Failed") {
               return "Failed";
             }
-          }
+            if (value === "Pending Cancel") {
+              return "Pending Cancel";
+            }
+          },
         },
         {
           key: "buyorSell",
@@ -131,22 +134,22 @@ export default {
             if (value === "Y") {
               return "SellCross (Fill for the Sell side of a Cross)";
             }
-          }
+          },
         },
         {
           key: "settlement_account_number",
           formatter: (value, key, item) => {
             var agent = item.settlement_agent;
             return agent + "-" + value;
-          }
+          },
         },
         {
           key: "messageDate",
           sortable: true,
           formatter: (value, key, item) => {
             return moment(String(value));
-          }
-        }
+          },
+        },
         // { key: "settlement_amount_allocated" }
         // {
         //   key: "order_type.text",
@@ -163,7 +166,7 @@ export default {
       broker: {},
       perPage: 5,
       currentPage: 1,
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
@@ -174,11 +177,11 @@ export default {
     },
     rows() {
       return this.report_data.length;
-    }
+    },
   },
   methods: {
     exportBalances() {
-      const tableData = this.report_data.map(r =>
+      const tableData = this.report_data.map((r) =>
         //for (var i = 0; i < this.report_data.length; i++) {
         //tableData.push([
         [
@@ -199,7 +202,7 @@ export default {
           r.stopPx,
           // r.execType,
           r.senderSub,
-          r.seqNum
+          r.seqNum,
           // r.sendingTime,
           // r.messageDate
         ]
@@ -233,19 +236,19 @@ export default {
             "stopPx",
             // "execType",
             "senderSubID",
-            "seqNum"
+            "seqNum",
             // "sendingTime",
             // "messageDate"
-          ]
+          ],
         ],
-        body: tableData
+        body: tableData,
       });
       doc.save("JSE-ORDER-EXECUTION-REPORT.pdf");
-    }
+    },
   },
   mounted() {
     console.log(this);
-  }
+  },
 };
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
