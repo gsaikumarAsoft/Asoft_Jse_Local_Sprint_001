@@ -61,8 +61,8 @@ class FunctionSet
     {
 
         $order = BrokerClientOrder::where('clordid', $id)->first();
-        $order_ex = BrokerOrderExecutionReport::where('clordid', $id)->where('status', 'Pending Cancel')->first();
-        if ($order_ex['status'] === "Pending Cancel") {
+        $order_ex = BrokerOrderExecutionReport::where('clordid', $id)->where('status', 'Cancel Submitted')->first();
+        if ($order_ex['status'] === "Cancel Submitted") {
             return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
         }
 
@@ -118,7 +118,7 @@ class FunctionSet
         curl_close($ch);
 
         $data['text'] = 'Order Cancel Request Submitted';
-        $data['status'] = 'Pending Cancel';
+        $data['status'] = 'Cancel Submitted';
 
         // Log this cancellation request to the execution reports
         $broker_order_execution_report = new BrokerOrderExecutionReport();

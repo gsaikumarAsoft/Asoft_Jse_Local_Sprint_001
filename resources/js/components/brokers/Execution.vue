@@ -100,8 +100,8 @@ export default {
             if (value === "Failed") {
               return "Failed";
             }
-            if (value === "Pending Cancel") {
-              return "Pending Cancel";
+            if (value === "Cancel Submitted") {
+              return "Cancel Submitted";
             }
           },
         },
