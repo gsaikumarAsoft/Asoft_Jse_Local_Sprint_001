@@ -2,7 +2,9 @@
   <div>
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top:100px;">
-      <h1 v-if="permissions.indexOf('read-broker-order') !== -1">Current Orders</h1>
+      <h1 v-if="permissions.indexOf('read-broker-order') !== -1">
+        Current Orders
+      </h1>
       <div class="content">
         <b-table
           responsive
@@ -18,10 +20,11 @@
           :fields="fields"
           @row-clicked="brokerOrderHandler"
         ></b-table>
-        <p
-          v-if="permissions.indexOf('read-broker-order') == -1"
-          class="lead"
-        >You currently do not have permisions to view orders within the system. Please speak with your Broker Admin to have the Permissions activated on your account</p>
+        <p v-if="permissions.indexOf('read-broker-order') == -1" class="lead">
+          You currently do not have permisions to view orders within the system.
+          Please speak with your Broker Admin to have the Permissions activated
+          on your account
+        </p>
         <!-- <pre>{{broker_client_orders}}</pre> -->
         <div v-if="!create"></div>
         <b-modal
@@ -37,7 +40,10 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
-                  <b-form-group label="Trading Account" label-for="broker-input">
+                  <b-form-group
+                    label="Trading Account"
+                    label-for="broker-input"
+                  >
                     <b-form-select
                       v-model="order.trading_account"
                       :options="broker_trading_account_options"
@@ -46,7 +52,10 @@
                       @change="currencyHandler(order.trading_account)"
                     >
                       <template v-slot:first>
-                        <b-form-select-option :value="null">-- Please select a Trading Account--</b-form-select-option>
+                        <b-form-select-option :value="null"
+                          >-- Please select a Trading
+                          Account--</b-form-select-option
+                        >
                       </template>
                       <!-- <b-form-select-option
                         v-for="b in local_brokers_list"
@@ -65,13 +74,18 @@
                       :disabled="disabled == 1"
                     >
                       <template v-slot:first>
-                        <b-form-select-option :value="null">-- Please select a Client Account--</b-form-select-option>
+                        <b-form-select-option :value="null"
+                          >-- Please select a Client
+                          Account--</b-form-select-option
+                        >
                       </template>
                       <b-form-select-option
                         v-for="b in client_trading_account_options"
                         :value="b.id"
                         :key="b.id"
-                      >JCSD-{{ b.jcsd }} : {{ b.name }} "Investor"</b-form-select-option>
+                        >JCSD-{{ b.jcsd }} :
+                        {{ b.name }} "Investor"</b-form-select-option
+                      >
                     </b-form-select>
                   </b-form-group>
                 </b-col>
@@ -228,7 +242,10 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
-                  <b-form-group label="Handling Instructions" label-for="broker-input">
+                  <b-form-group
+                    label="Handling Instructions"
+                    label-for="broker-input"
+                  >
                     <multiselect
                       placeholder="Select an Instruction"
                       v-model="order.handling_instructions"
@@ -431,7 +448,8 @@
           v-if="permissions.indexOf('create-broker-order') !== -1"
           v-b-modal.jse-new-order
           @click="add"
-        >Create New Order</b-button>
+          >Create New Order</b-button
+        >
       </div>
     </div>
   </div>
@@ -447,7 +465,7 @@ export default {
   props: ["orders", "client_accounts"],
   components: {
     headNav,
-    Multiselect
+    Multiselect,
   },
   mixins: [currenciesMixin],
   data() {
@@ -483,7 +501,7 @@ export default {
             var order = JSON.parse(value);
             var d = JSON.parse(order);
             return d["text"];
-          }
+          },
         },
         {
           key: "symbol",
@@ -495,7 +513,7 @@ export default {
 
             return s.text;
             // return symbol.text;
-          }
+          },
         },
         {
           key: "time_in_force",
@@ -511,7 +529,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "currency",
@@ -527,7 +545,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "side",
@@ -543,7 +561,7 @@ export default {
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
@@ -575,8 +593,8 @@ export default {
             } else {
               return value;
             }
-          }
-        }
+          },
+        },
         // { key: "foreign_broker", sortable: true }
       ],
       broker_client_orders: "",
@@ -587,37 +605,22 @@ export default {
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "1"
-        }
-        // {
-        //   text: "Automated execution order, public, Broker intervention OK",
-        //   value: "Automated execution order, public, Broker intervention OK",
-        //   fix_value: "2"
-        // },
-        // {
-        //   text: "Manual order, best execution",
-        //   value: "Manual order, best execution",
-        //   fix_value: "3"
-        // },
-        // {
-        //   text: "Automated execution order, private, no Broker intervention",
-        //   value: "Automated execution order, private, no Broker intervention",
-        //   fix_value: "4"
-        // }
+          fix_value: "1",
+        },
       ],
       jason_order: [],
       option_values: [
         {
           text: "TimeInForce",
           value: "TimeInForce",
-          type: "Date: when to expire"
+          type: "Date: when to expire",
         },
         {
           text: "Exection Destination",
           value: "Exection Destination",
-          type: "optional"
+          type: "optional",
         },
-        { text: "Exuction Instruction", value: "Exection Instruction" }
+        { text: "Exuction Instruction", value: "Exection Instruction" },
       ],
       option_types: [
         { text: "ClOrdID", value: "ClOrdID" },
@@ -631,19 +634,19 @@ export default {
         { text: "Side", value: "Side" },
         { text: "StopPx", value: "StopPx" },
         { text: "TimeInForce", value: "TimeInForce" },
-        { text: "TransactTime", value: "TransactTime" }
+        { text: "TransactTime", value: "TransactTime" },
       ],
       time_in_force: [
         { text: "Day", value: "Day", fix_value: "0" },
         {
           text: "Good Till Cancel (GTC)",
           value: "Good Till Cancel (GTC)",
-          fix_value: "1"
+          fix_value: "1",
         },
         {
           text: "Good Till Date (GTD)",
           value: "Good Till Date (GTD)",
-          fix_value: "6"
+          fix_value: "6",
         },
         // {
         //   text: "At the Opening (OPG)",
@@ -653,8 +656,8 @@ export default {
         {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
-          fix_value: "3"
-        }
+          fix_value: "3",
+        },
         // {
         //   text: "Fill or Kill (FOK)",
         //   value: "Fill or Kill (FOK)",
@@ -668,7 +671,7 @@ export default {
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
-        { text: "Sell", value: "Sell", fix_value: "2" }
+        { text: "Sell", value: "Sell", fix_value: "2" },
         // { text: "Buy minus", value: "Buy minus", fix_value: "3" },
         // { text: "Sell plus", value: "Sell plus", fix_value: "4" },
         // { text: "Sell short", value: "Sell short", fix_value: "5" },
@@ -681,7 +684,7 @@ export default {
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -721,13 +724,13 @@ export default {
         // { text: "Pegged", value: "Pegged", fix_value: "J" }
       ],
       symbols: [],
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_client_orders.length;
-    }
+    },
   },
   methods: {
     search(nameKey, myArray) {
@@ -794,7 +797,7 @@ export default {
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
-        footer: "<a href='orders' >Exit</a>"
+        footer: "<a href='orders' >Exit</a>",
       }); //.then(result => {
       if (result.value) {
         if (this.permissions.indexOf("update-broker-order") !== -1) {
@@ -827,7 +830,7 @@ export default {
       // console.log(this.files);
       const fr = new FileReader();
       const self = this;
-      fr.onload = e => {
+      fr.onload = (e) => {
         //const result = JSON.parse(e.target.result);
         self.order_template_data = e.target.result;
       };
@@ -846,7 +849,7 @@ export default {
     async saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
-        order_options: this.order_option_inputs
+        order_options: this.order_option_inputs,
       };
 
       delete order_data.order_standard["trading_account"];
@@ -859,26 +862,26 @@ export default {
           "Filename: Untitled.json, please insert a name for your file below.",
         input: "text",
         inputAttributes: {
-          autocapitalize: "off"
+          autocapitalize: "off",
         },
         confirmButtontext: "Create File",
         showLoaderOnConfirm: true,
-        preConfirm: request => {
+        preConfirm: (request) => {
           // once the user is complete giving the file a name, show them the order modal
 
           var Filename = request;
           var blob = new Blob(
             [
-              JSON.stringify(order_data)
+              JSON.stringify(order_data),
               //   JSON.stringify(this.order_option_inputs)
             ],
             {
-              type: "application/json"
+              type: "application/json",
             }
           );
           saveAs(blob, Filename + ".json");
         },
-        allowOutsideClick: () => !this.$swal.isLoading()
+        allowOutsideClick: () => !this.$swal.isLoading(),
       });
       if (result.value) {
         //Re Open Modal and allow user to continue their function
@@ -901,7 +904,7 @@ export default {
             " : " +
             data[i].account,
           value: data[i].id,
-          data: data[i]
+          data: data[i],
         });
       }
     },
@@ -1004,7 +1007,7 @@ export default {
         Strategy: 1000,
         StopPx: 230.0,
         ExDestination: "CNQ",
-        ClientID: "JMMB_TRADER1"
+        ClientID: "JMMB_TRADER1",
       };
 
       console.log(order_sample);
@@ -1097,13 +1100,13 @@ export default {
     handleSubmit() {},
     async getSymbols() {
       ({ data: this.symbols } = await axios.get("/apis/symbols.json"));
-    }
+    },
   },
   async mounted() {
     await Promise.all([
       this.getBrokers(),
       this.getSymbols(),
-      this.tradingAccounts()
+      this.tradingAccounts(),
     ]);
 
     var client_accounts_data = JSON.parse(this.client_accounts);
@@ -1122,7 +1125,7 @@ export default {
     this.broker_client_orders = JSON.parse(this.orders);
     console.log(this.broker_client_orders);
     // }
-  }
+  },
 };
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

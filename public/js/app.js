@@ -75644,12 +75644,30 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
   components: {
     headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
-    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default())
+    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default()),
   },
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   data() {
@@ -75685,7 +75703,7 @@ __webpack_require__.r(__webpack_exports__);
             var order = JSON.parse(value);
             var d = JSON.parse(order);
             return d["text"];
-          }
+          },
         },
         {
           key: "symbol",
@@ -75697,7 +75715,7 @@ __webpack_require__.r(__webpack_exports__);
 
             return s.text;
             // return symbol.text;
-          }
+          },
         },
         {
           key: "time_in_force",
@@ -75713,7 +75731,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "currency",
@@ -75729,7 +75747,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         {
           key: "side",
@@ -75745,7 +75763,7 @@ __webpack_require__.r(__webpack_exports__);
               return "N/A";
             }
             // return symbol.text;
-          }
+          },
         },
         { key: "order_quantity", sortable: true },
         { key: "price", sortable: true },
@@ -75777,8 +75795,8 @@ __webpack_require__.r(__webpack_exports__);
             } else {
               return value;
             }
-          }
-        }
+          },
+        },
         // { key: "foreign_broker", sortable: true }
       ],
       broker_client_orders: "",
@@ -75789,37 +75807,22 @@ __webpack_require__.r(__webpack_exports__);
         {
           text: "Automated execution order, private, no Broker intervention",
           value: "Automated execution order, private, no Broker intervention",
-          fix_value: "1"
-        }
-        // {
-        //   text: "Automated execution order, public, Broker intervention OK",
-        //   value: "Automated execution order, public, Broker intervention OK",
-        //   fix_value: "2"
-        // },
-        // {
-        //   text: "Manual order, best execution",
-        //   value: "Manual order, best execution",
-        //   fix_value: "3"
-        // },
-        // {
-        //   text: "Automated execution order, private, no Broker intervention",
-        //   value: "Automated execution order, private, no Broker intervention",
-        //   fix_value: "4"
-        // }
+          fix_value: "1",
+        },
       ],
       jason_order: [],
       option_values: [
         {
           text: "TimeInForce",
           value: "TimeInForce",
-          type: "Date: when to expire"
+          type: "Date: when to expire",
         },
         {
           text: "Exection Destination",
           value: "Exection Destination",
-          type: "optional"
+          type: "optional",
         },
-        { text: "Exuction Instruction", value: "Exection Instruction" }
+        { text: "Exuction Instruction", value: "Exection Instruction" },
       ],
       option_types: [
         { text: "ClOrdID", value: "ClOrdID" },
@@ -75833,19 +75836,19 @@ __webpack_require__.r(__webpack_exports__);
         { text: "Side", value: "Side" },
         { text: "StopPx", value: "StopPx" },
         { text: "TimeInForce", value: "TimeInForce" },
-        { text: "TransactTime", value: "TransactTime" }
+        { text: "TransactTime", value: "TransactTime" },
       ],
       time_in_force: [
         { text: "Day", value: "Day", fix_value: "0" },
         {
           text: "Good Till Cancel (GTC)",
           value: "Good Till Cancel (GTC)",
-          fix_value: "1"
+          fix_value: "1",
         },
         {
           text: "Good Till Date (GTD)",
           value: "Good Till Date (GTD)",
-          fix_value: "6"
+          fix_value: "6",
         },
         // {
         //   text: "At the Opening (OPG)",
@@ -75855,8 +75858,8 @@ __webpack_require__.r(__webpack_exports__);
         {
           text: "Immediate or Cancel (IOC)",
           value: "Immediate or Cancel (IOC)",
-          fix_value: "3"
-        }
+          fix_value: "3",
+        },
         // {
         //   text: "Fill or Kill (FOK)",
         //   value: "Fill or Kill (FOK)",
@@ -75870,7 +75873,7 @@ __webpack_require__.r(__webpack_exports__);
       ],
       side_options: [
         { text: "Buy", value: "Buy", fix_value: "1" },
-        { text: "Sell", value: "Sell", fix_value: "2" }
+        { text: "Sell", value: "Sell", fix_value: "2" },
         // { text: "Buy minus", value: "Buy minus", fix_value: "3" },
         // { text: "Sell plus", value: "Sell plus", fix_value: "4" },
         // { text: "Sell short", value: "Sell short", fix_value: "5" },
@@ -75883,7 +75886,7 @@ __webpack_require__.r(__webpack_exports__);
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" }
+        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -75923,13 +75926,13 @@ __webpack_require__.r(__webpack_exports__);
         // { text: "Pegged", value: "Pegged", fix_value: "J" }
       ],
       symbols: [],
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_client_orders.length;
-    }
+    },
   },
   methods: {
     search(nameKey, myArray) {
@@ -75996,7 +75999,7 @@ __webpack_require__.r(__webpack_exports__);
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
         cancelButtonText: "Cancel Order",
-        footer: "<a href='orders' >Exit</a>"
+        footer: "<a href='orders' >Exit</a>",
       }); //.then(result => {
       if (result.value) {
         if (this.permissions.indexOf("update-broker-order") !== -1) {
@@ -76029,7 +76032,7 @@ __webpack_require__.r(__webpack_exports__);
       // console.log(this.files);
       const fr = new FileReader();
       const self = this;
-      fr.onload = e => {
+      fr.onload = (e) => {
         //const result = JSON.parse(e.target.result);
         self.order_template_data = e.target.result;
       };
@@ -76048,7 +76051,7 @@ __webpack_require__.r(__webpack_exports__);
     async saveOrderToJSON() {
       let order_data = {
         order_standard: this.order,
-        order_options: this.order_option_inputs
+        order_options: this.order_option_inputs,
       };
 
       delete order_data.order_standard["trading_account"];
@@ -76061,26 +76064,26 @@ __webpack_require__.r(__webpack_exports__);
           "Filename: Untitled.json, please insert a name for your file below.",
         input: "text",
         inputAttributes: {
-          autocapitalize: "off"
+          autocapitalize: "off",
         },
         confirmButtontext: "Create File",
         showLoaderOnConfirm: true,
-        preConfirm: request => {
+        preConfirm: (request) => {
           // once the user is complete giving the file a name, show them the order modal
 
           var Filename = request;
           var blob = new Blob(
             [
-              JSON.stringify(order_data)
+              JSON.stringify(order_data),
               //   JSON.stringify(this.order_option_inputs)
             ],
             {
-              type: "application/json"
+              type: "application/json",
             }
           );
           file_saver__WEBPACK_IMPORTED_MODULE_0___default()(blob, Filename + ".json");
         },
-        allowOutsideClick: () => !this.$swal.isLoading()
+        allowOutsideClick: () => !this.$swal.isLoading(),
       });
       if (result.value) {
         //Re Open Modal and allow user to continue their function
@@ -76103,7 +76106,7 @@ __webpack_require__.r(__webpack_exports__);
             " : " +
             data[i].account,
           value: data[i].id,
-          data: data[i]
+          data: data[i],
         });
       }
     },
@@ -76206,7 +76209,7 @@ __webpack_require__.r(__webpack_exports__);
         Strategy: 1000,
         StopPx: 230.0,
         ExDestination: "CNQ",
-        ClientID: "JMMB_TRADER1"
+        ClientID: "JMMB_TRADER1",
       };
 
       console.log(order_sample);
@@ -76299,13 +76302,13 @@ __webpack_require__.r(__webpack_exports__);
     handleSubmit() {},
     async getSymbols() {
       ({ data: this.symbols } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json"));
-    }
+    },
   },
   async mounted() {
     await Promise.all([
       this.getBrokers(),
       this.getSymbols(),
-      this.tradingAccounts()
+      this.tradingAccounts(),
     ]);
 
     var client_accounts_data = JSON.parse(this.client_accounts);
@@ -76324,7 +76327,7 @@ __webpack_require__.r(__webpack_exports__);
     this.broker_client_orders = JSON.parse(this.orders);
     console.log(this.broker_client_orders);
     // }
-  }
+  },
 });
 
 
@@ -80737,7 +80740,7 @@ var render = function() {
         },
         [
           _vm.permissions.indexOf("read-broker-order") !== -1
-            ? _c("h1", [_vm._v("Current Orders")])
+            ? _c("h1", [_vm._v("\n      Current Orders\n    ")])
             : _vm._e(),
           _vm._v(" "),
           _c(
@@ -80766,7 +80769,7 @@ var render = function() {
               _vm.permissions.indexOf("read-broker-order") == -1
                 ? _c("p", { staticClass: "lead" }, [
                     _vm._v(
-                      "You currently do not have permisions to view orders within the system. Please speak with your Broker Admin to have the Permissions activated on your account"
+                      "\n        You currently do not have permisions to view orders within the system.\n        Please speak with your Broker Admin to have the Permissions activated\n        on your account\n      "
                     )
                   ])
                 : _vm._e(),
@@ -80833,7 +80836,7 @@ var render = function() {
                                                   { attrs: { value: null } },
                                                   [
                                                     _vm._v(
-                                                      "-- Please select a Trading Account--"
+                                                      "-- Please select a Trading\n                        Account--"
                                                     )
                                                   ]
                                                 )
@@ -80893,7 +80896,7 @@ var render = function() {
                                                     { attrs: { value: null } },
                                                     [
                                                       _vm._v(
-                                                        "-- Please select a Client Account--"
+                                                        "-- Please select a Client\n                        Account--"
                                                       )
                                                     ]
                                                   )
@@ -80931,7 +80934,7 @@ var render = function() {
                                                   _vm._v(
                                                     "JCSD-" +
                                                       _vm._s(b.jcsd) +
-                                                      " : " +
+                                                      " :\n                      " +
                                                       _vm._s(b.name) +
                                                       ' "Investor"'
                                                   )
