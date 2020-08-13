@@ -146,7 +146,7 @@ class FunctionSet
         $broker_order_execution_report->messageDate = $data['messageDate'] ?? $timeNdate;
         $broker_order_execution_report->save();
 
-        return $broker_order_execution_report;
+        // return $broker_order_execution_report;
         return response()->json(['isvalid' => true, 'errors' => 'A Cancellation Request for this order has been submitted']);
     }
 
