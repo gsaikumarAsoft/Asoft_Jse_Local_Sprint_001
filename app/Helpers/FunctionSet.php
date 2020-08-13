@@ -81,7 +81,7 @@ class FunctionSet
 
         // // //Settlement Account Information
         // $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
-
+        $cancel_order_no = $this->generateOrderNumber(15);
         $url = $this->fix_wrapper_url("api/OrderManagement/OrderCancelRequest");
         $data = array(
             'BeginString' => 'FIX.4.2',
@@ -89,7 +89,7 @@ class FunctionSet
             'SenderCompID' => $trading->sender_comp_id,
             'SenderSubID' => $trading->trading_account_number,
             'Host' => $trading->socket,
-            'OrderID' => $order->clordid,
+            'OrderID' => $cancel_order_no,
             "OriginalOrderID" => $order->clordid,
             "OrigClOrdID" => $order->clordid,
             "OrderQty" => $order->quantity,
@@ -117,12 +117,14 @@ class FunctionSet
 
         curl_close($ch);
 
+
         $data['text'] = 'Order Cancel Request Submitted';
         $data['status'] = 'Cancel Submitted';
 
+
         // Log this cancellation request to the execution reports
         $broker_order_execution_report = new BrokerOrderExecutionReport();
-        $broker_order_execution_report->clOrdID = $data['clOrdID'] ?? $data['OrderID'];
+        $broker_order_execution_report->clOrdID = $data['clOrdID'] ?? $data['OrigClOrdID'];
         $broker_order_execution_report->orderID = $data['orderID'] ?? '000000-000000-0';
         $broker_order_execution_report->text = $data['text'];
         $broker_order_execution_report->ordRejRes = $data['ordRejRes'] ?? null;
@@ -143,6 +145,8 @@ class FunctionSet
         $broker_order_execution_report->sendingTime = $data['sendingTime'] ?? $timeNdate;
         $broker_order_execution_report->messageDate = $data['messageDate'] ?? $timeNdate;
         $broker_order_execution_report->save();
+
+        return $broker_order_execution_report;
         return response()->json(['isvalid' => true, 'errors' => 'A Cancellation Request for this order has been submitted']);
     }
 
@@ -163,11 +167,10 @@ class FunctionSet
         $client = BrokerClient::find($client_id);
 
         //validation
-        if (is_null($request->side)) {
-            return response()->json(['isvalid' => false, 'errors' => 'The Order SIDE is required']);
+        /*  if (is_null($request->stop_price)) {
+            return response()->json(['isvalid' => false, 'errors' => 'The Stop Price is required']);
         }
 
-        /*
         if (is_nuill($request->quantity)) {
             return response()->json(['isvalid' => false, 'errors' => 'The Quantity is required']);
         }
@@ -881,6 +884,17 @@ class FunctionSet
     public function generateRandomString($length = 10)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+    public function generateOrderNumber($length = 10)
+    {
+        $characters = '0123456789';
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
