@@ -40,5 +40,6 @@ class getOrderStatuses extends Command
     {
         //Run the logExecution Function and update statuses
         BrokerClientOrder::truncate();
+        return "Wiped";
     }
 }
