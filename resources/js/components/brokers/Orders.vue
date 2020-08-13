@@ -1219,7 +1219,7 @@ export default {
     console.log("this.broker_client_orders", this.broker_client_orders);
 
     this.broker_client_orders.sort(function(a, b) {
-      return b.client_order_number > a.client_order_number ? -1 : 1;
+      return b.client_order_number > a.client_order_number ? 0 : 1;
     });
     this.client_trading_account_options = client_accounts;
 
