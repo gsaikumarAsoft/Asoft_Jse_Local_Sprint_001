@@ -150,17 +150,6 @@ export default {
             return moment(String(value));
           },
         },
-        // { key: "settlement_amount_allocated" }
-        // {
-        //   key: "order_type.text",
-        //   label: "Order Type",
-        //   sortable: true,
-        //   formatter: (value, key, item) => {
-        //     var type = JSON.parse(item.order_type);
-        //     var order = JSON.parse(type);
-        //     return order.text;
-        //   }
-        // },
       ],
       broker_client_orders: [],
       broker: {},
@@ -172,7 +161,7 @@ export default {
   computed: {
     report_data() {
       const data = JSON.parse(this.execution_reports);
-      console.log("this.execution_reports", data);
+      this.execution_reports = data;
       return data;
     },
     rows() {
@@ -185,26 +174,17 @@ export default {
         //for (var i = 0; i < this.report_data.length; i++) {
         //tableData.push([
         [
-          // r.clOrdID,
           r.orderID,
-          // r.text,
-          // r.ordRejRes,
-          // r.status,
           r.buyorSell,
           r.securitySubType,
-          // r.time,
           r.ordType,
           r.orderQty,
           r.timeInForce,
           r.symbol,
-          // r.qTradeacc,
           r.price,
           r.stopPx,
-          // r.execType,
           r.senderSub,
           r.seqNum,
-          // r.sendingTime,
-          // r.messageDate
         ]
       );
 
