@@ -152,6 +152,7 @@ class FunctionSet
 
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
     {
+
         // Find Local Broker For This Order & Define the SenderSub Id
         $local_broker = $this->LocalBrokerPick($local_broker_id);
         $sender_sub_id = $local_broker->name;
@@ -241,12 +242,11 @@ class FunctionSet
             $data['expireDate'] = $request->expiration_date;
         }
         if ($request->has('stop_price')) {
-            $data['stopPx'] = $request->stop_price;
+            $data['stopPx'] = (int)$request->stop_price;
         }
         if ($request->has('quantity')) {
             $data['OrderQty'] = $request->quantity;
         }
-
         if ($request->has('time_in_force')) {
             $data['TimeInForce'] = $this->jsonStrip(json_decode($request->time_in_force, true), 'fix_value');
         }
@@ -278,6 +278,7 @@ class FunctionSet
         $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
         // ================================================================================================
 
+        // return $result;
         $fix_status = json_decode($result, true);
 
         switch ($fix_status['result']) {
@@ -318,6 +319,7 @@ class FunctionSet
     {
 
         // return $request;
+
         $execution_report = $request["executionReports"];
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
@@ -357,7 +359,7 @@ class FunctionSet
                     $broker_order_execution_report->save();
 
                     // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
-                    $this->clientSettlementBalanceUpdate($report);
+                    return $this->clientSettlementBalanceUpdate($report);
                 }
             }
         }
@@ -480,7 +482,7 @@ class FunctionSet
         $account = $request['executionReports'];
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        $this->logExecution($request);
+        return $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
