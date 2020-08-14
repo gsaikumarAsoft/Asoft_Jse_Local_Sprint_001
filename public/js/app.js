@@ -75653,6 +75653,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -76147,16 +76149,16 @@ __webpack_require__.r(__webpack_exports__);
     async createBrokerClientOrder(broker) {
       //Notes:
 
-      // this.$swal
-      //   .fire({
-      //     title: "Creating Client Order",
-      //     html: "One moment while we setup the current order",
-      //     timerProgressBar: true,
-      //     onBeforeOpen: () => {
-      //       this.$swal.showLoading();
-      //     },
-      //   })
-      //   .then((result) => {});
+      this.$swal
+        .fire({
+          title: "Creating Client Order",
+          html: "One moment while we setup the current order",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          },
+        })
+        .then((result) => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
@@ -80754,56 +80756,66 @@ var render = function() {
             { staticClass: "content" },
             [
               _c(
-                "div",
-                { staticClass: "float-right" },
+                "b-card",
+                { attrs: { title: "Current Orders" } },
                 [
-                  _c("b-input", {
-                    staticClass: "mb-2 mr-sm-2 mb-sm-0",
-                    attrs: {
-                      id: "search_content",
-                      type: "text",
-                      placeholder: "Filter Orders..."
+                  _c(
+                    "div",
+                    {
+                      staticClass: "float-right",
+                      staticStyle: { "padding-bottom": "10px" }
                     },
-                    model: {
-                      value: _vm.filter,
-                      callback: function($$v) {
-                        _vm.filter = $$v
-                      },
-                      expression: "filter"
-                    }
-                  })
+                    [
+                      _c("b-input", {
+                        staticClass: "mb-2 mr-sm-2 mb-sm-0",
+                        attrs: {
+                          id: "search_content",
+                          type: "text",
+                          placeholder: "Filter Orders..."
+                        },
+                        model: {
+                          value: _vm.filter,
+                          callback: function($$v) {
+                            _vm.filter = $$v
+                          },
+                          expression: "filter"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _vm.permissions.indexOf("read-broker-order") !== -1
+                    ? _c("b-table", {
+                        ref: "selectedOrder",
+                        attrs: {
+                          responsive: "",
+                          "empty-text":
+                            "No Orders have been Created. Create an Order below.",
+                          id: "orders-table",
+                          items: _vm.broker_client_orders,
+                          "per-page": _vm.perPage,
+                          "current-page": _vm.currentPage,
+                          filterIncludedFields: _vm.filterOn,
+                          striped: "",
+                          hover: "",
+                          fields: _vm.fields,
+                          filter: _vm.filter
+                        },
+                        on: { "row-clicked": _vm.brokerOrderHandler }
+                      })
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.permissions.indexOf("read-broker-order") == -1
+                    ? _c("p", { staticClass: "lead" }, [
+                        _vm._v(
+                          "\n          You currently do not have permisions to view orders within the\n          system. Please speak with your Broker Admin to have the Permissions\n          activated on your account\n        "
+                        )
+                      ])
+                    : _vm._e()
                 ],
                 1
               ),
-              _vm._v(" "),
-              _vm.permissions.indexOf("read-broker-order") !== -1
-                ? _c("b-table", {
-                    ref: "selectedOrder",
-                    attrs: {
-                      responsive: "",
-                      "empty-text":
-                        "No Orders have been Created. Create an Order below.",
-                      id: "orders-table",
-                      items: _vm.broker_client_orders,
-                      "per-page": _vm.perPage,
-                      "current-page": _vm.currentPage,
-                      filterIncludedFields: _vm.filterOn,
-                      striped: "",
-                      hover: "",
-                      fields: _vm.fields,
-                      filter: _vm.filter
-                    },
-                    on: { "row-clicked": _vm.brokerOrderHandler }
-                  })
-                : _vm._e(),
-              _vm._v(" "),
-              _vm.permissions.indexOf("read-broker-order") == -1
-                ? _c("p", { staticClass: "lead" }, [
-                    _vm._v(
-                      "\n        You currently do not have permisions to view orders within the system.\n        Please speak with your Broker Admin to have the Permissions activated\n        on your account\n      "
-                    )
-                  ])
-                : _vm._e(),
               _vm._v(" "),
               !_vm.create ? _c("div") : _vm._e(),
               _vm._v(" "),

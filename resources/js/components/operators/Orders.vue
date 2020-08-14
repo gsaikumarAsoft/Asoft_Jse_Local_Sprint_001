@@ -6,36 +6,38 @@
         Current Orders
       </h1>
       <div class="content">
-        <div class="float-right">
-          <b-input
-            id="search_content"
-            v-model="filter"
-            type="text"
-            placeholder="Filter Orders..."
-            class="mb-2 mr-sm-2 mb-sm-0"
-          ></b-input>
-        </div>
-        <b-table
-          responsive
-          v-if="permissions.indexOf('read-broker-order') !== -1"
-          ref="selectedOrder"
-          :empty-text="'No Orders have been Created. Create an Order below.'"
-          id="orders-table"
-          :items="broker_client_orders"
-          :per-page="perPage"
-          :current-page="currentPage"
-          :filterIncludedFields="filterOn"
-          striped
-          hover
-          :fields="fields"
-          :filter="filter"
-          @row-clicked="brokerOrderHandler"
-        ></b-table>
-        <p v-if="permissions.indexOf('read-broker-order') == -1" class="lead">
-          You currently do not have permisions to view orders within the system.
-          Please speak with your Broker Admin to have the Permissions activated
-          on your account
-        </p>
+        <b-card title="Current Orders">
+          <div class="float-right" style="padding-bottom:10px;">
+            <b-input
+              id="search_content"
+              v-model="filter"
+              type="text"
+              placeholder="Filter Orders..."
+              class="mb-2 mr-sm-2 mb-sm-0"
+            ></b-input>
+          </div>
+          <b-table
+            responsive
+            v-if="permissions.indexOf('read-broker-order') !== -1"
+            ref="selectedOrder"
+            :empty-text="'No Orders have been Created. Create an Order below.'"
+            id="orders-table"
+            :items="broker_client_orders"
+            :per-page="perPage"
+            :current-page="currentPage"
+            :filterIncludedFields="filterOn"
+            striped
+            hover
+            :fields="fields"
+            :filter="filter"
+            @row-clicked="brokerOrderHandler"
+          ></b-table>
+          <p v-if="permissions.indexOf('read-broker-order') == -1" class="lead">
+            You currently do not have permisions to view orders within the
+            system. Please speak with your Broker Admin to have the Permissions
+            activated on your account
+          </p>
+        </b-card>
         <!-- <pre>{{broker_client_orders}}</pre> -->
         <div v-if="!create"></div>
         <b-modal
@@ -965,16 +967,16 @@ export default {
     async createBrokerClientOrder(broker) {
       //Notes:
 
-      // this.$swal
-      //   .fire({
-      //     title: "Creating Client Order",
-      //     html: "One moment while we setup the current order",
-      //     timerProgressBar: true,
-      //     onBeforeOpen: () => {
-      //       this.$swal.showLoading();
-      //     },
-      //   })
-      //   .then((result) => {});
+      this.$swal
+        .fire({
+          title: "Creating Client Order",
+          html: "One moment while we setup the current order",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          },
+        })
+        .then((result) => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the order.
