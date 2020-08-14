@@ -325,13 +325,21 @@ class FunctionSet
         if ($execution_report) {
 
             foreach ($execution_report as $report) {
+                // return $report;
+                $market_order_number = $report['orderID'];
+                // return $market_order_number;
+
+
                 $clients[] = $report;
 
                 $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
+
                 if ($record->exists()) {
                     //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
-
+                    // DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $market_order_number]);
                 } else {
+                    //Add Market Order Number To Order Being Placed
+                    DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $market_order_number]);
                     // IF IT IS A NEW RECORD INSERT IT AND UPDATE THE BALANCES
                     $broker_order_execution_report = new BrokerOrderExecutionReport();
                     $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
@@ -549,6 +557,7 @@ class FunctionSet
                     ) {
                         // UPDATE ORDER STATUS ONLY
                         BrokerClientOrder::updateOrCreate(
+
                             ['id' => $current_order->id],
                             ['order_status' => $status]
 
