@@ -75914,6 +75914,21 @@ __webpack_require__.r(__webpack_exports__);
       return this.broker_client_orders.length;
     },
   },
+  watch: {
+    "order.time_in_force": function(d) {
+      // if (d.fix_value) {
+      // console.log("d", d);
+      var fix_value = d.fix_value;
+      this.expiration = false;
+      if (fix_value === "6") {
+        // console.log(TIF.fix_valu:disabled="validated == 1"e);
+        // Show the Expiration date input for this order
+        this.expiration = true;
+      }
+      console.log(this.expiration);
+      // }
+    },
+  },
   methods: {
     search(nameKey, myArray) {
       for (var i = 0; i < myArray.length; i++) {
