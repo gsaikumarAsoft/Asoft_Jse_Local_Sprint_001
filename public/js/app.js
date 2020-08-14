@@ -75655,6 +75655,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -81673,6 +81674,7 @@ var render = function() {
               _vm._v(" "),
               _vm.permissions.indexOf("read-broker-order") !== -1
                 ? _c("b-pagination", {
+                    staticStyle: { "padding-top": "15px" },
                     attrs: {
                       "total-rows": _vm.rows,
                       "per-page": _vm.perPage,

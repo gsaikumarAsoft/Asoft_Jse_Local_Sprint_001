@@ -456,6 +456,7 @@
           :total-rows="rows"
           :per-page="perPage"
           aria-controls="orders-table"
+          style="padding-top:15px;"
         ></b-pagination>
         <b-button
           v-if="permissions.indexOf('create-broker-order') !== -1"
