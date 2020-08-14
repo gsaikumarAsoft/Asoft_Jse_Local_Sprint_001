@@ -325,10 +325,6 @@ class FunctionSet
         if ($execution_report) {
 
             foreach ($execution_report as $report) {
-                // return $report;
-                $market_order_number = $report['orderID'];
-                // return $market_order_number;
-
 
                 $clients[] = $report;
 
