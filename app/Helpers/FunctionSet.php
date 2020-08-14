@@ -339,7 +339,7 @@ class FunctionSet
                     // DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $market_order_number]);
                 } else {
                     //Add Market Order Number To Order Being Placed
-                    DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $market_order_number]);
+                    // DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $market_order_number]);
                     // IF IT IS A NEW RECORD INSERT IT AND UPDATE THE BALANCES
                     $broker_order_execution_report = new BrokerOrderExecutionReport();
                     $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
