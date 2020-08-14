@@ -357,7 +357,7 @@ class FunctionSet
                     $broker_order_execution_report->save();
 
                     // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
-                    return $this->clientSettlementBalanceUpdate($report);
+                    $this->clientSettlementBalanceUpdate($report);
                 }
             }
         }
@@ -480,7 +480,7 @@ class FunctionSet
         $account = $request['executionReports'];
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        return $this->logExecution($request);
+        $this->logExecution($request);
     }
 
     public function clientSettlementBalanceUpdate($data)
