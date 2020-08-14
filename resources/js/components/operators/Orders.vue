@@ -6,6 +6,15 @@
         Current Orders
       </h1>
       <div class="content">
+        <div class="float-right">
+          <b-input
+            id="search_content"
+            v-model="filter"
+            type="text"
+            placeholder="Filter Orders..."
+            class="mb-2 mr-sm-2 mb-sm-0"
+          ></b-input>
+        </div>
         <b-table
           responsive
           v-if="permissions.indexOf('read-broker-order') !== -1"
@@ -15,9 +24,11 @@
           :items="broker_client_orders"
           :per-page="perPage"
           :current-page="currentPage"
+          :filterIncludedFields="filterOn"
           striped
           hover
           :fields="fields"
+          :filter="filter"
           @row-clicked="brokerOrderHandler"
         ></b-table>
         <p v-if="permissions.indexOf('read-broker-order') == -1" class="lead">
@@ -470,6 +481,8 @@ export default {
   mixins: [currenciesMixin],
   data() {
     return {
+      filter: null,
+      filterOn: ["clordid", "side", "jcsd", "client_name"],
       expiration: false,
       disabled: 0,
       modalTitle: "New Order",
@@ -739,8 +752,6 @@ export default {
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
-        // console.log(TIF.fix_valu:disabled="validated == 1"e);
-        // Show the Expiration date input for this order
         this.expiration = true;
       }
       console.log(this.expiration);

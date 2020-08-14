@@ -223,7 +223,7 @@ class BrokerController extends Controller
         }
 
 
-        $this->HelperClass->executionBalanceUpdate($clients);
+        return $this->HelperClass->executionBalanceUpdate($clients);
     }
     public function orders()
     {

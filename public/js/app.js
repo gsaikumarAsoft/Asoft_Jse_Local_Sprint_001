@@ -75642,6 +75642,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -75652,6 +75663,8 @@ __webpack_require__.r(__webpack_exports__);
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   data() {
     return {
+      filter: null,
+      filterOn: ["clordid", "side", "jcsd", "client_name"],
       expiration: false,
       disabled: 0,
       modalTitle: "New Order",
@@ -75921,8 +75934,6 @@ __webpack_require__.r(__webpack_exports__);
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
-        // console.log(TIF.fix_valu:disabled="validated == 1"e);
-        // Show the Expiration date input for this order
         this.expiration = true;
       }
       console.log(this.expiration);
@@ -80742,6 +80753,29 @@ var render = function() {
             "div",
             { staticClass: "content" },
             [
+              _c(
+                "div",
+                { staticClass: "float-right" },
+                [
+                  _c("b-input", {
+                    staticClass: "mb-2 mr-sm-2 mb-sm-0",
+                    attrs: {
+                      id: "search_content",
+                      type: "text",
+                      placeholder: "Filter Orders..."
+                    },
+                    model: {
+                      value: _vm.filter,
+                      callback: function($$v) {
+                        _vm.filter = $$v
+                      },
+                      expression: "filter"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
               _vm.permissions.indexOf("read-broker-order") !== -1
                 ? _c("b-table", {
                     ref: "selectedOrder",
@@ -80753,9 +80787,11 @@ var render = function() {
                       items: _vm.broker_client_orders,
                       "per-page": _vm.perPage,
                       "current-page": _vm.currentPage,
+                      filterIncludedFields: _vm.filterOn,
                       striped: "",
                       hover: "",
-                      fields: _vm.fields
+                      fields: _vm.fields,
+                      filter: _vm.filter
                     },
                     on: { "row-clicked": _vm.brokerOrderHandler }
                   })
