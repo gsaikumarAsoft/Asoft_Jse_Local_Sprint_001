@@ -80748,75 +80748,73 @@ var render = function() {
           staticStyle: { "margin-top": "100px" }
         },
         [
-          _vm.permissions.indexOf("read-broker-order") !== -1
-            ? _c("h1", [_vm._v("\n      Current Orders\n    ")])
-            : _vm._e(),
-          _vm._v(" "),
           _c(
             "div",
             { staticClass: "content" },
             [
-              _c(
-                "b-card",
-                { attrs: { title: "Current Orders" } },
-                [
-                  _c(
-                    "div",
-                    {
-                      staticClass: "float-right",
-                      staticStyle: { "padding-bottom": "10px" }
-                    },
+              _vm.permissions.indexOf("read-broker-order") !== -1
+                ? _c(
+                    "b-card",
+                    { attrs: { title: "Current Orders" } },
                     [
-                      _c("b-input", {
-                        staticClass: "mb-2 mr-sm-2 mb-sm-0",
-                        attrs: {
-                          id: "search_content",
-                          type: "text",
-                          placeholder: "Filter Orders..."
+                      _c(
+                        "div",
+                        {
+                          staticClass: "float-right",
+                          staticStyle: { "padding-bottom": "10px" }
                         },
-                        model: {
-                          value: _vm.filter,
-                          callback: function($$v) {
-                            _vm.filter = $$v
-                          },
-                          expression: "filter"
-                        }
-                      })
+                        [
+                          _c("b-input", {
+                            staticClass: "mb-2 mr-sm-2 mb-sm-0",
+                            attrs: {
+                              id: "search_content",
+                              type: "text",
+                              placeholder: "Filter Orders..."
+                            },
+                            model: {
+                              value: _vm.filter,
+                              callback: function($$v) {
+                                _vm.filter = $$v
+                              },
+                              expression: "filter"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _vm.permissions.indexOf("read-broker-order") !== -1
+                        ? _c("b-table", {
+                            ref: "selectedOrder",
+                            attrs: {
+                              responsive: "",
+                              "empty-text":
+                                "No Orders have been Created. Create an Order below.",
+                              id: "orders-table",
+                              items: _vm.broker_client_orders,
+                              "per-page": _vm.perPage,
+                              "current-page": _vm.currentPage,
+                              filterIncludedFields: _vm.filterOn,
+                              striped: "",
+                              hover: "",
+                              fields: _vm.fields,
+                              filter: _vm.filter
+                            },
+                            on: { "row-clicked": _vm.brokerOrderHandler }
+                          })
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.permissions.indexOf("read-broker-order") == -1
+                        ? _c("p", { staticClass: "lead" }, [
+                            _vm._v(
+                              "\n          You currently do not have permisions to view orders within the\n          system. Please speak with your Broker Admin to have the Permissions\n          activated on your account\n        "
+                            )
+                          ])
+                        : _vm._e()
                     ],
                     1
-                  ),
-                  _vm._v(" "),
-                  _vm.permissions.indexOf("read-broker-order") !== -1
-                    ? _c("b-table", {
-                        ref: "selectedOrder",
-                        attrs: {
-                          responsive: "",
-                          "empty-text":
-                            "No Orders have been Created. Create an Order below.",
-                          id: "orders-table",
-                          items: _vm.broker_client_orders,
-                          "per-page": _vm.perPage,
-                          "current-page": _vm.currentPage,
-                          filterIncludedFields: _vm.filterOn,
-                          striped: "",
-                          hover: "",
-                          fields: _vm.fields,
-                          filter: _vm.filter
-                        },
-                        on: { "row-clicked": _vm.brokerOrderHandler }
-                      })
-                    : _vm._e(),
-                  _vm._v(" "),
-                  _vm.permissions.indexOf("read-broker-order") == -1
-                    ? _c("p", { staticClass: "lead" }, [
-                        _vm._v(
-                          "\n          You currently do not have permisions to view orders within the\n          system. Please speak with your Broker Admin to have the Permissions\n          activated on your account\n        "
-                        )
-                      ])
-                    : _vm._e()
-                ],
-                1
-              ),
+                  )
+                : _vm._e(),
               _vm._v(" "),
               !_vm.create ? _c("div") : _vm._e(),
               _vm._v(" "),

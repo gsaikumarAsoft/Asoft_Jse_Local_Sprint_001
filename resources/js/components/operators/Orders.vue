@@ -2,11 +2,11 @@
   <div>
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top:100px;">
-      <h1 v-if="permissions.indexOf('read-broker-order') !== -1">
-        Current Orders
-      </h1>
       <div class="content">
-        <b-card title="Current Orders">
+        <b-card
+          title="Current Orders"
+          v-if="permissions.indexOf('read-broker-order') !== -1"
+        >
           <div class="float-right" style="padding-bottom:10px;">
             <b-input
               id="search_content"
