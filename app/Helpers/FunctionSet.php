@@ -241,7 +241,7 @@ class FunctionSet
             $data['expireDate'] = $request->expiration_date;
         }
         if ($request->has('stop_price')) {
-            $data['stopPx'] = (int) $request->stop_price;
+            $data['stopPx'] = $request->stop_price;
         }
         if ($request->has('quantity')) {
             $data['OrderQty'] = $request->quantity;
@@ -394,7 +394,7 @@ class FunctionSet
         //             $broker_order_execution_report->buyorSell = $this->jsonStrip(json_decode($order->side, true), 'fix_value');
         //             $broker_order_execution_report->securitySubType = 0;
         //             $broker_order_execution_report->time = null;
-        //             $broker_order_execution_report->ordType = 99;
+        //             $broker_order_execution_report->ordType = 99;»
         //             $broker_order_execution_report->orderQty = 0;
         //             $broker_order_execution_report->timeInForce = 0;
         //             $broker_order_execution_report->symbol = null;
