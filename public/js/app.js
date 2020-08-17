@@ -73733,7 +73733,7 @@ __webpack_require__.r(__webpack_exports__);
 
         this.$swal.fire({
           title: "Creating Client Order",
-          html: "Please wait while we validate you order..",
+          html: "Please wait while we validate your order..",
           timerProgressBar: true,
           showCancelButton: false,
           onBeforeOpen: () => {
