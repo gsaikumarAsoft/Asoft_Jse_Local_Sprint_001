@@ -152,8 +152,6 @@ class FunctionSet
 
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
     {
-
-        // return $request;
         // Find Local Broker For This Order & Define the SenderSub Id
         $local_broker = $this->LocalBrokerPick($local_broker_id);
         $sender_sub_id = $local_broker->name;
@@ -170,7 +168,7 @@ class FunctionSet
 
         // return $request->symbol;
         //validation
-        if (is_null($request->symbol)) {
+        if (!$request->has('symbol')) {
             return response()->json(['isvalid' => false, 'errors' => 'Sybmol is required']);
         }
         /*
@@ -278,6 +276,7 @@ class FunctionSet
         $result = curl_exec($ch);
         curl_close($ch);
 
+        return $result;
         // ================================================================================================
         $data['text'] = 'Order Submitted Successfully';
         $data['status'] = 'Submitted';
