@@ -73751,7 +73751,7 @@ __webpack_require__.r(__webpack_exports__);
         console.log("post data", data);
         if (valid) {
           this.notify("Order Created", data.errors, "success", true);
-          this.order = {};
+          // this.order = {};
           this.newOrderNumber();
         } else {
           this.notify("Order Failed", data.errors, "warning", false);
