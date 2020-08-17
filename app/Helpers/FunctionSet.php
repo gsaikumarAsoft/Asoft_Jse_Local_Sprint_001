@@ -294,17 +294,14 @@ class FunctionSet
                     ->update(['order_status' => $this->OrderStatus->Failed()]);
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
-
                 break;
             case "Please Check the endpoint /MessageDownload/Download for message queue":
                 // If the order is successfull create a log
                 $this->LogActivity->addToLog('Order Successfull: Please Check the endpoint /MessageDownload/Download for message queue' . '-' . $request->client_order_number);
                 $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
-                // return response()->json(['isvalid' => true, 'errors' => 'SENT NewOrderSingle() request to the RESTful API!']);
                 return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
                 break;
             default:
-
                 // If the response fails create a record in the audit log and in the execution reports as well
                 $data['text'] = "Order Submission Failed: " . $fix_status['result'];
                 $data['status'] = $this->OrderStatus->Failed();
@@ -320,9 +317,6 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-
-        // return $request;
-
         $execution_report = $request["executionReports"];
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";

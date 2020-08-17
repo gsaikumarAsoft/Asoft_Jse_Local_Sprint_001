@@ -123,8 +123,6 @@ class BrokerController extends Controller
 
     public function users()
     {
-
-
         $broker_users = $data = BrokerUser::with('role')->get();
         return view('brokers.user')->with('broker_users', $broker_users);
     }
@@ -141,9 +139,7 @@ class BrokerController extends Controller
         $u = auth()->user();
         // return $u;
         $broker_traders = LocalBroker::where('user_id', $u['id'])->with('clients')->get();
-        // return $broker_traders;
         return view('brokers.client')->with('broker_traders', $broker_traders);
-        // return view('brokers.client');
     }
     public function settlements()
     {
@@ -161,15 +157,9 @@ class BrokerController extends Controller
         $a = LocalBroker::with('user', 'clients')->get();
         // $a = DB::table('broker_clients')->where()
         return $a;
-        // $broker_trader_accounts = BrokerTradingAccount::all();
-        // return $broker_trader_accounts;
-        // $list = BrokerClient::with('local_broker')->get();
-        // return $list;
     }
     public function execution()
     {
-        // $execution_reports = BrokerOrderExecutionReport::all();
-        // return $this->HelperClass->executionBalanceUpdate("BARITA"); //Download Execution Reports
         $execution_reports = DB::table('broker_client_order_execution_reports')
             ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
             ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.clordid')
@@ -177,10 +167,8 @@ class BrokerController extends Controller
             ->join('broker_trading_accounts', 'local_brokers.id', 'broker_trading_accounts.local_broker_id')
             ->join('users', 'broker_client_order_execution_reports.senderSubID', 'users.name')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            ->distinct()
             ->get();
-
-
-        // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 

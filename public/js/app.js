@@ -73315,7 +73315,7 @@ __webpack_require__.r(__webpack_exports__);
             if (value) {
               return "Iceberg Order";
             } else {
-              return "New Order Single";
+              return "Full Order";
             }
           },
         },
@@ -73704,15 +73704,11 @@ __webpack_require__.r(__webpack_exports__);
       }));
     },
     async createBrokerClientOrder() {
-      //Notes:
-      console.log("order", this.order);
-
       // .then(result => {});
 
       // •	The “Price” indicates the highest price to be used to buy the stocks.
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the this.order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
-
       try {
         const { value: side_type } = JSON.parse(this.order.side);
         console.log("side_type", side_type);
@@ -73744,11 +73740,8 @@ __webpack_require__.r(__webpack_exports__);
           "store-broker-client-order",
           this.order
         );
-        //  .then(response => {
-        // let data = response.data;
-        console.log("data", data);
         let valid = data.isvalid;
-        console.log("post data", data);
+        console.log(this.order);
         if (valid) {
           this.notify("Order Created", data.errors, "success", true);
           // this.order = {};
