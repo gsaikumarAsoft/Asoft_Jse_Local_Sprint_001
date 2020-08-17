@@ -1072,7 +1072,7 @@ export default {
 
         this.$swal.fire({
           title: "Creating Client Order",
-          html: "One moment while we setup the current order",
+          html: "Please wait while we validate you order..",
           timerProgressBar: true,
           showCancelButton: false,
           onBeforeOpen: () => {
