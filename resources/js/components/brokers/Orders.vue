@@ -29,18 +29,9 @@
             :filter="filter"
             @row-clicked="brokerOrderHandler"
           >
-            <template v-slot:cell(max_floor)="data">
-              <!-- `data.value` is the value after formatted by the Formatter -->
-              {{ data.item.max_floor }}
-              <!-- <p
-                :v-show="
-                  (data.item['display_range'] > 0) &
-                    (data.item['max_floor'] > 0)
-                "
-              >
-                Iceberg Order
-              </p> -->
-            </template>
+            <!-- <template :v-if="data.item.max_floor" v-slot:cell(max_floor)="data">
+              <p>Iceberg Order</p>
+            </template>-->
           </b-table>
           <b-pagination
             v-model="currentPage"
@@ -69,7 +60,8 @@
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
-                          -- Please select a Trading Account--
+                          -- Please select a Trading
+                          Account--
                         </b-form-select-option>
                       </template>
                       <!-- <b-form-select-option
@@ -94,7 +86,8 @@
                     >
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
-                          -- Please select a Client Account--
+                          -- Please select a Client
+                          Account--
                         </b-form-select-option>
                       </template>
                       <b-form-select-option
@@ -102,7 +95,8 @@
                         :value="b.id"
                         :key="b.id"
                       >
-                        JCSD-{{ b.jcsd }} : {{ b.name }} "Investor"
+                        JCSD-{{ b.jcsd }} :
+                        {{ b.name }} "Investor"
                       </b-form-select-option>
                     </b-form-select>
                   </b-form-group>
@@ -501,12 +495,8 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col cols="12" class="text-center">
-                  <b-button type="submit" variant="primary" v-show="isNew"
-                    >Create Order</b-button
-                  >
-                  <b-button variant="danger" @click="reloadPage()"
-                    >Exit</b-button
-                  >
+                  <b-button type="submit" variant="primary" v-show="isNew">Create Order</b-button>
+                  <b-button variant="danger" @click="reloadPage()">Exit</b-button>
                 </b-col>
               </b-row>
             </b-container>
@@ -661,7 +651,11 @@ export default {
           label: "Order Type",
           sortable: true,
           formatter: (value, key, item) => {
-            return value;
+            if (value) {
+              return "Iceberg Order";
+            } else {
+              return "New Order Single";
+            }
           },
         },
 
@@ -829,7 +823,7 @@ export default {
     },
   },
   watch: {
-    "order.time_in_force": function(d) {
+    "order.time_in_force": function (d) {
       // if (d.fix_value) {
       // console.log("d", d);
       var fix_value = d.fix_value;
@@ -1117,7 +1111,7 @@ export default {
         text: message,
         type: type,
         // showConfirmButton: confirm,
-      }).then(function() {
+      }).then(function () {
         // window.location.reload();
       });
     },
@@ -1139,10 +1133,7 @@ export default {
         "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
         "" +
-        dt
-          .getDate()
-          .toString()
-          .padStart(2, "0") +
+        dt.getDate().toString().padStart(2, "0") +
         "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
@@ -1156,10 +1147,7 @@ export default {
         "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
         "" +
-        dt
-          .getDate()
-          .toString()
-          .padStart(2, "0") +
+        dt.getDate().toString().padStart(2, "0") +
         "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
@@ -1239,7 +1227,7 @@ export default {
     });
     console.log("this.broker_client_orders", this.broker_client_orders);
 
-    this.broker_client_orders.sort(function(a, b) {
+    this.broker_client_orders.sort(function (a, b) {
       return b.client_order_number > a.client_order_number ? 0 : 1;
     });
     this.client_trading_account_options = client_accounts;

@@ -73174,16 +73174,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-
-
-
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -73322,7 +73312,11 @@ __webpack_require__.r(__webpack_exports__);
           label: "Order Type",
           sortable: true,
           formatter: (value, key, item) => {
-            return value;
+            if (value) {
+              return "Iceberg Order";
+            } else {
+              return "New Order Single";
+            }
           },
         },
 
@@ -73490,7 +73484,7 @@ __webpack_require__.r(__webpack_exports__);
     },
   },
   watch: {
-    "order.time_in_force": function(d) {
+    "order.time_in_force": function (d) {
       // if (d.fix_value) {
       // console.log("d", d);
       var fix_value = d.fix_value;
@@ -73778,7 +73772,7 @@ __webpack_require__.r(__webpack_exports__);
         text: message,
         type: type,
         // showConfirmButton: confirm,
-      }).then(function() {
+      }).then(function () {
         // window.location.reload();
       });
     },
@@ -73800,10 +73794,7 @@ __webpack_require__.r(__webpack_exports__);
         "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
         "" +
-        dt
-          .getDate()
-          .toString()
-          .padStart(2, "0") +
+        dt.getDate().toString().padStart(2, "0") +
         "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
@@ -73817,10 +73808,7 @@ __webpack_require__.r(__webpack_exports__);
         "" +
         (dt.getMonth() + 1).toString().padStart(2, "0") +
         "" +
-        dt
-          .getDate()
-          .toString()
-          .padStart(2, "0") +
+        dt.getDate().toString().padStart(2, "0") +
         "" +
         ("" + Math.random()).substring(2, 5);
       // ===============================================/
@@ -73900,7 +73888,7 @@ __webpack_require__.r(__webpack_exports__);
     });
     console.log("this.broker_client_orders", this.broker_client_orders);
 
-    this.broker_client_orders.sort(function(a, b) {
+    this.broker_client_orders.sort(function (a, b) {
       return b.client_order_number > a.client_order_number ? 0 : 1;
     });
     this.client_trading_account_options = client_accounts;
@@ -78501,26 +78489,7 @@ var render = function() {
                           fields: _vm.fields,
                           filter: _vm.filter
                         },
-                        on: { "row-clicked": _vm.brokerOrderHandler },
-                        scopedSlots: _vm._u(
-                          [
-                            {
-                              key: "cell(max_floor)",
-                              fn: function(data) {
-                                return [
-                                  _vm._v(
-                                    "\n            " +
-                                      _vm._s(data.item.max_floor) +
-                                      "\n            "
-                                  )
-                                ]
-                              }
-                            }
-                          ],
-                          null,
-                          false,
-                          2150770158
-                        )
+                        on: { "row-clicked": _vm.brokerOrderHandler }
                       }),
                       _vm._v(" "),
                       _c("b-pagination", {
@@ -78614,7 +78583,7 @@ var render = function() {
                                                       },
                                                       [
                                                         _vm._v(
-                                                          "\n                        -- Please select a Trading Account--\n                      "
+                                                          "\n                        -- Please select a Trading\n                        Account--\n                      "
                                                         )
                                                       ]
                                                     )
@@ -78683,7 +78652,7 @@ var render = function() {
                                                         },
                                                         [
                                                           _vm._v(
-                                                            "\n                        -- Please select a Client Account--\n                      "
+                                                            "\n                        -- Please select a Client\n                        Account--\n                      "
                                                           )
                                                         ]
                                                       )
@@ -78722,7 +78691,7 @@ var render = function() {
                                                       _vm._v(
                                                         "\n                      JCSD-" +
                                                           _vm._s(b.jcsd) +
-                                                          " : " +
+                                                          " :\n                      " +
                                                           _vm._s(b.name) +
                                                           ' "Investor"\n                    '
                                                       )
