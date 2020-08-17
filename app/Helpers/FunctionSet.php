@@ -167,10 +167,10 @@ class FunctionSet
         $client = BrokerClient::find($client_id);
 
         //validation
-        /*  if (is_null($request->stop_price)) {
-            return response()->json(['isvalid' => false, 'errors' => 'The Stop Price is required']);
+        if (is_null($request->symobol)) {
+            return response()->json(['isvalid' => false, 'errors' => 'Sybmol is required']);
         }
-
+        /*
         if (is_nuill($request->quantity)) {
             return response()->json(['isvalid' => false, 'errors' => 'The Quantity is required']);
         }
