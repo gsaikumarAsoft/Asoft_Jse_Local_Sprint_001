@@ -168,6 +168,7 @@ class FunctionSet
         // Locate the broker client for this order
         $client = BrokerClient::find($client_id);
 
+        // return $request->symbol;
         //validation
         if (is_null($request->symbol)) {
             return response()->json(['isvalid' => false, 'errors' => 'Sybmol is required']);
