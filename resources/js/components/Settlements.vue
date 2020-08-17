@@ -9,7 +9,9 @@
             striped
             hover
             show-empty
-            :empty-text="'No Settlement Accounts have been Created. Create a Settlement Account below.'"
+            :empty-text="
+              'No Settlement Accounts have been Created. Create a Settlement Account below.'
+            "
             id="foreign-brokers"
             :items="broker_settlement_accounts"
             :fields="fields"
@@ -19,7 +21,9 @@
           >
             <template v-slot:cell(hash)="data">
               <!-- `data.value` is the value after formatted by the Formatter -->
-              <b-button @click="resetFilledOrders(data)">Clear Unsettled Trades</b-button>
+              <b-button @click="resetFilledOrders(data)"
+                >Clear Unsettled Trades</b-button
+              >
               <!--{{ data.value }}-->
             </template>
           </b-table>
@@ -29,7 +33,9 @@
             :per-page="perPage"
             aria-controls="foreign-brokers"
           ></b-pagination>
-          <b-button @click="settlement_account={}">Create Settlement Account</b-button>
+          <b-button @click="settlement_account = {}"
+            >Create Settlement Account</b-button
+          >
           <!-- <b-button @click="importAccounts">Import Accounts</b-button> -->
           <b-button @click="exportBalances">Export Balances</b-button>
         </b-card>
@@ -63,7 +69,11 @@
                 required
               ></b-form-select>
             </b-form-group>
-            <b-form-group label="Bank" label-for="bank-input" invalid-feedback=" Bank is required">
+            <b-form-group
+              label="Bank"
+              label-for="bank-input"
+              invalid-feedback=" Bank is required"
+            >
               <b-form-input
                 id="bank-input"
                 v-model="settlement_account.bank_name"
@@ -151,7 +161,9 @@
               ></b-form-input>
             </b-form-group>
             <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button variant="danger" @click="settlement_account=null">Cancel</b-button>
+            <b-button variant="danger" @click="settlement_account = null"
+              >Cancel</b-button
+            >
           </form>
         </b-card>
       </div>
@@ -168,7 +180,7 @@ import checkErrorMixin from "./../mixins/CheckError.js";
 export default {
   mixins: [currenciesMixin, checkErrorMixin],
   components: {
-    "head-nav": headNav
+    "head-nav": headNav,
   },
   data() {
     return {
@@ -182,26 +194,26 @@ export default {
         {
           key: `local_broker.name`,
           label: "Local Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "foreign_broker.name",
           label: "Foreign Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "bank_name",
           label: "Settlement Agent",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
           label: "Settlement Agent Email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "filled_orders",
@@ -210,12 +222,12 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.filled_orders;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "account_balance",
@@ -223,12 +235,12 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.account_balance;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "available_balance",
@@ -236,7 +248,7 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var spent =
@@ -244,7 +256,7 @@ export default {
 
             var cal = item.account_balance - spent;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "amount_allocated",
@@ -252,28 +264,28 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.amount_allocated;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "currency",
-          sortable: true
+          sortable: true,
         },
         {
           key: "settlement_agent_status",
           label: "Status",
-          sortable: true
+          sortable: true,
         },
         {
           key: "hash",
-          label: ""
-        }
+          label: "fi",
+        },
       ],
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
@@ -285,7 +297,7 @@ export default {
     },
     rows() {
       return this.broker_settlement_accounts.length;
-    }
+    },
   },
   methods: {
     async resetFilledOrders(d) {
@@ -313,9 +325,9 @@ export default {
           timerProgressBar: true,
           onBeforeOpen: () => {
             this.$swal.showLoading();
-          }
+          },
         })
-        .then(result => {});
+        .then((result) => {});
     },
     exportBalances() {
       const tableData = [];
@@ -327,7 +339,7 @@ export default {
           this.broker_settlement_accounts[i].account,
           this.broker_settlement_accounts[i].email,
           this.broker_settlement_accounts[i].account_balance,
-          this.broker_settlement_accounts[i].amount_allocated
+          this.broker_settlement_accounts[i].amount_allocated,
         ]);
       }
 
@@ -348,10 +360,10 @@ export default {
             "Account",
             "Email",
             "Account Balance",
-            "Amount Allocated"
-          ]
+            "Amount Allocated",
+          ],
         ],
-        body: tableData
+        body: tableData,
       });
       doc.save("BrokerSettlementReport.pdf");
     },
@@ -372,7 +384,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
 
       // console.log(account);
@@ -400,7 +412,7 @@ export default {
         confirmButtonText: "Edit",
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
+        cancelButtonAriaLabel: "cancel",
       });
       if (result.value) {
         this.settlement_account = { ...b };
@@ -428,7 +440,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       try {
         await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
@@ -447,7 +459,7 @@ export default {
       const { data } = await axios.get("../local-brokers");
       this.local_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("local brokers", this.local_brokers);
     },
@@ -455,17 +467,17 @@ export default {
       const { data } = await axios.get("../foreign-brokers");
       this.foreign_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("foreign brokers", this.foreign_brokers);
-    }
+    },
   },
   async mounted() {
     await Promise.all([
       this.getlocalBrokers(),
       this.getForeignBrokers(),
-      this.getSettlementList()
+      this.getSettlementList(),
     ]);
-  }
+  },
 };
 </script>

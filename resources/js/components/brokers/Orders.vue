@@ -28,7 +28,19 @@
             :fields="fields"
             :filter="filter"
             @row-clicked="brokerOrderHandler"
-          ></b-table>
+          >
+            <template v-slot:cell(hash)="data">
+              <!-- `data.value` is the value after formatted by the Formatter -->
+              <p
+                :v-show="
+                  (data.item['display_range'] > 0) &
+                    (data.item['max_floor'] > 0)
+                "
+              >
+                Iceberg Order
+              </p>
+            </template>
+          </b-table>
           <b-pagination
             v-model="currentPage"
             :total-rows="rows"
@@ -641,6 +653,14 @@ export default {
             } else {
               return value;
             }
+          },
+        },
+        {
+          key: "hash",
+          label: "Order Type",
+          sortable: true,
+          formatter: (value, key, item) => {
+            return value;
           },
         },
 

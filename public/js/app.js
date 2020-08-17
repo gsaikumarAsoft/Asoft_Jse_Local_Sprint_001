@@ -71693,10 +71693,22 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__["default"]],
   components: {
-    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
   },
   data() {
     return {
@@ -71710,26 +71722,26 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: `local_broker.name`,
           label: "Local Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "foreign_broker.name",
           label: "Foreign Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "bank_name",
           label: "Settlement Agent",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
           label: "Settlement Agent Email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "filled_orders",
@@ -71738,12 +71750,12 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.filled_orders;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "account_balance",
@@ -71751,12 +71763,12 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.account_balance;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "available_balance",
@@ -71764,7 +71776,7 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var spent =
@@ -71772,7 +71784,7 @@ __webpack_require__.r(__webpack_exports__);
 
             var cal = item.account_balance - spent;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "amount_allocated",
@@ -71780,28 +71792,28 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.amount_allocated;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "currency",
-          sortable: true
+          sortable: true,
         },
         {
           key: "settlement_agent_status",
           label: "Status",
-          sortable: true
+          sortable: true,
         },
         {
           key: "hash",
-          label: ""
-        }
+          label: "fi",
+        },
       ],
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
@@ -71813,7 +71825,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     rows() {
       return this.broker_settlement_accounts.length;
-    }
+    },
   },
   methods: {
     async resetFilledOrders(d) {
@@ -71841,9 +71853,9 @@ __webpack_require__.r(__webpack_exports__);
           timerProgressBar: true,
           onBeforeOpen: () => {
             this.$swal.showLoading();
-          }
+          },
         })
-        .then(result => {});
+        .then((result) => {});
     },
     exportBalances() {
       const tableData = [];
@@ -71855,7 +71867,7 @@ __webpack_require__.r(__webpack_exports__);
           this.broker_settlement_accounts[i].account,
           this.broker_settlement_accounts[i].email,
           this.broker_settlement_accounts[i].account_balance,
-          this.broker_settlement_accounts[i].amount_allocated
+          this.broker_settlement_accounts[i].amount_allocated,
         ]);
       }
 
@@ -71876,10 +71888,10 @@ __webpack_require__.r(__webpack_exports__);
             "Account",
             "Email",
             "Account Balance",
-            "Amount Allocated"
-          ]
+            "Amount Allocated",
+          ],
         ],
-        body: tableData
+        body: tableData,
       });
       doc.save("BrokerSettlementReport.pdf");
     },
@@ -71900,7 +71912,7 @@ __webpack_require__.r(__webpack_exports__);
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
 
       // console.log(account);
@@ -71928,7 +71940,7 @@ __webpack_require__.r(__webpack_exports__);
         confirmButtonText: "Edit",
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
+        cancelButtonAriaLabel: "cancel",
       });
       if (result.value) {
         this.settlement_account = { ...b };
@@ -71956,7 +71968,7 @@ __webpack_require__.r(__webpack_exports__);
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       try {
         await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
@@ -71975,7 +71987,7 @@ __webpack_require__.r(__webpack_exports__);
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../local-brokers");
       this.local_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("local brokers", this.local_brokers);
     },
@@ -71983,18 +71995,18 @@ __webpack_require__.r(__webpack_exports__);
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("../foreign-brokers");
       this.foreign_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("foreign brokers", this.foreign_brokers);
-    }
+    },
   },
   async mounted() {
     await Promise.all([
       this.getlocalBrokers(),
       this.getForeignBrokers(),
-      this.getSettlementList()
+      this.getSettlementList(),
     ]);
-  }
+  },
 });
 
 
@@ -73159,6 +73171,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -73290,6 +73314,14 @@ __webpack_require__.r(__webpack_exports__);
             } else {
               return value;
             }
+          },
+        },
+        {
+          key: "hash",
+          label: "Order Type",
+          sortable: true,
+          formatter: (value, key, item) => {
+            return value;
           },
         },
 
@@ -78468,7 +78500,36 @@ var render = function() {
                           fields: _vm.fields,
                           filter: _vm.filter
                         },
-                        on: { "row-clicked": _vm.brokerOrderHandler }
+                        on: { "row-clicked": _vm.brokerOrderHandler },
+                        scopedSlots: _vm._u(
+                          [
+                            {
+                              key: "cell(hash)",
+                              fn: function(data) {
+                                return [
+                                  _c(
+                                    "p",
+                                    {
+                                      attrs: {
+                                        "v-show":
+                                          (data.item["display_range"] > 0) &
+                                          (data.item["max_floor"] > 0)
+                                      }
+                                    },
+                                    [
+                                      _vm._v(
+                                        "\n              Iceberg Order\n            "
+                                      )
+                                    ]
+                                  )
+                                ]
+                              }
+                            }
+                          ],
+                          null,
+                          false,
+                          2009243409
+                        )
                       }),
                       _vm._v(" "),
                       _c("b-pagination", {

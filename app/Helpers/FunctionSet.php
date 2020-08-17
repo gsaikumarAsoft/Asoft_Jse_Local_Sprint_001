@@ -206,6 +206,8 @@ class FunctionSet
         $broker_client_order->market_order_number = $request->market_order_number;
         $broker_client_order->stop_price = $request->stop_price;
         $broker_client_order->expiration_date = $request->expiration_date;
+        $broker_client_order->max_floor = $request->max_floor;
+        $broker_client_order->display_range = $request->display_range;
         $broker_client_order->time_in_force = $request->time_in_force;
         $broker_client_order->broker_client_id = $client_id;
         $broker_client_order->remaining = $request->price * $request->quantity;
@@ -233,9 +235,11 @@ class FunctionSet
         );
 
         //Check if this is an iceberg order
-        if ($request->has('max_floor') && $request->has('display_range')) {
-            $data['maxFloor'] = $request->max_floor;
+        if ($request->has('display_range')) {
             $data['displayRange'] = $request->display_range;
+        }
+        if ($request->has('max_floor')) {
+            $data['maxFloor'] = $request->max_floor;
         }
         if ($request->has('expiration_date')) {
             $data['expireDate'] = $request->expiration_date;
