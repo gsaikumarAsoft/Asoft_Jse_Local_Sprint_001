@@ -71810,7 +71810,7 @@ __webpack_require__.r(__webpack_exports__);
         },
         {
           key: "hash",
-          label: "fi",
+          label: "",
         },
       ],
       nameState: null,
@@ -73183,6 +73183,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
@@ -73317,7 +73318,7 @@ __webpack_require__.r(__webpack_exports__);
           },
         },
         {
-          key: "hash",
+          key: "max_floor",
           label: "Order Type",
           sortable: true,
           formatter: (value, key, item) => {
@@ -78504,23 +78505,13 @@ var render = function() {
                         scopedSlots: _vm._u(
                           [
                             {
-                              key: "cell(hash)",
+                              key: "cell(max_floor)",
                               fn: function(data) {
                                 return [
-                                  _c(
-                                    "p",
-                                    {
-                                      attrs: {
-                                        "v-show":
-                                          (data.item["display_range"] > 0) &
-                                          (data.item["max_floor"] > 0)
-                                      }
-                                    },
-                                    [
-                                      _vm._v(
-                                        "\n              Iceberg Order\n            "
-                                      )
-                                    ]
+                                  _vm._v(
+                                    "\n            " +
+                                      _vm._s(data.item.max_floor) +
+                                      "\n            "
                                   )
                                 ]
                               }
@@ -78528,7 +78519,7 @@ var render = function() {
                           ],
                           null,
                           false,
-                          2009243409
+                          2150770158
                         )
                       }),
                       _vm._v(" "),

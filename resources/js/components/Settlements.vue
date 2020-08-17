@@ -282,7 +282,7 @@ export default {
         },
         {
           key: "hash",
-          label: "fi",
+          label: "",
         },
       ],
       nameState: null,
