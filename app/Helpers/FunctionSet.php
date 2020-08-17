@@ -276,7 +276,6 @@ class FunctionSet
         $result = curl_exec($ch);
         curl_close($ch);
 
-        return $result;
         // ================================================================================================
         $data['text'] = 'Order Submitted Successfully';
         $data['status'] = 'Submitted';
