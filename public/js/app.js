@@ -73263,7 +73263,7 @@ __webpack_require__.r(__webpack_exports__);
           },
         },
         { key: "order_quantity", label: "Qty", sortable: true },
-        { key: "remaining", label: "Remainder", sortable: true },
+        { key: "remaining", label: "Remainder Held", sortable: true },
         { key: "price", sortable: true },
         {
           key: "order_status",
