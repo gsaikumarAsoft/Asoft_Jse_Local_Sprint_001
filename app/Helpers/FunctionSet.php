@@ -546,11 +546,32 @@ class FunctionSet
                     if (
                         $status === $this->OrderStatus->Expired() ||
                         $status === $this->OrderStatus->Cancelled() ||
-                        $status === $this->OrderStatus->Failed() ||
                         $status === $this->OrderStatus->Rejected() ||
                         $status === $this->OrderStatus->_New()
                     ) {
                         // UPDATE ORDER STATUS ONLY
+                        BrokerClientOrder::updateOrCreate(
+
+                            ['id' => $current_order->id],
+                            ['order_status' => $status]
+
+                        );
+
+
+                        // Update Settlement Account Balances
+                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
+                            ['id' => $sa['id']],
+                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value]
+                        );
+
+
+                        // Update Broker Clients Open Orders
+                        $broker_client_account = BrokerClient::updateOrCreate(
+                            ['id' => $bc->id],
+                            ['open_orders' => $client_open_orders - $order_value]
+                        );
+                    } else if ($status === $this->OrderStatus->Failed()) {
+                        //Update Status
                         BrokerClientOrder::updateOrCreate(
 
                             ['id' => $current_order->id],
@@ -569,14 +590,14 @@ class FunctionSet
                         // Update Settlement Account Balances
                         $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                             ['id' => $sa['id']],
-                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'account_balance' => (int) $sa['account_balance'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
+                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
                         );
 
 
                         // Update Broker Clients Open Orders
                         $broker_client_account = BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
-                            ['open_orders' => $client_open_orders, 'filled_orders' => $bc->filled_orders + (int)$order_value]
+                            ['open_orders' => $client_open_orders - $order_value, 'filled_orders' => $bc->filled_orders + (int)$order_value]
                         );
                     } else if ($status === $this->OrderStatus->PartialFilled()) {
 
@@ -597,7 +618,7 @@ class FunctionSet
                             $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
                                 // ['amount_allocated' => $sa['filled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
-                                ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
+                                ['amount_allocated' => (int) $sa['amount_allocated'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
 
                             );
 

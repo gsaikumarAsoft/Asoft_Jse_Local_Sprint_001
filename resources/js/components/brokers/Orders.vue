@@ -1080,7 +1080,7 @@ export default {
           this.order
         );
         let valid = data.isvalid;
-        console.log(this.order);
+        console.log(this.order);  
         if (valid) {
           this.notify("Order Created", data.errors, "success", true);
           // this.order = {};
