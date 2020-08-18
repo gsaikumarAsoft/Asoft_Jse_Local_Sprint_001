@@ -160,15 +160,33 @@ class BrokerController extends Controller
     }
     public function execution()
     {
+        $user = auth()->user();
+        // $execution_reports = DB::table('broker_client_order_execution_reports')
+        //     ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
+        //     ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.clordid')
+        //     ->join('local_brokers', 'broker_client_orders.local_broker_id', 'local_brokers.id')
+        //     ->join('broker_trading_accounts', 'local_brokers.id', 'broker_trading_accounts.local_broker_id')
+        //     // ->join('users', 'broker_client_order_execution_reports.senderSubID', 'users.name')
+        //     ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+        //     ->distinct()
+        //     ->get();
+
         $execution_reports = DB::table('broker_client_order_execution_reports')
+            ->where('broker_client_order_execution_reports.senderSubID', $user->name)
             ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
-            ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.clordid')
-            ->join('local_brokers', 'broker_client_orders.local_broker_id', 'local_brokers.id')
-            ->join('broker_trading_accounts', 'local_brokers.id', 'broker_trading_accounts.local_broker_id')
-            ->join('users', 'broker_client_order_execution_reports.senderSubID', 'users.name')
+            ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.client_order_number')
+            ->join('broker_trading_accounts', 'broker_client_orders.trading_account_id', 'broker_trading_accounts.id')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
-            ->distinct()
             ->get();
+
+        // $exec = BrokerOrderExecutionReport::where('senderSubID', $user->)->get();
+
+
+        // foreach ($exec as $item) {
+        //     return $item;
+        // }
+
+        // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
 

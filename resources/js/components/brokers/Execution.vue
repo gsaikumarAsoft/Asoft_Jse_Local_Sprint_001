@@ -3,6 +3,7 @@
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top: 100px;">
       <h1>Order Execution Reports</h1>
+      <!-- <pre>{{report_data}}</pre> -->
       <div class="content table-responsive">
         <div class="float-right">
           <b-input
