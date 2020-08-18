@@ -314,8 +314,7 @@ class BrokerController extends Controller
                 // Update Settlement Account Balances
                 BrokerSettlementAccount::updateOrCreate(
                     ['hash' => $settlement->hash],
-                    ['amount_allocated' => $settlement_allocated]
-                    // 'account_balance' => $settlement_account_balance 
+                    ['amount_allocated' => $settlement_allocated, 'account_balance' => $settlement_account_balance]
                 );
 
 

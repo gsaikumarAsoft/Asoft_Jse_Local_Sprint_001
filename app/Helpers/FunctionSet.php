@@ -549,7 +549,6 @@ class FunctionSet
                     //If offer is (Rejected, Cancelled, Expired Or New)
                     if (
                         $status === $this->OrderStatus->Expired() ||
-                        $status === $this->OrderStatus->Cancelled() ||
                         $status === $this->OrderStatus->_New()
                     ) {
                         // UPDATE ORDER STATUS ONLY
@@ -559,9 +558,32 @@ class FunctionSet
                             ['order_status' => $status]
 
                         );
+                    } else if ($status === $this->OrderStatus->Cancelled()) {
+                        //Update Status
+                        BrokerClientOrder::updateOrCreate(
+
+                            ['id' => $current_order->id],
+                            ['order_status' => $status]
+
+                        );
+                        // $status === $this->OrderStatus->Cancelled()  When an order is cancelled 
+                        //allocated - order amount 
+                        //available balance + order_amount
+                        // Update Settlement Account Balances
+                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
+                            ['id' => $sa['id']],
+                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'account_balance' => (int) $sa['account_balance'] + $order_value]
+                        );
+
+
+                        // Update Broker Clients Open Orders
+                        $broker_client_account = BrokerClient::updateOrCreate(
+                            ['id' => $bc->id],
+                            ['open_orders' => $client_open_orders - $order_value]
+                        );
                     } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
 
-                        LogActivity::addToLog('Update Client Details');
+                        // LogActivity::addToLog('Update Client Details');
                         //Update Status
                         BrokerClientOrder::updateOrCreate(
 
