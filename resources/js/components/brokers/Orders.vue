@@ -876,6 +876,7 @@ export default {
       });
 
       if (result.value) {
+        this.new_order = true;
         this.order = o;
 
         this.disabled = true;
@@ -1107,7 +1108,7 @@ export default {
         type: type,
         // showConfirmButton: confirm,
       }).then(function () {
-        // window.location.reload();
+        window.location.reload();
       });
     },
     async getSymbols() {

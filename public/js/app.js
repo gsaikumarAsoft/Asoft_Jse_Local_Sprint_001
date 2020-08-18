@@ -73525,6 +73525,7 @@ __webpack_require__.r(__webpack_exports__);
       });
 
       if (result.value) {
+        this.new_order = true;
         this.order = o;
 
         this.disabled = true;
@@ -73756,7 +73757,7 @@ __webpack_require__.r(__webpack_exports__);
         type: type,
         // showConfirmButton: confirm,
       }).then(function () {
-        // window.location.reload();
+        window.location.reload();
       });
     },
     async getSymbols() {

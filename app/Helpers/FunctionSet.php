@@ -328,11 +328,14 @@ class FunctionSet
 
                 $clients[] = $report;
 
-                $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
+                // return [$report, 'data' => array_values($report)[16]];
 
+                $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
+                // $record = BrokerOrderExecutionReport::where('senderSubID', $report->senderSubID)->where('seqNum', $report['seqNum'])->where('clOrdID', $report['clOrdID'])->where('sendingTime', $report['sendingTime']);
+                // return $record->get();
                 if ($record->exists()) {
                     //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
-                    // DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $market_order_number]);
+                    DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $report['orderID']]);
                 } else {
                     //Add Market Order Number To Order Being Placed
                     // DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $market_order_number]);
@@ -557,6 +560,8 @@ class FunctionSet
 
                         );
                     } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
+
+                        LogActivity::addToLog('Update Client Details');
                         //Update Status
                         BrokerClientOrder::updateOrCreate(
 
@@ -589,14 +594,14 @@ class FunctionSet
                         // Update Settlement Account Balances
                         $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                             ['id' => $sa['id']],
-                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
+                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + $order_value]
                         );
 
 
                         // Update Broker Clients Open Orders
                         $broker_client_account = BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
-                            ['open_orders' => $client_open_orders - $order_value, 'filled_orders' => $bc->filled_orders + (int)$order_value]
+                            ['open_orders' => (int) $bc['open_orders'] + $order_value, 'filled_orders' => $bc->filled_orders + $order_value]
                         );
                     } else if ($status === $this->OrderStatus->PartialFilled()) {
 
@@ -616,7 +621,7 @@ class FunctionSet
 
                             $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                // ['amount_allocated' => $sa['filled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
+                                // ['amount_allocated' => $sa['fiRejectedlled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
                                 ['filled_orders' => $sa['filled_orders'] + $current_order_value]
 
                             );
