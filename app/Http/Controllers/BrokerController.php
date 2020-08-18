@@ -311,22 +311,23 @@ class BrokerController extends Controller
                 $client_open_orders = (int) $broker_client->open_orders + $order_value;
 
 
-                // Update Settlement Account Balances
-                BrokerSettlementAccount::updateOrCreate(
-                    ['hash' => $settlement->hash],
-                    ['amount_allocated' => $settlement_allocated]
-                    // 'account_balance' => $settlement_account_balance 
-                );
-
+                //Update the allocated amount field in settlement account
+                //# $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
+                $settlement_account_record = BrokerSettlementAccount::find($settlement->id);
+                $settlement_account_record->amount_allocated = $settlement_allocated;
+                $settlement_account_record->save();
 
                 // Update Broker Clients Open Orders
-                BrokerClient::updateOrCreate(
-                    ['id' => $broker_client->id],
-                    ['open_orders' => $client_open_orders]
-                );
+                $new_brokerclient = $broker_client;
+                $new_brokerclient->open_orders = $client_open_orders;
+                $new_brokerclient->save();
+                // BrokerClient::updateOrCreate(
+                //     ['id' => $broker_client->id],
+                //     ['open_orders' => $client_open_orders]
+                // );
 
                 // Create the order in our databases and send order server side using curl
-                return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
+                // return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             }
         } else if ($side['fix_value'] === '2') {
             // if side is = SELL
