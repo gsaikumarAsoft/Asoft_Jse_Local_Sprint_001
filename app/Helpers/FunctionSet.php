@@ -569,7 +569,7 @@ class FunctionSet
                         // Update Settlement Account Balances
                         $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                             ['id' => $sa['id']],
-                            ['amount_allocated' => (int) $sa['amount_allocated'] + $order_value, 'account_balance' => (int) $sa['account_balance'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
+                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'account_balance' => (int) $sa['account_balance'] - $order_value, 'filled_orders' => (int) $sa['filled_orders'] + (int) $order_value]
                         );
 
 
@@ -583,8 +583,6 @@ class FunctionSet
                         $order_value = (int)$quantity * $price;
                         $current_order_value = $current_order['price'] * $current_order['quantity'];
                         $current_filled_orders = $sa['filled_orders'];
-
-                        // return $current_order_value;
                         $being_filled = $current_order_value - $order_value;
                         $remaining = $current_order['filled_orders'] + $current_order_value - $order_value;
 
@@ -596,22 +594,21 @@ class FunctionSet
 
                             );
 
-
                             $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['amount_allocated' => $sa['filled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
+                                // ['amount_allocated' => $sa['filled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
+                                ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
+
                             );
 
-
-                            // // Update Broker Clients Open Orders
+                            // Update Broker Clients Open Orders
                             $brokerClient = BrokerClient::updateOrCreate(
                                 ['id' => $bc->id],
                                 ['open_orders' => $bc['open_orders'] - $current_order_value, 'filled_orders' => $bc->filled_orders + $current_order_value]
                             );
                         } else if ($current_order['remaining'] > 0 && $current_order['remaining'] < number_format($current_order_value, 2, '.', '')) {
-                            // UPDATE THE ORDER STATUS 
-                            // second partial Fill
 
+                            // second partial Fill
                             $brokerClientOrder = BrokerClientOrder::updateOrCreate(
                                 ['id' => $current_order->id],
                                 ['order_status' => $status, 'remaining' => $current_order['remaining'] - $remaining]
