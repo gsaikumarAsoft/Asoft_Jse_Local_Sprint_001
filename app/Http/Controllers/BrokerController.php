@@ -333,8 +333,4 @@ class BrokerController extends Controller
             return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
         }
     }
-
-    public function createBrokerClientOrder()
-    {
-    }
 }
