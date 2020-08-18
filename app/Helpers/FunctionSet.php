@@ -549,7 +549,6 @@ class FunctionSet
                     if (
                         $status === $this->OrderStatus->Expired() ||
                         $status === $this->OrderStatus->Cancelled() ||
-                        $status === $this->OrderStatus->Rejected() ||
                         $status === $this->OrderStatus->_New()
                     ) {
                         // UPDATE ORDER STATUS ONLY
@@ -559,7 +558,14 @@ class FunctionSet
                             ['order_status' => $status]
 
                         );
+                    } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
+                        //Update Status
+                        BrokerClientOrder::updateOrCreate(
 
+                            ['id' => $current_order->id],
+                            ['order_status' => $status]
+
+                        );
 
                         // Update Settlement Account Balances
                         $broker_settlement = BrokerSettlementAccount::updateOrCreate(
@@ -572,14 +578,6 @@ class FunctionSet
                         $broker_client_account = BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
                             ['open_orders' => $client_open_orders - $order_value]
-                        );
-                    } else if ($status === $this->OrderStatus->Failed()) {
-                        //Update Status
-                        BrokerClientOrder::updateOrCreate(
-
-                            ['id' => $current_order->id],
-                            ['order_status' => $status]
-
                         );
                     } else if ($status === $this->OrderStatus->Filled()) {
 
