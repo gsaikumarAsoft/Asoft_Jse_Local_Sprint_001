@@ -559,9 +559,6 @@ class FunctionSet
 
                         );
                     } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected() || $status === $this->OrderStatus->Cancelled()) {
-
-                        // LogActivity::addToLog('Update Client Details');
-                        //Update Status
                         BrokerClientOrder::updateOrCreate(
 
                             ['id' => $current_order->id],
@@ -593,14 +590,14 @@ class FunctionSet
                         // Update Settlement Account Balances
                         $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                             ['id' => $sa['id']],
-                            ['filled_orders' => (int) $sa['filled_orders'] + $order_value]
+                            ['filled_orders' => (int) $sa['filled_orders'] + ($quantity * $price)]
                         );
 
 
                         // Update Broker Clients Open Orders
                         $broker_client_account = BrokerClient::updateOrCreate(
                             ['id' => $bc->id],
-                            ['open_orders' => (int) $bc['open_orders'] - $order_value, 'filled_orders' => $bc->filled_orders + $order_value]
+                            ['open_orders' => (int) $bc['open_orders'] - $order_value, 'filled_orders' => $bc->filled_orders + ($quantity * $current_order['price'])]
                         );
                     } else if ($status === $this->OrderStatus->PartialFilled()) {
 
@@ -614,28 +611,30 @@ class FunctionSet
                             //First Partial Fill
                             $brokerClientOrder = BrokerClientOrder::updateOrCreate(
                                 ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $remaining]
+                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - ($quantity * $current_order['price'])]
 
+                                // LogActivity::addToLog('Update Client Details');
+                                //Update Status
                             );
 
                             $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
                                 // ['amount_allocated' => $sa['fiRejectedlled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
-                                ['filled_orders' => $sa['filled_orders'] + $current_order_value]
+                                ['filled_orders' => (int) $sa['filled_orders'] + ($quantity * $price)]
 
                             );
 
                             // Update Broker Clients Open Orders
                             $brokerClient = BrokerClient::updateOrCreate(
                                 ['id' => $bc->id],
-                                ['open_orders' => $bc['open_orders'] - $current_order_value, 'filled_orders' => $bc->filled_orders + $current_order_value]
+                                ['open_orders' => (int) $bc['open_orders'] - $order_value, 'filled_orders' => $bc->filled_orders + ($quantity * $current_order['price'])]
                             );
                         } else if ($current_order['remaining'] > 0 && $current_order['remaining'] < number_format($current_order_value, 2, '.', '')) {
 
                             // second partial Fill
                             $brokerClientOrder = BrokerClientOrder::updateOrCreate(
                                 ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $remaining]
+                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - ($quantity * $current_order['price'])]
 
                             );
                         } else {
