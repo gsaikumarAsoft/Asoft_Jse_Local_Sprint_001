@@ -286,6 +286,9 @@ class FunctionSet
         // ================================================================================================
 
         $fix_status = json_decode($result, true);
+        $order_value = $request->quantity * $request->price;
+        $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
+        $client_open_orders = (int) $client->open_orders + $order_value;
 
         switch ($fix_status['result']) {
             case "Session could not be established with CIBC. Order number {0}":
@@ -295,6 +298,18 @@ class FunctionSet
                 $order = DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
                     ->update(['order_status' => $this->OrderStatus->Failed()]);
+                BrokerSettlementAccount::updateOrCreate(
+                    ['hash' => $settlement->hash],
+                    ['amount_allocated' => $settlement_allocated]
+                );
+
+
+                // Update Broker Clients Open Orders
+                BrokerClient::updateOrCreate(
+                    ['id' => $client_id],
+                    ['open_orders' => $client_open_orders]
+                );
+
                 $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
                 break;
@@ -311,13 +326,13 @@ class FunctionSet
                 // ============================================================================================
                 DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
-                    ->update(['order_status' => $this->OrderStatus->Failed()]);
+                    ->update([
+                        ['order_status' => $this->OrderStatus->Failed()],
+                        ['remaining' => 0.00]
+                    ]);
 
                 //Return Funds Upon Failing To Submit The Order
                 // Update Settlement Account Balances
-                $order_value = $request->quantity * $request->price;
-                $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
-                $client_open_orders = (int) $client->open_orders + $order_value;
 
                 BrokerSettlementAccount::updateOrCreate(
                     ['hash' => $settlement->hash],
@@ -340,7 +355,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
-        return $request;
+        // return $request;
         $execution_report = $request["executionReports"];
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
