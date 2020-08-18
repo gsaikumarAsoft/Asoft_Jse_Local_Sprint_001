@@ -312,9 +312,10 @@ class BrokerController extends Controller
 
                 //Update the allocated amount field in settlement account
                 //# $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
-                $settlement_account_record = BrokerSettlementAccount::find($settlement->id);
-                $settlement_account_record->amount_allocated = $settlement_allocated;
-                $settlement_account_record->save();
+                $setUpdate =  DB::table('broker_settlement_accounts')->where('id', $settlement->id)->update(['amount_allocated' => $settlement_allocated]);
+                // $settlement_account_record = BrokerSettlementAccount::find($settlement->id);
+                // $settlement_account_record->amount_allocated = $settlement_allocated;
+                // $settlement_account_record->save();
 
                 // Update Broker Clients Open Orders
                 $new_brokerclient = $broker_client;
