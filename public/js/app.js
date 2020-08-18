@@ -73173,6 +73173,7 @@ __webpack_require__.r(__webpack_exports__);
   data() {
     return {
       // messageDownload: [],
+      new_order: false,
       filter: null,
       expiration: false,
       order_template_data: [],
@@ -73729,14 +73730,15 @@ __webpack_require__.r(__webpack_exports__);
           this.order
         );
         let valid = data.isvalid;
-        console.log(this.order);  
         if (valid) {
           this.notify("Order Created", data.errors, "success", true);
-          // this.order = {};
+          this.order = {};
+          this.new_order = false;
           this.newOrderNumber();
         } else {
           this.notify("Order Failed", data.errors, "warning", false);
           this.order = {};
+          this.new_order = false;
           this.newOrderNumber();
         }
       } catch (error) {
@@ -73764,6 +73766,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     displayNewOrder() {
+      this.new_order = true;
       this.disabled = false;
       var dt = new Date();
       this.order = {};
@@ -78426,7 +78429,7 @@ var render = function() {
             "div",
             { staticClass: "content" },
             [
-              !_vm.order
+              !_vm.new_order
                 ? _c(
                     "b-card",
                     { attrs: { title: "Current Orders" } },

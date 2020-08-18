@@ -3,7 +3,7 @@
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top: 100px;">
       <div class="content">
-        <b-card title="Current Orders" v-if="!order">
+        <b-card title="Current Orders" v-if="!new_order">
           <div class="float-right">
             <b-input
               id="search_content"
@@ -524,6 +524,7 @@ export default {
   data() {
     return {
       // messageDownload: [],
+      new_order: false,
       filter: null,
       expiration: false,
       order_template_data: [],
@@ -1080,14 +1081,15 @@ export default {
           this.order
         );
         let valid = data.isvalid;
-        console.log(this.order);  
         if (valid) {
           this.notify("Order Created", data.errors, "success", true);
-          // this.order = {};
+          this.order = {};
+          this.new_order = false;
           this.newOrderNumber();
         } else {
           this.notify("Order Failed", data.errors, "warning", false);
           this.order = {};
+          this.new_order = false;
           this.newOrderNumber();
         }
       } catch (error) {
@@ -1115,6 +1117,7 @@ export default {
     },
 
     displayNewOrder() {
+      this.new_order = true;
       this.disabled = false;
       var dt = new Date();
       this.order = {};

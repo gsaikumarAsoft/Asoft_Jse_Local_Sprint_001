@@ -183,7 +183,36 @@ class FunctionSet
         if ((int) $request->price > (int) $request->stop_price) {
             return response()->json(['isvalid' => false, 'errors' => 'Price cannot be greater than the Stop Price!']);
         } */
-
+        // Store Order to our databases
+        $mytime = Carbon::now();
+        $broker_client_order = new BrokerClientOrder();
+        $broker_client_order->local_broker_id = $local_broker_id;
+        $broker_client_order->foreign_broker_id = $foreign_broker_id[0]->id;
+        $broker_client_order->handling_instructions = $request->handling_instructions;
+        $broker_client_order->order_quantity = $request->quantity;
+        $broker_client_order->order_type = $request->order_type;
+        $broker_client_order->order_status = $order_status;
+        $broker_client_order->order_date = $mytime->toDateTimeString();
+        $broker_client_order->currency = $request->currency;
+        $broker_client_order->symbol = $request->symbol;
+        $broker_client_order->price = $request->price;
+        $broker_client_order->value = $request->value;
+        $broker_client_order->quantity = $request->quantity;
+        $broker_client_order->country = 'Jamaica';
+        $broker_client_order->side = $request->side;
+        $broker_client_order->status_time = $mytime->toDateTimeString();
+        $broker_client_order->client_order_number = $request->client_order_number;
+        $broker_client_order->clordid = $request->client_order_number;
+        $broker_client_order->market_order_number = $request->market_order_number;
+        $broker_client_order->stop_price = $request->stop_price;
+        $broker_client_order->expiration_date = $request->expiration_date;
+        $broker_client_order->max_floor = $request->max_floor;
+        $broker_client_order->display_range = $request->display_range;
+        $broker_client_order->time_in_force = $request->time_in_force;
+        $broker_client_order->broker_client_id = $client_id;
+        $broker_client_order->remaining = $request->price * $request->quantity;
+        $broker_client_order->trading_account_id = $request->trading_account;
+        $broker_client_order->save();
 
         // Send customer order to FIX 4.2 Switch - API Beta Fix Swith PHP Post 4.2
         $url = $this->fix_wrapper_url("api/OrderManagement/NewOrderSingle");
@@ -237,12 +266,12 @@ class FunctionSet
 
         $ch = curl_init($url);
         // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        // curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
+        // curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
         curl_close($ch);
@@ -254,38 +283,6 @@ class FunctionSet
         // ================================================================================================
 
         $fix_status = json_decode($result, true);
-
-
-        // Store Order to our databases
-        $mytime = Carbon::now();
-        $broker_client_order = new BrokerClientOrder();
-        $broker_client_order->local_broker_id = $local_broker_id;
-        $broker_client_order->foreign_broker_id = $foreign_broker_id[0]->id;
-        $broker_client_order->handling_instructions = $request->handling_instructions;
-        $broker_client_order->order_quantity = $request->quantity;
-        $broker_client_order->order_type = $request->order_type;
-        $broker_client_order->order_status = $order_status;
-        $broker_client_order->order_date = $mytime->toDateTimeString();
-        $broker_client_order->currency = $request->currency;
-        $broker_client_order->symbol = $request->symbol;
-        $broker_client_order->price = $request->price;
-        $broker_client_order->value = $request->value;
-        $broker_client_order->quantity = $request->quantity;
-        $broker_client_order->country = 'Jamaica';
-        $broker_client_order->side = $request->side;
-        $broker_client_order->status_time = $mytime->toDateTimeString();
-        $broker_client_order->client_order_number = $request->client_order_number;
-        $broker_client_order->clordid = $request->client_order_number;
-        $broker_client_order->market_order_number = $request->market_order_number;
-        $broker_client_order->stop_price = $request->stop_price;
-        $broker_client_order->expiration_date = $request->expiration_date;
-        $broker_client_order->max_floor = $request->max_floor;
-        $broker_client_order->display_range = $request->display_range;
-        $broker_client_order->time_in_force = $request->time_in_force;
-        $broker_client_order->broker_client_id = $client_id;
-        $broker_client_order->remaining = $request->price * $request->quantity;
-        $broker_client_order->trading_account_id = $request->trading_account;
-        $broker_client_order->save();
 
         switch ($fix_status['result']) {
             case "Session could not be established with CIBC. Order number {0}":
@@ -320,6 +317,7 @@ class FunctionSet
     }
     public function logExecution($request)
     {
+        // return $request;
         $execution_report = $request["executionReports"];
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
@@ -619,7 +617,7 @@ class FunctionSet
                             $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
                                 // ['amount_allocated' => $sa['filled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
-                                ['amount_allocated' => (int) $sa['amount_allocated'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
+                                ['filled_orders' => $sa['filled_orders'] + $current_order_value]
 
                             );
 

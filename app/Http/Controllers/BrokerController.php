@@ -304,23 +304,26 @@ class BrokerController extends Controller
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                $settlement_ALL = (int) $settlement->amount_allocated + $order_value;
+                $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
                 $settlement_account_balance = (int) $settlement->account_balance - $order_value;
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
                 $client_open_orders = (int) $broker_client->open_orders + $order_value;
 
-                //Update the allocated amount field in settlement account
-                //# $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
-                $setUpdate =  DB::table('broker_settlement_accounts')->where('id', $settlement->id)->update(['amount_allocated' => $settlement_ALL]);
-                // $settlement_account_record = BrokerSettlementAccount::find($settlement->id);
-                // $settlement_account_record->amount_allocated = $settlement_allocated;
-                // $settlement_account_record->save();
+
+                // Update Settlement Account Balances
+                BrokerSettlementAccount::updateOrCreate(
+                    ['hash' => $settlement->hash],
+                    ['amount_allocated' => $settlement_allocated]
+                    // 'account_balance' => $settlement_account_balance 
+                );
+
 
                 // Update Broker Clients Open Orders
-                $new_brokerclient = $broker_client;
-                $new_brokerclient->open_orders = $client_open_orders;
-                $new_brokerclient->save();
+                BrokerClient::updateOrCreate(
+                    ['id' => $broker_client->id],
+                    ['open_orders' => $client_open_orders]
+                );
 
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
