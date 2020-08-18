@@ -71693,18 +71693,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /* harmony default export */ __webpack_exports__["default"] = ({
   mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__["default"]],
   components: {
@@ -76409,7 +76397,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["accounts"],
   components: {
-    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
   },
   data() {
     return {
@@ -76424,49 +76412,49 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: "foreign_broker.name",
           label: "Foreign Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "bank_name",
           label: "Settlement Agent",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account_balance",
-          sortable: true
+          sortable: true,
         },
         {
           key: "amount_allocated",
-          sortable: true
+          sortable: true,
         },
         {
           key: "currency",
-          sortable: true
+          sortable: true,
         },
         {
           key: "status",
-          sortable: true
-        }
+          sortable: true,
+        },
       ],
       modalTitle: "Create Broker Settlement Account",
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_settlement_account.length;
-    }
+    },
   },
   methods: {},
-  mounted() {}
+  mounted() {},
 });
 
 
@@ -79733,20 +79721,7 @@ var render = function() {
                           "per-page": _vm.perPage,
                           "current-page": _vm.currentPage
                         },
-                        on: { "row-clicked": _vm.settlmentAccountHandler },
-                        scopedSlots: _vm._u(
-                          [
-                            {
-                              key: "index",
-                              fn: function(row) {
-                                return [_vm._v(_vm._s(row))]
-                              }
-                            }
-                          ],
-                          null,
-                          false,
-                          131414210
-                        )
+                        on: { "row-clicked": _vm.settlmentAccountHandler }
                       }),
                       _vm._v(" "),
                       _c("b-pagination", {

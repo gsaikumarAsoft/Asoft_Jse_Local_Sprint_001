@@ -264,9 +264,9 @@ class BrokerController extends Controller
         //Trading Account Information
         $trading = BrokerTradingAccount::with('settlement_account')->find($request->trading_account)->first();
 
+
         //Settlement Account Information
         $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
-
 
         // Client Account Information
         $broker_client = BrokerClient::find($request->client_trading_account);
@@ -312,15 +312,15 @@ class BrokerController extends Controller
 
 
                 // Update Settlement Account Balances
-                $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                    ['id' => $trading->broker_settlement_account_id],
+                BrokerSettlementAccount::updateOrCreate(
+                    ['hash' => $settlement->hash],
                     ['amount_allocated' => $settlement_allocated]
                     // 'account_balance' => $settlement_account_balance 
                 );
 
 
                 // Update Broker Clients Open Orders
-                $broker_client_account = BrokerClient::updateOrCreate(
+                BrokerClient::updateOrCreate(
                     ['id' => $broker_client->id],
                     ['open_orders' => $client_open_orders]
                 );
@@ -335,7 +335,7 @@ class BrokerController extends Controller
         }
     }
 
-    public function createBrokerClientOrder(){
-        
+    public function createBrokerClientOrder()
+    {
     }
 }

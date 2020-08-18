@@ -35,7 +35,7 @@ import headNav from "./../partials/Nav.vue";
 export default {
   props: ["accounts"],
   components: {
-    "head-nav": headNav
+    "head-nav": headNav,
   },
   data() {
     return {
@@ -50,48 +50,48 @@ export default {
         {
           key: "foreign_broker.name",
           label: "Foreign Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "bank_name",
           label: "Settlement Agent",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account_balance",
-          sortable: true
+          sortable: true,
         },
         {
           key: "amount_allocated",
-          sortable: true
+          sortable: true,
         },
         {
           key: "currency",
-          sortable: true
+          sortable: true,
         },
         {
           key: "status",
-          sortable: true
-        }
+          sortable: true,
+        },
       ],
       modalTitle: "Create Broker Settlement Account",
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_settlement_account.length;
-    }
+    },
   },
   methods: {},
-  mounted() {}
+  mounted() {},
 };
 </script>

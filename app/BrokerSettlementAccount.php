@@ -24,11 +24,11 @@ class BrokerSettlementAccount extends Model
         'amount_allocated',
         'settlement_agent_status',
         'foreign_broker_status',
-        
+
     ];
 
     // public $timestamps = false;
-    
+
     public function local_broker()
     {
         return $this->belongsTo(User::class);
@@ -38,7 +38,4 @@ class BrokerSettlementAccount extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-  
-
 }

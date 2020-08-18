@@ -9,9 +9,7 @@
             striped
             hover
             show-empty
-            :empty-text="
-              'No Settlement Accounts have been Created. Create a Settlement Account below.'
-            "
+            :empty-text="'No Settlement Accounts have been Created. Create a Settlement Account below.'"
             id="foreign-brokers"
             :items="broker_settlement_accounts"
             :fields="fields"
@@ -21,9 +19,7 @@
           >
             <template v-slot:cell(hash)="data">
               <!-- `data.value` is the value after formatted by the Formatter -->
-              <b-button @click="resetFilledOrders(data)"
-                >Clear Unsettled Trades</b-button
-              >
+              <b-button @click="resetFilledOrders(data)">Clear Unsettled Trades</b-button>
               <!--{{ data.value }}-->
             </template>
           </b-table>
@@ -33,9 +29,7 @@
             :per-page="perPage"
             aria-controls="foreign-brokers"
           ></b-pagination>
-          <b-button @click="settlement_account = {}"
-            >Create Settlement Account</b-button
-          >
+          <b-button @click="settlement_account={}">Create Settlement Account</b-button>
           <!-- <b-button @click="importAccounts">Import Accounts</b-button> -->
           <b-button @click="exportBalances">Export Balances</b-button>
         </b-card>
@@ -69,11 +63,7 @@
                 required
               ></b-form-select>
             </b-form-group>
-            <b-form-group
-              label="Bank"
-              label-for="bank-input"
-              invalid-feedback=" Bank is required"
-            >
+            <b-form-group label="Bank" label-for="bank-input" invalid-feedback=" Bank is required">
               <b-form-input
                 id="bank-input"
                 v-model="settlement_account.bank_name"
@@ -161,9 +151,7 @@
               ></b-form-input>
             </b-form-group>
             <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button variant="danger" @click="settlement_account = null"
-              >Cancel</b-button
-            >
+            <b-button variant="danger" @click="settlement_account=null">Cancel</b-button>
           </form>
         </b-card>
       </div>
