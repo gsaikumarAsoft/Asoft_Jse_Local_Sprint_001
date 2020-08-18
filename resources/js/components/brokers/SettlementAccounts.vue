@@ -132,7 +132,7 @@ import checkErrorMixin from "../../mixins/CheckError.js";
 export default {
   props: ["settlement_accounts"],
   components: {
-    "head-nav": headNav
+    "head-nav": headNav,
   },
   mixins: [checkErrorMixin],
   data() {
@@ -147,20 +147,20 @@ export default {
         {
           key: "foreign_broker.name",
           label: "Foreign Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "bank_name",
           label: "Settlement Agent",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "filled_orders",
@@ -169,12 +169,12 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.filled_orders;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "account_balance",
@@ -182,12 +182,12 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.account_balance;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "available_balance",
@@ -195,7 +195,7 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var spent =
@@ -203,7 +203,7 @@ export default {
 
             var cal = item.account_balance - spent;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "amount_allocated",
@@ -211,31 +211,31 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.amount_allocated;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "currency",
-          sortable: true
+          sortable: true,
         },
         {
           key: "settlement_agent_status",
           label: "Status",
-          sortable: true
-        }
+          sortable: true,
+        },
       ],
 
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_settlement_account.length;
-    }
+    },
   },
   methods: {
     exportBalances() {
@@ -248,7 +248,7 @@ export default {
           this.broker_settlement_account[0].account,
           this.broker_settlement_account[0].email,
           this.broker_settlement_account[0].account_balance,
-          this.broker_settlement_account[0].amount_allocated
+          this.broker_settlement_account[0].amount_allocated,
         ]);
       }
 
@@ -269,10 +269,10 @@ export default {
             "Account",
             "Email",
             "Account Balance",
-            "Amount Allocated"
-          ]
+            "Amount Allocated",
+          ],
         ],
-        body: tableData
+        body: tableData,
       });
       doc.save("BrokerSettlementReport.pdf");
     },
@@ -288,7 +288,7 @@ export default {
         foreign_broker_id: this.settlement_account.foreign_broker_id,
         id: this.settlement_account.id,
         local_broker_id: this.settlement_account.local_broker_id,
-        status: "Unverified"
+        status: "Unverified",
       };
 
       this.$swal.fire({
@@ -297,7 +297,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
 
       // console.log(account);
@@ -336,7 +336,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       try {
         await axios.delete(`../settlement-account-delete/${id}`); //.then(response => {
@@ -352,7 +352,7 @@ export default {
       const { data } = await axios.get("local-brokers");
       this.local_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("local brokers", this.local_brokers);
     },
@@ -360,15 +360,15 @@ export default {
       const { data } = await axios.get("foreign-broker-list");
       this.foreign_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("foreign brokers", this.foreign_brokers);
-    }
+    },
   },
   async mounted() {
     await Promise.all([this.getlocalBrokers(), this.getForeignBrokers()]);
 
     // await this.getSettlementList();
-  }
+  },
 };
 </script>

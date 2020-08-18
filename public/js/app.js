@@ -74151,7 +74151,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["settlement_accounts"],
   components: {
-    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+    "head-nav": _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
   },
   mixins: [_mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_4__["default"]],
   data() {
@@ -74166,20 +74166,20 @@ __webpack_require__.r(__webpack_exports__);
         {
           key: "foreign_broker.name",
           label: "Foreign Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "bank_name",
           label: "Settlement Agent",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "filled_orders",
@@ -74188,12 +74188,12 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.filled_orders;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "account_balance",
@@ -74201,12 +74201,12 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.account_balance;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "available_balance",
@@ -74214,7 +74214,7 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var spent =
@@ -74222,7 +74222,7 @@ __webpack_require__.r(__webpack_exports__);
 
             var cal = item.account_balance - spent;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "amount_allocated",
@@ -74230,31 +74230,31 @@ __webpack_require__.r(__webpack_exports__);
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.amount_allocated;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "currency",
-          sortable: true
+          sortable: true,
         },
         {
           key: "settlement_agent_status",
           label: "Status",
-          sortable: true
-        }
+          sortable: true,
+        },
       ],
 
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.broker_settlement_account.length;
-    }
+    },
   },
   methods: {
     exportBalances() {
@@ -74267,7 +74267,7 @@ __webpack_require__.r(__webpack_exports__);
           this.broker_settlement_account[0].account,
           this.broker_settlement_account[0].email,
           this.broker_settlement_account[0].account_balance,
-          this.broker_settlement_account[0].amount_allocated
+          this.broker_settlement_account[0].amount_allocated,
         ]);
       }
 
@@ -74288,10 +74288,10 @@ __webpack_require__.r(__webpack_exports__);
             "Account",
             "Email",
             "Account Balance",
-            "Amount Allocated"
-          ]
+            "Amount Allocated",
+          ],
         ],
-        body: tableData
+        body: tableData,
       });
       doc.save("BrokerSettlementReport.pdf");
     },
@@ -74307,7 +74307,7 @@ __webpack_require__.r(__webpack_exports__);
         foreign_broker_id: this.settlement_account.foreign_broker_id,
         id: this.settlement_account.id,
         local_broker_id: this.settlement_account.local_broker_id,
-        status: "Unverified"
+        status: "Unverified",
       };
 
       this.$swal.fire({
@@ -74316,7 +74316,7 @@ __webpack_require__.r(__webpack_exports__);
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
 
       // console.log(account);
@@ -74355,7 +74355,7 @@ __webpack_require__.r(__webpack_exports__);
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       try {
         await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`../settlement-account-delete/${id}`); //.then(response => {
@@ -74371,7 +74371,7 @@ __webpack_require__.r(__webpack_exports__);
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("local-brokers");
       this.local_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("local brokers", this.local_brokers);
     },
@@ -74379,16 +74379,16 @@ __webpack_require__.r(__webpack_exports__);
       const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("foreign-broker-list");
       this.foreign_brokers = data.map(({ user }) => ({
         text: user.name,
-        value: user.id
+        value: user.id,
       }));
       console.log("foreign brokers", this.foreign_brokers);
-    }
+    },
   },
   async mounted() {
     await Promise.all([this.getlocalBrokers(), this.getForeignBrokers()]);
 
     // await this.getSettlementList();
-  }
+  },
 });
 
 
