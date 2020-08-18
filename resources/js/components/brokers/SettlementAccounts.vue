@@ -17,7 +17,7 @@
             :current-page="currentPage"
             @row-clicked="settlmentAccountHandler"
           >
-            <!-- <template slot="index" slot-scope="row">{{ row }}</template> -->
+            <template slot="index" slot-scope="row">{{ row }}</template>
           </b-table>
           <b-pagination
             v-model="currentPage"

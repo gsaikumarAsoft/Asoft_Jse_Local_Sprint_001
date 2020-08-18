@@ -572,7 +572,7 @@ class FunctionSet
                         // Update Settlement Account Balances
                         $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                             ['id' => $sa['id']],
-                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value, 'account_balance' => (int) $sa['account_balance'] + $order_value]
+                            ['amount_allocated' => (int) $sa['amount_allocated'] - $order_value]
                         );
 
 

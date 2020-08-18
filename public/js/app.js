@@ -79725,7 +79725,20 @@ var render = function() {
                           "per-page": _vm.perPage,
                           "current-page": _vm.currentPage
                         },
-                        on: { "row-clicked": _vm.settlmentAccountHandler }
+                        on: { "row-clicked": _vm.settlmentAccountHandler },
+                        scopedSlots: _vm._u(
+                          [
+                            {
+                              key: "index",
+                              fn: function(row) {
+                                return [_vm._v(_vm._s(row))]
+                              }
+                            }
+                          ],
+                          null,
+                          false,
+                          131414210
+                        )
                       }),
                       _vm._v(" "),
                       _c("b-pagination", {

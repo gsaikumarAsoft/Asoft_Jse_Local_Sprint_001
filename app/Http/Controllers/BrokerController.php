@@ -145,7 +145,7 @@ class BrokerController extends Controller
     {
 
         $user = auth()->user();
-        $a = BrokerSettlementAccount::with('foreign_broker')->where('local_broker_id', $user->id)->where('settlement_agent_status', 'Verified')->get();
+        $a = BrokerSettlementAccount::with('foreign_broker')->where('local_broker_id', $user->id)->where('settlement_agent_status', 'Verified')->distinct()->get();
         // return $a;
         return view('brokers.settlements')->with('accounts', $a);
     }
@@ -314,7 +314,7 @@ class BrokerController extends Controller
                 // Update Settlement Account Balances
                 BrokerSettlementAccount::updateOrCreate(
                     ['hash' => $settlement->hash],
-                    ['amount_allocated' => $settlement_allocated, 'account_balance' => $settlement_account_balance]
+                    ['amount_allocated' => $settlement_allocated]
                 );
 
 
