@@ -311,18 +311,6 @@ class BrokerController extends Controller
                 $client_open_orders = (int) $broker_client->open_orders + $order_value;
 
 
-                // // Update Settlement ACcount Balances
-                // BrokerSettlementAccount::updateOrCreate(
-                //     ['id' => $trading->broker_settlement_account_id],
-                //     ['amount_allocated' => $settlement_allocated]
-                // );
-
-
-                // // Update Broker Clients Open Orders
-                // BrokerClient::updateOrCreate(
-                //     ['id' => $request['client_trading_account']],
-                //     ['open_orders' => $client_open_orders]
-                // );
                 // Update Settlement Account Balances
                 $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                     ['id' => $trading->broker_settlement_account_id],
@@ -337,8 +325,6 @@ class BrokerController extends Controller
                     ['open_orders' => $client_open_orders]
                 );
 
-                // $this->LogActivity->addToLog('ORDER Submitted: JCSD:' . $broker_client->jcsd . '-' . $broker_client->name . ': Balance:' . $broker_client->account_balance . ', Open Orders:' . $client_open_orders);
-                // $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $settlement['account'] . ', Balance: ' . $settlement['account_balance'] . ', Amount Allocated: ' . $settlement['amount_allocated']);
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             }
@@ -347,5 +333,9 @@ class BrokerController extends Controller
             // Create the order in our databases and send order server side using curl
             return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
         }
+    }
+
+    public function createBrokerClientOrder(){
+        
     }
 }
