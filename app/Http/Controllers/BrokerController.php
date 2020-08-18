@@ -304,7 +304,7 @@ class BrokerController extends Controller
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
+                $settlement_ALL = (int) $settlement->amount_allocated + $order_value;
                 $settlement_account_balance = (int) $settlement->account_balance - $order_value;
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
@@ -312,7 +312,7 @@ class BrokerController extends Controller
 
                 //Update the allocated amount field in settlement account
                 //# $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
-                $setUpdate =  DB::table('broker_settlement_accounts')->where('id', $settlement->id)->update(['amount_allocated' => $settlement_allocated]);
+                $setUpdate =  DB::table('broker_settlement_accounts')->where('id', $settlement->id)->update(['amount_allocated' => $settlement_ALL]);
                 // $settlement_account_record = BrokerSettlementAccount::find($settlement->id);
                 // $settlement_account_record->amount_allocated = $settlement_allocated;
                 // $settlement_account_record->save();
