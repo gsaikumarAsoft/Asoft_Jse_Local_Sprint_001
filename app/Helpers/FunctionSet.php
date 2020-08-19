@@ -624,7 +624,7 @@ class FunctionSet
                         // UPDATE THE ORDER STATUS 
                         $broker_client_order = BrokerClientOrder::updateOrCreate(
                             ['id' => $current_order->id],
-                            ['order_status' => $status]
+                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - ($quantity * $current_order['price'])]
 
                         );
 
