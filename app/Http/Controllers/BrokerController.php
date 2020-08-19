@@ -316,8 +316,8 @@ class BrokerController extends Controller
 
 
         //Beta 2
-        $settlement_available = (int) $settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
-        $client_available = (int) $broker_client->account_balance - ($broker_client->open_orders + $broker_client->filled_orders);
+        $settlement_available = $settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
+        $client_available = $broker_client->account_balance - ($broker_client->open_orders + $broker_client->filled_orders);
         //=========================================================================
         // return $settlement_available ."=". $order_value;
 
@@ -336,11 +336,11 @@ class BrokerController extends Controller
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                $settlement_allocated = (int) $settlement->amount_allocated + $order_value;
-                $settlement_account_balance = (int) $settlement->account_balance - $order_value;
+                $settlement_allocated = $settlement->amount_allocated + $order_value;
+                $settlement_account_balance = $settlement->account_balance - $order_value;
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
-                $client_open_orders = (int) $broker_client->open_orders + $order_value;
+                $client_open_orders = $broker_client->open_orders + $order_value;
 
 
                 // Update Settlement Account Balances
