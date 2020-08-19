@@ -177,6 +177,7 @@ class BrokerController extends Controller
             ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.client_order_number')
             ->join('broker_trading_accounts', 'broker_client_orders.trading_account_id', 'broker_trading_accounts.id')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            ->orderBy('messageDate', 'asc')
             ->get();
 
         // $exec = BrokerOrderExecutionReport::where('senderSubID', $user->)->get();
@@ -242,7 +243,7 @@ class BrokerController extends Controller
         //     ->join('local_brokers', 'broker_client_orders.local_broker_id', 'local_brokers.id')
         //     ->get();
         $user = auth()->user();
-        $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->get();
+        $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->orderBy('created_at', 'desc')->get();
         foreach ($orders[0]['trading'] as $b2b) {
             $this->HelperClass->executionBalanceUpdate($user->name, $b2b->trading_account_number);
         }

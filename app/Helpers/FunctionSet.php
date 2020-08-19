@@ -297,7 +297,10 @@ class FunctionSet
                 $data['status'] = 'Session Failed';
                 $order = DB::table('broker_client_orders')
                     ->where('id', $broker_client_order->id)
-                    ->update(['order_status' => $this->OrderStatus->Failed()]);
+                    ->update([
+                        ['order_status' => $this->OrderStatus->Failed()],
+                        ['remaining' => 0.00]
+                    ]);
                 BrokerSettlementAccount::updateOrCreate(
                     ['hash' => $settlement->hash],
                     ['amount_allocated' => $settlement_allocated]
