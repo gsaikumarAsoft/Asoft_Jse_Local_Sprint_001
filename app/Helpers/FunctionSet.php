@@ -152,6 +152,7 @@ class FunctionSet
 
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
     {
+
         // Find Local Broker For This Order & Define the SenderSub Id
         $local_broker = $this->LocalBrokerPick($local_broker_id);
         $sender_sub_id = $local_broker->name;
@@ -164,7 +165,7 @@ class FunctionSet
         $foreign_broker_id = $this->getForeignBrokerById($trading->foreign_broker_id);
 
         //Settlement 
-        $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
+        $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
 
         // Locate the broker client for this order
         $client = BrokerClient::find($client_id);
@@ -319,7 +320,7 @@ class FunctionSet
             case "Please Check the endpoint /MessageDownload/Download for message queue":
                 // If the order is successfull create a log
                 $this->LogActivity->addToLog('Order Successfull: Please Check the endpoint /MessageDownload/Download for message queue' . '-' . $request->client_order_number);
-                $this->executionBalanceUpdate($sender_sub_id, $trading->trading_account_number);
+                $this->executionBalanceUpdate($sender_sub_id);
                 return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
                 break;
             default:
@@ -368,8 +369,6 @@ class FunctionSet
             foreach ($execution_report as $report) {
 
                 $clients[] = $report;
-
-                // return [$report, 'data' => array_values($report)[16]];
 
                 $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
                 // $record = BrokerOrderExecutionReport::where('senderSubID', $report->senderSubID)->where('seqNum', $report['seqNum'])->where('clOrdID', $report['clOrdID'])->where('sendingTime', $report['sendingTime']);
@@ -500,7 +499,7 @@ class FunctionSet
         //     }
         // }
     }
-    public function executionBalanceUpdate($sender_sub_id, $trading_account_number)
+    public function executionBalanceUpdate($sender_sub_id)
     {
         // Call fix and return excutiun report for the required SensderSubID
         $url = $this->fix_wrapper_url("api/messagedownload/download");
@@ -561,17 +560,26 @@ class FunctionSet
 
         //Find the broker order linked to this execution report (account number)
         $order = BrokerClientOrder::where('clordid', $order_number)->first();
-
         if ($order) {
             //Trading Account Information
             $trading = BrokerTradingAccount::find($order->trading_account_id)->first();
+            // return $trading;
 
+            // $s = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
+            // return $s;
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
-            $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $trading["trading_account_number"])
-                ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
-                ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            $settlement_account = DB::table('broker_settlement_accounts')->where('id', $trading->broker_settlement_account_id)
+                // ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
+                // ->join('broker_trading_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
                 ->get();
+
+            // $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $trading["trading_account_number"])
+            //     ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
+            //     ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            //     ->get();
+
             $array = json_decode(json_encode($settlement_account), true);
+            // return $array;
             if ($order && $broker_client) {
                 $current_order = $order;
                 $bc = $broker_client;
@@ -579,7 +587,7 @@ class FunctionSet
                 if ($current_order->id) {
                     $order_status = $this->orderStatus($current_order->id);
                     $sa = $array[0];
-
+                    // return $sa;
                     $order_value = $quantity * $price;
                     // return $order_status;
                     // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
@@ -681,7 +689,10 @@ class FunctionSet
                         } else {
                             $brokerClientOrder = BrokerClientOrder::updateOrCreate(
                                 ['id' => $current_order->id],
-                                ['order_status' => $this->OrderStatus->Filled(), 'remaining' => 0.00]
+                                [
+                                    'order_status' => $this->OrderStatus->Filled(),
+                                    'remaining' => $current_order['remaining'] - ($quantity * $current_order['price'])
+                                ]
 
                             );
                         }

@@ -92,15 +92,25 @@ class BrokerController extends Controller
     {
 
         $user = auth()->user();
+        // return $user->id;
 
-        $user_definition  = LocalBroker::where('user_id', $user->id)->first();
+        $user_definition  = LocalBroker::where('user_id', $user->id)->get();
 
-        $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition['id'])
+
+
+        $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition[0]->id)
             ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_trading_accounts.id', 'broker_settlement_accounts.currency')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
             ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
             ->join('users', 'foreign_brokers.user_id', 'users.id')
             ->get();
+
+        // //Find The Trading ACcounts For This Local Broker
+        // $t = BrokerTradingAccount::where('local_broker_id', $user_definition[0]->id)->get();
+        // return $t;
+        // $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition[0]->id)
+        //     ->get();
+
         return $broker;
     }
 
@@ -281,11 +291,14 @@ class BrokerController extends Controller
 
 
         //Trading Account Information
-        $trading = BrokerTradingAccount::with('settlement_account')->find($request->trading_account)->first();
+        $trading = BrokerTradingAccount::find($request['trading_account']);
+        // $trading_account_broker = $trading->local_broker_id;
+
+        // return $trading;
 
 
         //Settlement Account Information
-        $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
+        $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
 
         // Client Account Information
         $broker_client = BrokerClient::find($request->client_trading_account);
@@ -342,7 +355,6 @@ class BrokerController extends Controller
                     ['id' => $broker_client->id],
                     ['open_orders' => $client_open_orders]
                 );
-
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             }
