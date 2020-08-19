@@ -603,7 +603,7 @@ class FunctionSet
                         BrokerClientOrder::updateOrCreate(
 
                             ['id' => $current_order->id],
-                            ['order_status' => $status]
+                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_value]
 
                         );
 
