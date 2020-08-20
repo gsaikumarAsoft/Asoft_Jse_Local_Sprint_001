@@ -300,7 +300,7 @@ class FunctionSet
                     ->where('id', $broker_client_order->id)
                     ->update([
                         ['order_status' => $this->OrderStatus->Failed()],
-                        ['remaining' => 0.00]
+                        ['remaining' => $broker_client_order['remaining'] - $order_value]
                     ]);
                 BrokerSettlementAccount::updateOrCreate(
                     ['hash' => $settlement->hash],
@@ -332,7 +332,7 @@ class FunctionSet
                     ->where('id', $broker_client_order->id)
                     ->update([
                         ['order_status' => $this->OrderStatus->Failed()],
-                        ['remaining' => 0.00]
+                        ['remaining' => $broker_client_order['remaining'] - $order_value]
                     ]);
 
                 //Return Funds Upon Failing To Submit The Order
@@ -664,8 +664,8 @@ class FunctionSet
                             ['id' => $current_order->id],
                             ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
 
-                                // LogActivity::addToLog('Update Client Details');
-                                //Update Status
+                            // LogActivity::addToLog('Update Client Details');
+                            //Update Status
                         );
 
                         $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
