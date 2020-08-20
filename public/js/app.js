@@ -73314,7 +73314,7 @@ __webpack_require__.r(__webpack_exports__);
       ],
       broker_client_orders: [],
       broker: {},
-      perPage: 5,
+      perPage: 10,
       currentPage: 1,
       handling_options: [
         {
@@ -73874,9 +73874,9 @@ __webpack_require__.r(__webpack_exports__);
     });
     console.log("this.broker_client_orders", this.broker_client_orders);
 
-    this.broker_client_orders.sort(function (a, b) {
-      return b.client_order_number > a.client_order_number ? 0 : 1;
-    });
+    // this.broker_client_orders.sort(function (a, b) {
+    //   return b.client_order_number > a.client_order_number ? 0 : 1;
+    // });
     this.client_trading_account_options = client_accounts;
 
     this.$swal.close();
