@@ -73744,6 +73744,9 @@ __webpack_require__.r(__webpack_exports__);
           this.newOrderNumber();
         }
       } catch (error) {
+        this.order = {};
+        this.new_order = false;
+        this.newOrderNumber();
         this.checkOrderError(error);
       }
     },

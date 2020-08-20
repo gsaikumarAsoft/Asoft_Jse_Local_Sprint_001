@@ -1094,6 +1094,9 @@ export default {
           this.newOrderNumber();
         }
       } catch (error) {
+        this.order = {};
+        this.new_order = false;
+        this.newOrderNumber();
         this.checkOrderError(error);
       }
     },
