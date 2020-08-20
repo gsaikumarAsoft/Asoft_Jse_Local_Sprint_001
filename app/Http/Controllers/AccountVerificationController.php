@@ -118,7 +118,7 @@ class AccountVerificationController extends Controller
 
 
                 if (count($account) <= 0) {
-                    return response()->json(['isvalid' => false, 'errors' => 'You are trying to verify an expired account']);
+                    return response()->json(['valid' => false, 'message' => 'You are trying to verify an expired account']);
                 }
                 $account['account'] = $account[0]->account;
 
