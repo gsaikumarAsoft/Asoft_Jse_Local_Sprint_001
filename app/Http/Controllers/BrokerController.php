@@ -273,11 +273,6 @@ class BrokerController extends Controller
 
     public function destroyOrder($id)
     {
-        // $order = BrokerClientOrder::updateOrCreate(
-        //     ['clordid' => $id],
-        //     ['order_status' => 4]
-        // );
-
         return $this->HelperClass->cancelOrder($id);
     }
     public function clientOrder(Request $request)
@@ -353,13 +348,13 @@ class BrokerController extends Controller
                 // Update Broker Clients Open Orders
                 BrokerClient::updateOrCreate(
                     ['id' => $broker_client->id],
-                    ['open_orders' => $client_open_orders]
+                    ['open_orders' => max($client_open_orders, 0)]
                 );
                 // Create the order in our databases and send order server side using curl
                 return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
             }
         } else if ($side['fix_value'] === '2') {
-            // if side is = SELL
+            // Do not update balances
             // Create the order in our databases and send order server side using curl
             return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
         }
