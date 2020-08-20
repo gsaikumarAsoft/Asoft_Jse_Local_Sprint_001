@@ -594,12 +594,115 @@ class FunctionSet
                     $settlement_allocated = $sa['amount_allocated'] + $order_value;
                     // [Client Open Orders] = [Client Open Orders] + [Order Value]
                     $client_open_orders = $bc['open_orders'] + $order_value;
+                    $side = json_decode($order->side, true);
+                    if ($side['fix_value'] === '1') {
+                        //Only Update account Balances if this is a buy order
 
-                    //If offer is (Rejected, Cancelled, Expired Or New)
-                    if (
-                        $status === $this->OrderStatus->Expired() ||
-                        $status === $this->OrderStatus->_New()
-                    ) {
+                        //If offer is (Rejected, Cancelled, Expired Or New)
+                        if (
+                            $status === $this->OrderStatus->Expired() ||
+                            $status === $this->OrderStatus->_New()
+                        ) {
+                            // UPDATE ORDER STATUS ONLY
+                            BrokerClientOrder::updateOrCreate(
+
+                                ['id' => $current_order->id],
+                                ['order_status' => $status]
+
+                            );
+                        } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected() || $status === $this->OrderStatus->Cancelled()) {
+                            BrokerClientOrder::updateOrCreate(
+
+                                ['id' => $current_order->id],
+                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_value]
+
+                            );
+
+                            // Update Settlement Account Balances
+                            $broker_settlement = BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                ['amount_allocated' => $sa['amount_allocated'] - $order_value]
+                            );
+
+
+                            // Update Broker Clients Open Orders
+                            $broker_client_account = BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['open_orders' => $client_open_orders - $order_value]
+                            );
+                        } else if ($status === $this->OrderStatus->Filled()) {
+
+                            $order_price = $quantity * $current_order['price'];
+                            // UPDATE THE ORDER STATUS 
+                            $broker_client_order = BrokerClientOrder::updateOrCreate(
+                                ['id' => $current_order->id],
+                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
+
+                            );
+
+                            // Update Settlement Account Balances
+                            $broker_settlement = BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                ['filled_orders' => $sa['filled_orders'] + ($quantity * $price)]
+                            );
+
+
+                            // Update Broker Clients Open Orders
+                            $broker_client_account = BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['open_orders' => $bc['open_orders'] - $order_value, 'filled_orders' => $bc->filled_orders + $order_price]
+                            );
+                        } else if ($status === $this->OrderStatus->PartialFilled()) {
+
+                            $order_value = $quantity * $price;
+                            $current_order_value = $current_order['price'] * $current_order['quantity'];
+                            $current_filled_orders = $sa['filled_orders'];
+                            $being_filled = $current_order_value - $order_value;
+                            $remaining = $current_order['filled_orders'] + $current_order_value - $order_value;
+                            $order_price = $quantity * $current_order['price'];
+                            // if ($current_order['remaining'] > 0 && $current_order['remaining'] == number_format($current_order_value, 2, '.', '')) {
+
+                            //First Partial Fill
+                            $brokerClientOrder = BrokerClientOrder::updateOrCreate(
+                                ['id' => $current_order->id],
+                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
+
+                                // LogActivity::addToLog('Update Client Details');
+                                //Update Status
+                            );
+
+                            $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
+                                ['id' => $sa['id']],
+                                // ['amount_allocated' => $sa['fiRejectedlled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
+                                ['filled_orders' => $sa['filled_orders'] + $order_value]
+
+                            );
+
+                            // Update Broker Clients Open Orders
+                            $brokerClient = BrokerClient::updateOrCreate(
+                                ['id' => $bc->id],
+                                ['open_orders' => $bc['open_orders'] - $order_value, 'filled_orders' => $bc->filled_orders + $order_price]
+                            );
+                            // } else if ($current_order['remaining'] > 0 && $current_order['remaining'] < number_format($current_order_value, 2, '.', '')) {
+
+                            //     // second partial Fill
+                            //     $brokerClientOrder = BrokerClientOrder::updateOrCreate(
+                            //         ['id' => $current_order->id],
+                            //         ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
+
+                            //     );
+                            // } else {
+                            //     $brokerClientOrder = BrokerClientOrder::updateOrCreate(
+                            //         ['id' => $current_order->id],
+                            //         [
+                            //             'order_status' => $this->OrderStatus->Filled(),
+                            //             'remaining' => $current_order['remaining'] - $order_price]
+                            //         ]
+
+                            //     );
+                            // }
+                        }
+                    } else {
                         // UPDATE ORDER STATUS ONLY
                         BrokerClientOrder::updateOrCreate(
 
@@ -607,97 +710,6 @@ class FunctionSet
                             ['order_status' => $status]
 
                         );
-                    } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected() || $status === $this->OrderStatus->Cancelled()) {
-                        BrokerClientOrder::updateOrCreate(
-
-                            ['id' => $current_order->id],
-                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_value]
-
-                        );
-
-                        // Update Settlement Account Balances
-                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['amount_allocated' => $sa['amount_allocated'] - $order_value]
-                        );
-
-
-                        // Update Broker Clients Open Orders
-                        $broker_client_account = BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $client_open_orders - $order_value]
-                        );
-                    } else if ($status === $this->OrderStatus->Filled()) {
-
-                        $order_price = $quantity * $current_order['price'];
-                        // UPDATE THE ORDER STATUS 
-                        $broker_client_order = BrokerClientOrder::updateOrCreate(
-                            ['id' => $current_order->id],
-                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
-
-                        );
-
-                        // Update Settlement Account Balances
-                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            ['filled_orders' => $sa['filled_orders'] + ($quantity * $price)]
-                        );
-
-
-                        // Update Broker Clients Open Orders
-                        $broker_client_account = BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $bc['open_orders'] - $order_value, 'filled_orders' => $bc->filled_orders + $order_price]
-                        );
-                    } else if ($status === $this->OrderStatus->PartialFilled()) {
-
-                        $order_value = $quantity * $price;
-                        $current_order_value = $current_order['price'] * $current_order['quantity'];
-                        $current_filled_orders = $sa['filled_orders'];
-                        $being_filled = $current_order_value - $order_value;
-                        $remaining = $current_order['filled_orders'] + $current_order_value - $order_value;
-                        $order_price = $quantity * $current_order['price'];
-                        // if ($current_order['remaining'] > 0 && $current_order['remaining'] == number_format($current_order_value, 2, '.', '')) {
-
-                        //First Partial Fill
-                        $brokerClientOrder = BrokerClientOrder::updateOrCreate(
-                            ['id' => $current_order->id],
-                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
-
-                            // LogActivity::addToLog('Update Client Details');
-                            //Update Status
-                        );
-
-                        $brokerSettlement = BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $sa['id']],
-                            // ['amount_allocated' => $sa['fiRejectedlled_orders'] - $current_order_value, 'account_balance' => $sa['account_balance'] - $current_order_value, 'filled_orders' => $sa['filled_orders'] + $current_order_value]
-                            ['filled_orders' => $sa['filled_orders'] + $order_value]
-
-                        );
-
-                        // Update Broker Clients Open Orders
-                        $brokerClient = BrokerClient::updateOrCreate(
-                            ['id' => $bc->id],
-                            ['open_orders' => $bc['open_orders'] - $order_value, 'filled_orders' => $bc->filled_orders + $order_price]
-                        );
-                        // } else if ($current_order['remaining'] > 0 && $current_order['remaining'] < number_format($current_order_value, 2, '.', '')) {
-
-                        //     // second partial Fill
-                        //     $brokerClientOrder = BrokerClientOrder::updateOrCreate(
-                        //         ['id' => $current_order->id],
-                        //         ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
-
-                        //     );
-                        // } else {
-                        //     $brokerClientOrder = BrokerClientOrder::updateOrCreate(
-                        //         ['id' => $current_order->id],
-                        //         [
-                        //             'order_status' => $this->OrderStatus->Filled(),
-                        //             'remaining' => $current_order['remaining'] - $order_price]
-                        //         ]
-
-                        //     );
-                        // }
                     }
                 }
             }
