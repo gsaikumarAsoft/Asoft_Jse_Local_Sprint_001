@@ -585,8 +585,14 @@ class FunctionSet
             //Trading Account Information
             $trading = BrokerTradingAccount::find($order->trading_account_id)->first();
 
+            // Log Trading & Settlement Account to activity Log //
+            // Settlement & Broker Accounts
+            // $this->logActivity::addToLog('Order Update In Progress: Trading Account:' . $order->trading_account_id);
+            //
+
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
             $settlement_account = DB::table('broker_settlement_accounts')->where('id', $trading->broker_settlement_account_id)->get();
+
 
             //Previous
             // $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $trading["trading_account_number"])
