@@ -664,8 +664,8 @@ class FunctionSet
                             ['id' => $current_order->id],
                             ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_price]
 
-                            // LogActivity::addToLog('Update Client Details');
-                            //Update Status
+                                // LogActivity::addToLog('Update Client Details');
+                                //Update Status
                         );
 
                         $brokerSettlement = BrokerSettlementAccount::updateOrCreate(

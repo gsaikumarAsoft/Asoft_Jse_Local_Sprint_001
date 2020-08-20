@@ -115,8 +115,13 @@ class AccountVerificationController extends Controller
                 $broker = BrokerSettlementAccount::where('hash', $id)
                     ->update(['settlement_agent_status' => 'Verified']);
                 $account = DB::table('broker_settlement_accounts')->where('hash', $id)->get();
+
+
+                if (count($account) <= 0) {
+                    return response()->json(['isvalid' => false, 'errors' => 'You are trying to verify an expired account']);
+                }
                 $account['account'] = $account[0]->account;
-  
+
 
                 $foreign_broker = $this->HelperClass->getUserAll($account[0]->foreign_broker_id);
                 // $account->lo = $lo;
@@ -124,11 +129,11 @@ class AccountVerificationController extends Controller
                 $account['foreign_broker'] = $this->HelperClass->getUserAll($account[0]->foreign_broker_id)['name'];
                 $account['hash'] = $id;
 
-   
-                
+
+
                 $account['user_name'] = $account['foreign_broker'];
                 $account['level'] = 'Foreign';
-                
+
                 // DMA ADMIN WEB ISSUES - From Demo Session 2020-07-01
                 // - Remove Settlement Account Notification to Foreign Broker Email
                 // Mail::to($foreign_broker->email)->send(new SettlementAccountConfirmation($account));
@@ -138,7 +143,7 @@ class AccountVerificationController extends Controller
             case 'reject':
                 BrokerSettlementAccount::where('hash', $id)
                     ->update(['settlement_agent_status' => 'Rejected']);
-                
+
                 break;
         }
     }
@@ -165,12 +170,9 @@ class AccountVerificationController extends Controller
             case 'reject':
                 BrokerSettlementAccount::where('hash', $id)
                     ->update(['foreign_broker_status' => 'Rejected']);
-                    return view('layouts.rejected');
+                return view('layouts.rejected');
                 break;
         }
-
-
-      
     }
 
 
@@ -183,11 +185,11 @@ class AccountVerificationController extends Controller
                 $foreign_broker = BrokerSettlementAccount::where('id', $trading->broker_settlement_account_id)
                     ->update(['foreign_broker_status' => 'Verified']);
                 $account = BrokerSettlementAccount::where('id', $trading->broker_settlement_account_id)->first();
-                
+
                 $trading = DB::table('broker_trading_accounts')->select('target_comp_id', 'sender_comp_id')->where('broker_settlement_account_id', $account['id'])->get();
                 if ($account->settlement_agent_status === 'Verified' && $account->foreign_broker_status === 'Verified') {
 
-                    
+
                     $broker = BrokerTradingAccount::where('hash', $id)
                         ->update(['status' => 'Verified']);
                     $local_broker = $this->HelperClass->getUserAll($account->local_broker_id);
