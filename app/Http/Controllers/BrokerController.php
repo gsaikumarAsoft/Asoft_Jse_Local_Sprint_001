@@ -242,17 +242,12 @@ class BrokerController extends Controller
     {
         $local_brokers = LocalBroker::all();
         $foreign_brokers = ForeignBroker::all();
-        // $orders = BrokerClientOrder::all();
-        // $data = DB::table('broker_client_orders')
-        //     ->select('broker_client_orders.*', 'foreign_brokers.name as foreign_broker', 'local_brokers.name as local_broker')
-        //     ->join('foreign_brokers', 'broker_client_orders.foreign_broker_id', 'foreign_brokers.id')
-        //     ->join('local_brokers', 'broker_client_orders.local_broker_id', 'local_brokers.id')
-        //     ->get();
         $user = auth()->user();
         $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->orderBy('created_at', 'desc')->get();
-        foreach ($orders[0]['trading'] as $b2b) {
-            $this->HelperClass->executionBalanceUpdate($user->name, $b2b->trading_account_number);
-        }
+
+        // foreach ($orders[0]['trading'] as $b2b) {
+        // $this->HelperClass->executionBalanceUpdate($user->name, $b2b->trading_account_number);
+        // }
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
         // return $broker_traders;
         return view('brokers.order')->with('orders', $orders)->with('client_accounts', $broker_traders);
