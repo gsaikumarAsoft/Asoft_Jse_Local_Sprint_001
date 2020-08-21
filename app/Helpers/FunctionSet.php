@@ -310,7 +310,7 @@ class FunctionSet
                         ->where('id', $broker_client_order->id)
                         ->update([
                             ['order_status' => $this->OrderStatus->Failed()],
-                            ['remaining' => $broker_client_order['remaining'] - $order_value]
+                            ['remaining' => max($broker_client_order['remaining'] - $order_value, 0)]
                         ]);
 
                     BrokerSettlementAccount::updateOrCreate(
@@ -592,13 +592,6 @@ class FunctionSet
 
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
             $settlement_account = DB::table('broker_settlement_accounts')->where('id', $trading->broker_settlement_account_id)->get();
-
-
-            //Previous
-            // $settlement_account = DB::table('broker_trading_accounts')->where('trading_account_number', $trading["trading_account_number"])
-            //     ->select('broker_trading_accounts.broker_settlement_account_id as trading_id', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.*')
-            //     ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
-            //     ->get();
 
             $array = json_decode(json_encode($settlement_account), true);
 

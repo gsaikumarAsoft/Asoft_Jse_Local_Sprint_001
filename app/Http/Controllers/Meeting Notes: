@@ -1,0 +1,13 @@
+Meeting Notes: 
+
+Check if the order number already exists. If it does, regenerate number
+order all orders by the order id
+2020 08 20 03:34 + 4 random digits check if the order number already exists
+
+
+clientSEttlementBalance Update
+
+Session level reject message
+eg(Symbol Missing Etc) : check if quantity and price is present if not do not update the remaining balances
+
+What is selected for settlement & broker accounts Upon processing (clientSEttlementBalance)

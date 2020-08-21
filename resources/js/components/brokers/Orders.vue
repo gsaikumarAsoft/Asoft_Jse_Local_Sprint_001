@@ -1129,7 +1129,8 @@ export default {
       var dt = new Date();
       this.order = {};
       // The “OrderID” must be unique per request submitted.
-      this.order.client_order_number = formatteddatestr;
+      this.order.client_order_number =
+        formatteddatestr + ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },
     newOrderNumber() {
@@ -1137,7 +1138,8 @@ export default {
       var formatteddatestr = moment(d).format("YMMDhhmmss");
 
       var dt = new Date();
-      this.order.client_order_number = formatteddatestr;
+      this.order.client_order_number =
+        formatteddatestr + ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },
     addOption(index) {
@@ -1215,9 +1217,9 @@ export default {
     });
     console.log("this.broker_client_orders", this.broker_client_orders);
 
-    // this.broker_client_orders.sort(function (a, b) {
-    //   return b.client_order_number > a.client_order_number ? 0 : 1;
-    // });
+    this.broker_client_orders.sort(function (a, b) {
+      return b.client_order_number > a.client_order_number ? -1 : 1;
+    });
     this.client_trading_account_options = client_accounts;
 
     this.$swal.close();

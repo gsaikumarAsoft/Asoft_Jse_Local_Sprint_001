@@ -73781,7 +73781,8 @@ __webpack_require__.r(__webpack_exports__);
       var dt = new Date();
       this.order = {};
       // The “OrderID” must be unique per request submitted.
-      this.order.client_order_number = formatteddatestr;
+      this.order.client_order_number =
+        formatteddatestr + ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },
     newOrderNumber() {
@@ -73789,7 +73790,8 @@ __webpack_require__.r(__webpack_exports__);
       var formatteddatestr = moment__WEBPACK_IMPORTED_MODULE_0___default()(d).format("YMMDhhmmss");
 
       var dt = new Date();
-      this.order.client_order_number = formatteddatestr;
+      this.order.client_order_number =
+        formatteddatestr + ("" + Math.random()).substring(2, 5);
       // ===============================================/
     },
     addOption(index) {
@@ -73867,9 +73869,9 @@ __webpack_require__.r(__webpack_exports__);
     });
     console.log("this.broker_client_orders", this.broker_client_orders);
 
-    // this.broker_client_orders.sort(function (a, b) {
-    //   return b.client_order_number > a.client_order_number ? 0 : 1;
-    // });
+    this.broker_client_orders.sort(function (a, b) {
+      return b.client_order_number > a.client_order_number ? -1 : 1;
+    });
     this.client_trading_account_options = client_accounts;
 
     this.$swal.close();
