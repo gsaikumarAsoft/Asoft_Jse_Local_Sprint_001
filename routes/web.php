@@ -83,7 +83,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth', 'verified']], function (
 
 Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], function () {
     Route::get('/', 'ProfileController@index')->name('home');
-    Route::post('/store', "ProfileController@store"); 
+    Route::post('/store', "ProfileController@store");
 });
 
 
@@ -121,7 +121,7 @@ Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Midd
 Route::group(['prefix' => '/operator', 'middleware' => ['App\Http\Middleware\LocalBrokerOperatorMiddleware']], function () {
     Route::get('/', "OperatorController@index");
     Route::get('/clients', 'OperatorController@clients');
-    Route::get('/execution', 'BrokerController@execution');
+    Route::get('/execution', 'OperatorController@execution');
     Route::get('/operator-clients', 'OperatorController@clientList');
     Route::get('/trading-accounts', 'OperatorController@traderList');
     Route::post('/store-broker-trader', "TraderController@storeOperatorClient");
@@ -159,7 +159,7 @@ Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\Ad
     Route::get('foreign-broker-list/', 'ApplicationController@indexCad');
     Route::get('/foreign-brokers', 'ApplicationController@foreignBrokerList');
     Route::get('/local-broker-list', 'LocalBrokerController@index');
-    Route::get('/local-brokers', 'ApplicationController@brokerList'); 
+    Route::get('/local-brokers', 'ApplicationController@brokerList');
     Route::get('/settlements', 'ApplicationController@settlements');
     Route::get('/settlement-list', 'ApplicationController@settlementBrokerList');
     Route::post('/settlement-broker-update/{id}', 'ApplicationController@updateLocalBroker');

@@ -192,12 +192,6 @@ class BrokerController extends Controller
             ->orderBy('messageDate', 'asc')
             ->get();
 
-        // $exec = BrokerOrderExecutionReport::where('senderSubID', $user->)->get();
-
-
-        // foreach ($exec as $item) {
-        //     return $item;
-        // }
 
         // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);

@@ -10,6 +10,7 @@ use App\BrokerUser;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
 use App\LocalBroker;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class OperatorController extends Controller
@@ -25,6 +26,26 @@ class OperatorController extends Controller
     public function index()
     {
         return view('operators.index');
+    }
+    public function execution()
+    {
+        $user = auth()->user();
+
+        // return $user->local_broker_id;
+        $broker = LocalBroker::find($user->local_broker_id)->first();
+        // return $broker->user->name;
+        $execution_reports = DB::table('broker_client_order_execution_reports')
+            ->where('broker_client_order_execution_reports.senderSubID', $broker->user->name)
+            ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
+            ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.client_order_number')
+            ->join('broker_trading_accounts', 'broker_client_orders.trading_account_id', 'broker_trading_accounts.id')
+            ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            ->orderBy('messageDate', 'asc')
+            ->get();
+
+
+        // return $execution_reports;
+        return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
     public function clients()
     {

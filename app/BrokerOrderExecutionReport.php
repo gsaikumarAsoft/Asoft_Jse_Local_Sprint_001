@@ -31,4 +31,9 @@ class BrokerOrderExecutionReport extends Model
         'sendingTime',
         'messageDate',
     ];
+    public function order()
+    {
+        return $this->belongsTo(BrokerClientOrder::class);
+    }
 }
+ 
