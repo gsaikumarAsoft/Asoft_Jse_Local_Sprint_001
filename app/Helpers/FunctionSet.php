@@ -305,7 +305,7 @@ class FunctionSet
                 $data['status'] = 'Session Failed';
 
                 // Return funds only if this is a buy order as we deducted funds previously
-                if ($side['fix_status'] === 1) {
+                if ($side['fix_value'] === 1) {
                     $order = DB::table('broker_client_orders')
                         ->where('id', $broker_client_order->id)
                         ->update([
@@ -342,7 +342,7 @@ class FunctionSet
                 $data['status'] = $this->OrderStatus->Failed();
                 // ============================================================================================
 
-                if ($side['fix_status'] === 1) {
+                if ($side['fix_value'] === 1) {
                     DB::table('broker_client_orders')
                         ->where('id', $broker_client_order->id)
                         ->update([
