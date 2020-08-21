@@ -460,6 +460,7 @@
   </div>
 </template>
 <script lang="ts">
+import moment from "moment";
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
