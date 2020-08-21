@@ -889,7 +889,6 @@ export default {
         showLoaderOnConfirm: true,
         preConfirm: (request) => {
           // once the user is complete giving the file a name, show them the order modal
-
           var Filename = request;
           var blob = new Blob(
             [
@@ -1134,11 +1133,8 @@ export default {
       this.permissions.push(p[i].name);
     }
 
-    // if there are orders present
-    // if(JSON.parse(this.orders).length >= 1){
     this.broker_client_orders = JSON.parse(this.orders);
     console.log(this.broker_client_orders);
-    // }
   },
 };
 </script>
