@@ -507,6 +507,7 @@
   </div>
 </template>
 <script lang="ts">
+import moment from "moment";
 import saveAs from "file-saver";
 import Multiselect from "vue-multiselect";
 import axios from "axios";
@@ -1121,35 +1122,22 @@ export default {
     },
 
     displayNewOrder() {
+      var d = new Date();
+      var formatteddatestr = moment(d).format("YMMDhhmmss");
       this.new_order = true;
       this.disabled = false;
       var dt = new Date();
       this.order = {};
       // The “OrderID” must be unique per request submitted.
-      this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) +
-        "" +
-        dt.getFullYear() +
-        "" +
-        (dt.getMonth() + 1).toString().padStart(2, "0") +
-        "" +
-        dt.getDate().toString().padStart(2, "0") +
-        "" +
-        ("" + Math.random()).substring(2, 5);
+      this.order.client_order_number = formatteddatestr;
       // ===============================================/
     },
     newOrderNumber() {
+      var d = new Date();
+      var formatteddatestr = moment(d).format("YMMDhhmmss");
+
       var dt = new Date();
-      this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) +
-        "" +
-        dt.getFullYear() +
-        "" +
-        (dt.getMonth() + 1).toString().padStart(2, "0") +
-        "" +
-        dt.getDate().toString().padStart(2, "0") +
-        "" +
-        ("" + Math.random()).substring(2, 5);
+      this.order.client_order_number = formatteddatestr;
       // ===============================================/
     },
     addOption(index) {

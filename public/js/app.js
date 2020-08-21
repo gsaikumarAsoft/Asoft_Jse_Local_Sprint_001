@@ -72639,15 +72639,18 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var file_saver__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! file-saver */ "./node_modules/file-saver/dist/FileSaver.min.js");
-/* harmony import */ var file_saver__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(file_saver__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var vue_multiselect__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-multiselect */ "./node_modules/vue-multiselect/dist/vue-multiselect.min.js");
-/* harmony import */ var vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_multiselect__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
-/* harmony import */ var _mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../mixins/Currencies.js */ "./resources/js/mixins/Currencies.js");
-/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var file_saver__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! file-saver */ "./node_modules/file-saver/dist/FileSaver.min.js");
+/* harmony import */ var file_saver__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(file_saver__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var vue_multiselect__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue-multiselect */ "./node_modules/vue-multiselect/dist/vue-multiselect.min.js");
+/* harmony import */ var vue_multiselect__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(vue_multiselect__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../partials/Nav.vue */ "./resources/js/components/partials/Nav.vue");
+/* harmony import */ var _mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../mixins/Currencies.js */ "./resources/js/mixins/Currencies.js");
+/* harmony import */ var _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../mixins/CheckError.js */ "./resources/js/mixins/CheckError.js");
+
 
 
 
@@ -73167,10 +73170,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
   components: {
-    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
-    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_1___default()),
+    headNav: _partials_Nav_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
+    Multiselect: (vue_multiselect__WEBPACK_IMPORTED_MODULE_2___default()),
   },
-  mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_5__["default"]],
+  mixins: [_mixins_Currencies_js__WEBPACK_IMPORTED_MODULE_5__["default"], _mixins_CheckError_js__WEBPACK_IMPORTED_MODULE_6__["default"]],
   data() {
     return {
       // messageDownload: [],
@@ -73624,7 +73627,7 @@ __webpack_require__.r(__webpack_exports__);
               type: "application/json",
             }
           );
-          file_saver__WEBPACK_IMPORTED_MODULE_0___default()(blob, Filename + ".json");
+          file_saver__WEBPACK_IMPORTED_MODULE_1___default()(blob, Filename + ".json");
         },
         allowOutsideClick: () => !this.$swal.isLoading(),
       });
@@ -73636,7 +73639,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     async tradingAccounts() {
-      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-trading-accounts"); //.then(response => {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("broker-trading-accounts"); //.then(response => {
       //let data = response.data;
       console.log("tradingAccounts", data);
       this.broker_trading_account_options = data.map((x) => ({
@@ -73678,7 +73681,7 @@ __webpack_require__.r(__webpack_exports__);
     }, */
 
     async getBrokers() {
-      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("broker-list"); //.then(response => {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("broker-list"); //.then(response => {
       //let data = response.data;
       this.local_broker = data.map((x) => ({
         text: x.name,
@@ -73687,7 +73690,7 @@ __webpack_require__.r(__webpack_exports__);
 
       // this.broker_client_orders = data;
       // });
-      let { data: fdata } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("foreign-broker-list"); //.then(fresponse => {
+      let { data: fdata } = await axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("foreign-broker-list"); //.then(fresponse => {
       // let fdata = fresponse.data;
       this.foreign_broker = data.map((x) => ({
         text: x.name,
@@ -73727,7 +73730,7 @@ __webpack_require__.r(__webpack_exports__);
             this.$swal.showLoading();
           },
         });
-        const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.post(
+        const { data } = await axios__WEBPACK_IMPORTED_MODULE_3___default.a.post(
           "store-broker-client-order",
           this.order
         );
@@ -73765,41 +73768,28 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     async getSymbols() {
-      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/apis/symbols.json"); //.then(response => {
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("/apis/symbols.json"); //.then(response => {
       this.symbols = data;
       // });
     },
 
     displayNewOrder() {
+      var d = new Date();
+      var formatteddatestr = moment__WEBPACK_IMPORTED_MODULE_0___default()(d).format("YMMDhhmmss");
       this.new_order = true;
       this.disabled = false;
       var dt = new Date();
       this.order = {};
       // The “OrderID” must be unique per request submitted.
-      this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) +
-        "" +
-        dt.getFullYear() +
-        "" +
-        (dt.getMonth() + 1).toString().padStart(2, "0") +
-        "" +
-        dt.getDate().toString().padStart(2, "0") +
-        "" +
-        ("" + Math.random()).substring(2, 5);
+      this.order.client_order_number = formatteddatestr;
       // ===============================================/
     },
     newOrderNumber() {
+      var d = new Date();
+      var formatteddatestr = moment__WEBPACK_IMPORTED_MODULE_0___default()(d).format("YMMDhhmmss");
+
       var dt = new Date();
-      this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) +
-        "" +
-        dt.getFullYear() +
-        "" +
-        (dt.getMonth() + 1).toString().padStart(2, "0") +
-        "" +
-        dt.getDate().toString().padStart(2, "0") +
-        "" +
-        ("" + Math.random()).substring(2, 5);
+      this.order.client_order_number = formatteddatestr;
       // ===============================================/
     },
     addOption(index) {
@@ -73812,7 +73802,7 @@ __webpack_require__.r(__webpack_exports__);
 
     async destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-      const { data } = await axios__WEBPACK_IMPORTED_MODULE_2___default.a.delete(`destroy-broker-client-order/${id}`);
+      const { data } = await axios__WEBPACK_IMPORTED_MODULE_3___default.a.delete(`destroy-broker-client-order/${id}`);
       let valid = data;
       if (valid.isvalid) {
         this.notify("Request Sent", data.errors, "success", true);
