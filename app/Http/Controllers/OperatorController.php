@@ -32,8 +32,8 @@ class OperatorController extends Controller
         $user = auth()->user();
 
         // return $user->local_broker_id;
-        $broker = LocalBroker::find($user->local_broker_id)->first();
-        // return $broker->user->name;
+        $broker = LocalBroker::where('id', $user['local_broker_id'])->with('user')->first();
+
         $execution_reports = DB::table('broker_client_order_execution_reports')
             ->where('broker_client_order_execution_reports.senderSubID', $broker->user->name)
             ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
@@ -43,8 +43,6 @@ class OperatorController extends Controller
             ->orderBy('messageDate', 'asc')
             ->get();
 
-
-        // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
     }
     public function clients()
