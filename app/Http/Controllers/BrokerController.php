@@ -11,6 +11,7 @@ use App\BrokerUser;
 use App\ForeignBroker;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
+use App\Jobs\ExecutionBalanceUpdate;
 use App\LocalBroker;
 use App\Mail\TradingAccount;
 use App\Role;
@@ -245,11 +246,10 @@ class BrokerController extends Controller
         $user = auth()->user();
         $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->orderBy('created_at', 'desc')->get();
 
-        // foreach ($orders[0]['trading'] as $b2b) {
-        // $this->HelperClass->executionBalanceUpdate($user->name, $b2b->trading_account_number);
-        // }
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
-        // return $broker_traders;
+
+        $this->dispatch(new ExecutionBalanceUpdate());
+
         return view('brokers.order')->with('orders', $orders)->with('client_accounts', $broker_traders);
     }
     public function approvals()
