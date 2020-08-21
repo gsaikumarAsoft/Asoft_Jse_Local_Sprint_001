@@ -92,10 +92,9 @@ class BrokerController extends Controller
     {
 
         $user = auth()->user();
-        // return $user->id;
 
         $user_definition  = LocalBroker::where('user_id', $user->id)->first();
-
+        // return $user_definition->id;
 
 
         $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition->id)
@@ -118,11 +117,14 @@ class BrokerController extends Controller
     {
 
         $user = auth()->user();
+        $user_definition  = LocalBroker::where('id', $user->local_broker_id)->first();
+        // return $user_definition->id;
 
         //Local Broker Owner for trading account
         $local_broker_id = $user->local_broker_id;
 
-        $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $local_broker_id)
+
+        $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition->id)
             ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_settlement_accounts.currency', 'broker_trading_accounts.id')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
             ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
@@ -287,9 +289,6 @@ class BrokerController extends Controller
 
         //Trading Account Information
         $trading = BrokerTradingAccount::find($request['trading_account']);
-        // $trading_account_broker = $trading->local_broker_id;
-
-        // return $trading;
 
 
         //Settlement Account Information

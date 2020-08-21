@@ -289,11 +289,6 @@ class FunctionSet
         $fix_status = json_decode($result, true);
         $order_value = $request->quantity * $request->price;
 
-        /*
-        Below calculations changed from
-            $settlement_allocated = $settlement->amount_allocated + $order_value;
-            $client_open_orders = $client->open_orders + $order_value;
-        */
         $settlement_allocated = $settlement->amount_allocated - $order_value;
         $client_open_orders = $client->open_orders - $order_value;
         $side = json_decode($request->side, true);

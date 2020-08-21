@@ -83,60 +83,74 @@ class OperatorController extends Controller
 
 
         //Trading Account Information
-        $trading = BrokerTradingAccount::with('settlement_account')->find($request->trading_account)->first();
+        $trading = BrokerTradingAccount::find($request['trading_account']);
 
         //Settlement Account Information
-        $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id)->first();
+        $settlement = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
 
 
         // // Client Account Information
-        $c_account = BrokerClient::find($request['client_trading_account'])->first();
+        $broker_client = BrokerClient::find($request->client_trading_account);
 
         // Check if the client account status is approved before continueing the order. If not Kill it
-        if ($c_account->status != 'Verified') {
-            $this->LogActivity->addToLog('ORDER BLOCKED: JCSD:' . $c_account->jcsd . '-' . $c_account->name . 's account status needs to be updated from ' . $c_account->status . ' to Verified');
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $c_account->name . 's account status needs to be updated from ' . $c_account->status . ' to Verified']);
+        if ($broker_client->status != 'Verified') {
+            $this->LogActivity->addToLog('ORDER BLOCKED: JCSD:' . $broker_client->jcsd . '-' . $broker_client->name . 's account status needs to be updated from ' . $broker_client->status . ' to Verified');
+            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $broker_client->name . 's account status needs to be updated from ' . $broker_client->status . ' to Verified']);
         }
 
         // Calculations Before Creating A New Order
-        $order_value = $request->price * $request->quantity;
-        $settlement_available = $settlement->account_balance - $settlement->amount_allocated;
-        $client_available = $c_account->account_balance - $c_account->open_orders;
-        // //==================================================
-
-        if ($settlement_available < $order_value) {
-
-            // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
-
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
-        } else if ($client_available < $order_value) {
-
-            // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
-        } else {
-
-            // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 
-            $settlement_allocated = $settlement->amount_allocated + $order_value;
-
-            // [Client Open Orders] = [Client Open Orders] + [Order Value]
-            $client_open_orders = $c_account->open_orders + $order_value;
+        $order_value = $request->quantity * $request->price;
+        // $settlement_available = $settlement->account_balance - $settlement->amount_allocated;
 
 
-            // Update Settlement ACcount Balances
-            BrokerSettlementAccount::updateOrCreate(
-                ['id' => $trading->broker_settlement_account_id],
-                ['amount_allocated' => $settlement_allocated]
-            );
+        //Beta 2
+        $settlement_available = $settlement->account_balance - ($settlement->orders_filled + $settlement->amount_allocated);
+        $client_available = $broker_client->account_balance - ($broker_client->open_orders + $broker_client->filled_orders);
+        //=========================================================================
+        // return $settlement_available ."=". $order_value;
+
+        $side = json_decode($request->side, true);
+
+        // If SIDE = BUY
+        if ($side['fix_value'] === '1') {
+            if ($settlement_available < $order_value) {
+
+                // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
+
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
+            } else if ($client_available < $order_value) {
+
+                // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
+            } else {
+
+                // [Settlement Allocated] = [Settlement Allocated] + [Order Value] 
+                $settlement_allocated = $settlement->amount_allocated + $order_value;
+
+                // [Client Open Orders] = [Client Open Orders] + [Order Value]
+                $client_open_orders = $broker_client->open_orders + $order_value;
 
 
-            // Update Broker Clients Open Orders
-            BrokerClient::updateOrCreate(
-                ['id' => $request['client_trading_account']],
-                ['open_orders' => $client_open_orders]
-            );
+                // Update Settlement ACcount Balances
+                BrokerSettlementAccount::updateOrCreate(
+                    ['id' => $trading->broker_settlement_account_id],
+                    ['amount_allocated' => $settlement_allocated]
+                );
 
+
+                // Update Broker Clients Open Orders
+                BrokerClient::updateOrCreate(
+                    ['id' => $request['client_trading_account']],
+                    ['open_orders' => max($client_open_orders, 0)]
+                );
+
+                return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
+                // return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
+            }
+        } else if ($side['fix_value'] === '2') {
+            // Do not update balances
+            // Create the order in our databases and send order server side using curl
             return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
-            // return response()->json(['isvalid' => true, 'errors' => 'SEND NewOrderSingle() request to the RESTful API!']);
         }
     }
 }

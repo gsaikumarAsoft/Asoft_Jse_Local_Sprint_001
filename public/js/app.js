@@ -75649,15 +75649,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-
-
-
 // import jsonfile from 'jsonfile';
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["orders", "client_accounts"],
@@ -75933,7 +75924,7 @@ __webpack_require__.r(__webpack_exports__);
     },
   },
   watch: {
-    "order.time_in_force": function(d) {
+    "order.time_in_force": function (d) {
       // if (d.fix_value) {
       // console.log("d", d);
       var fix_value = d.fix_value;
@@ -76255,21 +76246,14 @@ __webpack_require__.r(__webpack_exports__);
       this.disabled = "0";
       this.modalTitle = "New Order";
       this.create = true;
-      var dt = new Date();
       // The “OrderID” must be unique per request submitted.
+      var d = new Date();
+      var formatteddatestr = moment(d).format("YMMDhhmmss");
+
+      var dt = new Date();
       this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) +
-        "" +
-        dt.getFullYear() +
-        "" +
-        (dt.getMonth() + 1).toString().padStart(2, "0") +
-        "" +
-        dt
-          .getDate()
-          .toString()
-          .padStart(2, "0") +
-        "" +
-        ("" + Math.random()).substring(2, 5);
+        formatteddatestr + ("" + Math.random()).substring(2, 5);
+      // ===============================================/
       // ===============================================/
     },
     addOption(index) {
@@ -80880,7 +80864,7 @@ var render = function() {
                                                   { attrs: { value: null } },
                                                   [
                                                     _vm._v(
-                                                      "-- Please select a Trading\n                        Account--"
+                                                      "\n                        -- Please select a Trading\n                        Account--\n                      "
                                                     )
                                                   ]
                                                 )
@@ -80940,7 +80924,7 @@ var render = function() {
                                                     { attrs: { value: null } },
                                                     [
                                                       _vm._v(
-                                                        "-- Please select a Client\n                        Account--"
+                                                        "\n                        -- Please select a Client\n                        Account--\n                      "
                                                       )
                                                     ]
                                                   )
@@ -80976,11 +80960,11 @@ var render = function() {
                                                 },
                                                 [
                                                   _vm._v(
-                                                    "JCSD-" +
+                                                    "\n                      JCSD-" +
                                                       _vm._s(b.jcsd) +
                                                       " :\n                      " +
                                                       _vm._s(b.name) +
-                                                      ' "Investor"'
+                                                      ' "Investor"\n                    '
                                                   )
                                                 ]
                                               )

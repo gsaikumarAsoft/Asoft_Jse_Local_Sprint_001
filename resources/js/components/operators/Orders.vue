@@ -3,10 +3,7 @@
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top:100px;">
       <div class="content">
-        <b-card
-          title="Current Orders"
-          v-if="permissions.indexOf('read-broker-order') !== -1"
-        >
+        <b-card title="Current Orders" v-if="permissions.indexOf('read-broker-order') !== -1">
           <div class="float-right" style="padding-bottom:10px;">
             <b-input
               id="search_content"
@@ -53,10 +50,7 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
-                  <b-form-group
-                    label="Trading Account"
-                    label-for="broker-input"
-                  >
+                  <b-form-group label="Trading Account" label-for="broker-input">
                     <b-form-select
                       v-model="order.trading_account"
                       :options="broker_trading_account_options"
@@ -65,10 +59,10 @@
                       @change="currencyHandler(order.trading_account)"
                     >
                       <template v-slot:first>
-                        <b-form-select-option :value="null"
-                          >-- Please select a Trading
-                          Account--</b-form-select-option
-                        >
+                        <b-form-select-option :value="null">
+                          -- Please select a Trading
+                          Account--
+                        </b-form-select-option>
                       </template>
                       <!-- <b-form-select-option
                         v-for="b in local_brokers_list"
@@ -87,18 +81,19 @@
                       :disabled="disabled == 1"
                     >
                       <template v-slot:first>
-                        <b-form-select-option :value="null"
-                          >-- Please select a Client
-                          Account--</b-form-select-option
-                        >
+                        <b-form-select-option :value="null">
+                          -- Please select a Client
+                          Account--
+                        </b-form-select-option>
                       </template>
                       <b-form-select-option
                         v-for="b in client_trading_account_options"
                         :value="b.id"
                         :key="b.id"
-                        >JCSD-{{ b.jcsd }} :
-                        {{ b.name }} "Investor"</b-form-select-option
                       >
+                        JCSD-{{ b.jcsd }} :
+                        {{ b.name }} "Investor"
+                      </b-form-select-option>
                     </b-form-select>
                   </b-form-group>
                 </b-col>
@@ -255,10 +250,7 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col>
-                  <b-form-group
-                    label="Handling Instructions"
-                    label-for="broker-input"
-                  >
+                  <b-form-group label="Handling Instructions" label-for="broker-input">
                     <multiselect
                       placeholder="Select an Instruction"
                       v-model="order.handling_instructions"
@@ -462,8 +454,7 @@
           v-if="permissions.indexOf('create-broker-order') !== -1"
           v-b-modal.jse-new-order
           @click="add"
-          >Create New Order</b-button
-        >
+        >Create New Order</b-button>
       </div>
     </div>
   </div>
@@ -749,7 +740,7 @@ export default {
     },
   },
   watch: {
-    "order.time_in_force": function(d) {
+    "order.time_in_force": function (d) {
       // if (d.fix_value) {
       // console.log("d", d);
       var fix_value = d.fix_value;
@@ -1071,21 +1062,14 @@ export default {
       this.disabled = "0";
       this.modalTitle = "New Order";
       this.create = true;
-      var dt = new Date();
       // The “OrderID” must be unique per request submitted.
+      var d = new Date();
+      var formatteddatestr = moment(d).format("YMMDhhmmss");
+
+      var dt = new Date();
       this.order.client_order_number =
-        Math.floor(1000 + Math.random() * 9000) +
-        "" +
-        dt.getFullYear() +
-        "" +
-        (dt.getMonth() + 1).toString().padStart(2, "0") +
-        "" +
-        dt
-          .getDate()
-          .toString()
-          .padStart(2, "0") +
-        "" +
-        ("" + Math.random()).substring(2, 5);
+        formatteddatestr + ("" + Math.random()).substring(2, 5);
+      // ===============================================/
       // ===============================================/
     },
     addOption(index) {
