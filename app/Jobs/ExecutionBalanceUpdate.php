@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\DB;
 class ExecutionBalanceUpdate implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     protected $api;
+
     protected $senderSubID;
     /**
      * Create a new job instance.
@@ -36,7 +38,7 @@ class ExecutionBalanceUpdate implements ShouldQueue
      */
     public function handle()
     {
-
+        // Download all data from the message download wrapper
         $url = env('FIX_API_URL') . "api/messagedownload/download";
         $data = array(
             'BeginString' => 'FIX.4.2',

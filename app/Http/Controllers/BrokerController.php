@@ -247,10 +247,19 @@ class BrokerController extends Controller
         $user = auth()->user();
         $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->orderBy('created_at', 'desc')->get();
 
+        // Call The Execution Balance Update Job
+        /*
+            * Run FIX Message Download Api
+            - Import new execution reports only
+            - Update the status of orders based on the execution report for this specific broker
+            - Update Account Balances based on (REJECTED,CANCELLED,NEW,FILLED,PARTIALLYFILLED)
+        */
         $executionBalanceUpdate = new ExecutionBalanceUpdate($user->name);
         $this->dispatch($executionBalanceUpdate);
+        /*--*/
+
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
-        // return $broker_traders;
+
         return view('brokers.order')->with('orders', $orders)->with('client_accounts', $broker_traders);
     }
     public function approvals()

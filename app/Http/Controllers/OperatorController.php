@@ -9,7 +9,9 @@ use App\BrokerTradingAccount;
 use App\BrokerUser;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
+use App\Jobs\ExecutionBalanceUpdate;
 use App\LocalBroker;
+use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -74,6 +76,20 @@ class OperatorController extends Controller
     {
         //Broker Operator
         $user = auth()->user();
+        // return $user;
+        $local_broker = LocalBroker::find($user->local_broker_id);
+
+        $broker_admin = User::find($local_broker->user_id);
+        // Call The Execution Balance Update Job
+        /*
+            * Run FIX Message Download Api
+            - Import new execution reports only
+            - Update the status of orders based on the execution report for this specific broker
+            - Update Account Balances based on (REJECTED,CANCELLED,NEW,FILLED,PARTIALLYFILLED)
+        */
+        $executionBalanceUpdate = new ExecutionBalanceUpdate($broker_admin->name);
+        $this->dispatch($executionBalanceUpdate);
+        /*--*/
 
         // Fetch All Broker Clients that are tied to the operators local broker
         $client_accounts = BrokerClient::where('local_broker_id', $user->local_broker_id)->get();
@@ -87,6 +103,9 @@ class OperatorController extends Controller
         } else {
             $orders = [];
         }
+
+
+        // $executionBalanceUpdate = new ExecutionBalanceUpdate($user);
         return view('operators.order')->with('orders', $orders)->with('client_accounts', $client_accounts);
     }
 
