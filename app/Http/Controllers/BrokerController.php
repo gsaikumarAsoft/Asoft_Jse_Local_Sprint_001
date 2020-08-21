@@ -243,13 +243,14 @@ class BrokerController extends Controller
     {
         $local_brokers = LocalBroker::all();
         $foreign_brokers = ForeignBroker::all();
+
         $user = auth()->user();
         $orders = LocalBroker::with('user', 'order', 'clients', 'trading')->where('user_id', $user['id'])->orderBy('created_at', 'desc')->get();
 
+        $executionBalanceUpdate = new ExecutionBalanceUpdate($user->name);
+        $this->dispatch($executionBalanceUpdate);
         $broker_traders = LocalBroker::where('user_id', $user['id'])->with('clients')->get();
-
-        $this->dispatch(new ExecutionBalanceUpdate());
-
+        // return $broker_traders;
         return view('brokers.order')->with('orders', $orders)->with('client_accounts', $broker_traders);
     }
     public function approvals()

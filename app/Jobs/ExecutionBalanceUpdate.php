@@ -17,14 +17,16 @@ class ExecutionBalanceUpdate implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $api;
+    protected $senderSubID;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($senderSubID)
     {
         $this->api = new FunctionSet;
+        $this->senderSubID = $senderSubID;
     }
 
     /**
@@ -34,40 +36,34 @@ class ExecutionBalanceUpdate implements ShouldQueue
      */
     public function handle()
     {
-        //Find All The Sender Sub IDs in the system and get a message download for each
-        $localBroker = DB::table('local_brokers')->get();
-        $senderSubIDs = array();
-        foreach ($localBroker as $broker) {
-            $b = User::find($broker->user_id);
-            array_push($senderSubIDs, $b['name']);
-        }
-        /*---------------------------------------------------------------------------*/
-        foreach ($senderSubIDs as $id) {
-            $url = env('FIX_API_URL') . "api/messagedownload/download";
-            $data = array(
-                'BeginString' => 'FIX.4.2',
-                "SenderSubID" => $id,
-                "seqNum" => 0,
-                'StartTime' => "11:00:00.000",
-                'EndTime' => "23:30:00.000",
-            );
-            $postdata = json_encode($data);
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-            $result = curl_exec($ch);
-            curl_close($ch);
+        $url = env('FIX_API_URL') . "api/messagedownload/download";
+        $data = array(
+            'BeginString' => 'FIX.4.2',
+            "SenderSubID" => $this->senderSubID,
+            "seqNum" => 0,
+            'StartTime' => "11:00:00.000",
+            'EndTime' => "23:30:00.000",
+        );
+        $postdata = json_encode($data);
 
-            $request = json_decode($result, true);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
+        curl_close($ch);
 
-            //Store Execution reports for above sender_Sub_id to database before updating account balances
-            return $this->api->logExecution($request);
+        $request = json_decode($result, true);
+        $account = $request['executionReports'];
+
+        //Store Execution reports for above sender_Sub_id to database before updating account balances
+        foreach ($account as $a) {
+            $this->api->logExecution($a);
         }
     }
 }

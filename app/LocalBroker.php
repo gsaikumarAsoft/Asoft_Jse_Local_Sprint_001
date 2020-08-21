@@ -39,7 +39,4 @@ class LocalBroker extends Model
     {
         return $this->hasMany(BrokerClientOrder::class);
     }
-    
-
 }
- 
