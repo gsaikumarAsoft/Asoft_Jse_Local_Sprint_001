@@ -94,11 +94,11 @@ class BrokerController extends Controller
         $user = auth()->user();
         // return $user->id;
 
-        $user_definition  = LocalBroker::where('user_id', $user->id)->get();
+        $user_definition  = LocalBroker::where('user_id', $user->id)->first();
 
 
 
-        $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition[0]->id)
+        $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition->id)
             ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_trading_accounts.id', 'broker_settlement_accounts.currency')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
             ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
@@ -106,7 +106,7 @@ class BrokerController extends Controller
             ->get();
 
         // //Find The Trading ACcounts For This Local Broker
-        // $t = BrokerTradingAccount::where('local_broker_id', $user_definition[0]->id)->get();
+        $t = BrokerTradingAccount::where('local_broker_id', $user_definition->id)->get();
         // return $t;
         // $broker = DB::table('broker_trading_accounts')->where('broker_trading_accounts.local_broker_id', $user_definition[0]->id)
         //     ->get();
@@ -341,7 +341,7 @@ class BrokerController extends Controller
                 // Update Settlement Account Balances
                 BrokerSettlementAccount::updateOrCreate(
                     ['hash' => $settlement->hash],
-                    ['amount_allocated' => max($settlement_allocated, 0)]
+                    ['amount_allocated' => $settlement_allocated]
                 );
 
 
