@@ -821,7 +821,7 @@ export default {
         footer: "<a href='orders' >Exit</a>",
       }); //.then(result => {
       if (result.value) {
-        if (this.permissions.indexOf("update-broker-order") !== -1) {
+        if (this.permissions.indexOf("read-broker-order") !== -1) {
           this.$bvModal.show("jse-new-order");
           this.modalTitle = `Viewing Order ${o.clordid}`;
         } else {
