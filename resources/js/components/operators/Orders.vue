@@ -987,12 +987,9 @@ export default {
           let valid = data.isvalid;
           console.log(data);
           if (valid) {
-            console.log(data);
-            this.$swal(data.errors);
-            setTimeout(location.reload.bind(location), 2000);
+            this.notify("Order Created", data.errors, "success", true);
           } else {
-            this.$swal(data.errors);
-            setTimeout(location.reload.bind(location), 2000);
+            this.notify("Order Failed", data.errors, "warning", false);
           }
         } catch (error) {
           var s = error.response.data.message;
@@ -1004,6 +1001,16 @@ export default {
           }
         }
       }
+    },
+    notify(title, message, type, confirm) {
+      this.$swal({
+        title: title,
+        text: message,
+        type: type,
+        // showConfirmButton: confirm,
+      }).then(function () {
+        window.location.reload();
+      });
     },
     async callFix() {
       let order_sample = {
