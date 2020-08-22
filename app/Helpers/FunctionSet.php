@@ -283,7 +283,8 @@ class FunctionSet
         // ================================================================================================
         $data['text'] = 'Order Submitted Successfully';
         $data['status'] = 'Submitted';
-        $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+        $this->logExecution($data);
+        // $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
         // ================================================================================================
 
         $fix_status = json_decode($result, true);
@@ -322,7 +323,7 @@ class FunctionSet
                 }
 
 
-                $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+                $this->logExecution($data); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
                 break;
             case "Please Check the endpoint /MessageDownload/Download for message queue":
@@ -363,7 +364,7 @@ class FunctionSet
                 }
 
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+                $this->logExecution($data); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
                 break;
         }

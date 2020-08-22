@@ -61,11 +61,11 @@ class ExecutionBalanceUpdate implements ShouldQueue
         curl_close($ch);
 
         $request = json_decode($result, true);
-        $account = $request['executionReports'];
+        $execution_report = $request['executionReports'];
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        foreach ($account as $a) {
-            $this->api->logExecution($a);
+        foreach ($execution_report as $report) {
+            $this->api->logExecution($report);
         }
     }
 }
