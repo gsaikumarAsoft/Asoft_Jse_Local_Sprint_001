@@ -73726,6 +73726,7 @@ __webpack_require__.r(__webpack_exports__);
           html: "Please wait while we validate your order..",
           timerProgressBar: true,
           showCancelButton: false,
+          allowOutsideClick: false,
           onBeforeOpen: () => {
             this.$swal.showLoading();
           },
@@ -76148,8 +76149,9 @@ __webpack_require__.r(__webpack_exports__);
       this.$swal
         .fire({
           title: "Creating Client Order",
-          html: "One moment while we setup the current order",
+          html: "One moment while we validate your order",
           timerProgressBar: true,
+          allowOutsideClick: false,
           onBeforeOpen: () => {
             this.$swal.showLoading();
           },

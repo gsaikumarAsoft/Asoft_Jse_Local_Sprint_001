@@ -36,13 +36,13 @@ Route::get('/home', function () {
 Route::get('/home-test', function () {
     $this->OrderStatus = new OrderStatus;
     // Determine variables for use
-    $order_number = '20200823013514528';
+    $order_number = '20200823015307383';
     $side = '1';
     $sender_sub_id = 'NCB';
-    $price = '12.22';
-    $quantity = '50';
-    $status = '2';
-    $jcsd_num = 'JCSD32423';
+    $price = '4.22';
+    $quantity = '10';
+    $status = '1';
+    $jcsd_num = 'JCSD324878';
 
     // return $order_number;
     // Define the clients jcsd number

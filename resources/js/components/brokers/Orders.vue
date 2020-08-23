@@ -1074,6 +1074,7 @@ export default {
           html: "Please wait while we validate your order..",
           timerProgressBar: true,
           showCancelButton: false,
+          allowOutsideClick: false,
           onBeforeOpen: () => {
             this.$swal.showLoading();
           },

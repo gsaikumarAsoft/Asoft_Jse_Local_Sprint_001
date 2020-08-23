@@ -622,26 +622,24 @@ class FunctionSet
                                 ['open_orders' => $trader['open_orders'] - $allocated_value_of_order]
                             );
                         } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
-                            $order_value = $current_order['quantity'] * $current_order['price'];
-
                             BrokerClientOrder::updateOrCreate(
 
                                 ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_value]
+                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
 
                             );
 
                             // Update Settlement Account Balances
                             $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $broker_settlement_account['id']],
-                                ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $order_value]
+                                ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order]
                             );
 
 
                             // Update Broker Clients Open Orders
                             $broker_client_account = BrokerClient::updateOrCreate(
                                 ['id' => $trader->id],
-                                ['open_orders' => $trader['open_orders'] - $order_value]
+                                ['open_orders' => $trader['open_orders'] - $allocated_value_of_order]
                             );
                         } else if ($status === $this->OrderStatus->Filled()) {
 
