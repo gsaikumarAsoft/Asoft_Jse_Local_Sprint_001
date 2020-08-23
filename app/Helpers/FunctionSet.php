@@ -306,19 +306,19 @@ class FunctionSet
                         ->where('id', $broker_client_order->id)
                         ->update([
                             ['order_status' => $this->OrderStatus->Failed()],
-                            ['remaining' => max($broker_client_order['remaining'] - $order_value, 0)]
+                            ['remaining' => $broker_client_order['remaining'] - $order_value]
                         ]);
 
                     BrokerSettlementAccount::updateOrCreate(
                         ['hash' => $settlement->hash],
-                        ['amount_allocated' => max($settlement_allocated, 0)]
+                        ['amount_allocated' => $settlement_allocated]
                     );
 
 
                     // Update Broker Clients Open Orders
                     BrokerClient::updateOrCreate(
                         ['id' => $client_id],
-                        ['open_orders' => max($client_open_orders, 0)]
+                        ['open_orders' => $client_open_orders]
                     );
                 }
 
@@ -343,7 +343,7 @@ class FunctionSet
                         ->where('id', $broker_client_order->id)
                         ->update([
                             ['order_status' => $this->OrderStatus->Failed()],
-                            ['remaining' => max($broker_client_order['remaining'] - $order_value, 0)]
+                            ['remaining' => $broker_client_order['remaining'] - $order_value]
                         ]);
 
                     //Return Funds Upon Failing To Submit The Order
@@ -351,14 +351,14 @@ class FunctionSet
 
                     BrokerSettlementAccount::updateOrCreate(
                         ['hash' => $settlement->hash],
-                        ['amount_allocated' => max($settlement_allocated, 0)]
+                        ['amount_allocated' => $settlement_allocated]
                     );
 
 
                     // Update Broker Clients Open Orders
                     BrokerClient::updateOrCreate(
                         ['id' => $client_id],
-                        ['open_orders' => max($client_open_orders, 0)]
+                        ['open_orders' => $client_open_orders]
                     );
                     $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
                 }
