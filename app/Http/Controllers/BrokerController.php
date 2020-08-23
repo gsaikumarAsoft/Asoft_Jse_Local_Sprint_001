@@ -329,8 +329,8 @@ class BrokerController extends Controller
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Client Funds!']);
             } else {
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                $settlement_allocated = $settlement->amount_allocated + $order_value;
-                $settlement_account_balance = $settlement->account_balance - $order_value;
+                $settlement_allocated = max($settlement->amount_allocated + $order_value, 0);
+                $settlement_account_balance = max($settlement->account_balance - $order_value, 0);
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
                 $client_open_orders = $broker_client->open_orders + $order_value;

@@ -343,7 +343,7 @@ class FunctionSet
                         ->where('id', $broker_client_order->id)
                         ->update([
                             ['order_status' => $this->OrderStatus->Failed()],
-                            ['remaining' => $broker_client_order['remaining'] - $order_value]
+                            ['remaining' => max($broker_client_order['remaining'] - $order_value, 0)]
                         ]);
 
                     //Return Funds Upon Failing To Submit The Order
@@ -589,6 +589,7 @@ class FunctionSet
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
             $settlement_account = DB::table('broker_settlement_accounts')->where('id', $trading->broker_settlement_account_id)->get();
 
+
             $array = json_decode(json_encode($settlement_account), true);
 
             if ($order && $broker_client) {
@@ -599,17 +600,17 @@ class FunctionSet
                     $order_status = $this->orderStatus($current_order->id);
                     $sa = $array[0];
 
-                    $order_value = $quantity * $price; //ER Order Value
+                    $order_value = max($quantity * $price, 0); //ER Order Value
 
                     // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                    $settlement_allocated = $sa['amount_allocated'] + $order_value;
+                    $settlement_allocated = max($sa['amount_allocated'] + $order_value, 0);
 
                     // [Client Open Orders] = [Client Open Orders] + [Order Value]
-                    $client_open_orders = $bc['open_orders'] + $order_value;
+                    $client_open_orders = max($bc['open_orders'] + $order_value, 0);
 
                     // Allocated Value of order [Release what was initially allocated per stock]
-                    $allocated_value_of_order = $quantity * $current_order['price'];
-                    $filled_value = $quantity * $price;
+                    $allocated_value_of_order = max($quantity * $current_order['price'], 0);
+                    $filled_value = max($quantity * $price, 0);
 
                     //Determine If The Order Is A Buy Or Sell
                     $side = json_decode($order->side, true);
@@ -630,14 +631,14 @@ class FunctionSet
                             BrokerClientOrder::updateOrCreate(
 
                                 ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['order_status' => $status, 'remaining' => max($current_order['remaining'] - $allocated_value_of_order, 0)]
 
                             );
 
                             // Update Settlement Account Balances
                             $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['amount_allocated' => $sa['amount_allocated'] - $allocated_value_of_order]
+                                ['amount_allocated' => max($sa['amount_allocated'] - $allocated_value_of_order, 0)]
                             );
 
 
@@ -652,14 +653,14 @@ class FunctionSet
                             BrokerClientOrder::updateOrCreate(
 
                                 ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $order_value]
+                                ['order_status' => $status, 'remaining' => max($current_order['remaining'] - $order_value, 0)]
 
                             );
 
                             // Update Settlement Account Balances
                             $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['amount_allocated' => $sa['amount_allocated'] - $order_value]
+                                ['amount_allocated' => max($sa['amount_allocated'] - $order_value, 0)]
                             );
 
 
@@ -673,41 +674,41 @@ class FunctionSet
                             // UPDATE THE ORDER STATUS 
                             $broker_client_order = BrokerClientOrder::updateOrCreate(
                                 ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['order_status' => $status, 'remaining' => max($current_order['remaining'] - $allocated_value_of_order, 0)]
 
                             );
 
                             // Update Settlement Account Balances
                             $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['amount_allocated' => $sa['amount_allocated'] - $allocated_value_of_order, 'filled_orders' => $sa['filled_orders'] + $filled_value]
+                                ['amount_allocated' => max($sa['amount_allocated'] - $allocated_value_of_order, 0), 'filled_orders' => max($sa['filled_orders'] + $filled_value, 0)]
                             );
 
 
                             // Update Broker Clients Open Orders
                             $broker_client_account = BrokerClient::updateOrCreate(
                                 ['id' => $bc->id],
-                                ['open_orders' => max($bc['open_orders'] - $allocated_value_of_order, 0), 'filled_orders' => $bc->filled_orders + $filled_value]
+                                ['open_orders' => max($bc['open_orders'] - $allocated_value_of_order, 0), 'filled_orders' => max($bc->filled_orders + $filled_value, 0)]
                             );
                         } else if ($status === $this->OrderStatus->PartialFilled()) {
                             // UPDATE THE ORDER STATUS 
                             $broker_client_order = BrokerClientOrder::updateOrCreate(
                                 ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['order_status' => $status, 'remaining' => max($current_order['remaining'] - $allocated_value_of_order, 0)]
 
                             );
 
                             // Update Settlement Account Balances
                             $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $sa['id']],
-                                ['amount_allocated' => $sa['amount_allocated'] - $allocated_value_of_order, 'filled_orders' => $sa['filled_orders'] + $filled_value]
+                                ['amount_allocated' => max($sa['amount_allocated'] - $allocated_value_of_order, 0), 'filled_orders' => max($sa['filled_orders'] + $filled_value, 0)]
                             );
 
 
                             // Update Broker Clients Open Orders
                             $broker_client_account = BrokerClient::updateOrCreate(
                                 ['id' => $bc->id],
-                                ['open_orders' => max($bc['open_orders'] - $allocated_value_of_order, 0), 'filled_orders' => $bc->filled_orders + $filled_value]
+                                ['open_orders' => max($bc['open_orders'] - $allocated_value_of_order, 0), 'filled_orders' => max($bc->filled_orders + $filled_value, 0)]
                             );
                         }
                     } else {
