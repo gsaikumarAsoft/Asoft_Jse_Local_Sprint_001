@@ -567,7 +567,7 @@ class FunctionSet
         $order = BrokerClientOrder::where('clordid', $order_number)->first();
         if ($order) {
             //Trading Account Information
-            $trading = BrokerTradingAccount::find($order->trading_account_id);
+            $trading = BrokerTradingAccount::find((int)$order->trading_account_id);
 
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
             $settlement_account = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
