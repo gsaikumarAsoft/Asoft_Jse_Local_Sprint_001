@@ -200,7 +200,17 @@ class BrokerController extends Controller
 
     public function mdTest()
     {
-        return $this->HelperClass->executionBalanceUpdate("BARITA", 'JSE_TRADER3');
+        $user = auth()->user();
+        // Call The Execution Balance Update Job
+        /*
+            * Run FIX Message Download Api
+            - Import new execution reports only
+            - Update the status of orders based on the execution report for this specific broker
+            - Update Account Balances based on (REJECTED,CANCELLED,NEW,FILLED,PARTIALLYFILLED)
+        */
+        $executionBalanceUpdate = new ExecutionBalanceUpdate($user->name);
+        $this->dispatch($executionBalanceUpdate);
+        /*--*/
     }
     public function logExecution(Request $request)
     {

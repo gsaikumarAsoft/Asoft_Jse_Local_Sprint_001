@@ -554,59 +554,33 @@ class FunctionSet
         $price = array_values($data)[13];
         $quantity = array_values($data)[9];
         $status = array_values($data)[5];
-
-        //Forward To LogExecution Function
         $jcsd_num = array_values($data)[12];
-
-        // return $order_number;
-
-        //Simulation Data Variables ========================//
-        // $jcsd_num = array_values($data)[13];
-        // $quantity = array_values($data)[10];
-        // $price = array_values($data)[14];
-        // $status = array_values($data)[5];
-        //    ==================================================
 
         // Define the clients jcsd number
         $jcsd = str_replace('JCSD', "", $jcsd_num);
 
-        // Define The broker client
+        // // Define The broker client
         $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
 
 
         //Find the broker order linked to this execution report (account number)
         $order = BrokerClientOrder::where('clordid', $order_number)->first();
-
         if ($order) {
             //Trading Account Information
-            $trading = BrokerTradingAccount::find($order->trading_account_id)->first();
-
-            // Log Trading & Settlement Account to activity Log //
-            // Settlement & Broker Accounts
-            // $this->logActivity::addToLog('Order Update In Progress: Trading Account:' . $order->trading_account_id);
-            //
+            $trading = BrokerTradingAccount::find($order->trading_account_id);
 
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
-            $settlement_account = DB::table('broker_settlement_accounts')->where('id', $trading->broker_settlement_account_id)->get();
-
-
-            $array = json_decode(json_encode($settlement_account), true);
+            $settlement_account = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
 
             if ($order && $broker_client) {
                 $current_order = $order;
                 $trader = $broker_client;
 
                 if ($current_order->id) {
-                    $order_status = $this->orderStatus($current_order->id);
-                    $broker_settlement_account = $array[0];
+                    // $order_status = $this->orderStatus($current_order->id);
+                    $broker_settlement_account = $settlement_account;
 
                     $order_value = max($quantity * $price, 0); //ER Order Value
-
-                    // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                    $settlement_allocated = max($broker_settlement_account['amount_allocated'] + $order_value, 0);
-
-                    // [Client Open Orders] = [Client Open Orders] + [Order Value]
-                    $client_open_orders = max($trader['open_orders'] + $order_value, 0);
 
                     // Allocated Value of order [Release what was initially allocated per stock]
                     $allocated_value_of_order = max($quantity * $current_order['price'], 0);
