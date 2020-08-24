@@ -73317,7 +73317,7 @@ __webpack_require__.r(__webpack_exports__);
       ],
       broker_client_orders: [],
       broker: {},
-      perPage: 10,
+      perPage: 5,
       currentPage: 1,
       handling_options: [
         {
@@ -78425,7 +78425,10 @@ var render = function() {
                     [
                       _c(
                         "div",
-                        { staticClass: "float-right" },
+                        {
+                          staticClass: "float-right",
+                          staticStyle: { "margin-bottom": "15px" }
+                        },
                         [
                           _c("b-input", {
                             staticClass: "mb-2 mr-sm-2 mb-sm-0",
