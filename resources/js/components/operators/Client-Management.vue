@@ -136,11 +136,6 @@ export default {
         { key: 3, text: "Un-Verified", value: "Un-Verified" },
       ],
       fields: [
-        // {
-        //   key: "local_broker.name",
-        //   label: "Local Broker",
-        //   sortable: true
-        // },
         {
           key: "name",
           sortable: true,
@@ -167,10 +162,55 @@ export default {
             return formatter.format(cal);
           },
         },
-        // {
-        //   key: "types",
-        //   label: "Access Permissions"
-        // }
+        {
+          key: "open_orders",
+          label: "Open Orders",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+            var nf = Intl.NumberFormat();
+            var cal = item.open_orders;
+            return nf.format(cal);
+          },
+        },
+        {
+          key: "filled_orders",
+          label: "Unsettled Trades",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+
+            var nf = Intl.NumberFormat();
+            var cal = Number(item.filled_orders);
+            return nf.format(cal);
+          },
+        },
+        {
+          key: "available",
+          label: "Available",
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+
+            var spent = Number(item.filled_orders) + Number(item.open_orders);
+
+            var cal = item.account_balance - spent;
+            return formatter.format(cal);
+          },
+        },
+        {
+          key: "jcsd",
+          label: "JCSD",
+          sortable: true,
+        },
       ],
       modalTitle: "Client Update",
       nameState: null,
