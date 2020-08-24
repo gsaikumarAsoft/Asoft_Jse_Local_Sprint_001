@@ -35,8 +35,6 @@
             activated on your account
           </p>
         </b-card>
-        <!-- <pre>{{broker_client_orders}}</pre> -->
-        <div v-if="!create"></div>
         <b-modal
           :hide-footer="!create"
           id="jse-new-order"
@@ -539,6 +537,7 @@ export default {
             // return symbol.text;
           },
         },
+        { key: "client_name", label: "Client", sortable: true },
         {
           key: "currency",
           label: "Currency",
