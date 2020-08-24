@@ -302,12 +302,10 @@ class FunctionSet
 
                 // Return funds only if this is a buy order as we deducted funds previously
                 if ($side['fix_value'] === 1) {
-                    $order = DB::table('broker_client_orders')
-                        ->where('id', $broker_client_order->id)
-                        ->update([
-                            ['order_status' => $this->OrderStatus->Failed()],
-                            ['remaining' => $broker_client_order['remaining'] - $order_value]
-                        ]);
+                    BrokerClientOrder::updateOrCreate(
+                        ['id', $broker_client_order['id']],
+                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
+                    );
 
                     BrokerSettlementAccount::updateOrCreate(
                         ['hash' => $settlement->hash],
@@ -339,13 +337,11 @@ class FunctionSet
                 // ============================================================================================
 
                 if ($side['fix_value'] === 1) {
-                    DB::table('broker_client_orders')
-                        ->where('id', $broker_client_order->id)
-                        ->update([
-                            ['order_status' => $this->OrderStatus->Failed()],
-                            ['remaining' => $broker_client_order['remaining'] - $order_value]
-                        ]);
 
+                    BrokerClientOrder::updateOrCreate(
+                        ['id', $broker_client_order['id']],
+                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
+                    );
                     //Return Funds Upon Failing To Submit The Order
                     // Update Settlement Account Balances
 
