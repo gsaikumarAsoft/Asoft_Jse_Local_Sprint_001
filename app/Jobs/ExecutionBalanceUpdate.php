@@ -44,8 +44,8 @@ class ExecutionBalanceUpdate implements ShouldQueue
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $this->senderSubID,
             "seqNum" => 0,
-            'StartTime' => date('Ymd') . "11:00:00.000",
-            'EndTime' => date('Ymd') . "23:30:00.000",
+            'StartTime' => date('Y-m-d') . " 11:00:00.000",
+            'EndTime' => date('Y-m-d') . " 23:30:00.000",
         );
         $postdata = json_encode($data);
 

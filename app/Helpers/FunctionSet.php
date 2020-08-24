@@ -226,8 +226,8 @@ class FunctionSet
             'SenderSubID' => $sender_sub_id,
             'Host' => $trading->socket,
             'Port' => (int) $trading->port,
-            'StartTime' => date('Ymd') . "11:00:00.000",
-            'EndTime' => date('Ymd') . "23:30:00.000",
+            'StartTime' => date('Y-m-d') . " 11:00:00.000",
+            'EndTime' => date('Y-m-d') . " 23:30:00.000",
             'OrderID' => $request->client_order_number,
             'BuyorSell' => $this->jsonStrip(json_decode($request->side, true), 'fix_value'),
             'OrdType' => $this->jsonStrip(json_decode($type, true), 'fix_value'),
@@ -512,15 +512,15 @@ class FunctionSet
     public function executionBalanceUpdate($sender_sub_id)
     {
 
-        $date = date('YYMMDD');
+        $date = date('Y-m-d');
         // Call fix and return excutiun report for the required SensderSubID
         $url = $this->fix_wrapper_url("api/messagedownload/download");
         $data = array(
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $sender_sub_id,
             "seqNum" => 0,
-            'StartTime' => $date . "11:00:00.000",
-            'EndTime' => $date . "23:30:00.000",
+            'StartTime' => $date . " 11:00:00.000",
+            'EndTime' => $date . " 23:30:00.000",
         );
         $postdata = json_encode($data);
 
