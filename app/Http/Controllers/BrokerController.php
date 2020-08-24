@@ -251,9 +251,6 @@ class BrokerController extends Controller
     }
     public function orders()
     {
-        // return
-        $date = date('Ymd');
-        return $date;
         $local_brokers = LocalBroker::all();
         $foreign_brokers = ForeignBroker::all();
 
