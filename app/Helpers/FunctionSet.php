@@ -272,6 +272,7 @@ class FunctionSet
 
         // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30); //timeout in seconds
         // curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
         // curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
