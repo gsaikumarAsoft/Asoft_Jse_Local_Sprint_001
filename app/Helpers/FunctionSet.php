@@ -299,41 +299,6 @@ class FunctionSet
         $client_open_orders = $client->open_orders - $order_value;
         $side = json_decode($request->side, true);
 
-        if (curl_errno($ch)) { //If fix cur request times out
-            // If the response fails create a record in the audit log and in the execution reports as well
-            $data['text'] = "Order Submission Failed: " . $fix_status['result'];
-            $data['status'] = $this->OrderStatus->Failed();
-            // ============================================================================================
-
-            if ($side['fix_value'] === 1) {
-
-                BrokerClientOrder::updateOrCreate(
-                    ['id', $broker_client_order['id']],
-                    ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
-                );
-                //Return Funds Upon Failing To Submit The Order
-                // Update Settlement Account Balances
-
-                BrokerSettlementAccount::updateOrCreate(
-                    ['hash' => $settlement->hash],
-                    ['amount_allocated' => $settlement_allocated]
-                );
-
-
-                // Update Broker Clients Open Orders
-                BrokerClient::updateOrCreate(
-                    ['id' => $client_id],
-                    ['open_orders' => $client_open_orders]
-                );
-                $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
-            }
-
-            $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-            $this->logExecution($data); //Create a record in the execution report
-            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
-        }
-        curl_close($ch);
-
 
         switch ($fix_status['result']) {
             case "Session could not be established with CIBC. Order number {0}":
@@ -371,39 +336,39 @@ class FunctionSet
                 // $this->executionBalanceUpdate($sender_sub_id);
                 return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
                 break;
-                // default:
-                //     // If the response fails create a record in the audit log and in the execution reports as well
-                //     $data['text'] = "Order Submission Failed: " . $fix_status['result'];
-                //     $data['status'] = $this->OrderStatus->Failed();
-                //     // ============================================================================================
+            default:
+                // If the response fails create a record in the audit log and in the execution reports as well
+                $data['text'] = "Order Submission Failed: " . $fix_status['result'];
+                $data['status'] = $this->OrderStatus->Failed();
+                // ============================================================================================
 
-                //     if ($side['fix_value'] === 1) {
+                if ($side['fix_value'] === 1) {
 
-                //         BrokerClientOrder::updateOrCreate(
-                //             ['id', $broker_client_order['id']],
-                //             ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
-                //         );
-                //         //Return Funds Upon Failing To Submit The Order
-                //         // Update Settlement Account Balances
+                    BrokerClientOrder::updateOrCreate(
+                        ['id', $broker_client_order['id']],
+                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
+                    );
+                    //Return Funds Upon Failing To Submit The Order
+                    // Update Settlement Account Balances
 
-                //         BrokerSettlementAccount::updateOrCreate(
-                //             ['hash' => $settlement->hash],
-                //             ['amount_allocated' => $settlement_allocated]
-                //         );
+                    BrokerSettlementAccount::updateOrCreate(
+                        ['hash' => $settlement->hash],
+                        ['amount_allocated' => $settlement_allocated]
+                    );
 
 
-                //         // Update Broker Clients Open Orders
-                //         BrokerClient::updateOrCreate(
-                //             ['id' => $client_id],
-                //             ['open_orders' => $client_open_orders]
-                //         );
-                //         $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                //     }
+                    // Update Broker Clients Open Orders
+                    BrokerClient::updateOrCreate(
+                        ['id' => $client_id],
+                        ['open_orders' => $client_open_orders]
+                    );
+                    $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
+                }
 
-                //     $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                //     $this->logExecution($data); //Create a record in the execution report
-                //     return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
-                //     break;
+                $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
+                $this->logExecution($data); //Create a record in the execution report
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
+                break;
         }
     }
     public function logExecution($report)
