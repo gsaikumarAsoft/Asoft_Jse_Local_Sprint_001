@@ -172,7 +172,6 @@ class ApplicationController extends Controller
     }
     function storeSettlementBroker(Request $request)
     {
-        return $request;
         $local_broker_name = $this->HelperClass->getUser($request->local_broker_id);
         $foreign_broker_name = $this->HelperClass->getUser($request->foreign_broker_id);
         $pass = $this->HelperClass->rand_pass(8);
@@ -181,7 +180,7 @@ class ApplicationController extends Controller
         if ($request->id) {
             $toggleStatus = 'Unverified';
             $this->LogActivity::addToLog('Updated Settlement Account Details. Account Number: ' . $request->account . ', Balance: ' . $request->account_balance . ', Amount Allocated: ' . $request->amount_allocated);
-            if ($request->filled_orders <= 0) {
+            if ($request->filled_orders == 0) {
                 $toggleStatus = 'Verified';
             }
             $b = BrokerSettlementAccount::find($request->id);
@@ -280,6 +279,7 @@ class ApplicationController extends Controller
                 $broker_settlement_account->currency = $request->currency;
                 $broker_settlement_account->settlement_agent_status = 'Unverified';
                 $broker_settlement_account->foreign_broker_status = 'Unverified';
+                $broker_settlement_account->filled_orders = $request->filled_orders;
                 $broker_settlement_account->account_balance = $request->account_balance;
                 $broker_settlement_account->amount_allocated = $request->amount_allocated;
                 $broker_settlement_account->save();

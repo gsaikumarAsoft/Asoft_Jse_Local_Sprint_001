@@ -71828,6 +71828,7 @@ __webpack_require__.r(__webpack_exports__);
           "Unsettled trades have been cleared.",
           "success"
         );
+        account.filled_orders = false;
       } catch (error) {
         console.log(error);
         // this.checkDuplicateError(error);

@@ -300,6 +300,7 @@ export default {
           "Unsettled trades have been cleared.",
           "success"
         );
+        account.filled_orders = false;
       } catch (error) {
         console.log(error);
         // this.checkDuplicateError(error);
