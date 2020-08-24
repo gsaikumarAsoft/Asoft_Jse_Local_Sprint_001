@@ -572,6 +572,7 @@ export default {
           },
         },
         { key: "order_quantity", sortable: true },
+        { key: "remaining", label: "Remainder Held", sortable: true },
         { key: "price", sortable: true },
         {
           key: "order_status",
