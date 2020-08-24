@@ -78301,36 +78301,35 @@ var render = function() {
                       filterIncludedFields: _vm.filterOn,
                       filter: _vm.filter
                     }
-                  })
+                  }),
+                  _vm._v(" "),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("b-pagination", {
+                    attrs: {
+                      "total-rows": _vm.rows,
+                      "per-page": _vm.perPage,
+                      "aria-controls": "orders-table"
+                    },
+                    model: {
+                      value: _vm.currentPage,
+                      callback: function($$v) {
+                        _vm.currentPage = $$v
+                      },
+                      expression: "currentPage"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("b-button", { on: { click: _vm.exportBalances } }, [
+                    _vm._v("Export Balances")
+                  ])
                 ],
                 1
               )
             ],
             1
-          ),
-          _vm._v(" "),
-          _c("br"),
-          _vm._v(" "),
-          _c("b-pagination", {
-            attrs: {
-              "total-rows": _vm.rows,
-              "per-page": _vm.perPage,
-              "aria-controls": "orders-table"
-            },
-            model: {
-              value: _vm.currentPage,
-              callback: function($$v) {
-                _vm.currentPage = $$v
-              },
-              expression: "currentPage"
-            }
-          }),
-          _vm._v(" "),
-          _c("b-button", { on: { click: _vm.exportBalances } }, [
-            _vm._v("Export Balances")
-          ])
-        ],
-        1
+          )
+        ]
       )
     ],
     1

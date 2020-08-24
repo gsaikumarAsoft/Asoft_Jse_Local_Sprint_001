@@ -28,16 +28,16 @@
             :filter="filter"
           ></b-table>
           <!-- <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button> -->
+          <br />
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="orders-table"
+          ></b-pagination>
+          <b-button @click="exportBalances">Export Balances</b-button>
         </b-card>
       </div>
-      <br />
-      <b-pagination
-        v-model="currentPage"
-        :total-rows="rows"
-        :per-page="perPage"
-        aria-controls="orders-table"
-      ></b-pagination>
-      <b-button @click="exportBalances">Export Balances</b-button>
     </div>
   </div>
 </template>
