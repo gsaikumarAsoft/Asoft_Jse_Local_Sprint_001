@@ -172,7 +172,7 @@ class ApplicationController extends Controller
     }
     function storeSettlementBroker(Request $request)
     {
-        // return $request;
+        return $request;
         $local_broker_name = $this->HelperClass->getUser($request->local_broker_id);
         $foreign_broker_name = $this->HelperClass->getUser($request->foreign_broker_id);
         $pass = $this->HelperClass->rand_pass(8);

@@ -863,7 +863,7 @@ export default {
     },
     async brokerOrderHandler(o) {
       // this.$refs.selectedOrder.clearSelected();
-
+      // =============================================================================================
       const result = await this.$swal({
         title: o.clordid,
         text: "The Options for the current order are.",

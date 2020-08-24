@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Helpers\FunctionSet;
+use App\Helpers\LogActivity;
 use App\LocalBroker;
 use App\User;
 use Illuminate\Bus\Queueable;
@@ -18,7 +19,7 @@ class ExecutionBalanceUpdate implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $api;
-
+    protected $activity;
     protected $senderSubID;
     /**
      * Create a new job instance.
@@ -28,6 +29,7 @@ class ExecutionBalanceUpdate implements ShouldQueue
     public function __construct($senderSubID)
     {
         $this->api = new FunctionSet;
+        $this->activity = new LogActivity;
         $this->senderSubID = $senderSubID;
     }
 
@@ -58,14 +60,18 @@ class ExecutionBalanceUpdate implements ShouldQueue
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
-        curl_close($ch);
 
         $request = json_decode($result, true);
         $execution_report = $request['executionReports'];
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        foreach ($execution_report as $a) {
-            $this->api->logExecution($a);
+        if (curl_errno($ch)) {
+            $this->activity->addToLog('Unable to run MessageDownloadService : Please Check The IIS Service');
+        } else {
+            foreach ($execution_report as $a) {
+                $this->api->logExecution($a);
+            }
         }
+        curl_close($ch);
     }
 }

@@ -268,6 +268,8 @@ class FunctionSet
         $postdata = json_encode($data);
 
         $ch = curl_init($url);
+        // Check if any error occurred
+
         // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         // curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
@@ -287,12 +289,50 @@ class FunctionSet
         // $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
         // ================================================================================================
 
+
+
         $fix_status = json_decode($result, true);
         $order_value = $request->quantity * $request->price;
 
         $settlement_allocated = $settlement->amount_allocated - $order_value;
         $client_open_orders = $client->open_orders - $order_value;
         $side = json_decode($request->side, true);
+
+        if (curl_errno($ch)) { //If fix cur request times out
+            // If the response fails create a record in the audit log and in the execution reports as well
+            $data['text'] = "Order Submission Failed: " . $fix_status['result'];
+            $data['status'] = $this->OrderStatus->Failed();
+            // ============================================================================================
+
+            if ($side['fix_value'] === 1) {
+
+                BrokerClientOrder::updateOrCreate(
+                    ['id', $broker_client_order['id']],
+                    ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
+                );
+                //Return Funds Upon Failing To Submit The Order
+                // Update Settlement Account Balances
+
+                BrokerSettlementAccount::updateOrCreate(
+                    ['hash' => $settlement->hash],
+                    ['amount_allocated' => $settlement_allocated]
+                );
+
+
+                // Update Broker Clients Open Orders
+                BrokerClient::updateOrCreate(
+                    ['id' => $client_id],
+                    ['open_orders' => $client_open_orders]
+                );
+                $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
+            }
+
+            $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
+            $this->logExecution($data); //Create a record in the execution report
+            return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
+        }
+        curl_close($ch);
+
 
         switch ($fix_status['result']) {
             case "Session could not be established with CIBC. Order number {0}":
@@ -330,39 +370,39 @@ class FunctionSet
                 // $this->executionBalanceUpdate($sender_sub_id);
                 return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
                 break;
-            default:
-                // If the response fails create a record in the audit log and in the execution reports as well
-                $data['text'] = "Order Submission Failed: " . $fix_status['result'];
-                $data['status'] = $this->OrderStatus->Failed();
-                // ============================================================================================
+                // default:
+                //     // If the response fails create a record in the audit log and in the execution reports as well
+                //     $data['text'] = "Order Submission Failed: " . $fix_status['result'];
+                //     $data['status'] = $this->OrderStatus->Failed();
+                //     // ============================================================================================
 
-                if ($side['fix_value'] === 1) {
+                //     if ($side['fix_value'] === 1) {
 
-                    BrokerClientOrder::updateOrCreate(
-                        ['id', $broker_client_order['id']],
-                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
-                    );
-                    //Return Funds Upon Failing To Submit The Order
-                    // Update Settlement Account Balances
+                //         BrokerClientOrder::updateOrCreate(
+                //             ['id', $broker_client_order['id']],
+                //             ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
+                //         );
+                //         //Return Funds Upon Failing To Submit The Order
+                //         // Update Settlement Account Balances
 
-                    BrokerSettlementAccount::updateOrCreate(
-                        ['hash' => $settlement->hash],
-                        ['amount_allocated' => $settlement_allocated]
-                    );
+                //         BrokerSettlementAccount::updateOrCreate(
+                //             ['hash' => $settlement->hash],
+                //             ['amount_allocated' => $settlement_allocated]
+                //         );
 
 
-                    // Update Broker Clients Open Orders
-                    BrokerClient::updateOrCreate(
-                        ['id' => $client_id],
-                        ['open_orders' => $client_open_orders]
-                    );
-                    $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                }
+                //         // Update Broker Clients Open Orders
+                //         BrokerClient::updateOrCreate(
+                //             ['id' => $client_id],
+                //             ['open_orders' => $client_open_orders]
+                //         );
+                //         $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
+                //     }
 
-                $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                $this->logExecution($data); //Create a record in the execution report
-                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
-                break;
+                //     $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
+                //     $this->logExecution($data); //Create a record in the execution report
+                //     return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
+                //     break;
         }
     }
     public function logExecution($report)
@@ -581,6 +621,7 @@ class FunctionSet
                     // Allocated Value of order [Release what was initially allocated per stock]
                     $allocated_value_of_order = $quantity * $current_order['price'];
                     $filled_value = $quantity * $price;
+                    // $partial_filled_value = $quantity * $price;
 
                     //Determine If The Order Is A Buy Or Sell
                     $side = json_decode($order->side, true);
