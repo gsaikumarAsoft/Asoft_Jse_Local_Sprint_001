@@ -44,8 +44,8 @@ class ExecutionBalanceUpdate implements ShouldQueue
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $this->senderSubID,
             "seqNum" => 0,
-            'StartTime' => "11:00:00.000",
-            'EndTime' => "23:30:00.000",
+            'StartTime' => date('Ymd') . "11:00:00.000",
+            'EndTime' => date('Ymd') . "23:30:00.000",
         );
         $postdata = json_encode($data);
 
@@ -64,8 +64,8 @@ class ExecutionBalanceUpdate implements ShouldQueue
         $execution_report = $request['executionReports'];
 
         //Store Execution reports for above sender_Sub_id to database before updating account balances
-        foreach ($execution_report as $report) {
-            $this->api->logExecution($report);
+        foreach ($execution_report as $a) {
+            $this->api->logExecution($a);
         }
     }
 }
