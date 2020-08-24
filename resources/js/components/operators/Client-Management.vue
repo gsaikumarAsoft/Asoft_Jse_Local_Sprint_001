@@ -153,6 +153,20 @@ export default {
           key: "status",
           sortable: true,
         },
+        {
+          key: "account_balance",
+          label: "Balance",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+
+            var cal = item.account_balance;
+            return formatter.format(cal);
+          },
+        },
         // {
         //   key: "types",
         //   label: "Access Permissions"
