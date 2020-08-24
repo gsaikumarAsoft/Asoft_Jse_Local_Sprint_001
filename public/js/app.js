@@ -72441,6 +72441,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["execution_reports"],
   components: {
@@ -78250,54 +78252,64 @@ var render = function() {
           staticStyle: { "margin-top": "100px" }
         },
         [
-          _c("h1", [_vm._v("Order Execution Reports")]),
-          _vm._v(" "),
           _c(
             "div",
             { staticClass: "content table-responsive" },
             [
               _c(
-                "div",
-                { staticClass: "float-right" },
+                "b-card",
+                { attrs: { title: "Order Execution Reports" } },
                 [
-                  _c("b-input", {
-                    staticClass: "mb-2 mr-sm-2 mb-sm-0",
-                    attrs: {
-                      id: "search_content",
-                      type: "text",
-                      placeholder: "Filter Orders..."
+                  _c(
+                    "div",
+                    {
+                      staticClass: "float-right",
+                      staticStyle: { "margin-bottom": "15px" }
                     },
-                    model: {
-                      value: _vm.filter,
-                      callback: function($$v) {
-                        _vm.filter = $$v
-                      },
-                      expression: "filter"
+                    [
+                      _c("b-input", {
+                        staticClass: "mb-2 mr-sm-2 mb-sm-0",
+                        attrs: {
+                          id: "search_content",
+                          type: "text",
+                          placeholder: "Filter Orders..."
+                        },
+                        model: {
+                          value: _vm.filter,
+                          callback: function($$v) {
+                            _vm.filter = $$v
+                          },
+                          expression: "filter"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c("b-table", {
+                    ref: "selectedOrder",
+                    attrs: {
+                      "empty-text":
+                        "No Orders have been Created. Create an Order below.",
+                      id: "orders-table",
+                      items: _vm.report_data,
+                      "per-page": _vm.perPage,
+                      "current-page": _vm.currentPage,
+                      striped: "",
+                      hover: "",
+                      fields: _vm.fields,
+                      filterIncludedFields: _vm.filterOn,
+                      filter: _vm.filter
                     }
                   })
                 ],
                 1
-              ),
-              _vm._v(" "),
-              _c("b-table", {
-                ref: "selectedOrder",
-                attrs: {
-                  "empty-text":
-                    "No Orders have been Created. Create an Order below.",
-                  id: "orders-table",
-                  items: _vm.report_data,
-                  "per-page": _vm.perPage,
-                  "current-page": _vm.currentPage,
-                  striped: "",
-                  hover: "",
-                  fields: _vm.fields,
-                  filterIncludedFields: _vm.filterOn,
-                  filter: _vm.filter
-                }
-              })
+              )
             ],
             1
           ),
+          _vm._v(" "),
+          _c("br"),
           _vm._v(" "),
           _c("b-pagination", {
             attrs: {

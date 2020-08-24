@@ -2,33 +2,35 @@
   <div>
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top: 100px;">
-      <h1>Order Execution Reports</h1>
       <!-- <pre>{{report_data}}</pre> -->
       <div class="content table-responsive">
-        <div class="float-right">
-          <b-input
-            id="search_content"
-            v-model="filter"
-            type="text"
-            placeholder="Filter Orders..."
-            class="mb-2 mr-sm-2 mb-sm-0"
-          ></b-input>
-        </div>
-        <b-table
-          ref="selectedOrder"
-          :empty-text="'No Orders have been Created. Create an Order below.'"
-          id="orders-table"
-          :items="report_data"
-          :per-page="perPage"
-          :current-page="currentPage"
-          striped
-          hover
-          :fields="fields"
-          :filterIncludedFields="filterOn"
-          :filter="filter"
-        ></b-table>
-        <!-- <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button> -->
+        <b-card title="Order Execution Reports">
+          <div class="float-right" style="margin-bottom: 15px">
+            <b-input
+              id="search_content"
+              v-model="filter"
+              type="text"
+              placeholder="Filter Orders..."
+              class="mb-2 mr-sm-2 mb-sm-0"
+            ></b-input>
+          </div>
+          <b-table
+            ref="selectedOrder"
+            :empty-text="'No Orders have been Created. Create an Order below.'"
+            id="orders-table"
+            :items="report_data"
+            :per-page="perPage"
+            :current-page="currentPage"
+            striped
+            hover
+            :fields="fields"
+            :filterIncludedFields="filterOn"
+            :filter="filter"
+          ></b-table>
+          <!-- <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button> -->
+        </b-card>
       </div>
+      <br />
       <b-pagination
         v-model="currentPage"
         :total-rows="rows"
