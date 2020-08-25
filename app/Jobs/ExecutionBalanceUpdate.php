@@ -19,8 +19,11 @@ class ExecutionBalanceUpdate implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $api;
+
     protected $activity;
+
     protected $senderSubID;
+
     /**
      * Create a new job instance.
      *
@@ -32,7 +35,6 @@ class ExecutionBalanceUpdate implements ShouldQueue
         $this->activity = new LogActivity;
         $this->senderSubID = $senderSubID;
     }
-
     /**
      * Execute the job.
      *
