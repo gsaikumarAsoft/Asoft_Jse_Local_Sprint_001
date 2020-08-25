@@ -65,9 +65,10 @@ class ExecutionBalanceUpdate implements ShouldQueue
         $request = json_decode($result, true);
         $execution_report = $request['executionReports'];
 
-
-        foreach ($execution_report as $a) {
-            $this->api->logExecution($a);
+        if ($execution_report) {
+            foreach ($execution_report as $a) {
+                $this->api->logExecution($a);
+            }
         }
     }
 }
