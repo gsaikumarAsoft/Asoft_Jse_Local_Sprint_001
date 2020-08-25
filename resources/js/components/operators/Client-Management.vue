@@ -3,95 +3,97 @@
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top:100px">
       <div class="content">
-        <b-table
-          v-if="permissions.indexOf('read-broker-client') !== -1"
-          striped
-          hover
-          show-empty
-          :empty-text="'No Clients have been Created. Create a Client below.'"
-          id="local-brokers"
-          :items="clients"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          @row-clicked="brokerClientHandler"
-        >
-          <template slot="index" slot-scope="row">{{ row }}</template>
-        </b-table>
-        <p
-          v-if="permissions.indexOf('read-broker-client') == -1"
-          class="lead"
-        >You currently do not have permisions to view Broker Client accounts within the system. Please speak with your Broker Admin to have the Permissions activated on your account</p>
-        <b-pagination
-          v-if="permissions.indexOf('read-broker-client') !== -1"
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="local-brokers"
-        ></b-pagination>
-        <b-button
-          v-if="permissions.indexOf('create-broker-client') !== -1"
-          v-b-modal.modal-1
-          @click="create = true"
-        >Create Client</b-button>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
-          <p class="my-4">Please update the fields below as required!</p>
-          <form ref="form" @submit.stop.prevent="handleSubmit">
-            <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
-              <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
-            </b-form-group>
-            <b-form-group
-              label="Email"
-              label-for="email-input"
-              invalid-feedback="Email is required"
-            >
-              <b-form-input id="name-input" v-model="broker.email" :state="nameState" required></b-form-input>
-            </b-form-group>
-            <b-form-group
-              label="JCSD Number"
-              label-for="jcsd-input"
-              invalid-feedback="Name is required"
-            >
-              <b-form-input
-                id="jcsd-input"
-                v-model="broker.jcsd"
-                type="number"
-                :state="nameState"
-                required
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
-              sm
-              label="Account Balance"
-              label-for="name-input"
-              invalid-feedback="Name is required"
-            >
-              <b-form-input
-                id="account-balance-input"
-                v-model="broker.account_balance"
-                type="number"
-                :state="nameState"
-                required
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
-              v-if="permissions.indexOf('approve-broker-client') !== -1"
-              label="Client Status"
-              label-for="status-input"
-              invalid-feedback="Client status is required"
-            >
-              <b-form-select v-model="broker.operator_status" :options="client_status"></b-form-select>
-            </b-form-group>
-            <!-- <b-form-group label="Access Permissions:">
+        <b-card title="Trading Accounts">
+          <b-table
+            v-if="permissions.indexOf('read-broker-client') !== -1"
+            striped
+            hover
+            show-empty
+            :empty-text="'No Clients have been Created. Create a Client below.'"
+            id="local-brokers"
+            :items="clients"
+            :fields="fields"
+            :per-page="perPage"
+            :current-page="currentPage"
+            @row-clicked="brokerClientHandler"
+          >
+            <template slot="index" slot-scope="row">{{ row }}</template>
+          </b-table>
+          <p
+            v-if="permissions.indexOf('read-broker-client') == -1"
+            class="lead"
+          >You currently do not have permisions to view Broker Client accounts within the system. Please speak with your Broker Admin to have the Permissions activated on your account</p>
+          <b-pagination
+            v-if="permissions.indexOf('read-broker-client') !== -1"
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="local-brokers"
+          ></b-pagination>
+          <b-button
+            v-if="permissions.indexOf('create-broker-client') !== -1"
+            v-b-modal.modal-1
+            @click="create = true"
+          >Create Client</b-button>
+          <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+            <p class="my-4">Please update the fields below as required!</p>
+            <form ref="form" @submit.stop.prevent="handleSubmit">
+              <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
+                <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
+              </b-form-group>
+              <b-form-group
+                label="Email"
+                label-for="email-input"
+                invalid-feedback="Email is required"
+              >
+                <b-form-input id="name-input" v-model="broker.email" :state="nameState" required></b-form-input>
+              </b-form-group>
+              <b-form-group
+                label="JCSD Number"
+                label-for="jcsd-input"
+                invalid-feedback="Name is required"
+              >
+                <b-form-input
+                  id="jcsd-input"
+                  v-model="broker.jcsd"
+                  type="number"
+                  :state="nameState"
+                  required
+                ></b-form-input>
+              </b-form-group>
+              <b-form-group
+                sm
+                label="Account Balance"
+                label-for="name-input"
+                invalid-feedback="Name is required"
+              >
+                <b-form-input
+                  id="account-balance-input"
+                  v-model="broker.account_balance"
+                  type="number"
+                  :state="nameState"
+                  required
+                ></b-form-input>
+              </b-form-group>
+              <b-form-group
+                v-if="permissions.indexOf('approve-broker-client') !== -1"
+                label="Client Status"
+                label-for="status-input"
+                invalid-feedback="Client status is required"
+              >
+                <b-form-select v-model="broker.operator_status" :options="client_status"></b-form-select>
+              </b-form-group>
+              <!-- <b-form-group label="Access Permissions:">
                 <b-form-checkbox-group
                   id="checkbox-group-1"
                   v-model="selected_permissions"
                   :options="options"
                   name="flavour-1"
                 ></b-form-checkbox-group>
-            </b-form-group>-->
-          </form>
-        </b-modal>
+              </b-form-group>-->
+            </form>
+          </b-modal>
+        </b-card>
       </div>
     </div>
   </div>
@@ -103,7 +105,7 @@ import headNav from "./../partials/Nav.vue";
 export default {
   mixins: [permissionMixin],
   components: {
-    headNav
+    headNav,
   },
   data() {
     return {
@@ -119,60 +121,114 @@ export default {
         { value: null, text: "Please select a status" },
         { value: "Verified", text: "Verified" },
         { value: "Un-verified", text: "Rejected" },
-        { value: "Pending", text: "Pending" }
+        { value: "Pending", text: "Pending" },
       ],
       options: [
         { text: "Create", value: "Create" },
         { text: "Read", value: "Read" },
         { text: "Update", value: "Update" },
         { text: "Delete", value: "Delete" },
-        { text: "Approve", value: "Approve" }
+        { text: "Approve", value: "Approve" },
       ],
       status: [
         { key: 1, text: "Approved", value: "Approved" },
         { key: 2, text: "Denied", value: "Denied" },
-        { key: 3, text: "Un-Verified", value: "Un-Verified" }
+        { key: 3, text: "Un-Verified", value: "Un-Verified" },
       ],
       fields: [
-        // {
-        //   key: "local_broker.name",
-        //   label: "Local Broker",
-        //   sortable: true
-        // },
         {
           key: "name",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "status",
-          sortable: true
-        }
-        // {
-        //   key: "types",
-        //   label: "Access Permissions"
-        // }
+          sortable: true,
+        },
+        {
+          key: "account_balance",
+          label: "Balance",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+
+            var cal = item.account_balance;
+            return formatter.format(cal);
+          },
+        },
+        {
+          key: "open_orders",
+          label: "Open Orders",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+            var nf = Intl.NumberFormat();
+            var cal = item.open_orders;
+            return nf.format(cal);
+          },
+        },
+        {
+          key: "filled_orders",
+          label: "Unsettled Trades",
+          sortable: true,
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+
+            var nf = Intl.NumberFormat();
+            var cal = Number(item.filled_orders);
+            return nf.format(cal);
+          },
+        },
+        {
+          key: "available",
+          label: "Available",
+          formatter: (value, key, item) => {
+            var formatter = new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            });
+
+            var spent = Number(item.filled_orders) + Number(item.open_orders);
+
+            var cal = item.account_balance - spent;
+            return formatter.format(cal);
+          },
+        },
+        {
+          key: "jcsd",
+          label: "JCSD",
+          sortable: true,
+        },
       ],
       modalTitle: "Client Update",
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.clients.length;
-    }
+    },
   },
   watch: {
-    create: function(data) {
+    create: function (data) {
       if (data) {
         this.modalTitle = "Create Client";
       } else {
         this.modalTitle = "Client Update";
       }
-    }
+    },
   },
   methods: {
     checkFormValidity() {
@@ -208,7 +264,7 @@ export default {
             status: this.broker.status,
             operator_status: this.broker.operator_status,
             permission: this.selected_permissions,
-            account_balance: this.broker.account_balance
+            account_balance: this.broker.account_balance,
           });
           this.$swal(`Account created for ${this.broker.email}`);
         } else {
@@ -222,7 +278,7 @@ export default {
             status: this.broker.status,
             operator_status: this.broker.operator_status,
             permission: this.selected_permissions,
-            account_balance: this.broker.account_balance
+            account_balance: this.broker.account_balance,
           });
           this.$swal(`Account Updated for ${this.broker.email}`);
         }
@@ -253,7 +309,7 @@ export default {
         confirmButtonText: "Edit",
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
+        cancelButtonAriaLabel: "cancel",
       }); //.then(result => {
       if (result.value) {
         if (this.permissions.indexOf("update-broker-client") !== -1) {
@@ -308,7 +364,7 @@ export default {
     async destroy(id) {
       await axios.delete(`client-broker-delete/${id}`);
       await this.getClients();
-    }
+    },
   },
   async mounted() {
     // //Define Permission On Front And Back End
@@ -324,11 +380,11 @@ export default {
     for (i = 0; i < local_brokers.length; i++) {
       this.local_brokers.push({
         text: local_brokers[i].name,
-        value: local_brokers[i].id
+        value: local_brokers[i].id,
       });
     }
 
     await this.getClients();
-  }
+  },
 };
 </script>

@@ -54,24 +54,21 @@ class ExecutionBalanceUpdate implements ShouldQueue
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
-
+        curl_close($ch);
         $request = json_decode($result, true);
         $execution_report = $request['executionReports'];
 
-        //Store Execution reports for above sender_Sub_id to database before updating account balances
-        if (curl_errno($ch)) {
-            $this->activity->addToLog('Unable to run MessageDownloadService : Please Check The IIS Service');
-        } else {
+        if ($execution_report) {
             foreach ($execution_report as $a) {
                 $this->api->logExecution($a);
             }
         }
-        curl_close($ch);
     }
 }

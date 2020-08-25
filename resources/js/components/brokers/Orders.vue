@@ -4,7 +4,7 @@
     <div class="container-fluid" style="margin-top: 100px;">
       <div class="content">
         <b-card title="Current Orders" v-if="!new_order">
-          <div class="float-right">
+          <div class="float-right" style="margin-bottom: 15px">
             <b-input
               id="search_content"
               v-model="filter"
@@ -665,7 +665,7 @@ export default {
       ],
       broker_client_orders: [],
       broker: {},
-      perPage: 10,
+      perPage: 5,
       currentPage: 1,
       handling_options: [
         {

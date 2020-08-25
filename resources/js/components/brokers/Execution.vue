@@ -2,40 +2,42 @@
   <div>
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top: 100px;">
-      <h1>Order Execution Reports</h1>
       <!-- <pre>{{report_data}}</pre> -->
       <div class="content table-responsive">
-        <div class="float-right">
-          <b-input
-            id="search_content"
-            v-model="filter"
-            type="text"
-            placeholder="Filter Orders..."
-            class="mb-2 mr-sm-2 mb-sm-0"
-          ></b-input>
-        </div>
-        <b-table
-          ref="selectedOrder"
-          :empty-text="'No Orders have been Created. Create an Order below.'"
-          id="orders-table"
-          :items="report_data"
-          :per-page="perPage"
-          :current-page="currentPage"
-          striped
-          hover
-          :fields="fields"
-          :filterIncludedFields="filterOn"
-          :filter="filter"
-        ></b-table>
-        <!-- <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button> -->
+        <b-card title="Order Execution Reports">
+          <div class="float-right" style="margin-bottom: 15px">
+            <b-input
+              id="search_content"
+              v-model="filter"
+              type="text"
+              placeholder="Filter Orders..."
+              class="mb-2 mr-sm-2 mb-sm-0"
+            ></b-input>
+          </div>
+          <b-table
+            ref="selectedOrder"
+            :empty-text="'No Orders have been Created. Create an Order below.'"
+            id="orders-table"
+            :items="report_data"
+            :per-page="perPage"
+            :current-page="currentPage"
+            striped
+            hover
+            :fields="fields"
+            :filterIncludedFields="filterOn"
+            :filter="filter"
+          ></b-table>
+          <!-- <b-button v-b-modal.jse-new-order @click="create = true">Create New Order</b-button> -->
+          <br />
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="orders-table"
+          ></b-pagination>
+          <b-button @click="exportBalances">Export Balances</b-button>
+        </b-card>
       </div>
-      <b-pagination
-        v-model="currentPage"
-        :total-rows="rows"
-        :per-page="perPage"
-        aria-controls="orders-table"
-      ></b-pagination>
-      <b-button @click="exportBalances">Export Balances</b-button>
     </div>
   </div>
 </template>
@@ -170,22 +172,48 @@ export default {
     },
   },
   methods: {
+    statusFilter(data) {
+      if (data === "0") {
+        return "New";
+      } else if (data === "1") {
+        return "Partially Filled";
+      } else if (data === "2") {
+        return "Filled";
+      } else if (data === "4") {
+        return "Cancelled";
+      } else if (data === "5") {
+        return "Replaced";
+      } else if (data === "C") {
+        return "Expired";
+      } else if (data === "Z") {
+        return "Private";
+      } else if (data === "U") {
+        return "Unplaced; order is not in the orderbook (Nasdaq defined)";
+      } else if (data === "x") {
+        return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+      } else if (data === "8") {
+        return "Rejected";
+      } else if (data === "Submitted") {
+        return "Submitted";
+      } else if (data === "Failed") {
+        return "Failed";
+      } else if (data === "Cancel Submitted") {
+        return "Cancel Submitted";
+      }
+    },
     exportBalances() {
+      console.log(this.report_data);
       const tableData = this.report_data.map((r) =>
         //for (var i = 0; i < this.report_data.length; i++) {
         //tableData.push([
         [
-          r.orderID,
-          r.buyorSell,
-          r.securitySubType,
-          r.ordType,
-          r.orderQty,
-          r.timeInForce,
-          r.symbol,
-          r.price,
-          r.stopPx,
-          r.senderSub,
-          r.seqNum,
+          r.clordid,
+          r.qTradeacc,
+          r.text,
+          this.statusFilter(r.status),
+          r.buyorSell == 1 ? "BUY" : "SELL",
+          r.settlement_agent + "-" + r.settlement_account_number,
+          r.messageDate,
         ]
       );
 
@@ -200,26 +228,13 @@ export default {
       doc.autoTable({
         head: [
           [
-            // "clOrdID",
-            "orderID",
-            // "text",
-            // "ordRejRes",
-            // "status",
-            "buyorSell",
-            "securitySubType",
-            // "time",
-            "ordType",
-            "orderQty",
-            "timeInForce",
-            "symbol",
-            // "qTradeacc",
-            "price",
-            "stopPx",
-            // "execType",
-            "senderSubID",
-            "seqNum",
-            // "sendingTime",
-            // "messageDate"
+            "Order Number",
+            "Client Account",
+            "Description",
+            "Status",
+            "Side",
+            "Settlement Account",
+            "Messsage Date",
           ],
         ],
         body: tableData,

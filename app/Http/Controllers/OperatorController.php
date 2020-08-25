@@ -95,15 +95,14 @@ class OperatorController extends Controller
         $client_accounts = BrokerClient::where('local_broker_id', $user->local_broker_id)->get();
         if (count($client_accounts) > 0) {
             // Sort through clients to get their id then search database for order
-            foreach ($client_accounts as $value) {
+            foreach ($client_accounts as $key => $value) {
                 $json_decoded = json_decode($value);
                 $clients[] = $json_decoded->id;
-                $orders = BrokerClientOrder::whereIn('broker_client_id', $clients)->get();
+                $orders = DB::table('broker_client_orders')->select('broker_client_orders.*', 'broker_clients.name as client_name')->whereIn('broker_client_id', $clients)->join('broker_clients', 'broker_client_orders.broker_client_id', 'broker_clients.id')->get();
             }
         } else {
             $orders = [];
         }
-
 
         // $executionBalanceUpdate = new ExecutionBalanceUpdate($user);
         return view('operators.order')->with('orders', $orders)->with('client_accounts', $client_accounts);
