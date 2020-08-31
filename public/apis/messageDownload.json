@@ -4,10 +4,11 @@
 			"id": 1983,
 			"clOrdID": "58957",
 			"orderID": "202003300000089051",
+			"origClOrdID": "",
 			"text": null,
 			"ordRejRes": null,
-			"status": "Z",
-			"buyorSell": "2",
+			"status": "1",
+			"buyorSell": "1",
 			"securitySubType": "JUNIOR",
 			"time": null,
 			"ordType": "2",
@@ -16,12 +17,14 @@
 			"symbol": "HSE.TO",
 			"qTradeacc": "8117319",
 			"price": "1.80",
+			"lastQty": "50",
+			"lastPx": "1.80",
 			"stopPx": null,
 			"execType": "5",
 			"senderSubID": "JMMBFT001",
 			"seqNum": 42,
-			"sendingTime": "2020-04-29T06:05:00.000234",
-			"messageDate": "2020-04-30T09:05:47.2766989"
+			"sendingTime": "2020-08-29T06:05:00.000234",
+			"messageDate": "2020-08-30T09:05:47.2766989"
 		}
 	],
 	"rejectMessages": [

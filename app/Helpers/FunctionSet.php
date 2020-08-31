@@ -587,7 +587,12 @@ class FunctionSet
                     // Allocated Value of order [Release what was initially allocated per stock]
                     $allocated_value_of_order = $quantity * $current_order['price'];
                     $filled_value = $quantity * $price;
-                    // $partial_filled_value = $quantity * $price;
+
+                    $order_number = $request->clordid;
+                    $orginal_order_number = $request->origClOrdId;
+                    $last_order_quantity = $request->lastOrderQty;
+                    $last_order_price = $request->lastPrice;
+
 
                     //Determine If The Order Is A Buy Or Sell
                     $side = json_decode($order->side, true);
