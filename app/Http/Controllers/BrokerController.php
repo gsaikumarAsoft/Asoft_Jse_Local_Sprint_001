@@ -200,17 +200,41 @@ class BrokerController extends Controller
 
     public function mdTest()
     {
-        $user = auth()->user();
-        // Call The Execution Balance Update Job
-        /*
-            * Run FIX Message Download Api
-            - Import new execution reports only
-            - Update the status of orders based on the execution report for this specific broker
-            - Update Account Balances based on (REJECTED,CANCELLED,NEW,FILLED,PARTIALLYFILLED)
-        */
-        $executionBalanceUpdate = new ExecutionBalanceUpdate($user->name);
-        $this->dispatch($executionBalanceUpdate);
-        /*--*/
+        // $user = auth()->user();
+        // // Call The Execution Balance Update Job
+        // /*
+        //     * Run FIX Message Download Api
+        //     - Import new execution reports only
+        //     - Update the status of orders based on the execution report for this specific broker
+        //     - Update Account Balances based on (REJECTED,CANCELLED,NEW,FILLED,PARTIALLYFILLED)
+        // */
+        // $executionBalanceUpdate = new ExecutionBalanceUpdate($user->name);
+        // $this->dispatch($executionBalanceUpdate);
+        // /*--*/
+
+        $url = env('FIX_API_URL') . "api/messagedownload/download";
+        $data = array(
+            'BeginString' => 'FIX.4.2',
+            "SenderSubID" => 'BARITA',
+            "seqNum" => 0,
+            'StartTime' => date('Y-m-d') . " 11:00:00.000",
+            'EndTime' => date('Y-m-d') . " 23:30:00.000",
+        );
+        $postdata = json_encode($data);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        $request = json_decode($result, true);
+        return $request;
     }
     public function logExecution(Request $request)
     {

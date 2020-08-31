@@ -66,10 +66,9 @@ class FunctionSet
             return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
         }
 
-        $offset = 7 * 60 * 60;
+        $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
-
         $order = BrokerClientOrder::where('clordid', $id)->first();
         $client = BrokerClient::find($order->broker_client_id);
         $mytime = Carbon::now();
@@ -405,7 +404,7 @@ class FunctionSet
         ----------------------------------------------
         */
         $execution_report = $report;
-        $offset = 7 * 60 * 60;
+        $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
         if ($execution_report) {
