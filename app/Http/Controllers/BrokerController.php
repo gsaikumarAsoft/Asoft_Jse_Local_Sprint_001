@@ -211,7 +211,6 @@ class BrokerController extends Controller
         // $executionBalanceUpdate = new ExecutionBalanceUpdate($user->name);
         // $this->dispatch($executionBalanceUpdate);
         // /*--*/
-
         $url = env('FIX_API_URL') . "api/messagedownload/download";
         $data = array(
             'BeginString' => 'FIX.4.2',
