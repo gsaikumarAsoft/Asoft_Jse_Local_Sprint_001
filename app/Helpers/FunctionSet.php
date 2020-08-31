@@ -287,7 +287,6 @@ class FunctionSet
         $data['text'] = 'Order Submitted Successfully';
         $data['status'] = 'Submitted';
         $this->logExecution($data);
-        // $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
         // ================================================================================================
 
 
@@ -373,6 +372,7 @@ class FunctionSet
     }
     public function logExecution($report)
     {
+
         /*
         JSE PAYLOAD Example (Array Positions)
         --------------------------------------------
@@ -408,8 +408,13 @@ class FunctionSet
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
         if ($execution_report) {
+            if (count($report) == 21) {
+                $time = $timeNdate;
+            } else {
+                $time = array_values($report)[21];
+            }
 
-            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])->where('seqNum', array_values($report)[20])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[21]);
+            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])->where('seqNum', array_values($report)[20])->where('sendingTime', $time);
             if ($record->exists()) {
                 //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT but update the marker order number
                 DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $report['orderID']]);
