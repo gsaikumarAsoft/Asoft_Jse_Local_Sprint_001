@@ -7,7 +7,7 @@
 import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import VueSweetalert2 from 'vue-sweetalert2';
-import jsPDF from 'jspdf';
+import jsPDF from 'jspdf'; 
 import { BootstrapVueIcons } from 'bootstrap-vue';
 import Multiselect from 'vue-multiselect';
 window.Vue = require('vue');
