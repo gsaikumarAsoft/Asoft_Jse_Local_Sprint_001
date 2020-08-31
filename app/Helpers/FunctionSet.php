@@ -637,17 +637,17 @@ class FunctionSet
             $settlement_account = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
 
             if ($order && $broker_client) {
-                $current_order = $order;
+                $original_order = $order;
                 $trader = $broker_client;
 
-                if ($current_order->id) {
-                    // $order_status = $this->orderStatus($current_order->id);
+                if ($original_order->id) {
+                    // $order_status = $this->orderStatus($original_order->id);
                     $broker_settlement_account = $settlement_account;
 
                     $order_value = $quantity * $price; //ER Order Value
 
                     // Allocated Value of order [Release what was initially allocated per stock]
-                    $allocated_value_of_order = $quantity * $current_order['price'];
+                    $allocated_value_of_order = $quantity * $original_order['price'];
                     $filled_value = $quantity * $price;
 
                     //Determine If The Order Is A Buy Or Sell
@@ -661,15 +661,15 @@ class FunctionSet
                             // UPDATE ORDER STATUS ONLY
                             BrokerClientOrder::updateOrCreate(
 
-                                ['id' => $current_order->id],
+                                ['id' => $original_order->id],
                                 ['order_status' => $status]
 
                             );
                         } else if ($status === $this->OrderStatus->Cancelled()) {
                             BrokerClientOrder::updateOrCreate(
 
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -688,8 +688,8 @@ class FunctionSet
                         } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
                             BrokerClientOrder::updateOrCreate(
 
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -707,13 +707,13 @@ class FunctionSet
                             );
                         } else if ($status === $this->OrderStatus->Filled()) {
 
-                            $allocated_value_of_order = $last_order_quantity * $current_order['price'];
+                            $allocated_value_of_order = $last_order_quantity * $original_order['price'];
                             $filled_value = $last_order_quantity * $last_order_price;
 
                             // UPDATE THE ORDER STATUS 
                             $broker_client_order = BrokerClientOrder::updateOrCreate(
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -730,12 +730,12 @@ class FunctionSet
                                 ['open_orders' => $trader['open_orders'] - $allocated_value_of_order, 'filled_orders' => $trader->filled_orders + $filled_value]
                             );
                         } else if ($status === $this->OrderStatus->PartialFilled()) {
-                            $allocated_value_of_order = $last_order_quantity * $current_order['price'];
+                            $allocated_value_of_order = $last_order_quantity * $original_order['price'];
                             $filled_value = $last_order_quantity * $last_order_price;
                             // UPDATE THE ORDER STATUS 
                             $broker_client_order = BrokerClientOrder::updateOrCreate(
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -757,7 +757,7 @@ class FunctionSet
                         // UPDATE ORDER STATUS ONLY
                         BrokerClientOrder::updateOrCreate(
 
-                            ['id' => $current_order->id],
+                            ['id' => $original_order->id],
                             ['order_status' => $status]
 
                         );
