@@ -38,7 +38,7 @@ class FIXMessageDownload implements ShouldQueue
     {
         $this->api = new FunctionSet;
         $this->activity = new LogActivity;
-        // $this->senderSubID = 
+        $this->senderSubID = LocalBroker::with('user');
     }
 
     /**

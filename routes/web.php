@@ -16,11 +16,14 @@ use App\BrokerClientOrder;
 use App\BrokerSettlementAccount;
 use App\BrokerTradingAccount;
 use App\Helpers\OrderStatus;
+use App\Jobs\ExecutionBalanceUpdate;
+use App\LocalBroker;
 use App\Mail\BrokerUserAccountCreated;
 use App\User;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -33,177 +36,9 @@ Route::get('/home', function () {
     return redirect('/');
 });
 
-Route::get('/home-test', function () {
-    $this->OrderStatus = new OrderStatus;
-    // Determine variables for use
-    $order_number = '20200823015600042';
-    $side = '1';
-    $sender_sub_id = 'NCB';
-    $price = '10';
-    $quantity = '10';
-    $status = '1';
-    $jcsd_num = 'JCSD324878';
-
-    // return $order_number;
-    // Define the clients jcsd number
-    $jcsd = str_replace('JCSD', "", $jcsd_num);
-
-    // // Define The broker client
-    $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
-    // return $broker_client;
-
-    //Find the broker order linked to this execution report (account number)
-    $order = BrokerClientOrder::where('clordid', $order_number)->first();
-    // return $order->trading_account_id;
-    if ($order) {
-        //Trading Account Information
-        // return (int)$order->trading_account_id;
-        $trading = BrokerTradingAccount::find((int)$order->trading_account_id);
-        // return $trading;
-        // Log Trading & Settlement Account to activity Log //
-        // Settlement & Broker Accounts
-        // $this->logActivity::addToLog('Order Update In Progress: Trading Account:' . $order->trading_account_id);
-        //
-
-        //Find the broker settlement account linked to this execution report (account number (senderSubID)
-        $settlement_account = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
-        // return $settlement_account;
-        if ($order && $broker_client) {
-            $current_order = $order;
-            $trader = $broker_client;
-
-            if ($current_order->id) {
-                // $order_status = $this->orderStatus($current_order->id);
-                $broker_settlement_account = $settlement_account;
-
-                $order_value = $quantity * $price; //ER Order Value
-
-                // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
-                $settlement_allocated = $broker_settlement_account['amount_allocated'] + $order_value;
-
-                // [Client Open Orders] = [Client Open Orders] + [Order Value]
-                $client_open_orders = $trader['open_orders'] + $order_value;
-
-                // Allocated Value of order [Release what was initially allocated per stock]
-                $allocated_value_of_order = $quantity * $current_order['price'];
-                $filled_value = $quantity * $price;
-
-                //Determine If The Order Is A Buy Or Sell
-                $side = json_decode($order->side, true);
-                // return $side;
-                if ($side['fix_value'] === '1') {
-                    // return $status;
-                    //Only Update account Balances if this is a buy order
-                    if (
-                        $status === $this->OrderStatus->Expired() ||
-                        $status === $this->OrderStatus->_New()
-                    ) {
-                        // UPDATE ORDER STATUS ONLY
-                        BrokerClientOrder::updateOrCreate(
-
-                            ['id' => $current_order->id],
-                            ['order_status' => $status]
-
-                        );
-                    } else if ($status === $this->OrderStatus->Cancelled()) {
-                        BrokerClientOrder::updateOrCreate(
-
-                            ['id' => $current_order->id],
-                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
-
-                        );
-
-                        // Update Settlement Account Balances
-                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $broker_settlement_account['id']],
-                            ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order]
-                        );
+Route::get('/DMAMessageDownload', "ApplicationController@messageDownload");
 
 
-                        // Update Broker Clients Open Orders
-                        $broker_client_account = BrokerClient::updateOrCreate(
-                            ['id' => $trader->id],
-                            ['open_orders' => $trader['open_orders'] - $allocated_value_of_order]
-                        );
-                    } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
-                        $order_value = $current_order['quantity'] * $current_order['price'];
-
-                        BrokerClientOrder::updateOrCreate(
-
-                            ['id' => $current_order->id],
-                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
-
-                        );
-
-                        // Update Settlement Account Balances
-                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $broker_settlement_account['id']],
-                            ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order]
-                        );
-
-
-                        // Update Broker Clients Open Orders
-                        $broker_client_account = BrokerClient::updateOrCreate(
-                            ['id' => $trader->id],
-                            ['open_orders' => $trader['open_orders'] - $order_value]
-                        );
-                    } else if ($status === $this->OrderStatus->Filled()) {
-                        // return "Filling";
-
-                        // UPDATE THE ORDER STATUS 
-                        $broker_client_order = BrokerClientOrder::updateOrCreate(
-                            ['id' => $current_order->id],
-                            ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
-
-                        );
-
-                        // Update Settlement Account Balances
-                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $broker_settlement_account['id']],
-                            ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order, 'filled_orders' => $broker_settlement_account['filled_orders'] + $filled_value]
-                        );
-
-
-                        // Update Broker Clients Open Orders
-                        $broker_client_account = BrokerClient::updateOrCreate(
-                            ['id' => $trader->id],
-                            ['open_orders' => $trader['open_orders'] - $allocated_value_of_order, 'filled_orders' => $trader->filled_orders + $filled_value]
-                        );
-                    } else if ($status === $this->OrderStatus->PartialFilled()) {
-                        // UPDATE THE ORDER STATUS 
-                        $broker_client_order = BrokerClientOrder::updateOrCreate(
-                            ['id' => $current_order->id],
-                            ['order_status' => $status, 'remaining' =>  $current_order['remaining'] - $allocated_value_of_order]
-
-                        );
-
-                        // Update Settlement Account Balances
-                        $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                            ['id' => $broker_settlement_account['id']],
-                            ['amount_allocated' =>  $broker_settlement_account['amount_allocated'] - $allocated_value_of_order, 'filled_orders' =>   $broker_settlement_account['filled_orders'] + $filled_value]
-                        );
-
-
-                        // Update Broker Clients Open Orders
-                        $broker_client_account = BrokerClient::updateOrCreate(
-                            ['id' => $trader->id],
-                            ['open_orders' =>   $trader['open_orders'] - $allocated_value_of_order, 'filled_orders' =>    $trader->filled_orders + $filled_value]
-                        );
-                    }
-                } else {
-                    // If the order side is a sell
-                    // UPDATE ORDER STATUS ONLY
-                    BrokerClientOrder::updateOrCreate(
-
-                        ['id' => $current_order->id],
-                        ['order_status' => $status]
-
-                    );
-                }
-            }
-        }
-    }
-});
 
 Route::get('/md-test', "BrokerController@mdTest");
 
