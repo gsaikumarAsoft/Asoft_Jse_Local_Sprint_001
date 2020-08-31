@@ -69,7 +69,7 @@ class FunctionSet
         $offset = 7 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
-        return $timeNdate;
+
         $order = BrokerClientOrder::where('clordid', $id)->first();
         $client = BrokerClient::find($order->broker_client_id);
         $mytime = Carbon::now();
