@@ -66,9 +66,10 @@ class FunctionSet
             return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
         }
 
-        $offset = 5 * 60 * 60;
+        $offset = 7 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
+        return $timeNdate;
         $order = BrokerClientOrder::where('clordid', $id)->first();
         $client = BrokerClient::find($order->broker_client_id);
         $mytime = Carbon::now();
@@ -89,8 +90,8 @@ class FunctionSet
             'SenderCompID' => $trading->sender_comp_id,
             'SenderSubID' => $trading->trading_account_number,
             'Host' => $trading->socket,
-            'OrderID' => $cancel_order_no,
-            "OriginalOrderID" => $order->clordid,
+            'OrderID' => $cancel_order_no, //NEW ORDER NUMBER GENERATED FOR CANCELLATION REQUEST
+            "OriginalOrderID" => $order->clordid, //ORDER NUMBER FOR THE ORIGINAL ORDER PLACED
             "OrigClOrdID" => $order->clordid,
             "OrderQty" => $order->quantity,
             'BuyorSell' => $this->jsonStrip(json_decode($order->side, true), 'fix_value'),
@@ -124,7 +125,7 @@ class FunctionSet
 
         // Log this cancellation request to the execution reports
         $broker_order_execution_report = new BrokerOrderExecutionReport();
-        $broker_order_execution_report->clOrdID = $data['clOrdID'] ?? $data['OrigClOrdID'];
+        $broker_order_execution_report->clOrdID = $order->clordid;
         $broker_order_execution_report->orderID = $data['orderID'] ?? '000000-000000-0';
         $broker_order_execution_report->text = $data['text'];
         $broker_order_execution_report->ordRejRes = $data['ordRejRes'] ?? null;
@@ -404,7 +405,7 @@ class FunctionSet
         ----------------------------------------------
         */
         $execution_report = $report;
-        $offset = 5 * 60 * 60;
+        $offset = 7 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
         if ($execution_report) {
