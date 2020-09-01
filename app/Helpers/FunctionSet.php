@@ -286,7 +286,7 @@ class FunctionSet
         // ================================================================================================
         $data['text'] = 'Order Submitted Successfully';
         $data['status'] = 'Submitted';
-        return $this->createDMAExecutionReport($data, $broker_client_order);
+        $this->createDMAExecutionReport($data, $broker_client_order);
         // ================================================================================================
 
 
@@ -326,7 +326,7 @@ class FunctionSet
                 }
 
 
-                // $this->logExecution($data); //Create a record in the execution report
+                $this->createDMAExecutionReport($data, $broker_client_order);
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
                 break;
             case "Please Check the endpoint /MessageDownload/Download for message queue":
@@ -365,7 +365,7 @@ class FunctionSet
                 }
 
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                // $this->logExecution($data); //Create a record in the execution report
+                $this->createDMAExecutionReport($data, $broker_client_order);
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
                 break;
         }
