@@ -306,7 +306,7 @@ class FunctionSet
                 $data['status'] = 'Session Failed';
 
                 // Return funds only if this is a buy order as we deducted funds previously
-                if ($side['fix_value'] === 1) {
+                if ($side['fix_value'] === '1') {
                     BrokerClientOrder::updateOrCreate(
                         ['id', $broker_client_order['id']],
                         ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
@@ -341,7 +341,7 @@ class FunctionSet
                 $data['status'] = $this->OrderStatus->Failed();
                 // ============================================================================================
 
-                if ($side['fix_value'] === 1) {
+                if ($side['fix_value'] === '1') {
 
                     BrokerClientOrder::updateOrCreate(
                         ['id', $broker_client_order['id']],
@@ -403,6 +403,9 @@ class FunctionSet
         
         ----------------------------------------------
         */
+        if (array_values($report)[1] === "XXXX") {
+            $report['clOrdID'] = array_values($report)[2];
+        }
         $execution_report = $report;
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
@@ -619,21 +622,20 @@ class FunctionSet
 
 
         // Determine if the order is a regular order or a cancel order
-        if ($original_order_number) {
+        if ($original_order_number && $order_number === "XXXX") {
             $order_number = $original_order_number;
         } else {
-            $order_number = $order_number;
+            $order_number = array_values($data)[1];
         }
+
 
         // Define the clients jcsd number
         $jcsd = str_replace('JCSD', "", $jcsd_num);
+        //Find the broker order linked to this execution report (account number)
+        $order = BrokerClientOrder::where('clordid', $order_number)->first();
 
         // // Define The broker client
         $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
-
-
-        //Find the broker order linked to this execution report (account number)
-        $order = BrokerClientOrder::where('clordid', $order_number)->first();
         if ($order) {
             //Trading Account Information
             $trading = BrokerTradingAccount::find((int)$order->trading_account_id);
