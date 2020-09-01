@@ -286,7 +286,7 @@ class FunctionSet
         // ================================================================================================
         $data['text'] = 'Order Submitted Successfully';
         $data['status'] = 'Submitted';
-        $this->logExecution($data);
+        return $this->createDMAExecutionReport($data, $broker_client_order);
         // ================================================================================================
 
 
@@ -326,7 +326,7 @@ class FunctionSet
                 }
 
 
-                $this->logExecution($data); //Create a record in the execution report
+                // $this->logExecution($data); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
                 break;
             case "Please Check the endpoint /MessageDownload/Download for message queue":
@@ -365,10 +365,40 @@ class FunctionSet
                 }
 
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                $this->logExecution($data); //Create a record in the execution report
+                // $this->logExecution($data); //Create a record in the execution report
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
                 break;
         }
+    }
+    public function createDMAExecutionReport($data, $order)
+    {
+
+        $offset = 5 * 60 * 60;
+        $dateFormat = "Y-m-d H:i:s";
+        $timeNdate = gmdate($dateFormat, time() - $offset);
+        // return $order;
+        $broker_order_execution_report = new BrokerOrderExecutionReport();
+        $broker_order_execution_report->clOrdID = $order['clordid'];
+        $broker_order_execution_report->orderID = "0-00000000-00000-00";
+        $broker_order_execution_report->text = $data['text'];
+        $broker_order_execution_report->ordRejRes = $data['ordRejRes'] ?? null;
+        $broker_order_execution_report->status = $data['status'];
+        $broker_order_execution_report->buyorSell = $data['BuyorSell'];
+        $broker_order_execution_report->securitySubType = 0;
+        $broker_order_execution_report->time = $data['time'] ?? null;
+        $broker_order_execution_report->ordType = 2;
+        $broker_order_execution_report->orderQty = $data['OrderQty'];
+        $broker_order_execution_report->timeInForce = $data['timeInForce'] ?? 0;
+        $broker_order_execution_report->symbol = $data['Symbol'];
+        $broker_order_execution_report->qTradeacc = $data['Account'];
+        $broker_order_execution_report->price = $order['price'];
+        $broker_order_execution_report->stopPx = $order['stopPx'] ?? 0;
+        $broker_order_execution_report->execType = $data['execType'] ?? 0;
+        $broker_order_execution_report->senderSubID = $data['SenderSubID'];
+        $broker_order_execution_report->seqNum = $data['seqNum'] ?? 0;
+        $broker_order_execution_report->sendingTime = $timeNdate;
+        $broker_order_execution_report->messageDate = $timeNdate;
+        $broker_order_execution_report->save();
     }
     public function logExecution($report)
     {
@@ -417,7 +447,6 @@ class FunctionSet
                 $time = array_values($report)[21];
             }
 
-            return $report;
             $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])->where('seqNum', array_values($report)[20])->where('sendingTime', $time);
             if ($record->exists()) {
                 //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT but update the marker order number
