@@ -28,6 +28,9 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
+Route::get('/DMAMessageDownload', "LightSailController@messageDownload");
+
+
 
 Route::post('/update-balances', 'ApplicationController@updateBalances');
 
@@ -35,8 +38,6 @@ Route::post('/update-balances', 'ApplicationController@updateBalances');
 Route::get('/home', function () {
     return redirect('/');
 });
-
-Route::get('/DMAMessageDownload', "ApplicationController@messageDownload");
 
 
 
