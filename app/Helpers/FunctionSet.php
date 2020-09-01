@@ -403,7 +403,7 @@ class FunctionSet
         
         ----------------------------------------------
         */
-        if (array_values($report)[1] === "XXXX") {
+        if (array_values($report)[1] != null) {
             $report['clOrdID'] = array_values($report)[2];
         }
         $execution_report = $report;
@@ -424,7 +424,7 @@ class FunctionSet
             } else {
                 // IF IT IS A NEW RECORD INSERT IT AND UPDATE THE BALANCES
                 $broker_order_execution_report = new BrokerOrderExecutionReport();
-                $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
+                $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['origClOrdID'];
                 $broker_order_execution_report->orderID = $report['orderID'] ?? '000000-000000-0';
                 $broker_order_execution_report->text = $report['text'];
                 $broker_order_execution_report->ordRejRes = $report['ordRejRes'] ?? null;

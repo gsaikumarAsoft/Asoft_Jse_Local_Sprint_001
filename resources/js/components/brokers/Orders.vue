@@ -631,6 +631,8 @@ export default {
               return "Filled";
             } else if (value === "4") {
               return "Cancelled";
+            } else if (value === "6") {
+              return "Pending Cancel";
             } else if (value === "5") {
               return "Replaced";
             } else if (value === "C") {
