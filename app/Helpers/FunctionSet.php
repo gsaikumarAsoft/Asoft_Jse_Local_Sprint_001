@@ -417,6 +417,7 @@ class FunctionSet
                 $time = array_values($report)[21];
             }
 
+            return $report;
             $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])->where('seqNum', array_values($report)[20])->where('sendingTime', $time);
             if ($record->exists()) {
                 //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT but update the marker order number
