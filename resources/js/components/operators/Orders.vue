@@ -121,7 +121,7 @@
                       v-model="order.market_order_number"
                       type="text"
                       placeholder="Enter Market Order Number"
-                      :disabled="disabled == 1"
+                      disabled
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -836,7 +836,8 @@ export default {
       }
       if (result.dismiss === "cancel") {
         if (this.permissions.indexOf("delete-broker-order") !== -1) {
-          await this.destroy(o.id);
+          console.log("Destruction")
+          this.destroy(o.clordid);
           //broker Or;
         } else {
           this.$swal(
@@ -1005,16 +1006,6 @@ export default {
         }
       }
     },
-    notify(title, message, type, confirm) {
-      this.$swal({
-        title: title,
-        text: message,
-        type: type,
-        // showConfirmButton: confirm,
-      }).then(function () {
-        window.location.reload();
-      });
-    },
     async callFix() {
       let order_sample = {
         BeginString: "FIX.4.2",
@@ -1079,6 +1070,8 @@ export default {
       var dt = new Date();
       this.order.client_order_number =
         formatteddatestr + ("" + Math.random()).substring(2, 5);
+      this.order.order_type = this.order_types[0]; //Preselect the order type by default
+      this.order.handling_instructions = this.handling_options[0];
       // ===============================================/
       // ===============================================/
     },
@@ -1091,10 +1084,13 @@ export default {
     },
     async destroy(id) {
       this.$swal("Proccessing Order Cancellation");
-      await axios.delete(`destroy-broker-client-order/${id}`); //.then(response => {
-      this.$swal("Cancelled");
-      await this.timeout(1000);
-      window.location.reload.bind(window.location);
+      const { data } = await axios.delete(`destroy-broker-client-order/${id}`);
+      let valid = data;
+      if (valid.isvalid) {
+        this.notify("Request Sent", data.errors, "success", true);
+      } else {
+        this.notify("Warning", data.errors, "warning", false);
+      }
     },
     async handleJSEOrder() {
       // Exit when the form isn't valid
@@ -1119,6 +1115,16 @@ export default {
       this.create = false;
       this.$refs.selectedOrder.clearSelected();
       this.order = {};
+    },
+    notify(title, message, type, confirm) {
+      this.$swal({
+        title: title,
+        text: message,
+        type: type,
+        // showConfirmButton: confirm,
+      }).then(function () {
+        window.location.reload();
+      });
     },
     handleSubmit() {},
     async getSymbols() {

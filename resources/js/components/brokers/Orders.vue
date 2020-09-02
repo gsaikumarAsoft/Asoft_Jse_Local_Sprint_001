@@ -1134,7 +1134,7 @@ export default {
 
       this.order.order_type = this.order_types[0]; //Preselect the order type by default
       this.order.handling_instructions = this.handling_options[0];
-      console.log(this.order_types[0]);
+      // console.log(this.order_types[0]);
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         formatteddatestr + ("" + Math.random()).substring(2, 5);
