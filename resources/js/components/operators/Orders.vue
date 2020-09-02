@@ -751,7 +751,7 @@ export default {
       if (fix_value === "6") {
         this.expiration = true;
       }
-      console.log(this.expiration);
+      // console.log(this.expiration);
       // }
     },
   },
@@ -790,7 +790,7 @@ export default {
           this.order.client_trading_account = clients[i].id;
         }
       }
-      console.log(trading);
+      // console.log(trading);
       for (j = 0; j < trading.length; j++) {
         // console.log(trading[j].id);
         if (parseInt(o.trading_account_id) === trading[j].value) {
@@ -862,7 +862,7 @@ export default {
     },
     importOrderFromJSON() {
       //  this.order = this.file;
-      console.log(this.order_template_data);
+      // console.log(this.order_template_data);
       this.order = {};
       this.order = this.order_template_data.order_standard;
       this.order_option_inputs = this.order_template_data.order_options;
@@ -912,8 +912,8 @@ export default {
     },
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
-      console.log("Right Here");
-      console.log(data);
+      // console.log("Right Here");
+      // console.log(data);
       for (let i = 0; i < data.length; i++) {
         //console.log(data[i]);
         this.broker_trading_account_options.push({
@@ -988,7 +988,7 @@ export default {
           );
           //.then(response => {
           let valid = data.isvalid;
-          console.log(data);
+          // console.log(data);
           if (valid) {
             this.notify("Order Created", data.errors, "success", true);
           } else {
@@ -1040,7 +1040,7 @@ export default {
         ClientID: "JMMB_TRADER1",
       };
 
-      console.log(order_sample);
+      // // console.log(order_sample);
 
       // Fix Wrapper
       const { status } = await axios.post(
@@ -1065,7 +1065,7 @@ export default {
         //{ crossDomain: true }
       );
       ///.then(response => {
-      console.log(response);
+      // console.log(response);
       ///});
     },
     add() {
@@ -1144,7 +1144,7 @@ export default {
     }
 
     this.broker_client_orders = JSON.parse(this.orders);
-    console.log(this.broker_client_orders);
+    // console.log(this.broker_client_orders);
   },
 };
 </script>

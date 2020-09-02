@@ -837,7 +837,7 @@ export default {
         // Show the Expiration date input for this order
         this.expiration = true;
       }
-      console.log(this.expiration);
+      // console.log(this.expiration);
       // }
     },
   },
@@ -930,7 +930,7 @@ export default {
       const fr = new FileReader();
       const self = this;
       fr.onload = (e) => {
-        console.log("e.target.result", e.target.result);
+        // console.log("e.target.result", e.target.result);
         //const result = JSON.parse(e.target.result);
         self.order_template_data = e.target.result;
       };
@@ -939,7 +939,7 @@ export default {
     },
     importOrderFromJSON() {
       //  this.order = this.file;
-      console.log(this.order_template_data);
+      // console.log(this.order_template_data);
       this.order = {};
       this.order = this.order_template_data.order_standard;
       this.order_option_inputs = this.order_template_data.order_options;
@@ -991,7 +991,7 @@ export default {
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
       //let data = response.data;
-      console.log("tradingAccounts", data);
+      // console.log("tradingAccounts", data);
       this.broker_trading_account_options = data.map((x) => ({
         text:
           x.foreign_broker +
@@ -1055,7 +1055,7 @@ export default {
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
       try {
         const { value: side_type } = JSON.parse(this.order.side);
-        console.log("side_type", side_type);
+        // console.log("side_type", side_type);
 
         /*  if (!this.order.trading_account || !this.order.client_trading_account) {
           throw new Error(
@@ -1209,16 +1209,16 @@ export default {
 
     const { clients: client_accounts } = client_accounts_data[0];
 
-    console.log("client_accounts", client_accounts);
+    // console.log("client_accounts", client_accounts);
 
-    console.log("orders", orders);
+    // console.log("orders", orders);
     this.broker_client_orders = orders.map((x) => {
       x.client = client_accounts.find((y) => y.id === x.broker_client_id);
       x.jcsd = x.client.jcsd;
       x.client_name = x.client.name;
       return x;
     });
-    console.log("this.broker_client_orders", this.broker_client_orders);
+    // console.log("this.broker_client_orders", this.broker_client_orders);
 
     this.broker_client_orders.sort(function (a, b) {
       return b.client_order_number > a.client_order_number ? -1 : 1;
