@@ -239,7 +239,7 @@
                       v-model="order.order_type"
                       label="text"
                       :options="order_types"
-                      :disabled="disabled == 1"
+                      disabled
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -254,7 +254,7 @@
                       v-model="order.handling_instructions"
                       label="text"
                       :options="handling_options"
-                      :disabled="disabled == 1"
+                      disabled
                     ></multiselect>
                     <!-- <b-form-select
                       v-model="order.local_broker"
@@ -836,7 +836,7 @@ export default {
       }
       if (result.dismiss === "cancel") {
         if (this.permissions.indexOf("delete-broker-order") !== -1) {
-          console.log("Destruction")
+          console.log("Destruction");
           this.destroy(o.clordid);
           //broker Or;
         } else {
@@ -1083,7 +1083,17 @@ export default {
       this.order_option_inputs.splice(index, 1);
     },
     async destroy(id) {
-      this.$swal("Proccessing Order Cancellation");
+      this.$swal.fire({
+        title: `${id}`,
+        html:
+          "Please wait while we validate your cancel request for order #" + id,
+        timerProgressBar: true,
+        showCancelButton: false,
+        allowOutsideClick: false,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        },
+      });
       const { data } = await axios.delete(`destroy-broker-client-order/${id}`);
       let valid = data;
       if (valid.isvalid) {
