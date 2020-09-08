@@ -127,7 +127,7 @@
                       v-model="order.market_order_number"
                       type="text"
                       placeholder="Enter Market Order Number"
-                      :disabled="disabled"
+                      disabled
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -277,7 +277,7 @@
                       v-model="order.order_type"
                       label="text"
                       :options="order_types"
-                      :disabled="disabled"
+                      disabled
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -296,7 +296,7 @@
                       v-model="order.handling_instructions"
                       label="text"
                       :options="handling_options"
-                      :disabled="disabled"
+                      disabled
                     ></multiselect>
                     <!-- <b-form-select
                       v-model="order.local_broker"
@@ -631,6 +631,8 @@ export default {
               return "Filled";
             } else if (value === "4") {
               return "Cancelled";
+            } else if (value === "6") {
+              return "Pending Cancel";
             } else if (value === "5") {
               return "Replaced";
             } else if (value === "C") {
@@ -765,7 +767,7 @@ export default {
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
+        // { text: "Stop limit", value: "Stop limit", fix_value: "4" },
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -835,7 +837,7 @@ export default {
         // Show the Expiration date input for this order
         this.expiration = true;
       }
-      console.log(this.expiration);
+      // console.log(this.expiration);
       // }
     },
   },
@@ -928,7 +930,7 @@ export default {
       const fr = new FileReader();
       const self = this;
       fr.onload = (e) => {
-        console.log("e.target.result", e.target.result);
+        // console.log("e.target.result", e.target.result);
         //const result = JSON.parse(e.target.result);
         self.order_template_data = e.target.result;
       };
@@ -937,7 +939,7 @@ export default {
     },
     importOrderFromJSON() {
       //  this.order = this.file;
-      console.log(this.order_template_data);
+      // console.log(this.order_template_data);
       this.order = {};
       this.order = this.order_template_data.order_standard;
       this.order_option_inputs = this.order_template_data.order_options;
@@ -989,7 +991,7 @@ export default {
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
       //let data = response.data;
-      console.log("tradingAccounts", data);
+      // console.log("tradingAccounts", data);
       this.broker_trading_account_options = data.map((x) => ({
         text:
           x.foreign_broker +
@@ -1053,7 +1055,7 @@ export default {
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
       try {
         const { value: side_type } = JSON.parse(this.order.side);
-        console.log("side_type", side_type);
+        // console.log("side_type", side_type);
 
         /*  if (!this.order.trading_account || !this.order.client_trading_account) {
           throw new Error(
@@ -1129,6 +1131,10 @@ export default {
       this.disabled = false;
       var dt = new Date();
       this.order = {};
+
+      this.order.order_type = this.order_types[0]; //Preselect the order type by default
+      this.order.handling_instructions = this.handling_options[0];
+      // console.log(this.order_types[0]);
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         formatteddatestr + ("" + Math.random()).substring(2, 5);
@@ -1152,7 +1158,17 @@ export default {
     },
 
     async destroy(id) {
-      this.$swal("Proccessing Order Cancellation");
+      this.$swal.fire({
+        title: `${id}`,
+        html:
+          "Please wait while we validate your cancel request for order #" + id,
+        timerProgressBar: true,
+        showCancelButton: false,
+        allowOutsideClick: false,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        },
+      });
       const { data } = await axios.delete(`destroy-broker-client-order/${id}`);
       let valid = data;
       if (valid.isvalid) {
@@ -1207,16 +1223,16 @@ export default {
 
     const { clients: client_accounts } = client_accounts_data[0];
 
-    console.log("client_accounts", client_accounts);
+    // console.log("client_accounts", client_accounts);
 
-    console.log("orders", orders);
+    // console.log("orders", orders);
     this.broker_client_orders = orders.map((x) => {
       x.client = client_accounts.find((y) => y.id === x.broker_client_id);
       x.jcsd = x.client.jcsd;
       x.client_name = x.client.name;
       return x;
     });
-    console.log("this.broker_client_orders", this.broker_client_orders);
+    // console.log("this.broker_client_orders", this.broker_client_orders);
 
     this.broker_client_orders.sort(function (a, b) {
       return b.client_order_number > a.client_order_number ? -1 : 1;

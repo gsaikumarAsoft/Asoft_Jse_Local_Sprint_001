@@ -121,7 +121,7 @@
                       v-model="order.market_order_number"
                       type="text"
                       placeholder="Enter Market Order Number"
-                      :disabled="disabled == 1"
+                      disabled
                     ></b-form-input>
                   </b-form-group>
                 </b-col>
@@ -239,7 +239,7 @@
                       v-model="order.order_type"
                       label="text"
                       :options="order_types"
-                      :disabled="disabled == 1"
+                      disabled
                     ></multiselect>
                   </b-form-group>
                 </b-col>
@@ -254,7 +254,7 @@
                       v-model="order.handling_instructions"
                       label="text"
                       :options="handling_options"
-                      :disabled="disabled == 1"
+                      disabled
                     ></multiselect>
                     <!-- <b-form-select
                       v-model="order.local_broker"
@@ -586,6 +586,8 @@ export default {
               return "Filled";
             } else if (value === "4") {
               return "Cancelled";
+            } else if (value === "6") {
+              return "Pending Cancel";
             } else if (value === "5") {
               return "Replaced";
             } else if (value === "C") {
@@ -692,7 +694,7 @@ export default {
         // { text: "Market", value: "Market", fix_value: "1" },
         { text: "Limit", value: "Limit", fix_value: "2" },
         // { text: "Stop", value: "Stop", fix_value: "3" },
-        { text: "Stop limit", value: "Stop limit", fix_value: "4" },
+        // { text: "Stop limit", value: "Stop limit", fix_value: "4" },
         // { text: "Market on close", value: "Market on close", fix_value: "5" },
         // { text: "With or without", value: "With or without", fix_value: "6" },
         // { text: "Limit or better", value: "Limit or better", fix_value: "7" },
@@ -749,7 +751,7 @@ export default {
       if (fix_value === "6") {
         this.expiration = true;
       }
-      console.log(this.expiration);
+      // console.log(this.expiration);
       // }
     },
   },
@@ -788,7 +790,7 @@ export default {
           this.order.client_trading_account = clients[i].id;
         }
       }
-      console.log(trading);
+      // console.log(trading);
       for (j = 0; j < trading.length; j++) {
         // console.log(trading[j].id);
         if (parseInt(o.trading_account_id) === trading[j].value) {
@@ -834,7 +836,8 @@ export default {
       }
       if (result.dismiss === "cancel") {
         if (this.permissions.indexOf("delete-broker-order") !== -1) {
-          await this.destroy(o.id);
+          console.log("Destruction");
+          this.destroy(o.clordid);
           //broker Or;
         } else {
           this.$swal(
@@ -860,7 +863,7 @@ export default {
     },
     importOrderFromJSON() {
       //  this.order = this.file;
-      console.log(this.order_template_data);
+      // console.log(this.order_template_data);
       this.order = {};
       this.order = this.order_template_data.order_standard;
       this.order_option_inputs = this.order_template_data.order_options;
@@ -910,8 +913,8 @@ export default {
     },
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
-      console.log("Right Here");
-      console.log(data);
+      // console.log("Right Here");
+      // console.log(data);
       for (let i = 0; i < data.length; i++) {
         //console.log(data[i]);
         this.broker_trading_account_options.push({
@@ -986,7 +989,7 @@ export default {
           );
           //.then(response => {
           let valid = data.isvalid;
-          console.log(data);
+          // console.log(data);
           if (valid) {
             this.notify("Order Created", data.errors, "success", true);
           } else {
@@ -1002,16 +1005,6 @@ export default {
           }
         }
       }
-    },
-    notify(title, message, type, confirm) {
-      this.$swal({
-        title: title,
-        text: message,
-        type: type,
-        // showConfirmButton: confirm,
-      }).then(function () {
-        window.location.reload();
-      });
     },
     async callFix() {
       let order_sample = {
@@ -1038,7 +1031,7 @@ export default {
         ClientID: "JMMB_TRADER1",
       };
 
-      console.log(order_sample);
+      // // console.log(order_sample);
 
       // Fix Wrapper
       const { status } = await axios.post(
@@ -1063,7 +1056,7 @@ export default {
         //{ crossDomain: true }
       );
       ///.then(response => {
-      console.log(response);
+      // console.log(response);
       ///});
     },
     add() {
@@ -1077,6 +1070,8 @@ export default {
       var dt = new Date();
       this.order.client_order_number =
         formatteddatestr + ("" + Math.random()).substring(2, 5);
+      this.order.order_type = this.order_types[0]; //Preselect the order type by default
+      this.order.handling_instructions = this.handling_options[0];
       // ===============================================/
       // ===============================================/
     },
@@ -1088,11 +1083,24 @@ export default {
       this.order_option_inputs.splice(index, 1);
     },
     async destroy(id) {
-      this.$swal("Proccessing Order Cancellation");
-      await axios.delete(`destroy-broker-client-order/${id}`); //.then(response => {
-      this.$swal("Cancelled");
-      await this.timeout(1000);
-      window.location.reload.bind(window.location);
+      this.$swal.fire({
+        title: `${id}`,
+        html:
+          "Please wait while we validate your cancel request for order #" + id,
+        timerProgressBar: true,
+        showCancelButton: false,
+        allowOutsideClick: false,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+        },
+      });
+      const { data } = await axios.delete(`destroy-broker-client-order/${id}`);
+      let valid = data;
+      if (valid.isvalid) {
+        this.notify("Request Sent", data.errors, "success", true);
+      } else {
+        this.notify("Warning", data.errors, "warning", false);
+      }
     },
     async handleJSEOrder() {
       // Exit when the form isn't valid
@@ -1118,6 +1126,16 @@ export default {
       this.$refs.selectedOrder.clearSelected();
       this.order = {};
     },
+    notify(title, message, type, confirm) {
+      this.$swal({
+        title: title,
+        text: message,
+        type: type,
+        // showConfirmButton: confirm,
+      }).then(function () {
+        window.location.reload();
+      });
+    },
     handleSubmit() {},
     async getSymbols() {
       ({ data: this.symbols } = await axios.get("/apis/symbols.json"));
@@ -1142,7 +1160,7 @@ export default {
     }
 
     this.broker_client_orders = JSON.parse(this.orders);
-    console.log(this.broker_client_orders);
+    // console.log(this.broker_client_orders);
   },
 };
 </script>

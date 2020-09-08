@@ -89,8 +89,8 @@ class FunctionSet
             'SenderCompID' => $trading->sender_comp_id,
             'SenderSubID' => $trading->trading_account_number,
             'Host' => $trading->socket,
-            'OrderID' => $cancel_order_no,
-            "OriginalOrderID" => $order->clordid,
+            'OrderID' => $cancel_order_no, //NEW ORDER NUMBER GENERATED FOR CANCELLATION REQUEST
+            "OriginalOrderID" => $order->clordid, //ORDER NUMBER FOR THE ORIGINAL ORDER PLACED
             "OrigClOrdID" => $order->clordid,
             "OrderQty" => $order->quantity,
             'BuyorSell' => $this->jsonStrip(json_decode($order->side, true), 'fix_value'),
@@ -124,7 +124,7 @@ class FunctionSet
 
         // Log this cancellation request to the execution reports
         $broker_order_execution_report = new BrokerOrderExecutionReport();
-        $broker_order_execution_report->clOrdID = $data['clOrdID'] ?? $data['OrigClOrdID'];
+        $broker_order_execution_report->clOrdID = $order->clordid;
         $broker_order_execution_report->orderID = $data['orderID'] ?? '000000-000000-0';
         $broker_order_execution_report->text = $data['text'];
         $broker_order_execution_report->ordRejRes = $data['ordRejRes'] ?? null;
@@ -286,8 +286,7 @@ class FunctionSet
         // ================================================================================================
         $data['text'] = 'Order Submitted Successfully';
         $data['status'] = 'Submitted';
-        $this->logExecution($data);
-        // $this->logExecution(['executionReports' => [$data]]); //Create a record in the execution report
+        $this->createDMAExecutionReport($data, $broker_client_order);
         // ================================================================================================
 
 
@@ -307,7 +306,7 @@ class FunctionSet
                 $data['status'] = 'Session Failed';
 
                 // Return funds only if this is a buy order as we deducted funds previously
-                if ($side['fix_value'] === 1) {
+                if ($side['fix_value'] === '1') {
                     BrokerClientOrder::updateOrCreate(
                         ['id', $broker_client_order['id']],
                         ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
@@ -327,7 +326,7 @@ class FunctionSet
                 }
 
 
-                $this->logExecution($data); //Create a record in the execution report
+                $this->createDMAExecutionReport($data, $broker_client_order);
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
                 break;
             case "Please Check the endpoint /MessageDownload/Download for message queue":
@@ -342,7 +341,7 @@ class FunctionSet
                 $data['status'] = $this->OrderStatus->Failed();
                 // ============================================================================================
 
-                if ($side['fix_value'] === 1) {
+                if ($side['fix_value'] === '1') {
 
                     BrokerClientOrder::updateOrCreate(
                         ['id', $broker_client_order['id']],
@@ -366,27 +365,89 @@ class FunctionSet
                 }
 
                 $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                $this->logExecution($data); //Create a record in the execution report
+                $this->createDMAExecutionReport($data, $broker_client_order);
                 return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
                 break;
         }
     }
+    public function createDMAExecutionReport($data, $order)
+    {
+
+        $offset = 5 * 60 * 60;
+        $dateFormat = "Y-m-d H:i:s";
+        $timeNdate = gmdate($dateFormat, time() - $offset);
+        // return $order;
+        $broker_order_execution_report = new BrokerOrderExecutionReport();
+        $broker_order_execution_report->clOrdID = $order['clordid'];
+        $broker_order_execution_report->orderID = "0-00000000-00000-00";
+        $broker_order_execution_report->text = $data['text'];
+        $broker_order_execution_report->ordRejRes = $data['ordRejRes'] ?? null;
+        $broker_order_execution_report->status = $data['status'];
+        $broker_order_execution_report->buyorSell = $data['BuyorSell'];
+        $broker_order_execution_report->securitySubType = 0;
+        $broker_order_execution_report->time = $data['time'] ?? null;
+        $broker_order_execution_report->ordType = 2;
+        $broker_order_execution_report->orderQty = $data['OrderQty'];
+        $broker_order_execution_report->timeInForce = $data['timeInForce'] ?? 0;
+        $broker_order_execution_report->symbol = $data['Symbol'];
+        $broker_order_execution_report->qTradeacc = $data['Account'];
+        $broker_order_execution_report->price = $order['price'];
+        $broker_order_execution_report->stopPx = $order['stopPx'] ?? 0;
+        $broker_order_execution_report->execType = $data['execType'] ?? 0;
+        $broker_order_execution_report->senderSubID = $data['SenderSubID'];
+        $broker_order_execution_report->seqNum = $data['seqNum'] ?? 0;
+        $broker_order_execution_report->sendingTime = $timeNdate;
+        $broker_order_execution_report->messageDate = $timeNdate;
+        $broker_order_execution_report->save();
+    }
     public function logExecution($report)
     {
-        // return $request;
+
+        /*
+        JSE PAYLOAD Example (Array Positions)
+        --------------------------------------------
+            
+            0"id"
+            1"clOrdID"
+            2"origClOrdID"
+            3"orderID"
+            4"text"
+            5"ordRejRes"
+            6"status"
+            7"buyorSell"
+            8"time"
+            9"ordType"
+            10"orderQty"
+            11"timeInForce"
+            12"symbol"
+            13"qTradeacc"
+            14"price"
+            15"stopPx"
+            16"execType"
+            17"senderSubID"
+            18"lastPrice"
+            19"lastOrderQty"
+            20"seqNum"
+            21"sendingTime"
+            22"messageDate"
+        
+        ----------------------------------------------
+        */
+        if (array_values($report)[1] === "XXXX") {
+            $report['clOrdID'] = array_values($report)[2];
+        }
         $execution_report = $report;
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
         if ($execution_report) {
+            if (count($report) == 21) {
+                $time = $timeNdate;
+            } else {
+                $time = array_values($report)[21];
+            }
 
-            // foreach ($execution_report as $report) {
-
-            // $clients[] = $report;
-
-            // addded jcsd number for accuracy
-            // $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('qTradeacc', array_values($report)[12])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
-            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[16])->where('seqNum', array_values($report)[17])->where('clOrdID', array_values($report)[1])->where('sendingTime', array_values($report)[18]);
+            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])->where('seqNum', array_values($report)[20])->where('sendingTime', $time);
             if ($record->exists()) {
                 //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT but update the marker order number
                 DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $report['orderID']]);
@@ -544,29 +605,74 @@ class FunctionSet
 
     public function clientSettlementBalanceUpdate($data)
     {
-        // return $data;
-
-        // iterate through all reports and update accounts as 
-
+        /*
+        JSE PAYLOAD Example (Array Positions)
+        --------------------------------------------
+            
+            0"id"
+            1"clOrdID"
+            2"origClOrdID"
+            3"orderID"
+            4"text"
+            5"ordRejRes"
+            6"status"
+            7"buyorSell"
+            8"time"
+            9"ordType"
+            10"orderQty"
+            11"timeInForce"
+            12"symbol"
+            13"qTradeacc"
+            14"price"
+            15"stopPx"
+            16"execType"
+            17"senderSubID"
+            18"lastPrice"
+            19"lastOrderQty"
+            20"seqNum"
+            21"sendingTime"
+            22"messageDate"
+        
+        ----------------------------------------------
+        */
 
         // Determine variables for use
         $order_number = array_values($data)[1];
-        $side = array_values($data)[6];
-        $sender_sub_id = array_values($data)[16];
-        $price = array_values($data)[13];
-        $quantity = array_values($data)[9];
-        $status = array_values($data)[5];
-        $jcsd_num = array_values($data)[12];
+        $side = array_values($data)[7];
+        $sender_sub_id = array_values($data)[17];
+        $price = array_values($data)[14];
+        $quantity = array_values($data)[10];
+        $status = array_values($data)[6];
+        $jcsd_num = array_values($data)[13];
+
+        // JSE NEW RELEASE AUGUST 29,2020
+        $original_order_number = array_values($data)[2];
+        $last_order_quantity = array_values($data)[19];
+        $last_order_price = array_values($data)[18];
+
+
+
+        if ($original_order_number) {
+            // this is a cancel request
+            //Update DMA Records to acurately mathch the cancellation request new order number : initial order number
+            BrokerOrderExecutionReport::updateOrCreate(
+                ['clordid' => $order_number],
+                ['clordid' => $original_order_number]
+            );
+
+            $order_number = $original_order_number;
+        } else {
+            $order_number = array_values($data)[1];
+        }
+
 
         // Define the clients jcsd number
         $jcsd = str_replace('JCSD', "", $jcsd_num);
+        //Find the broker order linked to this execution report (account number)
+        $order = BrokerClientOrder::where('clordid', $order_number)->first();
 
         // // Define The broker client
         $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
-
-
-        //Find the broker order linked to this execution report (account number)
-        $order = BrokerClientOrder::where('clordid', $order_number)->first();
         if ($order) {
             //Trading Account Information
             $trading = BrokerTradingAccount::find((int)$order->trading_account_id);
@@ -575,19 +681,18 @@ class FunctionSet
             $settlement_account = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
 
             if ($order && $broker_client) {
-                $current_order = $order;
+                $original_order = $order;
                 $trader = $broker_client;
 
-                if ($current_order->id) {
-                    // $order_status = $this->orderStatus($current_order->id);
+                if ($original_order->id) {
+                    // $order_status = $this->orderStatus($original_order->id);
                     $broker_settlement_account = $settlement_account;
 
                     $order_value = $quantity * $price; //ER Order Value
 
                     // Allocated Value of order [Release what was initially allocated per stock]
-                    $allocated_value_of_order = $quantity * $current_order['price'];
+                    $allocated_value_of_order = $quantity * $original_order['price'];
                     $filled_value = $quantity * $price;
-                    // $partial_filled_value = $quantity * $price;
 
                     //Determine If The Order Is A Buy Or Sell
                     $side = json_decode($order->side, true);
@@ -600,15 +705,15 @@ class FunctionSet
                             // UPDATE ORDER STATUS ONLY
                             BrokerClientOrder::updateOrCreate(
 
-                                ['id' => $current_order->id],
+                                ['id' => $original_order->id],
                                 ['order_status' => $status]
 
                             );
                         } else if ($status === $this->OrderStatus->Cancelled()) {
                             BrokerClientOrder::updateOrCreate(
 
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -627,8 +732,8 @@ class FunctionSet
                         } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
                             BrokerClientOrder::updateOrCreate(
 
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -646,10 +751,13 @@ class FunctionSet
                             );
                         } else if ($status === $this->OrderStatus->Filled()) {
 
+                            $allocated_value_of_order = $last_order_quantity * $original_order['price'];
+                            $filled_value = $last_order_quantity * $last_order_price;
+
                             // UPDATE THE ORDER STATUS 
                             $broker_client_order = BrokerClientOrder::updateOrCreate(
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -666,10 +774,12 @@ class FunctionSet
                                 ['open_orders' => $trader['open_orders'] - $allocated_value_of_order, 'filled_orders' => $trader->filled_orders + $filled_value]
                             );
                         } else if ($status === $this->OrderStatus->PartialFilled()) {
+                            $allocated_value_of_order = $last_order_quantity * $original_order['price'];
+                            $filled_value = $last_order_quantity * $last_order_price;
                             // UPDATE THE ORDER STATUS 
                             $broker_client_order = BrokerClientOrder::updateOrCreate(
-                                ['id' => $current_order->id],
-                                ['order_status' => $status, 'remaining' => $current_order['remaining'] - $allocated_value_of_order]
+                                ['id' => $original_order->id],
+                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
 
                             );
 
@@ -691,7 +801,7 @@ class FunctionSet
                         // UPDATE ORDER STATUS ONLY
                         BrokerClientOrder::updateOrCreate(
 
-                            ['id' => $current_order->id],
+                            ['id' => $original_order->id],
                             ['order_status' => $status]
 
                         );

@@ -8,6 +8,7 @@ use App\BrokerTradingAccount;
 use App\ForeignBroker;
 use App\Helpers\FunctionSet;
 use App\Helpers\LogActivity;
+use App\Jobs\ExecutionBalanceUpdate;
 use App\LocalBroker;
 use App\LogActivity as AppLogActivity;
 use App\Mail\BrokerDetailsUpdate;
@@ -480,4 +481,6 @@ class ApplicationController extends Controller
             // return $broker_client_account;
         }
     }
+
+
 }

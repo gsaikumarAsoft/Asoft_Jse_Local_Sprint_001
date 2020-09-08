@@ -79,6 +79,9 @@ export default {
             if (value === "4") {
               return "Cancelled";
             }
+            if (value === "6") {
+              return "Pending Cancel";
+            }
             if (value === "5") {
               return "Replaced";
             }

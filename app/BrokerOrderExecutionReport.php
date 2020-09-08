@@ -10,7 +10,7 @@ class BrokerOrderExecutionReport extends Model
     protected $table = 'broker_client_order_execution_reports';
 
     protected $fillable = [
-        'clOrdID',
+        'clordid',
         'orderID',
         'text',
         'ordRejRes',
@@ -36,4 +36,3 @@ class BrokerOrderExecutionReport extends Model
         return $this->belongsTo(BrokerClientOrder::class);
     }
 }
- 

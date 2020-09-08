@@ -3,7 +3,7 @@
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top:100px">
       <div class="content">
-        <b-card title="Trading Accounts">
+        <b-card title="Client Accounts">
           <b-table
             v-if="permissions.indexOf('read-broker-client') !== -1"
             striped

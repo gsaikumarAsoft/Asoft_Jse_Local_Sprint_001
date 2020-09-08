@@ -3,7 +3,7 @@
     <head-nav></head-nav>
     <div class="container-fluid" style="margin-top: 100px;">
       <div class="content">
-        <b-card title="Broker Clients" v-if="!broker_client">
+        <b-card title="Client Accounts" v-if="!broker_client">
           <b-table
             striped
             hover
@@ -115,7 +115,7 @@ import checkErrorMixin from "../../mixins/CheckError.js";
 export default {
   props: ["broker_traders"],
   components: {
-    headNav
+    headNav,
   },
   mixins: [checkErrorMixin],
   data() {
@@ -129,15 +129,15 @@ export default {
       fields: [
         {
           key: "name",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
-          sortable: true
+          sortable: true,
         },
         {
           key: "status",
-          sortable: true
+          sortable: true,
         },
         {
           key: "account_balance",
@@ -146,12 +146,12 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var cal = item.account_balance;
             return formatter.format(cal);
-          }
+          },
         },
         {
           key: "open_orders",
@@ -160,7 +160,7 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var nf = Intl.NumberFormat();
@@ -169,7 +169,7 @@ export default {
 
             // return formatter(cal);
             // return formatter.format(cal);
-          }
+          },
         },
         {
           key: "filled_orders",
@@ -178,7 +178,7 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
             var nf = Intl.NumberFormat();
@@ -187,7 +187,7 @@ export default {
 
             // return formatter(cal);
             // return formatter.format(cal);
-          }
+          },
         },
         // {
         //   key: "orders_limit",
@@ -201,25 +201,23 @@ export default {
           formatter: (value, key, item) => {
             var formatter = new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD"
+              currency: "USD",
             });
 
-            var spent =
-              Number(item.filled_orders) + Number(item.open_orders);
+            var spent = Number(item.filled_orders) + Number(item.open_orders);
 
             var cal = item.account_balance - spent;
             return formatter.format(cal);
-
-          }
+          },
         },
         {
           key: "jcsd",
           label: "JCSD",
-          sortable: true
-        }
+          sortable: true,
+        },
       ],
       modalTitle: "Client Update",
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
@@ -231,7 +229,7 @@ export default {
     },
     rows() {
       return this.local_broker_clients.length;
-    }
+    },
   },
   watch: {},
   methods: {
@@ -249,7 +247,7 @@ export default {
           account_balance: this.broker_client.account_balance,
           email: this.broker_client.email,
           jcsd: this.broker_client.jcsd,
-          status: "Unverified"
+          status: "Unverified",
         };
         // this.getClients();
       } else {
@@ -263,7 +261,7 @@ export default {
           name: this.broker_client.name,
           email: this.broker_client.email,
           jcsd: this.broker_client.jcsd,
-          status: "Unverified"
+          status: "Unverified",
         };
       }
       await this.storeBrokerClient(account);
@@ -287,7 +285,7 @@ export default {
         confirmButtonText: "Edit",
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
+        cancelButtonAriaLabel: "cancel",
       });
       if (result.value) {
         this.broker_client = b;
@@ -306,7 +304,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       console.log("Storing Broker Client");
       try {
@@ -327,7 +325,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       try {
         await axios.delete(`client-broker-delete/${id}`);
@@ -337,7 +335,7 @@ export default {
       } catch (error) {
         this.checkDeleteError(error);
       }
-    }
+    },
   },
   async mounted() {
     var client_data = JSON.parse(this.broker_traders);
@@ -349,9 +347,9 @@ export default {
     for (let i = 0; i < local_brokers.length; i++) {
       this.local_brokers.push({
         text: local_brokers[i].name,
-        value: local_brokers[i].id
+        value: local_brokers[i].id,
       });
     }
-  }
+  },
 };
 </script>
