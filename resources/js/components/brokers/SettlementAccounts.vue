@@ -15,8 +15,8 @@
             :fields="fields"
             :per-page="perPage"
             :current-page="currentPage"
-            @row-clicked="settlmentAccountHandler"
           >
+            <!-- @row-clicked="settlmentAccountHandler" -->
             <template slot="index" slot-scope="row">{{ row }}</template>
           </b-table>
           <b-pagination
