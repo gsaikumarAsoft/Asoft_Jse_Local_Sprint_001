@@ -28,7 +28,7 @@ class RoleTableSeeder extends Seeder
       'name' => 'BRKF',
     ]);
     Role::create([
-      'description' => 'Settlement Agent	',
+      'description' => 'Settlement Bank	',
       'guard_name' => 'web',
       'name' => 'AGTS',
     ]);

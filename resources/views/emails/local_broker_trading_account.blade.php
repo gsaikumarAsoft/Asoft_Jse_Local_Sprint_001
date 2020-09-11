@@ -10,7 +10,7 @@
         <p>
             The following Trading Account settings were verified as follows:
             </p>    
-        <li>Settlement Agent:  {{$user['bank_agent']}}</li>
+        <li>Settlement Bank:  {{$user['bank_agent']}}</li>
         <li>Settlement Account Number: {{$user['account']}}</li>
         <li>Foreign Broker: {{$user['foreign_broker_name']}}</li>
         <li>TargetCompID:  {{$user['target_comp_id']}}</li>

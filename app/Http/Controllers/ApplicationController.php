@@ -78,7 +78,7 @@ class ApplicationController extends Controller
                     // return redirect('foreign-broker');
                     break;
                 case 'AGTS':
-                    return 'Configuration Screen For Settlement Agent To Be Designed <a href="/logout">Logout</a>';
+                    return 'Configuration Screen For Settlement Bank To Be Designed <a href="/logout">Logout</a>';
                     // return redirect('settlement-agent');
                     break;
                 default:
@@ -160,7 +160,7 @@ class ApplicationController extends Controller
 
 
 
-            // Notify Settlement Agent
+            // Notify Settlement Bank
             Mail::to($request->email)->send(new MailLocalBroker($request, $pass));
         }
         // return $broker;
@@ -202,7 +202,7 @@ class ApplicationController extends Controller
             );
 
 
-            // Update The settlement agent password and notify the settlement agent of the change
+            // Update The Settlement Bank password and notify the Settlement Bank of the change
             User::where('name', $request->bank_name)
                 ->update(['password' => Hash::make($pass)]);
 
@@ -481,6 +481,4 @@ class ApplicationController extends Controller
             // return $broker_client_account;
         }
     }
-
-
 }
