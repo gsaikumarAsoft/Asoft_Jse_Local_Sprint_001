@@ -162,13 +162,8 @@ export default {
               style: "currency",
               currency: "USD",
             });
-
-            var nf = Intl.NumberFormat();
             var cal = item.open_orders;
-            return nf.format(cal);
-
-            // return formatter(cal);
-            // return formatter.format(cal);
+            return formatter.format(cal);
           },
         },
         {
@@ -180,20 +175,10 @@ export default {
               style: "currency",
               currency: "USD",
             });
-
-            var nf = Intl.NumberFormat();
-            var cal = Number(item.filled_orders);
-            return nf.format(cal);
-
-            // return formatter(cal);
+            return formatter.format(item.filled_orders);
             // return formatter.format(cal);
           },
         },
-        // {
-        //   key: "orders_limit",
-        //   label: "Available",
-        //   sortable: true
-        // },
         {
           // A virtual column with custom formatter
           key: "available",
