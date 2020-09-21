@@ -28,6 +28,13 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
+
+
+// External Capabilities
+Route::get('/', function () {
+    return response()->json(['name' => 'OMS API']);
+});
+
 Route::get('/DMAMessageDownload', "LightSailController@messageDownload");
 
 
