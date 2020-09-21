@@ -26,7 +26,7 @@
             aria-controls="local-brokers"
           ></b-pagination>
           <b-button v-b-modal.modal-1 @click="broker_client={}">Create Client</b-button>
-          <b-button v-b-modal.modal-1 @click="exportClients">Export Clients</b-button>
+          <b-button v-if="local_broker_clients.length > 0" @click="exportClients">Export Clients</b-button>
         </b-card>
         <b-card :title="title" v-else>
           <p class="my-4">Please update the fields below as required!</p>
