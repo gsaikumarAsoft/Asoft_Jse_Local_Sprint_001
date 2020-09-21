@@ -26,6 +26,7 @@
             aria-controls="local-brokers"
           ></b-pagination>
           <b-button v-b-modal.modal-1 @click="broker_client={}">Create Client</b-button>
+          <b-button v-b-modal.modal-1 @click="exportClients">Export Clients</b-button>
         </b-card>
         <b-card :title="title" v-else>
           <p class="my-4">Please update the fields below as required!</p>
@@ -109,6 +110,7 @@
   </div>
 </template>
 <script lang="ts">
+import jsPDF from "jspdf";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
 import checkErrorMixin from "../../mixins/CheckError.js";
@@ -218,6 +220,44 @@ export default {
   },
   watch: {},
   methods: {
+    exportClients() {
+      const tableData = [];
+      for (var i = 0; i < this.local_broker_clients.length; i++) {
+        tableData.push([
+          this.local_broker_clients[i].name,
+          this.local_broker_clients[i].email,
+          this.local_broker_clients[i].status,
+          this.local_broker_clients[i].account_balance,
+          this.local_broker_clients[i].open_orders,
+          this.local_broker_clients[i].filled_orders,
+          this.local_broker_clients[i].available,
+        ]);
+      }
+
+      // console.log(this.broker_settlement_accounts[i])
+      // tableData.push(this.broker_settlement_accounts[i]);
+
+      var doc = new jsPDF();
+      //   // It can parse html:
+      //   doc.autoTable({ html: "#foreign-brokers" });
+
+      // Or use javascript directly:
+      doc.autoTable({
+        head: [
+          [
+            "Name",
+            "Email",
+            "Status",
+            "Account Balance",
+            "Open Orders",
+            "Unsettled Trades",
+            "Available",
+          ],
+        ],
+        body: tableData,
+      });
+      doc.save("BrokerAdminClients.pdf");
+    },
     async handleSubmit() {
       // Exit when the form isn't valid
       //Determine if a new client is being created or we are updating an existing client
