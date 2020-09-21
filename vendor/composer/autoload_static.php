@@ -604,6 +604,7 @@ class ComposerStaticInit4a5e6b9b086dfd728233fc34eee3e29d
         'App\\Helpers\\OrderStatus' => __DIR__ . '/../..' . '/app/Helpers/OrderStatus.php',
         'App\\Http\\Controllers\\APIClientController' => __DIR__ . '/../..' . '/app/Http/Controllers/APIClientController.php',
         'App\\Http\\Controllers\\AccountVerificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/AccountVerificationController.php',
+        'App\\Http\\Controllers\\Api\\V1\\ClientController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/ClientController.php',
         'App\\Http\\Controllers\\ApplicationController' => __DIR__ . '/../..' . '/app/Http/Controllers/ApplicationController.php',
         'App\\Http\\Controllers\\Auth\\ConfirmPasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ConfirmPasswordController.php',
         'App\\Http\\Controllers\\Auth\\ForgotPasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ForgotPasswordController.php',

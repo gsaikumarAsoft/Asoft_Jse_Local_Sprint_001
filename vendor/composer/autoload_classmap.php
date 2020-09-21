@@ -24,6 +24,7 @@ return array(
     'App\\Helpers\\OrderStatus' => $baseDir . '/app/Helpers/OrderStatus.php',
     'App\\Http\\Controllers\\APIClientController' => $baseDir . '/app/Http/Controllers/APIClientController.php',
     'App\\Http\\Controllers\\AccountVerificationController' => $baseDir . '/app/Http/Controllers/AccountVerificationController.php',
+    'App\\Http\\Controllers\\Api\\V1\\ClientController' => $baseDir . '/app/Http/Controllers/API/ClientController.php',
     'App\\Http\\Controllers\\ApplicationController' => $baseDir . '/app/Http/Controllers/ApplicationController.php',
     'App\\Http\\Controllers\\Auth\\ConfirmPasswordController' => $baseDir . '/app/Http/Controllers/Auth/ConfirmPasswordController.php',
     'App\\Http\\Controllers\\Auth\\ForgotPasswordController' => $baseDir . '/app/Http/Controllers/Auth/ForgotPasswordController.php',
