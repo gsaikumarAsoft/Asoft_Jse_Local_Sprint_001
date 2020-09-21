@@ -31,8 +31,8 @@ use Spatie\Permission\Models\Role;
 
 
 // External Capabilities
-Route::get('/', function () {
-    return response()->json(['name' => 'OMS API']);
+Route::get('/api/', function () {
+    return response()->json(['name' => 'DMA 1.5']);
 });
 
 Route::get('/DMAMessageDownload', "LightSailController@messageDownload");

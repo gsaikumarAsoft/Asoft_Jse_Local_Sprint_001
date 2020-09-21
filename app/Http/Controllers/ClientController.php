@@ -28,6 +28,9 @@ class ClientController extends Controller
     {
 
         $local_broker = $this->HelperClass->getLocalBrokerById($request->local_broker_id);
+
+
+
         if ($request->id) {
             LogActivity::addToLog('Update Client Details');
             $broker = BrokerClient::updateOrCreate(
@@ -49,19 +52,6 @@ class ClientController extends Controller
 
             Mail::to($local_broker->email)->send(new LocalBrokerTrader($request));
         }
-    }
-    function newClient()
-    {
-        $broker = new BrokerClient;
-        $broker->local_broker_id = $request->local_broker_id;
-        $broker->name = $request->name;
-        $broker->email = $request->email;
-        $broker->orders_limit = $request->orders_limit;
-        $broker->open_orders = $request->open_orders;
-        $broker->jcsd = "";
-        $broker->status = 'Un-Verified';
-        // $broker->password = bcrypt('password');
-        $broker->save();
     }
     function destroy($id)
     {
