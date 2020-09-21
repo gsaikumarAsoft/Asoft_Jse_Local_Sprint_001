@@ -63,6 +63,17 @@ class ClientController extends Controller
 
     public function add(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'local_broker_id' => 'required',
+            'name' => 'required',
+            'email' => 'required|email',
+            'orders_limit' => 'required',
+            'open_orders' => 'required',
+            'jcsd' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 401);
+        }
         $broker = new BrokerClient();
         $broker->local_broker_id = $request->get('local_broker_id');
         $broker->name = $request->get('name');
