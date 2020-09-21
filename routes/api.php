@@ -17,10 +17,15 @@ use Illuminate\Http\Request;
 //     return $request->user();
 // });
 
-Route::namespace('\App\Http\Controllers\Api\V1')->prefix('v1')->group(function () {
-    Route::namespace("Client")->prefix("client")->middleware(['auth:api'])->group(function () {
-        return '1';
-        // Route::post("", "ClientController@create");
-        // Route::get("all", "ClientController@all");
-    });
+// Route::namespace('\App\Http\Controllers\Api\V1')->prefix('v1')->group(function () {
+//     Route::namespace("Client")->prefix("client")->middleware(['auth:api'])->group(function () {
+//         // Route::post("", "ClientController@create");
+//         Route::get("all", "ClientController@all");
+//     });
+// });
+
+Route::post('login', 'API\UserController@login');
+Route::post('register', 'API\UserController@register');
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::post('details', 'API\UserController@details');
 });

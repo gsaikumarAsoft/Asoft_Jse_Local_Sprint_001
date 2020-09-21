@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,8 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-  use Notifiable;
-  use HasRoles;
+  use Notifiable, HasRoles, HasApiTokens;
 
   /**
    * The attributes that are mass assignable.
@@ -34,7 +34,7 @@ class User extends Authenticatable
 
   /**
    * The attributes that should be cast to native types.
-  *
+   *
    * @var array
    */
   protected $casts = [
@@ -84,14 +84,16 @@ class User extends Authenticatable
   }
   public function permission()
   {
-      return $this->hasMany(Permission::class);
+    return $this->hasMany(Permission::class);
   }
 
-  public function broker(){
+  public function broker()
+  {
     return $this->hasMany(BrokerUser::class, 'user_id');
   }
 
-  public function trading_account(){
+  public function trading_account()
+  {
     return $this->hasMany(BrokerTradingAccount::class, 'user_id');
   }
 }
