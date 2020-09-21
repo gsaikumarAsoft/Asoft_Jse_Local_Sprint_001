@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\BrokerClient;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -58,5 +59,19 @@ class ClientController extends Controller
     {
         $user = Auth::user();
         return response()->json(['success' => $user], $this->successStatus);
+    }
+
+    public function add(Request $request)
+    {
+        $broker = new BrokerClient();
+        $broker->local_broker_id = $request->get('local_broker_id');
+        $broker->name = $request->get('name');
+        $broker->email = $request->get('email');
+        $broker->orders_limit = $request->get('orders_limit');
+        $broker->open_orders = $request->get('open_orders');
+        $broker->jcsd = $request->get('jcsd');
+        $broker->status = 'Un-Verified';
+        $broker->save();
+        return response()->json(['success' => "New Client Created"], $this->successStatus);
     }
 }

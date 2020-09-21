@@ -13,8 +13,19 @@ use Illuminate\Http\Request;
 |
 */
 
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+// Route::namespace('\App\Http\Controllers\Api\V1')->prefix('v1')->group(function () {
+//     Route::namespace("Client")->prefix("client")->middleware(['auth:api'])->group(function () {
+//         // Route::post("", "ClientController@create");
+//         Route::get("all", "ClientController@all");
+//     });
+// });
+
 Route::post('login', 'API\ClientController@login');
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('details', 'API\ClientController@details');
+    Route::post('add', 'API\ClientController@add');
 });
-    

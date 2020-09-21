@@ -22,7 +22,7 @@ class ClientController extends Controller
     public function index()
     {
         $users = BrokerClient::with('local_broker')->get();
-        return $users;
+        return $users; 
     }
     function store(Request $request)
     {
