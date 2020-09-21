@@ -256,7 +256,7 @@ export default {
         ],
         body: tableData,
       });
-      doc.save("BrokerAdminClients.pdf");
+      doc.save("Broker Admin Clients.pdf");
     },
     async handleSubmit() {
       // Exit when the form isn't valid

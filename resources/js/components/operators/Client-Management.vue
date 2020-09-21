@@ -35,6 +35,7 @@
             v-b-modal.modal-1
             @click="create = true"
           >Create Client</b-button>
+          <b-button v-if="clients.length > 0" @click="exportClients">Export Clients</b-button>
           <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
             <p class="my-4">Please update the fields below as required!</p>
             <form ref="form" @submit.stop.prevent="handleSubmit">
@@ -99,6 +100,7 @@
   </div>
 </template>
 <script lang="ts">
+import jsPDF from "jspdf";
 import permissionMixin from "./../../../js/mixins/Permissions.js";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
@@ -231,6 +233,44 @@ export default {
     },
   },
   methods: {
+    exportClients() {
+      const tableData = [];
+      for (var i = 0; i < this.clients.length; i++) {
+        tableData.push([
+          this.clients[i].name,
+          this.clients[i].email,
+          this.clients[i].status,
+          this.clients[i].account_balance,
+          this.clients[i].open_orders,
+          this.clients[i].filled_orders,
+          this.clients[i].jcsd,
+        ]);
+      }
+
+      // console.log(this.broker_settlement_accounts[i])
+      // tableData.push(this.broker_settlement_accounts[i]);
+
+      var doc = new jsPDF();
+      //   // It can parse html:
+      //   doc.autoTable({ html: "#foreign-brokers" });
+
+      // Or use javascript directly:
+      doc.autoTable({
+        head: [
+          [
+            "Name",
+            "Email",
+            "Status",
+            "Account Balance",
+            "Open Orders",
+            "Unsettled Trades",
+            "JCSD",
+          ],
+        ],
+        body: tableData,
+      });
+      doc.save("Broker Operator Clients.pdf");
+    },
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity();
       //3.81.122.101/
