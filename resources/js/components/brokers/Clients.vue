@@ -230,7 +230,7 @@ export default {
           this.local_broker_clients[i].account_balance,
           this.local_broker_clients[i].open_orders,
           this.local_broker_clients[i].filled_orders,
-          this.local_broker_clients[i].available,
+          this.local_broker_clients[i].jcsd,
         ]);
       }
 
@@ -251,7 +251,7 @@ export default {
             "Account Balance",
             "Open Orders",
             "Unsettled Trades",
-            "Available",
+            "JCSD",
           ],
         ],
         body: tableData,
