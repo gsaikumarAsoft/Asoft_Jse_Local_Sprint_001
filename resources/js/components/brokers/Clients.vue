@@ -26,6 +26,7 @@
             aria-controls="local-brokers"
           ></b-pagination>
           <b-button v-b-modal.modal-1 @click="broker_client={}">Create Client</b-button>
+          <b-button v-if="local_broker_clients.length > 0" @click="exportClients">Export Clients</b-button>
         </b-card>
         <b-card :title="title" v-else>
           <p class="my-4">Please update the fields below as required!</p>
@@ -109,6 +110,7 @@
   </div>
 </template>
 <script lang="ts">
+import jsPDF from "jspdf";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
 import checkErrorMixin from "../../mixins/CheckError.js";
@@ -162,13 +164,8 @@ export default {
               style: "currency",
               currency: "USD",
             });
-
-            var nf = Intl.NumberFormat();
             var cal = item.open_orders;
-            return nf.format(cal);
-
-            // return formatter(cal);
-            // return formatter.format(cal);
+            return formatter.format(cal);
           },
         },
         {
@@ -180,20 +177,10 @@ export default {
               style: "currency",
               currency: "USD",
             });
-
-            var nf = Intl.NumberFormat();
-            var cal = Number(item.filled_orders);
-            return nf.format(cal);
-
-            // return formatter(cal);
+            return formatter.format(item.filled_orders);
             // return formatter.format(cal);
           },
         },
-        // {
-        //   key: "orders_limit",
-        //   label: "Available",
-        //   sortable: true
-        // },
         {
           // A virtual column with custom formatter
           key: "available",
@@ -233,6 +220,44 @@ export default {
   },
   watch: {},
   methods: {
+    exportClients() {
+      const tableData = [];
+      for (var i = 0; i < this.local_broker_clients.length; i++) {
+        tableData.push([
+          this.local_broker_clients[i].name,
+          this.local_broker_clients[i].email,
+          this.local_broker_clients[i].status,
+          this.local_broker_clients[i].account_balance,
+          this.local_broker_clients[i].open_orders,
+          this.local_broker_clients[i].filled_orders,
+          this.local_broker_clients[i].jcsd,
+        ]);
+      }
+
+      // console.log(this.broker_settlement_accounts[i])
+      // tableData.push(this.broker_settlement_accounts[i]);
+
+      var doc = new jsPDF();
+      //   // It can parse html:
+      //   doc.autoTable({ html: "#foreign-brokers" });
+
+      // Or use javascript directly:
+      doc.autoTable({
+        head: [
+          [
+            "Name",
+            "Email",
+            "Status",
+            "Account Balance",
+            "Open Orders",
+            "Unsettled Trades",
+            "JCSD",
+          ],
+        ],
+        body: tableData,
+      });
+      doc.save("Broker Admin Clients.pdf");
+    },
     async handleSubmit() {
       // Exit when the form isn't valid
       //Determine if a new client is being created or we are updating an existing client

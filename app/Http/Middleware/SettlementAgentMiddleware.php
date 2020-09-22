@@ -17,7 +17,7 @@ class SettlementAgentMiddleware
     public function handle($request, Closure $next)
     {
         if (!$request->user()->hasRole('AGTS')) {
-            return new Response (view('unauthorized')->with('role', 'Settlement Agent'));
+            return new Response(view('unauthorized')->with('role', 'Settlement Bank'));
         }
         return $next($request);
     }

@@ -183,6 +183,7 @@ return [
 
         // Auth0\Login\LoginServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        Laravel\Passport\PassportServiceProvider::class,
     ],
 
     /*

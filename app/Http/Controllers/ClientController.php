@@ -9,6 +9,7 @@ use App\Mail\LocalBrokerClient;
 use App\Mail\LocalBrokerTrader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+
 class ClientController extends Controller
 {
     public function __construct()
@@ -21,7 +22,7 @@ class ClientController extends Controller
     public function index()
     {
         $users = BrokerClient::with('local_broker')->get();
-        return $users;
+        return $users; 
     }
     function store(Request $request)
     {
@@ -48,10 +49,8 @@ class ClientController extends Controller
             $broker->status = 'Un-Verified';
             // $broker->password = bcrypt('password');
             $broker->save();
-            
-            Mail::to($local_broker->email)->send(new LocalBrokerTrader($request));
 
-            
+            Mail::to($local_broker->email)->send(new LocalBrokerTrader($request));
         }
     }
     function destroy($id)

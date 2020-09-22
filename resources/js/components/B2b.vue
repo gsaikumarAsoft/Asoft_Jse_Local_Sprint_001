@@ -148,9 +148,9 @@ import checkErrorMixin from "./../mixins/CheckError.js";
 export default {
   props: ["accounts"],
   components: {
-    "head-nav": headNav
+    "head-nav": headNav,
   },
-   mixins: [checkErrorMixin],
+  mixins: [checkErrorMixin],
   data() {
     return {
       trading_accounts: [],
@@ -165,55 +165,55 @@ export default {
         {
           key: `local_broker`,
           label: "Local Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "foreign_broker",
           label: "Foreign Broker",
-          sortable: true
+          sortable: true,
         },
         {
           key: "settlement_account.bank_name",
-          label: "Settlement Agent",
-          sortable: true
+          label: "Settlement Bank",
+          sortable: true,
         },
         {
           key: "settlement_account.account",
           label: "Account",
-          sortable: true
+          sortable: true,
         },
         {
           key: "trading_account_number",
           label: "Trader Account Number",
-          sortable: true
+          sortable: true,
         },
         {
           key: "sender_comp_id",
           label: "Sender Comp",
-          sortable: true
+          sortable: true,
         },
         {
           key: "target_comp_id",
           label: "Target Comp",
-          sortable: true
+          sortable: true,
         },
         {
           key: "socket",
           label: "Socket",
-          sortable: true
+          sortable: true,
         },
         {
           key: "status",
           label: "Status",
-          sortable: true
+          sortable: true,
         },
         {
           key: "port",
           label: "Port",
-          sortable: true
-        }
+          sortable: true,
+        },
       ],
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
@@ -228,16 +228,16 @@ export default {
     },
 
     broker_settlement_accounts_options() {
-      return this.broker_settlement_accounts.map(x => ({
+      return this.broker_settlement_accounts.map((x) => ({
         text: [
           x.foreign_broker["name"],
           x.local_broker["name"],
           x.bank_name,
-          x.account
+          x.account,
         ].join("-"),
-        value: x.id
+        value: x.id,
       }));
-    }
+    },
   },
   watch: {},
   methods: {
@@ -246,10 +246,10 @@ export default {
         .broker_settlement_account;
       const correctBrokers = {};
       correctBrokers["correct_local_broker_id"] = this.foreign_brokers.find(
-        x => x.user_id === new_settlement_account.foreign_broker_id
+        (x) => x.user_id === new_settlement_account.foreign_broker_id
       );
       correctBrokers["correct_foreign_broker_id"] = this.foreign_brokers.find(
-        x => x.user_id === new_settlement_account.local_broker_id
+        (x) => x.user_id === new_settlement_account.local_broker_id
       );
       return correctBrokers;
     },
@@ -265,7 +265,7 @@ export default {
         confirmButtonText: "Edit",
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
+        cancelButtonAriaLabel: "cancel",
       });
       if (result.value) {
         this.trading_account = b;
@@ -284,7 +284,7 @@ export default {
 
       const {
         correct_foreign_broker_id,
-        correct_local_broker_id
+        correct_local_broker_id,
       } = this.setCorrectBrokersIDs();
 
       if (this.isNew) {
@@ -301,7 +301,7 @@ export default {
           port: this.trading_account.port,
           trading_account_number: this.trading_account.trading_account_number,
           settlement_account_number: this.trading_account
-            .broker_settlement_account
+            .broker_settlement_account,
         };
       } else {
         //Include ID
@@ -316,7 +316,7 @@ export default {
           port: this.trading_account.port,
           trading_account_number: this.trading_account.trading_account_number,
           settlement_account_number: this.trading_account
-            .broker_settlement_account
+            .broker_settlement_account,
         };
       }
 
@@ -328,7 +328,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
 
       try {
@@ -338,7 +338,7 @@ export default {
         this.$swal.close();
         // setTimeout(location.reload.bind(location), 2000);
       } catch (error) {
-       this.checkDuplicateError(error);
+        this.checkDuplicateError(error);
       }
 
       /*  try {
@@ -368,7 +368,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       try {
         await axios.delete(`trading-account-delete/${id}`); //.then(response => {
@@ -383,23 +383,23 @@ export default {
     async getLocalBrokers() {
       const { data } = await axios.get("local-brokers");
       // console.log(local_brokers);
-      this.local_brokers = data.map(broker => ({
+      this.local_brokers = data.map((broker) => ({
         user_id: broker.user.id,
         text: broker.user.name,
-        value: broker.id
+        value: broker.id,
       }));
       console.log("local brokers", this.local_brokers);
     },
 
     async getForeignBrokers() {
       const { data } = await axios.get("foreign-brokers"); //.then(response => {
-      this.foreign_brokers = data.map(broker => ({
+      this.foreign_brokers = data.map((broker) => ({
         user_id: broker.user.id,
         text: broker.user.name,
-        value: broker.id
+        value: broker.id,
       }));
       console.log("foreign brokers", this.foreign_brokers);
-    }
+    },
   },
 
   async mounted() {
@@ -408,8 +408,8 @@ export default {
       this.getLocalBrokers(),
       this.getForeignBrokers(),
       this.getTradingAccountsList(),
-      this.getSettlementAccounts()
+      this.getSettlementAccounts(),
     ]);
-  }
+  },
 };
 </script>

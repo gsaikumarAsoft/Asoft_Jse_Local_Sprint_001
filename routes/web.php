@@ -28,6 +28,13 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
+
+
+// External Capabilities
+Route::get('/api/', function () {
+    return response()->json(['name' => 'DMA 1.5']);
+});
+
 Route::get('/DMAMessageDownload', "LightSailController@messageDownload");
 
 

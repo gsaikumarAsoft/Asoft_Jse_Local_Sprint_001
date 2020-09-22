@@ -15,8 +15,8 @@
             :fields="fields"
             :per-page="perPage"
             :current-page="currentPage"
-            @row-clicked="settlmentAccountHandler"
           >
+            <!-- @row-clicked="settlmentAccountHandler" -->
             <template slot="index" slot-scope="row">{{ row }}</template>
           </b-table>
           <b-pagination
@@ -78,9 +78,9 @@
               ></b-form-input>
             </b-form-group>
             <b-form-group
-              label="Settlement Agent Email"
+              label="Settlement Bank Email"
               label-for="email-input"
-              invalid-feedback="Settlement Agent Email is required"
+              invalid-feedback="Settlement Bank Email is required"
             >
               <b-form-input
                 id="email-input"
@@ -151,7 +151,7 @@ export default {
         },
         {
           key: "bank_name",
-          label: "Settlement Agent",
+          label: "Settlement Bank",
           sortable: true,
         },
         {
@@ -265,7 +265,7 @@ export default {
           [
             // "Local Broker",
             "Foreign Broker",
-            "Settlement Agent",
+            "Settlement Bank",
             "Account",
             "Email",
             "Account Balance",
