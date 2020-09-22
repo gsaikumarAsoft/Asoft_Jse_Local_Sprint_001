@@ -86,6 +86,8 @@ class ClientController extends Controller
         }
         $client_record = BrokerClient::where('email', $request->get('email'))->first();
         if ($client_record->exists) {
+            $request['message'] = "Duplicate Record Detected";
+            $this->LogActivity::addToLog(json_encode($request->all()));
             return response()->json(['error' => "A client account with this E-MAIL already exists"]);
         }
         $broker_client = new BrokerClient();
@@ -99,6 +101,8 @@ class ClientController extends Controller
         $broker_client->account_balance = $request->get('account_balance');
         $broker_client->status = 'Un-Verified';
         $broker_client->save();
+        $request['message'] = "Client Account Created";
+        $this->LogActivity::addToLog(json_encode($request->all()));
         return response()->json(['success' => "New Client Created"], $this->successStatus);
     }
 
@@ -131,6 +135,7 @@ class ClientController extends Controller
             $broker_client->status = $request->get('status');
             $broker_client->account_balance = $request->get('account_balance');
             $broker_client->save();
+            $request['message'] = "Client Account Updated";
             $this->LogActivity::addToLog(json_encode($request->all()));
             return response()->json(['success' => "Client Updated"], $this->successStatus);
         } else {
