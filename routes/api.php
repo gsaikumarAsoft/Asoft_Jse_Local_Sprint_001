@@ -28,4 +28,5 @@ Route::post('login', 'API\ClientController@login');
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('details', 'API\ClientController@details');
     Route::post('add', 'API\ClientController@add');
+    Route::post('update/{id}', 'API\ClientController@update');
 });
