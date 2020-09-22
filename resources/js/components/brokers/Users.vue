@@ -36,7 +36,7 @@
             <b-form-group
               label="Email"
               label-for="email-input"
-              invalid-feedback="Email is required"
+              invalid-feedback="Email is required"or
             >
               <b-form-input id="name-input" v-model="broker.email" :state="nameState" required></b-form-input>
             </b-form-group>
@@ -68,7 +68,7 @@
                 <b-form-checkbox value="create-broker-client">Create</b-form-checkbox>
                 <b-form-checkbox value="read-broker-client">Read</b-form-checkbox>
                 <b-form-checkbox value="update-broker-client">Update</b-form-checkbox>
-                <b-form-checkbox value="delete-broker-client">Delete</b-form-checkbox>
+                <!-- <b-form-checkbox value="delete-broker-client">Delete</b-form-checkbox> -->
                 <b-form-checkbox value="approve-broker-client">Approve</b-form-checkbox>
               </b-form-checkbox-group>
             </b-form-group>
@@ -95,7 +95,7 @@ import checkErrorMixin from "../../mixins/CheckError.js";
 export default {
   mixins: [permissionMixin, checkErrorMixin],
   components: {
-    headNav
+    headNav,
   },
   data() {
     return {
@@ -114,60 +114,60 @@ export default {
         { text: "Read", value: "read-broker-user" },
         { text: "Update", value: "update-broker-user" },
         { text: "Delete", value: "delete-broker-user" },
-        { text: "Approve", value: "approve-broker-user" }
+        { text: "Approve", value: "approve-broker-user" },
       ],
       broker_client_options: [
         { text: "Create", value: "create-broker-client" },
         { text: "Read", value: "read-broker-client" },
         { text: "Update", value: "update-broker-client" },
         { text: "Delete", value: "delete-broker-client" },
-        { text: "Approve", value: "approve-broker-client" }
+        { text: "Approve", value: "approve-broker-client" },
       ],
       broker_order_options: [
         { text: "Create", value: "create-broker-order" },
         { text: "Read", value: "read-broker-order" },
         { text: "Update", value: "update-broker-order" },
         { text: "Delete", value: "delete-broker-order" },
-        { text: "Approve", value: "approve-broker-order" }
+        { text: "Approve", value: "approve-broker-order" },
       ],
       permission_target: [],
       fields: [
         {
           key: "name",
           label: "User",
-          sortable: true
+          sortable: true,
         },
         {
           key: "email",
           sortable: true,
-          label: "email"
+          label: "email",
         },
         {
           key: "status",
-          label: "Status"
+          label: "Status",
         },
         {
           key: "types",
-          label: "Access Permissions"
-        }
+          label: "Access Permissions",
+        },
       ],
       modalTitle: "User Update",
-      nameState: null
+      nameState: null,
     };
   },
   computed: {
     rows() {
       return this.local_broker_users.length;
-    }
+    },
   },
   watch: {
-    create: function(data) {
+    create: function (data) {
       if (data) {
         this.modalTitle = "Create User";
       } else {
         this.modalTitle = "User Update";
       }
-    }
+    },
   },
   methods: {
     async getUserRole() {
@@ -188,30 +188,30 @@ export default {
         this.permission_target.push({
           role: "ADMB",
           text: "Broker User",
-          value: "broker-user"
+          value: "broker-user",
         });
       } else {
         this.permission_target = [
           {
             role: "ADMB",
             text: "Broker User",
-            value: "broker-user"
+            value: "broker-user",
           },
           {
             role: "",
             text: "Broker Client",
-            value: "broker-client"
+            value: "broker-client",
           },
           {
             role: "",
             text: "Broker Accounts",
-            value: "broker-accounts"
+            value: "broker-accounts",
           },
           {
             role: "",
             text: "Broker Orders",
-            value: "broker-order"
-          }
+            value: "broker-order",
+          },
         ];
       }
 
@@ -220,8 +220,8 @@ export default {
           {
             role: "ADMB",
             text: "Broker Client",
-            value: "broker-client"
-          }
+            value: "broker-client",
+          },
         ];
       }
     },
@@ -256,7 +256,7 @@ export default {
         permissions: this.broker.selected_client_permissions.concat(
           this.broker.selected_broker_permissions
         ),
-        target: this.broker.target
+        target: this.broker.target,
       };
 
       //Determine if a new user is being created or we are updating an existing user
@@ -275,7 +275,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
 
       try {
@@ -310,7 +310,7 @@ export default {
         confirmButtonText: "View",
         confirmButtonAriaLabel: "delete",
         cancelButtonText: "Delete",
-        cancelButtonAriaLabel: "cancel"
+        cancelButtonAriaLabel: "cancel",
       }); //.then(result => {
       if (result.value) {
         this.$bvModal.show("modal-1");
@@ -359,9 +359,9 @@ export default {
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts");
       console.log("tradingAccounts", data);
-      this.broker_trading_account_options = data.map(x => ({
+      this.broker_trading_account_options = data.map((x) => ({
         text: `${x.foreign_broker} : ${x.bank}-${x.trading_account_number} : ${x.account}`,
-        value: x.id
+        value: x.id,
       }));
     },
 
@@ -375,7 +375,7 @@ export default {
         timerProgressBar: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-        }
+        },
       });
       try {
         await axios.delete(`user-broker-delete/${id}`);
@@ -388,11 +388,11 @@ export default {
     async getLocalBrokers() {
       const { data } = await axios.get("local-brokers");
       console.log("local_brokers", data);
-      this.local_brokers = data.map(x => ({
+      this.local_brokers = data.map((x) => ({
         text: x.name,
-        value: x.id
+        value: x.id,
       }));
-    }
+    },
   },
   async mounted() {
     this.$swal.fire({
@@ -401,16 +401,16 @@ export default {
       timerProgressBar: true,
       onBeforeOpen: () => {
         this.$swal.showLoading();
-      }
+      },
     });
     await Promise.all([
       this.getBrokerUsers(),
       this.tradingAccounts(),
       this.getUserRole(),
-      this.getLocalBrokers()
+      this.getLocalBrokers(),
     ]);
     this.$swal.close();
     console.log("permissions", this.permissions);
-  }
+  },
 };
 </script>
