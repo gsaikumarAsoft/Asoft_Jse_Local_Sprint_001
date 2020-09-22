@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\BrokerClient;
+use App\Helpers\FunctionSet;
+use App\Helpers\LogActivity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -14,6 +16,7 @@ class ClientController extends Controller
     public $successStatus = 200;
     public function __construct()
     {
+        $this->LogActivity = new LogActivity;
     }
     /** 
      * login api 
@@ -25,8 +28,10 @@ class ClientController extends Controller
         if (Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
             $user = Auth::user();
             $success['token'] =  $user->createToken('DMA1.5')->accessToken;
+            $this->LogActivity::addToLog('API Login Successfull');
             return response()->json(['success' => $success], $this->successStatus);
         } else {
+            $this->LogActivity::addToLog('API Login Failed');
             return response()->json(['error' => 'Unauthorised'], 401);
         }
     }
@@ -61,6 +66,7 @@ class ClientController extends Controller
     public function details()
     {
         $user = Auth::user();
+        return $user;
         return response()->json(['success' => $user], $this->successStatus);
     }
 
@@ -78,15 +84,21 @@ class ClientController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 401);
         }
-        $client = new BrokerClient();
-        $client->local_broker_id = $request->get('local_broker_id');
-        $client->name = $request->get('name');
-        $client->email = $request->get('email');
-        $client->orders_limit = $request->get('orders_limit');
-        $client->open_orders = $request->get('open_orders');
-        $client->jcsd = $request->get('jcsd');
-        $client->status = 'Un-Verified';
-        $client->save();
+        $client_record = BrokerClient::where('email', $request->get('email'))->first();
+        if ($client_record->exists) {
+            return response()->json(['error' => "A client account with this E-MAIL already exists"]);
+        }
+        $broker_client = new BrokerClient();
+        $broker_client->local_broker_id = $request->get('local_broker_id');
+        $broker_client->name = $request->get('name');
+        $broker_client->email = $request->get('email');
+        $broker_client->orders_limit = $request->get('orders_limit');
+        $broker_client->open_orders = $request->get('open_orders');
+        $broker_client->jcsd = $request->get('jcsd');
+        $broker_client->status = $request->get('status');
+        $broker_client->account_balance = $request->get('account_balance');
+        $broker_client->status = 'Un-Verified';
+        $broker_client->save();
         return response()->json(['success' => "New Client Created"], $this->successStatus);
     }
 
@@ -108,7 +120,6 @@ class ClientController extends Controller
             return $this->res->withError($validator->errors()->toArray(), 400);
         }
         $broker_client = BrokerClient::find($id);
-        // return $broker_client;
 
         if ($broker_client != null) {
             $broker_client->local_broker_id = $request->get('local_broker_id');
@@ -120,6 +131,7 @@ class ClientController extends Controller
             $broker_client->status = $request->get('status');
             $broker_client->account_balance = $request->get('account_balance');
             $broker_client->save();
+            $this->LogActivity::addToLog(json_encode($request->all()));
             return response()->json(['success' => "Client Updated"], $this->successStatus);
         } else {
             return response()->json(['error' => 'Invalid Client'], 401);
