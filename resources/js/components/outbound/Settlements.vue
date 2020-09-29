@@ -54,7 +54,7 @@ export default {
         },
         {
           key: "bank_name",
-          label: "Settlement Bank",
+          label: "Bank",
           sortable: true,
         },
         {

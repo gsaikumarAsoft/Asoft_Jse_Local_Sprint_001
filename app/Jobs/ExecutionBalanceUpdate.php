@@ -21,7 +21,7 @@ class ExecutionBalanceUpdate implements ShouldQueue
     protected $api;
 
     protected $activity;
-
+ 
     protected $senderSubID;
 
     /**

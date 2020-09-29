@@ -5,7 +5,7 @@
       <h4>Welcome Outbound Broker</h4>
       <p>This DMA Administration user interface provides menu options to functions that will allow you to perform any of the following functions:</p>
       <li>Manage SETTLEMENT ACCOUNTS</li>
-      <li>Manage BROKER TO BROKER SETTINGS</li>
+      <li>Manage TRADING ACCOUNT SETTINGS</li>
       <b-img src="/images/DMAValueProposition.png" fluid alt="Responsive image"></b-img>
     </div>
   </div>

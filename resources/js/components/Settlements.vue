@@ -84,7 +84,7 @@
               ></b-form-input>
             </b-form-group>
             <b-form-group
-              label="Settlement Bank Email"
+              label="Bank Email"
               label-for="email-input"
               invalid-feedback=" Email is required"
             >
@@ -191,7 +191,7 @@ export default {
         },
         {
           key: "bank_name",
-          label: "Settlement Bank",
+          label: "JCSD Email",
           sortable: true,
         },
         {
@@ -200,7 +200,7 @@ export default {
         },
         {
           key: "email",
-          label: "Settlement Bank Email",
+          label: "Bank Email",
           sortable: true,
         },
         {
@@ -345,7 +345,7 @@ export default {
           [
             "Local Broker",
             "Foreign Broker",
-            "Bank",
+            "JCSD Email",
             "Account",
             "Email",
             "Account Balance",

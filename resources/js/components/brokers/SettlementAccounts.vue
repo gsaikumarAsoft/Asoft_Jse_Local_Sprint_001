@@ -78,9 +78,9 @@
               ></b-form-input>
             </b-form-group>
             <b-form-group
-              label="Settlement Bank Email"
+              label="Bank Email"
               label-for="email-input"
-              invalid-feedback="Settlement Bank Email is required"
+              invalid-feedback="Bank Email is required"
             >
               <b-form-input
                 id="email-input"
@@ -151,7 +151,7 @@ export default {
         },
         {
           key: "bank_name",
-          label: "Settlement Bank",
+          label: "Bank",
           sortable: true,
         },
         {
@@ -265,7 +265,7 @@ export default {
           [
             // "Local Broker",
             "Foreign Broker",
-            "Settlement Bank",
+            "Bank",
             "Account",
             "Email",
             "Account Balance",

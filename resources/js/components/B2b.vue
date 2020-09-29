@@ -174,7 +174,7 @@ export default {
         },
         {
           key: "settlement_account.bank_name",
-          label: "Settlement Bank",
+          label: "Bank",
           sortable: true,
         },
         {
