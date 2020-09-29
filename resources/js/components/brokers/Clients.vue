@@ -1,18 +1,9 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px">
+    <div class="container-fluid" style="margin-top: 100px;">
       <div class="content">
         <b-card title="Client Accounts" v-if="!broker_client">
-          <div class="float-right" style="margin-bottom: 15px">
-            <b-input
-              id="search_content"
-              v-model="filter"
-              type="text"
-              placeholder="Filter Users..."
-              class="mb-2 mr-sm-2 mb-sm-0"
-            ></b-input>
-          </div>
           <b-table
             striped
             hover
@@ -34,23 +25,13 @@
             :per-page="perPage"
             aria-controls="local-brokers"
           ></b-pagination>
-          <b-button v-b-modal.modal-1 @click="broker_client = {}"
-            >Create Client</b-button
-          >
-          <b-button
-            v-if="local_broker_clients.length > 0"
-            @click="exportClients"
-            >Export Clients</b-button
-          >
+          <b-button v-b-modal.modal-1 @click="broker_client={}">Create Client</b-button>
+          <b-button v-if="local_broker_clients.length > 0" @click="exportClients">Export Clients</b-button>
         </b-card>
         <b-card :title="title" v-else>
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
-            <b-form-group
-              label="JCSD"
-              label-for="JCSD-input"
-              invalid-feedback="JCSD is required"
-            >
+            <b-form-group label="JCSD" label-for="JCSD-input" invalid-feedback="JCSD is required">
               <b-form-input
                 id="JCSD-input"
                 v-model="broker_client.jcsd"
@@ -59,11 +40,7 @@
                 required
               ></b-form-input>
             </b-form-group>
-            <b-form-group
-              label="Name"
-              label-for="name-input"
-              invalid-feedback="Name is required"
-            >
+            <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
               <b-form-input
                 id="name-input"
                 v-model="broker_client.name"
@@ -125,9 +102,7 @@
               ></b-form-input>
             </b-form-group>
             <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button variant="danger" @click="broker_client = null"
-              >Cancel</b-button
-            >
+            <b-button variant="danger" @click="broker_client=null">Cancel</b-button>
           </form>
         </b-card>
       </div>

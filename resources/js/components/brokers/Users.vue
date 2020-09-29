@@ -1,9 +1,18 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 100px">
       <div class="content">
         <b-card title="Users">
+          <div class="float-right" style="margin-bottom: 15px">
+            <b-input
+              id="search_content"
+              v-model="filter"
+              type="text"
+              placeholder="Filter Users..."
+              class="mb-2 mr-sm-2 mb-sm-0"
+            ></b-input>
+          </div>
           <b-table
             responsive
             show-empty
@@ -15,6 +24,8 @@
             :fields="fields"
             :per-page="perPage"
             :current-page="currentPage"
+            :filterIncludedFields="filterOn"
+            :filter="filter"
             @row-clicked="brokerUserHandler"
           >
             <template slot="index" slot-scope="row">{{ row }}</template>
@@ -25,20 +36,42 @@
             :per-page="perPage"
             aria-controls="local-brokers"
           ></b-pagination>
-          <b-button v-b-modal.modal-1 @click="create = true">Create User</b-button>
+          <b-button v-b-modal.modal-1 @click="create = true"
+            >Create User</b-button
+          >
         </b-card>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+        <b-modal
+          id="modal-1"
+          :title="modalTitle"
+          @ok="handleOk"
+          @hidden="resetModal"
+        >
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form">
-            <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
-              <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
+            <b-form-group
+              label="Name"
+              label-for="name-input"
+              invalid-feedback="Name is required"
+            >
+              <b-form-input
+                id="name-input"
+                v-model="broker.name"
+                :state="nameState"
+                required
+              ></b-form-input>
             </b-form-group>
             <b-form-group
               label="Email"
               label-for="email-input"
-              invalid-feedback="Email is required"or
+              invalid-feedback="Email is required"
+              or
             >
-              <b-form-input id="name-input" v-model="broker.email" :state="nameState" required></b-form-input>
+              <b-form-input
+                id="name-input"
+                v-model="broker.email"
+                :state="nameState"
+                required
+              ></b-form-input>
             </b-form-group>
             <b-form-group
               sm
@@ -64,20 +97,40 @@
               ></b-form-checkbox-group>
             </b-form-group>-->
             <b-form-group label="Client Account Permissions:">
-              <b-form-checkbox-group v-model="broker.selected_client_permissions" id="checkboxes-r">
-                <b-form-checkbox value="create-broker-client">Create</b-form-checkbox>
-                <b-form-checkbox value="read-broker-client">Read</b-form-checkbox>
-                <b-form-checkbox value="update-broker-client">Update</b-form-checkbox>
+              <b-form-checkbox-group
+                v-model="broker.selected_client_permissions"
+                id="checkboxes-r"
+              >
+                <b-form-checkbox value="create-broker-client"
+                  >Create</b-form-checkbox
+                >
+                <b-form-checkbox value="read-broker-client"
+                  >Read</b-form-checkbox
+                >
+                <b-form-checkbox value="update-broker-client"
+                  >Update</b-form-checkbox
+                >
                 <!-- <b-form-checkbox value="delete-broker-client">Delete</b-form-checkbox> -->
-                <b-form-checkbox value="approve-broker-client">Approve</b-form-checkbox>
+                <b-form-checkbox value="approve-broker-client"
+                  >Approve</b-form-checkbox
+                >
               </b-form-checkbox-group>
             </b-form-group>
             <b-form-group label="Order Permissions:">
-              <b-form-checkbox-group v-model="broker.selected_broker_permissions" id="checkboxes-4">
-                <b-form-checkbox value="create-broker-order">Create</b-form-checkbox>
-                <b-form-checkbox value="read-broker-order">Read</b-form-checkbox>
+              <b-form-checkbox-group
+                v-model="broker.selected_broker_permissions"
+                id="checkboxes-4"
+              >
+                <b-form-checkbox value="create-broker-order"
+                  >Create</b-form-checkbox
+                >
+                <b-form-checkbox value="read-broker-order"
+                  >Read</b-form-checkbox
+                >
                 <!-- <b-form-checkbox value="update-broker-order">Update</b-form-checkbox> -->
-                <b-form-checkbox value="delete-broker-order">Cancel</b-form-checkbox>
+                <b-form-checkbox value="delete-broker-order"
+                  >Cancel</b-form-checkbox
+                >
                 <!-- <b-form-checkbox value="approve-broker-order">Approve</b-form-checkbox> -->
               </b-form-checkbox-group>
             </b-form-group>
@@ -99,6 +152,8 @@ export default {
   },
   data() {
     return {
+      filter: null,
+      filterOn: ["name","email","status", "types"],
       trading_accounts: [],
       permissions: [],
       user_role: [],

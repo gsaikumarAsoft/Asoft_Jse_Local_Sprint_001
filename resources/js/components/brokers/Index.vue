@@ -4,11 +4,11 @@
     <div class="container-fluid" style="margin-top: 100px;">
       <h4>Welcome Local Broker Admin</h4>
       <p>Use the menus available here to perform the following functions:</p>
-      <li>Manage your <a href="/broker/users">USERS</a></li>
-      <li>Manage your <a href="/broker/settlements">SETTLEMENT ACCOUNTS</a></li>
-      <li>Manage your <a href="/broker/traders">CLIENT ACCOUNTS</a></li>
-      <li>Manage your <a href="/broker/orders">FOREIGN MARKET ORDERS</a></li>
-      <li>Manage your <a href="/profile/">PROFILE</a></li>
+      <li>Manage <a href="/broker/users">USERS</a></li>
+      <li>Manage <a href="/broker/settlements">SETTLEMENT BALANCES</a></li>
+      <li>Manage <a href="/broker/traders">CLIENT ACCOUNTS</a></li>
+      <li>Manage <a href="/broker/orders">FOREIGN MARKET ORDERS</a></li>
+      <li>Manage <a href="/profile/">PROFILE</a></li>
     </div>
   </div>
 </template>
