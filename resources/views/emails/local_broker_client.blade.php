@@ -10,9 +10,7 @@
     <p>A broker client account has been created for the following:</p>
     <p>Name {{$user['name']}}</p>
     <p>Email {{$user['email']}}</p>
-    <p>JCSD Account Number JCSD {{$user['jcsd']}}</p>
-
-    Registered email-id is {{ $user['email'] }}
+    <p>JCSD Account Number JCSD{{$user['jcsd']}}</p>
     <p>Please provide your verification of these settings using the links below:</p>
     <a href="{{ env('APP_URL') }}verify-broker-trader/{{ $user['id'] }}/accept">Accept </a><br>
     <a href="{{ env('APP_URL') }}verify-broker-trader/{{ $user['id'] }}/reject">Reject </a><br>
