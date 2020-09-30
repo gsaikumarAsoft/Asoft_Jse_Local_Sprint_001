@@ -4,6 +4,9 @@
     <div class="container-fluid" style="margin-top: 100px;">
       <h4>Welcome JSE Admin</h4>
       <p>This DMA Administration user interface provides menu options to functions that will allow you to perform any of the following functions:</p>
+            <li>
+        <a href="/jse-admin/foreign-broker-list">MANAGE FOREIGN BROKERS</a>
+      </li>
       <li>
         <a href="/jse-admin/local-broker-list">MANAGE LOCAL BROKERS</a>
       </li>

@@ -21,7 +21,7 @@ class LightSailController extends Controller
         //Define all sender sub ids
 
         $data = LocalBroker::with('user')->get();
-
+ 
         //Loop through list of local brokers
         //Local broker names are used as the sender sub id when requesting message download
         foreach ($data as $d) {

@@ -256,6 +256,7 @@ class ApplicationController extends Controller
                 $user['local_broker'] = $local_broker_name[0]->name;
                 $user['foreign_broker'] = $foreign_broker_name[0]->name;
                 $user['user_name'] = $request->bank_name;
+                $data['name'] = $u->name;
                 $user['account'] = $request->account;
                 $user['filled_orders'] = $request->filled_orders;
                 $user['id'] = $broker_settlement_account->id;
@@ -309,6 +310,7 @@ class ApplicationController extends Controller
                 $data['local_broker'] = $local_broker_name[0]->name;
                 $data['foreign_broker'] = $foreign_broker_name[0]->name;
                 $data['user_name'] = $request->bank_name;
+                $data['name'] = $u->name;
                 $data['account'] = $request->account;
                 $data['id'] = $broker_settlement_account->id;
                 $data['hash'] = $settlement_hash;
