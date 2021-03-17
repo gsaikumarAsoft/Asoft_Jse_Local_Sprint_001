@@ -51,27 +51,35 @@ class ExecutionBalanceUpdate implements ShouldQueue
             'StartTime' => date('Y-m-d') . " 11:00:00.000",
             'EndTime' => date('Y-m-d') . " 23:30:00.000",
         );
-        $postdata = json_encode($data);
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $request = json_decode($result, true);
-        $execution_report = $request['executionReports'];
+        $len = isset($cOTLdata[$data]) ? count($cOTLdata[$data]) : 0;
+            
+        if ($len == 0) {
+            //do nothing
+        } else {
+            $postdata = json_encode($data);
 
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            $result = curl_exec($ch);
+            curl_close($ch);
+            $request = json_decode($result, true);
+            $execution_report = $request['executionReports'];
 
-        if ($execution_report) {
-            foreach ($execution_report as $a) {
-                $this->api->logExecution($a);
+            if ($execution_report) {
+                foreach ($execution_report as $a) {
+                    $this->api->logExecution($a);
+                }
             }
         }
+
+
     }
 }

@@ -292,6 +292,14 @@ class FunctionSet
 
 
         $fix_status = json_decode($result, true);
+        $result_len = isset($cOTLdata[$result]) ? count($cOTLdata[$result]) : 0;
+        $fix_status_result = '';
+
+        if ($result_len > 0) {
+            $fix_status_result = $fix_status['result'];
+        }
+
+
         $order_value = $request->quantity * $request->price;
 
         $settlement_allocated = $settlement->amount_allocated - $order_value;
@@ -299,10 +307,10 @@ class FunctionSet
         $side = json_decode($request->side, true);
 
 
-        switch ($fix_status['result']) {
+        switch ($fix_status_result) {
             case "Session could not be established with CIBC. Order number {0}":
-                $this->LogActivity->addToLog('Order Failed:' . $fix_status['result'] . '-' . $request->client_order_number);
-                $data['text'] = 'Order Submission Failed: ' . $fix_status['result'] . '-' . $request->client_order_number;
+                $this->LogActivity->addToLog('Order Failed:' . $fix_status_result . '-' . $request->client_order_number);
+                $data['text'] = 'Order Submission Failed: ' . $fix_status_result . '-' . $request->client_order_number;
                 $data['status'] = 'Session Failed';
 
                 // Return funds only if this is a buy order as we deducted funds previously
@@ -327,7 +335,7 @@ class FunctionSet
 
 
                 $this->createDMAExecutionReport($data, $broker_client_order);
-                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status_result . '-' . $request->client_order_number]);
                 break;
             case "Please Check the endpoint /MessageDownload/Download for message queue":
                 // If the order is successfull create a log
@@ -337,14 +345,14 @@ class FunctionSet
                 break;
             default:
                 // If the response fails create a record in the audit log and in the execution reports as well
-                $data['text'] = "Order Submission Failed: " . $fix_status['result'];
+                $data['text'] = "Order Submission Failed: " . $fix_status_result;
                 $data['status'] = $this->OrderStatus->Failed();
                 // ============================================================================================
 
                 if ($side['fix_value'] === '1') {
 
                     BrokerClientOrder::updateOrCreate(
-                        ['id', $broker_client_order['id']],
+                        ['id' => $broker_client_order['id']],
                         ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
                     );
                     //Return Funds Upon Failing To Submit The Order
