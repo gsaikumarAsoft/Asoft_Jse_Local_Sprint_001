@@ -16,8 +16,8 @@
     Please use the links below to verify or reject the updated information.
     <br></br>
 
-    <a href="{{ env('APP_URL') }}verify/{{ $user['hash'] }}/accept">Accept</a><br>
-    <a href="{{ env('APP_URL') }}verify/{{ $user['hash'] }}/reject">Reject</a><br>
+    <a href="{{ config('app.url') }}verify/{{ $user['hash'] }}/accept">Accept</a><br>
+    <a href="{{ config('app.url') }}verify/{{ $user['hash'] }}/reject">Reject</a><br>
 </body>
 
 </html>

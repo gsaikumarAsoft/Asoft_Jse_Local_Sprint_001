@@ -14,6 +14,7 @@ use App\Mail\ClientDetailsUpdate;
 use App\Mail\LocalBrokerClient;
 use App\Mail\LocalBrokerDetailsUpdate;
 use App\Mail\LocalBrokerUser;
+use App\Mail\LocalBrokerUserUpdate;
 use App\Role;
 use App\User;
 use Carbon\Carbon;
@@ -21,6 +22,7 @@ use CreateBrokerClientOrderExecutionReports;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class FunctionSet
 {
@@ -44,7 +46,7 @@ class FunctionSet
     //set fix wrapper url
     public function fix_wrapper_url($path)
     {
-        return env('FIX_API_URL') . $path; //"api/OrderManagement/OrderCancelRequest";
+        return config('fixwrapper.base_url') . $path;
     }
 
     //check if Order is opened and side = BUY
@@ -59,13 +61,19 @@ class FunctionSet
 
     public function cancelOrder($id)
     {
-
+        Log::debug('CANCELLING | Order: ' . $id . '...');
         $order = BrokerClientOrder::where('clordid', $id)->first();
+        Log::debug('PROCESSING | Cancel Order: ' . $id . '...');        
+        /*
         $order_ex = BrokerOrderExecutionReport::where('clordid', $id)->where('status', 'Cancel Submitted')->first();
-        if ($order_ex['status'] === "Cancel Submitted") {
-            return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
-        }
-
+        if (isset($order_ex)) {
+            Log::debug('PROCESSING | Cancel Request Already Made: ' . $order_ex  );
+            if ($order_ex['status'] === "Cancel Submitted") {
+                return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
+            }
+        }       
+        */
+        
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
@@ -112,7 +120,7 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
         $result = curl_exec($ch);
 
         curl_close($ch);
@@ -217,6 +225,9 @@ class FunctionSet
         $broker_client_order->trading_account_id = $request->trading_account;
         $broker_client_order->save();
 
+        $side = json_decode($request->side, true);
+        $order_value = $request->quantity * $request->price; //New Order Value
+
         // Send customer order to FIX 4.2 Switch - API Beta Fix Swith PHP Post 4.2
         $url = $this->fix_wrapper_url("api/OrderManagement/NewOrderSingle");
         $data = array(
@@ -235,6 +246,7 @@ class FunctionSet
             'Account' => 'JCSD' . $client->jcsd,
             'ClientID' => $trading->trading_account_number,
             'AccountType' => 'CL',
+            'text' => '',
         );
 
         //Check if this is an iceberg order
@@ -267,9 +279,91 @@ class FunctionSet
 
         $postdata = json_encode($data);
 
-        $ch = curl_init($url);
-        // Check if any error occurred
+        //$log_text = isset($cOTLdata[$postdata]) ? $cOTLdata[$postdata] : 'NULL';        
+        Log::debug('PROCESSING | New Order Single: ' . $request->client_order_number . '...');
 
+        $curl_error_codes = array(
+            1 => 'CURLE_UNSUPPORTED_PROTOCOL',
+            2 => 'CURLE_FAILED_INIT',
+            3 => 'CURLE_URL_MALFORMAT',
+            4 => 'CURLE_URL_MALFORMAT_USER',
+            5 => 'CURLE_COULDNT_RESOLVE_PROXY',
+            6 => 'CURLE_COULDNT_RESOLVE_HOST',
+            7 => 'CURLE_COULDNT_CONNECT',
+            8 => 'CURLE_FTP_WEIRD_SERVER_REPLY',
+            9 => 'CURLE_REMOTE_ACCESS_DENIED',
+            11 => 'CURLE_FTP_WEIRD_PASS_REPLY',
+            13 => 'CURLE_FTP_WEIRD_PASV_REPLY',
+            14 =>'CURLE_FTP_WEIRD_227_FORMAT',
+            15 => 'CURLE_FTP_CANT_GET_HOST',
+            17 => 'CURLE_FTP_COULDNT_SET_TYPE',
+            18 => 'CURLE_PARTIAL_FILE',
+            19 => 'CURLE_FTP_COULDNT_RETR_FILE',
+            21 => 'CURLE_QUOTE_ERROR',
+            22 => 'CURLE_HTTP_RETURNED_ERROR',
+            23 => 'CURLE_WRITE_ERROR',
+            25 => 'CURLE_UPLOAD_FAILED',
+            26 => 'CURLE_READ_ERROR',
+            27 => 'CURLE_OUT_OF_MEMORY',
+            28 => 'CURLE_OPERATION_TIMEDOUT',
+            30 => 'CURLE_FTP_PORT_FAILED',
+            31 => 'CURLE_FTP_COULDNT_USE_REST',
+            33 => 'CURLE_RANGE_ERROR',
+            34 => 'CURLE_HTTP_POST_ERROR',
+            35 => 'CURLE_SSL_CONNECT_ERROR',
+            36 => 'CURLE_BAD_DOWNLOAD_RESUME',
+            37 => 'CURLE_FILE_COULDNT_READ_FILE',
+            38 => 'CURLE_LDAP_CANNOT_BIND',
+            39 => 'CURLE_LDAP_SEARCH_FAILED',
+            41 => 'CURLE_FUNCTION_NOT_FOUND',
+            42 => 'CURLE_ABORTED_BY_CALLBACK',
+            43 => 'CURLE_BAD_FUNCTION_ARGUMENT',
+            45 => 'CURLE_INTERFACE_FAILED',
+            47 => 'CURLE_TOO_MANY_REDIRECTS',
+            48 => 'CURLE_UNKNOWN_TELNET_OPTION',
+            49 => 'CURLE_TELNET_OPTION_SYNTAX',
+            51 => 'CURLE_PEER_FAILED_VERIFICATION',
+            52 => 'CURLE_GOT_NOTHING',
+            53 => 'CURLE_SSL_ENGINE_NOTFOUND',
+            54 => 'CURLE_SSL_ENGINE_SETFAILED',
+            55 => 'CURLE_SEND_ERROR',
+            56 => 'CURLE_RECV_ERROR',
+            58 => 'CURLE_SSL_CERTPROBLEM',
+            59 => 'CURLE_SSL_CIPHER',
+            60 => 'CURLE_SSL_CACERT',
+            61 => 'CURLE_BAD_CONTENT_ENCODING',
+            62 => 'CURLE_LDAP_INVALID_URL',
+            63 => 'CURLE_FILESIZE_EXCEEDED',
+            64 => 'CURLE_USE_SSL_FAILED',
+            65 => 'CURLE_SEND_FAIL_REWIND',
+            66 => 'CURLE_SSL_ENGINE_INITFAILED',
+            67 => 'CURLE_LOGIN_DENIED',
+            68 => 'CURLE_TFTP_NOTFOUND',
+            69 => 'CURLE_TFTP_PERM',
+            70 => 'CURLE_REMOTE_DISK_FULL',
+            71 => 'CURLE_TFTP_ILLEGAL',
+            72 => 'CURLE_TFTP_UNKNOWNID',
+            73 => 'CURLE_REMOTE_FILE_EXISTS',
+            74 => 'CURLE_TFTP_NOSUCHUSER',
+            75 => 'CURLE_CONV_FAILED',
+            76 => 'CURLE_CONV_REQD',
+            77 => 'CURLE_SSL_CACERT_BADFILE',
+            78 => 'CURLE_REMOTE_FILE_NOT_FOUND',
+            79 => 'CURLE_SSH',
+            80 => 'CURLE_SSL_SHUTDOWN_FAILED',
+            81 => 'CURLE_AGAIN',
+            82 => 'CURLE_SSL_CRL_BADFILE',
+            83 => 'CURLE_SSL_ISSUER_ERROR',
+            84 => 'CURLE_FTP_PRET_FAILED',
+            84 => 'CURLE_FTP_PRET_FAILED',
+            85 => 'CURLE_RTSP_CSEQ_ERROR',
+            86 => 'CURLE_RTSP_SESSION_ERROR',
+            87 => 'CURLE_FTP_BAD_FILE_LIST',
+            88 => 'CURLE_CHUNK_FAILED');       
+        
+        $ch = curl_init($url);       
+        //curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true); // Required for HTTP error codes to be reported via our call to curl_error($ch)  
         // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30); //timeout in seconds
@@ -279,108 +373,224 @@ class FunctionSet
         // curl_setopt($ch, CURLOPT_TIMEOUT, '20L');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $result = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
+       
+        //$result = curl_exec($ch);
+        if( ! $result = curl_exec($ch))
+        {
+            //trigger_error(curl_error($ch));
+            $data['text'] = 'Communications Error: API Unreachable!' ;
+            $data['status'] = $this->OrderStatus->Failed();
+            Log::debug('ORDER: ' . $request->client_order_number . ' Failed | ' . $data['text'] );
+            $this->createDMAExecutionReport($data, $broker_client_order);
+            // Return funds only if this is a buy order as we deducted funds previously
+            $this->releaseFailedOrderFunds(
+                $side['fix_value'], 
+                $broker_client_order['id'], 
+                $this->OrderStatus->Failed(), 
+                $broker_client_order['remaining'] - $order_value,
+                $settlement->hash,
+                $settlement->amount_allocated - $order_value,
+                $client_id,
+                $client->open_orders - $order_value,                                            
+                $order_value,
+                $request->client_order_number);
+                curl_close($ch);
+            return response()->json(['isvalid' => false, 'errors' =>$data['text'] .' for Order#: ' . $request->client_order_number]);
+        }     
+
+        Log::debug('ORDER: ' . $request->client_order_number . ' | CURL_EXEC Result: ' . $result );
+                    
+                // Check if curl INIT FAILED
+                if ($result = False) {
+                    $data['text'] = 'Communications Error: API Unreachable!' ;
+                    $data['status'] = $this->OrderStatus->Failed();
+                    Log::debug('ORDER: ' . $request->client_order_number . ' Failed | ' . $data['text'] );
+
+                    $this->createDMAExecutionReport($data, $broker_client_order);
+                    // Return funds only if this is a buy order as we deducted funds previously
+                    $this->releaseFailedOrderFunds(
+                        $side['fix_value'], 
+                        $broker_client_order['id'], 
+                        $this->OrderStatus->Failed(), 
+                        $broker_client_order['remaining'] - $order_value,
+                        $settlement->hash,
+                        $settlement->amount_allocated - $order_value,
+                        $client_id,
+                        $client->open_orders - $order_value,                                            
+                        $order_value,
+                        $request->client_order_number);
+                    curl_close($ch);
+                    return response()->json(['isvalid' => false, 'errors' =>$data['text'] .' for Order#: ' . $request->client_order_number]);
+                } 
+
+        //$http_code = 0;
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);       
         curl_close($ch);
 
-        // ================================================================================================
-        $data['text'] = 'Order Submitted Successfully';
-        $data['status'] = 'Submitted';
-        $this->createDMAExecutionReport($data, $broker_client_order);
-        // ================================================================================================
+        // Check HTTP status code
+        Log::debug('ORDER: ' . $request->client_order_number . '| API HTTP Status Code: '. $http_code);
+        
+        switch ($http_code) {
+            case 200:  # OK
+            // ================================================================================================
+            $data['text'] = 'Order submitted for routing (Status Pending).';
+            $data['status'] = 'Submitted';
+            $this->createDMAExecutionReport($data, $broker_client_order);
 
+            $fix_status_result = '';
 
-
-        $fix_status = json_decode($result, true);
-        $result_len = isset($cOTLdata[$result]) ? count($cOTLdata[$result]) : 0;
-        $fix_status_result = '';
-
-        if ($result_len > 0) {
-            $fix_status_result = $fix_status['result'];
+            //Check Response Content
+            Log::debug('ORDER: ' . $request->client_order_number . '| API Response: '. $fix_status_result . '| Response: ' . $result );
+            if ( str_contains($fix_status_result, 'Session could not be established')) {           
+                $data['text'] = 'Error connecting to '. $trading->target_comp_id .'['. $fix_status_result.']';
+                $data['status'] = $this->OrderStatus->Failed();
+                $this->createDMAExecutionReport($data, $broker_client_order);
+                if ($side['fix_value'] === '1') {
+                    // Return funds only if this is a buy order as we deducted funds previously
+                    $this->releaseFailedOrderFunds(
+                        $side['fix_value'], 
+                        $broker_client_order['id'], 
+                        $this->OrderStatus->Failed(), 
+                        $broker_client_order['remaining'] - $order_value,
+                        $settlement->hash,
+                        $settlement->amount_allocated - $order_value,
+                        $client_id,
+                        $client->open_orders - $order_value,                                            
+                        $order_value,
+                        $request->client_order_number);
+                }
+                return response()->json(['isvalid' => false, 'errors' => 'Error connecting to ' . $trading->target_comp_id . 'for Order#: ' . $request->client_order_number]);
+                // ================================================================================================
+            }
+            return response()->json(['isvalid' => true, 'errors' => 'Order '. $request->client_order_number. ' submitted to '. $trading->target_comp_id .'!' ]);
+            break;
+            // ================================================================================================
+        
+        default:
+            //'Unexpected HTTP code: ', $http_code, "\n";
+            // ================================================================================================
+            $data['text'] = 'Order Submission Failed - Communication Error: [HTTP:'.$http_code.']';
+            $data['status'] = $this->OrderStatus->Failed();
+            $this->createDMAExecutionReport($data, $broker_client_order);
+            return response()->json(['isvalid' => false, 'errors' => $data['text'] ]);            
+            break;
+            // ================================================================================================
         }
 
+/*
+        $fix_status = json_decode($result, true);
+        $fix_status_result = $fix_status['result'];
+        $log_text = isset($cOTLdata[$result]) ? $cOTLdata[$result] : 'NULL';        
+        
+        Log::debug('ORDER: ' . $request->client_order_number . '| API Response: '  .  $result );
+        $log_text = isset($cOTLdata[$result]) ? $cOTLdata[$result] : 'NULL';        
+
+        $result_len = isset($cOTLdata[$result]) ? count($cOTLdata[$result]) : 0;
+
+        if ($result_len >0) {
+            //Default the $fix_status_result variable to the HTTP Response code of the FIX Wrapper request
+            $fix_status_result = 'HTTP Response(' . $http_code . ')';   
+            
+            ///Check HTTP Request Status
+            if ($http_code!=200) {
+                //$data['text'] = 'Order Submission Failed!';
+                $data['text'] = 'Communication Failure (HTTP ' . $http_code . ')';
+                $data['status'] = $this->OrderStatus->Failed();
+            } else {
+                $data['text'] = 'Order Submitted';
+                $data['status'] = 'Submitted';
+                $fix_status_result = 'HTTP OK (' . $http_code . ')';
+            }
+            
+        } else {
+            $fix_status_result = 'Unexpected Server Response!';
+            $data['text'] = 'Order Submission Status Pending!';
+            //$data['status'] = $this->OrderStatus->Failed();
+        }
+
+        //Fetch API Request Response
+        if ($result_len > 0) {
+            //Update the $fix_status_result variable with the payload returned from FIX Wrapper
+            $fix_status_result = $fix_status['result'];
+        }
+        
+        //Check API Request Response
+        if ( str_contains($fix_status_result, 'Session could not be established')) {            
+            $data['text'] = 'Order Submission Failed!';
+            $data['status'] = $this->OrderStatus->Failed();
+        }
 
         $order_value = $request->quantity * $request->price;
 
         $settlement_allocated = $settlement->amount_allocated - $order_value;
         $client_open_orders = $client->open_orders - $order_value;
         $side = json_decode($request->side, true);
-
-
-        switch ($fix_status_result) {
-            case "Session could not be established with CIBC. Order number {0}":
+        
+        
+        if ( $data['status'] = "Failed") {
                 $this->LogActivity->addToLog('Order Failed:' . $fix_status_result . '-' . $request->client_order_number);
                 $data['text'] = 'Order Submission Failed: ' . $fix_status_result . '-' . $request->client_order_number;
                 $data['status'] = 'Session Failed';
 
-                // Return funds only if this is a buy order as we deducted funds previously
                 if ($side['fix_value'] === '1') {
-                    BrokerClientOrder::updateOrCreate(
-                        ['id', $broker_client_order['id']],
-                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
-                    );
-
-                    BrokerSettlementAccount::updateOrCreate(
-                        ['hash' => $settlement->hash],
-                        ['amount_allocated' => $settlement_allocated]
-                    );
-
-
-                    // Update Broker Clients Open Orders
-                    BrokerClient::updateOrCreate(
-                        ['id' => $client_id],
-                        ['open_orders' => $client_open_orders]
-                    );
+                    // Return funds only if this is a buy order as we deducted funds previously
+                    $this->releaseFailedOrderFunds(
+                        $side['fix_value'], 
+                        $broker_client_order['id'], 
+                        $this->OrderStatus->Failed(), 
+                        $broker_client_order['remaining'] - $order_value,
+                        $settlement->hash,
+                        $settlement->amount_allocated - $order_value,
+                        $client_id,
+                        $client->open_orders - $order_value,                                            
+                        $order_value,
+                        $request->client_order_number);
                 }
-
-
                 $this->createDMAExecutionReport($data, $broker_client_order);
-                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status_result . '-' . $request->client_order_number]);
-                break;
-            case "Please Check the endpoint /MessageDownload/Download for message queue":
-                // If the order is successfull create a log
-                $this->LogActivity->addToLog('Order Successfull: Please Check the endpoint /MessageDownload/Download for message queue' . '-' . $request->client_order_number);
-                // $this->executionBalanceUpdate($sender_sub_id);
-                return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
-                break;
-            default:
-                // If the response fails create a record in the audit log and in the execution reports as well
-                $data['text'] = "Order Submission Failed: " . $fix_status_result;
-                $data['status'] = $this->OrderStatus->Failed();
-                // ============================================================================================
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER SUBMISSION FAILED: ' . $fix_status_result . '-' . $request->client_order_number]);
+                
+        } else {
+            $this->LogActivity->addToLog('Order Successfully Submitted:' . $fix_status_result . '-' . $request->client_order_number);
+            $this->createDMAExecutionReport($data, $broker_client_order);                
+            return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
+        }
+ */
+    }
 
-                if ($side['fix_value'] === '1') {
+    public function releaseFailedOrderFunds($side_num, 
+                                            $broker_client_order_id, 
+                                            $new_order_status, 
+                                            $new_remaining,
+                                            $settlement_hash,
+                                            $settlement_allocated,
+                                            $client_id,
+                                            $new_client_allocated_amount,
+                                            $order_value,
+                                            $client_order_number
+                                        ) {
+        // Return funds only if this is a buy order as we deducted funds previously
+        if ($side_num === '1') {
+            BrokerClientOrder::updateOrCreate(
+                ['id' => $broker_client_order_id],
+                ['order_status' => $new_order_status, 'remaining' => $new_remaining ]
+            );
 
-                    BrokerClientOrder::updateOrCreate(
-                        ['id' => $broker_client_order['id']],
-                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
-                    );
-                    //Return Funds Upon Failing To Submit The Order
-                    // Update Settlement Account Balances
+            BrokerSettlementAccount::updateOrCreate(
+                ['hash' => $settlement_hash],
+                ['amount_allocated' => $settlement_allocated]
+            );
 
-                    BrokerSettlementAccount::updateOrCreate(
-                        ['hash' => $settlement->hash],
-                        ['amount_allocated' => $settlement_allocated]
-                    );
-
-
-                    // Update Broker Clients Open Orders
-                    BrokerClient::updateOrCreate(
-                        ['id' => $client_id],
-                        ['open_orders' => $client_open_orders]
-                    );
-                    $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                }
-
-                $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                $this->createDMAExecutionReport($data, $broker_client_order);
-                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
-                break;
+            // Update Broker Clients Open Orders
+            BrokerClient::updateOrCreate(
+                ['id' => $client_id],
+                ['open_orders' => $new_client_allocated_amount]
+            );
+            $this->LogActivity->addToLog('Failed Order Funds Released:' . $order_value . '-' . $client_order_number);
         }
     }
     public function createDMAExecutionReport($data, $order)
     {
-
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i:s";
         $timeNdate = gmdate($dateFormat, time() - $offset);
@@ -593,6 +803,9 @@ class FunctionSet
         );
         $postdata = json_encode($data);
 
+        $log_text = isset($cOTLdata[$postdata]) ? $cOTLdata[$postdata] : 'NULL';        
+        Log::debug('FIX API Request | Message Download: ' . $sender_sub_id . ' | ' . $log_text);
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -600,9 +813,14 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
+        
         $result = curl_exec($ch);
         curl_close($ch);
+
+        $log_text = isset($cOTLdata[$result]) ? $cOTLdata[$result] : 'NULL';        
+        Log::debug('FIX API Response | Message Download: ' . $sender_sub_id . ' | ' . $log_text);
+
 
         $request = json_decode($result, true);
         $account = $request['executionReports'];
@@ -696,8 +914,7 @@ class FunctionSet
                     // $order_status = $this->orderStatus($original_order->id);
                     $broker_settlement_account = $settlement_account;
 
-                    $order_value = $quantity * $price; //ER Order Value
-
+                    
                     // Allocated Value of order [Release what was initially allocated per stock]
                     $allocated_value_of_order = $quantity * $original_order['price'];
                     $filled_value = $quantity * $price;
@@ -1000,36 +1217,45 @@ class FunctionSet
 
     public function createBrokerUser($request)
     {
-
         $local_broker = $this->getUserAll($request->local_broker_id);
         $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
-        // return $broker_owner;
-
         if ($request->id) {
-            LogActivity::addToLog('Update User Details');
+            $role_OPRB = Role::where('name', 'OPRB')->first();
+            $pass = $this->rand_pass(8);
+            $hash = $this->generateRandomString(20);            
+            $user = User::find($request->id);            
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = Hash::make($pass);
+            $user->status = 'Unverified';
+            $user->status = 'Unverified';
+            $user->local_broker_id = $broker_owner['id'];
+            $user->hash = $hash;
+            $user->save();
+            $user->roles()->attach($role_OPRB);            
+            //needed for the valudation link in the email
+            $request['id'] = $user->id;
+            $request['hash'] = $hash;
+            $request['p'] = $pass;
+            ////////////////////////////////
+            LogActivity::addToLog('Updated User Details');            
             $broker = User::updateOrCreate(
                 ['id' => $request->id],
                 ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified']
-
             );
-
             $broker_user = BrokerUser::updateOrCreate(
                 ['user_id' => $request->id],
                 ['broker_trading_account_id' => $request->broker_trading_account_id]
-
             );
-
             $broker->syncPermissions();
-
             $permission_length = count($request->permissions);
             for ($i = 0; $i < $permission_length; $i++) {
-                // $user->givePermissionTo($permissions[$i] . '-' . $target);
                 $broker->givePermissionTo($request->permissions[$i]);
-
-                // $user->givePermissionTo($request->permissions[$i]);
-                // $user = User::find($user->is); // returns an instance of \App\User
-
             }
+            //Notify Local Broker Admin
+            Mail::to($local_broker->email)->send(new LocalBrokerUserUpdate($request));
+
+
         } else {
             $role_OPRB = Role::where('name', 'OPRB')->first();
             $pass = $this->rand_pass(8);
@@ -1046,23 +1272,16 @@ class FunctionSet
             $request['id'] = $user->id;
             $request['hash'] = $hash;
             $request['p'] = $pass;
-
             $broker_user = new BrokerUser();
             $broker_user->user_id = $user->id;
             $broker_user->dma_broker_id = $request->local_broker_id;
             $broker_user->broker_trading_account_id = $request->broker_trading_account_id;
             $broker_user->save();
-
             //Check to see how many permission have been selected to appl to the new broker user
             $permission_length = count($request->permissions);
             for ($i = 0; $i < $permission_length; $i++) {
-
-                //Apply the specific permission for the target type selected
                 $user->givePermissionTo($request->permissions[$i]);
-                // $user = User::find($user->is); // returns an instance of \App\User
-
             }
-
             //Notify Local Broker Admin
             Mail::to($local_broker->email)->send(new LocalBrokerUser($request));
         }
@@ -1101,5 +1320,40 @@ class FunctionSet
         // check current broker client order status
         $order_status = BrokerClientOrder::select('order_status')->where('id', $id)->first();
         return $order_status;
+    }
+    
+    public function statusFilter($data)
+    {
+        if ($data === "0") {
+          return "NEW";
+        } else if ($data === "-1") {
+          return "PENDING";
+        } else if ($data === "1") {
+          return "PARTIALLY FILLED";
+        } else if ($data === "2") {
+          return "FILLED";
+        } else if ($data === "4") {
+          return "CANCELLED";
+        } else if ($data === "5") {
+          return "REPLACED";
+        } else if ($data === "C") {
+          return "EXPIRED";
+        } else if ($data === "Z") {
+          return "PRIVATE";
+        } else if ($data === "U") {
+          return "UNPLACED";
+        } else if ($data === "x") {
+          return "INACTIVE";
+        } else if ($data === "8") {
+          return "REJECTED";
+        } else if ($data === "Submitted") {
+          return "SUBMITTED";
+        } else if ($data === "Failed") {
+          return "FAILED";
+        } else if ($data === "Cancel Submitted") {
+          return "CANCEL SUBMITTED";
+        } else {
+          return "["+$data+"]";
+        }
     }
 }

@@ -18,8 +18,8 @@
         <li>SenderCompID: {{$user['sender_comp_id']}}</li>
         
         <p>Please provide your verification of these settings using the links below:</p>
-        <a href="{{env('APP_URL')}}verify-trading-account/{{$user['hash']}}/accept">Accept </a><br>
-        <a href="{{env('APP_URL')}}verify-trading-account/{{$user['hash']}}/reject">Reject </a><br>
+        <a href="{{config('app.url')}}verify-trading-account/{{$user['hash']}}/accept">Accept </a><br>
+        <a href="{{config('app.url')config('app.url')}}verify-trading-account/{{$user['hash']}}/reject">Reject </a><br>
  
 </body>
 

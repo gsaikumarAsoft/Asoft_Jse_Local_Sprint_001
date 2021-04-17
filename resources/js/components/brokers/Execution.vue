@@ -24,6 +24,7 @@
             striped
             hover
             :fields="fields"
+            v-model="visibleRows" 
             :filterIncludedFields="filterOn"
             :filter="filter"
           ></b-table>
@@ -35,7 +36,7 @@
             :per-page="perPage"
             aria-controls="orders-table"
           ></b-pagination>
-          <b-button @click="exportBalances">Export Balances</b-button>
+          <b-button @click="exportReports">Export Execution Reports (PDF)</b-button>
         </b-card>
       </div>
     </div>
@@ -56,64 +57,84 @@ export default {
   },
   data() {
     return {
-      filterOn: ["clordid", "qTradeacc", "buyorSell", "status"],
+      filterOn: ["clordid", "qTradeacc", "messageDate", "buyorSell", "status", "settlement_account_number", "text"],
       filter: null,
       fields: [
         { key: "clordid", sortable: true, label: "Order Number" },
         { key: "qTradeacc", sortable: true, label: "Client Account" },
-        { key: "text", sortable: true, label: "Description" },
-        {
-          key: "status",
-          sortable: true,
+        { key: "status",
+          sortable: true,  
+          label: "STATUS : Details" ,     
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
             // return value;
+            //return statusFilter(value) + (item.text || "No details");
+            
             if (value === "0") {
-              return "New";
+              return "NEW : "+ (item.text || "No details");
+            }
+            if (value === "-1") {
+              return "PENDING : "+ (item.text || "No details");
             }
             if (value === "1") {
-              return "Partially Filled";
+              return "PARTIALLY FILLED : "+ (item.text || "No details");
             }
             if (value === "2") {
-              return "Filled";
+              return "FILLED : "+ (item.text || "No details");
             }
             if (value === "4") {
-              return "Cancelled";
+              return "CANCELLLED : "+ (item.text || "No details");
             }
             if (value === "6") {
-              return "Pending Cancel";
+              return "PENDING CANCEL : "+ (item.text || "No details");
             }
             if (value === "5") {
-              return "Replaced";
+              return "REPLACED : "+ (item.text || "No details");
             }
             if (value === "C") {
-              return "Expired";
+              return "EXPIRED :"+ (item.text || "No details");
             }
             if (value === "Z") {
-              return "Private";
+              return "PRIVATE : "+ (item.text || "No details");
             }
             if (value === "U") {
-              return "Unplaced; order is not in the orderbook (Nasdaq defined)";
+              return "UNPLACED : "+ (item.text || "No details");
             }
             if (value === "x") {
-              return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+              return "INACTIVE : "+ (item.text || "No details");  //; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
             }
             if (value === "8") {
-              return "Rejected";
+              return "REJECTED : "+ (item.text || "No details");
             }
             if (value === "Submitted") {
-              return "Submitted";
+              return "SUBMITTED : "+ (item.text || "No details");
             }
             if (value === "Failed") {
-              return "Failed";
+              return "FAILED : "+ (item.text || "No details");
             }
             if (value === "Cancel Submitted") {
-              return "Cancel Submitted";
+              return "CANCEL SUBMITTED : "+ (item.text || "No details");
             }
+            return "STATUS["+value+"] : "+ (item.text || "No details");
+            
           },
         },
+        /*
+        { key: "text", sortable: true, 
+          label: "Description",
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            // return value;
+            //return value == null ? "(No details)" : (value || "");
+            return item.status;
+            //return value == null ? "Status: " + this.status : (value || 0);
+          }
+        },
+        */
         {
           key: "buyorSell",
-          sortable: true,
+          sortable: true,       
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
             // return value;
             if (value === "1") {
@@ -143,7 +164,8 @@ export default {
           },
         },
         {
-          key: "settlement_account_number",
+          key: "settlement_account_number",       
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
             var agent = item.settlement_agent;
             return agent + "-" + value;
@@ -151,12 +173,14 @@ export default {
         },
         {
           key: "messageDate",
-          sortable: true,
+          sortable: true,       
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
             return moment(String(value));
           },
         },
       ],
+      visibleRows: [],
       broker_client_orders: [],
       broker: {},
       perPage: 5,
@@ -174,56 +198,70 @@ export default {
       return this.report_data.length;
     },
   },
+  watch: {
+    "filter": function(filt){
+        //if(filt) {  
+          this.currentPage = 1;
+          //this.perPage = 0
+        //} else { 
+        //  this.perPage = 5
+        //}
+    },
+  },
   methods: {
     statusFilter(data) {
       if (data === "0") {
-        return "New";
+        return "NEW";
+      } else if (data === "-1") {
+        return "PENDING";
       } else if (data === "1") {
-        return "Partially Filled";
+        return "PARTIALLY FILLED";
       } else if (data === "2") {
-        return "Filled";
+        return "FILLED";
       } else if (data === "4") {
-        return "Cancelled";
+        return "CANCELLED";
       } else if (data === "5") {
-        return "Replaced";
+        return "REPLACED";
       } else if (data === "C") {
-        return "Expired";
+        return "EXPIRED";
       } else if (data === "Z") {
-        return "Private";
+        return "PRIVATE";
       } else if (data === "U") {
-        return "Unplaced; order is not in the orderbook (Nasdaq defined)";
+        return "UNPLACED";
       } else if (data === "x") {
-        return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+        return "INACTIVE";
       } else if (data === "8") {
-        return "Rejected";
+        return "REJECTED";
       } else if (data === "Submitted") {
-        return "Submitted";
+        return "SUBMITTED";
       } else if (data === "Failed") {
-        return "Failed";
+        return "FAILED";
       } else if (data === "Cancel Submitted") {
-        return "Cancel Submitted";
+        return "CANCEL SUBMITTED";
+      } else {
+        return "["+data+"]";
       }
     },
-    exportBalances() {
-      console.log(this.report_data);
-      const tableData = this.report_data.map((r) =>
+    exportReports() {
+      //console.log(this.visibleRows);      
+      const tableData = this.visibleRows.map((r) =>
+      //const tableData = this.report_data.map((r) =>
         //for (var i = 0; i < this.report_data.length; i++) {
         //tableData.push([
         [
           r.clordid,
           r.qTradeacc,
-          r.text,
-          this.statusFilter(r.status),
+          this.statusFilter(r.status)+" : "+ r.text,
           r.buyorSell == 1 ? "BUY" : "SELL",
           r.settlement_agent + "-" + r.settlement_account_number,
           r.messageDate,
         ]
       );
 
-      // console.log(this.broker_settlement_account[i])
+      // //console.log(this.broker_settlement_account[i])
       // tableData.push(this.broker_settlement_account[i]);
 
-      var doc = new jsPDF();
+      var doc = new jsPDF('l', 'in', [612, 792]);
       //   // It can parse html:
       //   doc.autoTable({ html: "#foreign-brokers" });
 
@@ -233,8 +271,7 @@ export default {
           [
             "Order Number",
             "Client Account",
-            "Description",
-            "Status",
+            "Status : Description",
             "Side",
             "Settlement Account",
             "Messsage Date",
@@ -242,11 +279,11 @@ export default {
         ],
         body: tableData,
       });
-      doc.save("JSE-ORDER-EXECUTION-REPORT.pdf");
+      doc.save("DMA-ORDER-EXECUTION-REPORTS.pdf");
     },
   },
   mounted() {
-    console.log(this);
+    //console.log(this);
   },
 };
 </script>

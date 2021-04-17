@@ -21,6 +21,10 @@ class OrderStatus
     {
         return "0";
     }
+    public static function  PendingSent()
+    {
+        return "-1";
+    }
     public static function  PartialFilled()
     {
         return "1";

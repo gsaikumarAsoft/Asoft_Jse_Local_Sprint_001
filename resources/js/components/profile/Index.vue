@@ -92,7 +92,7 @@ export default {
       axios
         .post("profile/store", user)
         .then(response => {
-          console.log(response);
+          ////console.log(response);
           this.$swal(`Account details Updated`);
           setTimeout(function() {
             window.location.reload();

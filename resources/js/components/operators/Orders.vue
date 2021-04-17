@@ -1,10 +1,10 @@
-<template>
+<template v-slot:custom-foot="row">
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top:100px;">
+    <div class="container-fluid" style="margin-top: 100px;">
       <div class="content">
         <b-card title="Current Orders" v-if="permissions.indexOf('read-broker-order') !== -1">
-          <div class="float-right" style="padding-bottom:10px;">
+          <div class="float-right" style="margin-bottom: 15px; padding-bottom: 15px;">
             <b-input
               id="search_content"
               v-model="filter"
@@ -13,11 +13,13 @@
               class="mb-2 mr-sm-2 mb-sm-0"
             ></b-input>
           </div>
+
+
           <b-table
             responsive
             v-if="permissions.indexOf('read-broker-order') !== -1"
             ref="selectedOrder"
-            :empty-text="'No Orders have been Created. Create an Order below.'"
+            :empty-text="'No orders found. Create an Order below.'"
             id="orders-table"
             :items="broker_client_orders"
             :per-page="perPage"
@@ -26,13 +28,18 @@
             striped
             hover
             :fields="fields"
+            v-model="visibleRows" 
             :filter="filter"
             @row-clicked="brokerOrderHandler"
-          ></b-table>
+            @filtered="onFiltered"
+          >
+            <!-- <template :v-if="data.item.max_floor" v-slot:cell(max_floor)="data">
+              <p>Iceberg Order</p>
+            </template>-->
+          </b-table>
           <p v-if="permissions.indexOf('read-broker-order') == -1" class="lead">
             You currently do not have permisions to view orders within the
-            system. Please speak with your Broker Admin to have the Permissions
-            activated on your account
+            system. Please speak with your Broker Admin to be granted access to this area
           </p>
         </b-card>
         <b-modal
@@ -452,7 +459,8 @@
           v-if="permissions.indexOf('create-broker-order') !== -1"
           v-b-modal.jse-new-order
           @click="add"
-        >Create New Order</b-button>
+          >Create New Order</b-button>        
+        <b-button @click="exportOrders">Export Orders (PDF)</b-button>
       </div>
     </div>
   </div>
@@ -464,18 +472,20 @@ import Multiselect from "vue-multiselect";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
 import currenciesMixin from "../../mixins/Currencies.js";
+import checkErrorMixin from "../../mixins/CheckError.js";
 // import jsonfile from 'jsonfile';
+import jsPDF from "jspdf";
 export default {
-  props: ["orders", "client_accounts"],
+  props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
   components: {
     headNav,
     Multiselect,
   },
-  mixins: [currenciesMixin],
+  mixins: [currenciesMixin, checkErrorMixin],
   data() {
     return {
+      new_order: false,
       filter: null,
-      filterOn: ["clordid", "side", "jcsd", "client_name"],
       expiration: false,
       disabled: 0,
       modalTitle: "New Order",
@@ -483,6 +493,7 @@ export default {
       order_template_data: [],
       file: "",
       order_option_input: false,
+      filterOn: ["clordid", "side", "jcsd", "client_name", "symbol", "order_date", "order_type.text", "time_in_force", "currency", "order_status", "price", "max_floor"],
       template: false,
       broker_trading_account_options: [],
       client_trading_account_options: [],
@@ -497,120 +508,143 @@ export default {
       fields: [
         // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
-        { key: "clordid", label: "Order#", sortable: true },
-        {
-          key: "order_type",
-          label: "Order Type",
-          sortable: true,
-          formatter: (value, key, item) => {
-            var type = JSON.parse(item.order_type);
-            var order = JSON.parse(value);
-            var d = JSON.parse(order);
-            return d["text"];
-          },
-        },
-        {
-          key: "symbol",
-          label: "Symbol",
-          sortable: true,
-          formatter: (value, key, item) => {
-            var data = JSON.parse(item.symbol);
-            var s = data;
-
-            return s.text;
-            // return symbol.text;
-          },
-        },
-        {
-          key: "time_in_force",
-          label: "Time In Force",
-          sortable: true,
-          formatter: (value, key, item) => {
-            if (value) {
-              var data = JSON.parse(item.time_in_force);
-              var s = data;
-
-              return s.text;
-            } else {
-              return "N/A";
-            }
-            // return symbol.text;
-          },
-        },
         { key: "client_name", label: "Client", sortable: true },
-        {
-          key: "currency",
-          label: "Currency",
-          sortable: true,
-          formatter: (value, key, item) => {
-            if (value) {
-              var data = JSON.parse(item.currency);
-              var s = data;
-
-              return s.text;
-            } else {
-              return "N/A";
-            }
-            // return symbol.text;
-          },
-        },
-        {
-          key: "side",
-          label: "Side",
-          sortable: true,
-          formatter: (value, key, item) => {
-            if (value) {
-              var data = JSON.parse(item.side);
-              var s = data;
-
-              return s.text;
-            } else {
-              return "N/A";
-            }
-            // return symbol.text;
-          },
-        },
-        { key: "order_quantity", sortable: true },
-        { key: "remaining", label: "Remainder Held", sortable: true },
-        { key: "price", sortable: true },
-        {
-          key: "order_status",
-          sortable: true,
+        { key: "jcsd", label: "JCSD#", sortable: true },
+        { key: "clordid", label: "Client Order#", sortable: true },
+        { key: "order_status",
+          label: "Status",
+          sortable: true,         
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
             // return value;
             if (value === "0") {
-              return "New";
+              return "NEW";
+            } else if (value === "Submitted") {
+              return "SUBMITTED";
+            } else if (value === "Failed") {
+              return "FAILED";
+            } else if (value === "-1") {
+              return "PENDING SENT";
             } else if (value === "1") {
-              return "Partially Filled";
+              return "PARTIALLY FILLED";
             } else if (value === "2") {
-              return "Filled";
+              return "FILLED";
             } else if (value === "4") {
-              return "Cancelled";
+              return "CANCELLED";
             } else if (value === "6") {
-              return "Pending Cancel";
+              return "PENDING CANCEL";
             } else if (value === "5") {
-              return "Replaced";
+              return "REPLACED";
             } else if (value === "C") {
-              return "Expired";
+              return "EXPIRED";
             } else if (value === "Z") {
-              return "Private";
+              return "PRIVATE";
             } else if (value === "U") {
-              return "Unplaced; order is not in the orderbook (Nasdaq defined)";
+              return "UNPLACED";
             } else if (value === "x") {
-              return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
+              return "INACTIVE";
             } else if (value === "8") {
-              return "Rejected";
+              return "REJECTED";
             } else {
               return value;
             }
           },
         },
+        { key: "side",
+          label: "Side",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            if (value) {
+              var data = JSON.parse(item.side) || {};
+              var s = data;
+
+              return s.text;
+            } else {
+              return "N/A";
+            }
+            // return symbol.text;
+          },
+        },
+        {
+          key: "symbol.text",
+          label: "Symbol",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            const data = JSON.parse(item.symbol) || {};
+            return data.text ;
+            // return symbol.text;
+          },
+        },
+        { key: "order_quantity", label: "Qty", sortable: true },
+        {
+          key: "time_in_force",
+          label: "Time In Force",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            if (value) {
+              //var data = JSON.parse(item.time_in_force);
+              var data = JSON.parse(item.time_in_force) || {};
+              return data.value;
+            } else {
+              return "N/A";
+            }
+            // return symbol.text;
+          },
+        },
+        { key: "order_type.text",
+          label: "Type",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            var type = JSON.parse(item.order_type) || {};
+            var order = JSON.parse(type) ||'';
+            return order.text;
+          },
+        },
+        { key: "currency",
+          label: "Currency",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            if (value) {
+              var data = JSON.parse(item.currency) || {};
+              var s = data;
+
+              return s.value;
+            } else {
+              return "N/A";
+            }
+            // return symbol.text;
+          },
+        },
+        { key: "price", sortable: true },
+        { key: "remaining", label: "Remainder Held", sortable: true },
+        {
+          key: "max_floor",
+          label: "Visibility",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            if (value) {
+              return "Iceberg Order";
+            } else {
+              return "Full Order";
+            }
+          },
+        },
+
         // { key: "foreign_broker", sortable: true }
       ],
-      broker_client_orders: "",
+      visibleRows: [],
+      broker_client_orders: [],
+      totalRows: 0,
       broker: {},
       perPage: 5,
       currentPage: 1,
+      usePagination: true,
       handling_options: [
         {
           text: "Automated execution order, private, no Broker intervention",
@@ -735,27 +769,70 @@ export default {
       ],
       symbols: [],
       nameState: null,
+      disabled: false,
     };
   },
   computed: {
-    rows() {
-      return this.broker_client_orders.length;
+    rows() {      
+      if (!this.filter) {
+        return this.broker_client_orders.length;
+      } else {
+        return this.broker_client_orders.length;
+      }    
     },
   },
   watch: {
     "order.time_in_force": function (d) {
       // if (d.fix_value) {
-      // console.log("d", d);
+      // //console.log("d", d);
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
         this.expiration = true;
       }
-      // console.log(this.expiration);
+      // //console.log(this.expiration);
       // }
     },
   },
   methods: {
+    onFiltered(filteredItems) {
+        // Trigger pagination to update the number of buttons/pages due to filtering
+        this.filteredItemsCount = filteredItems.length
+        this.currentPage = 1
+      },      
+      statusFilter(data) {
+      if (data === "0") {
+        return "NEW";
+      } else if (data === "-1") {
+        return "PENDING";
+      } else if (data === "1") {
+        return "PARTIALLY FILLED";
+      } else if (data === "2") {
+        return "FILLED";
+      } else if (data === "4") {
+        return "CANCELLED";
+      } else if (data === "5") {
+        return "REPLACED";
+      } else if (data === "C") {
+        return "EXPIRED";
+      } else if (data === "Z") {
+        return "PRIVATE";
+      } else if (data === "U") {
+        return "UNPLACED";
+      } else if (data === "x") {
+        return "INACTIVE";
+      } else if (data === "8") {
+        return "REJECTED";
+      } else if (data === "Submitted") {
+        return "SUBMITTED";
+      } else if (data === "Failed") {
+        return "FAILED";
+      } else if (data === "Cancel Submitted") {
+        return "CANCEL SUBMITTED";
+      } else {
+        return "["+data+"]";
+      }
+    },
     search(nameKey, myArray) {
       for (var i = 0; i < myArray.length; i++) {
         if (myArray[i].value === nameKey) {
@@ -790,9 +867,9 @@ export default {
           this.order.client_trading_account = clients[i].id;
         }
       }
-      // console.log(trading);
+      // //console.log(trading);
       for (j = 0; j < trading.length; j++) {
-        // console.log(trading[j].id);
+        // //console.log(trading[j].id);
         if (parseInt(o.trading_account_id) === trading[j].value) {
           this.order.trading_account = trading[j].value;
         }
@@ -836,7 +913,7 @@ export default {
       }
       if (result.dismiss === "cancel") {
         if (this.permissions.indexOf("delete-broker-order") !== -1) {
-          console.log("Destruction");
+          //console.log("Destruction");
           this.destroy(o.clordid);
           //broker Or;
         } else {
@@ -851,7 +928,7 @@ export default {
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
       const files = this.$refs.file.files[0];
-      // console.log(this.files);
+      // //console.log(this.files);
       const fr = new FileReader();
       const self = this;
       fr.onload = (e) => {
@@ -863,7 +940,7 @@ export default {
     },
     importOrderFromJSON() {
       //  this.order = this.file;
-      // console.log(this.order_template_data);
+      // //console.log(this.order_template_data);
       this.order = {};
       this.order = this.order_template_data.order_standard;
       this.order_option_inputs = this.order_template_data.order_options;
@@ -913,10 +990,10 @@ export default {
     },
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
-      // console.log("Right Here");
-      // console.log(data);
+      // //console.log("Right Here");
+      // //console.log(data);
       for (let i = 0; i < data.length; i++) {
-        //console.log(data[i]);
+        ////console.log(data[i]);
         this.broker_trading_account_options.push({
           text:
             data[i].foreign_broker +
@@ -989,7 +1066,7 @@ export default {
           );
           //.then(response => {
           let valid = data.isvalid;
-          // console.log(data);
+          // //console.log(data);
           if (valid) {
             this.notify("Order Created", data.errors, "success", true);
           } else {
@@ -1031,7 +1108,7 @@ export default {
         ClientID: "JMMB_TRADER1",
       };
 
-      // // console.log(order_sample);
+      // // //console.log(order_sample);
 
       // Fix Wrapper
       const { status } = await axios.post(
@@ -1056,7 +1133,7 @@ export default {
         //{ crossDomain: true }
       );
       ///.then(response => {
-      // console.log(response);
+      // //console.log(response);
       ///});
     },
     add() {
@@ -1120,6 +1197,53 @@ export default {
       this.order["order_type"] = JSON.stringify(this.order.order_type);
       await this.createBrokerClientOrder(this.order);
       // }
+    },    
+    exportOrders() {
+      ////console.log("Filtered Orders");
+      this.perPage=0;
+      this.$refs.selectedOrder.refresh();
+      //console.log(this.visibleRows);
+      const tableData = this.visibleRows.map((r) =>
+        //for (var i = 0; i < this.report_data.length; i++) {
+        //tableData.push([
+        [
+          r.order_date.trim(),
+          r.jcsd,
+          r.clordid,          
+          this.statusFilter(r.order_status),
+          JSON.parse(r.side)["text"],
+          (JSON.parse(r.symbol) || {})["text"],
+          r.quantity,
+          (JSON.parse(r.currency) || {})["value"],
+          r.price,
+          r.remaining
+        ]
+      );
+
+      var doc = new jsPDF('l', 'in', [612, 792]);
+      //   // It can parse html:
+      //   doc.autoTable({ html: "#foreign-brokers" });
+      // Or use javascript directly:
+      doc.autoTable({
+        head: [
+          [
+            "Order Date",
+            "JCSD#",
+            "Client Order#",
+            "Status",
+            "Side",
+            "Symbol",
+            "Quantity",
+            "Currency",
+            "Price",
+            "Remainder"
+          ],
+        ],
+        body: tableData,
+      });
+      doc.save("DMA-ORDERS-REPORT.pdf");
+      this.perPage = 5;
+      this.$refs.selectedOrder.refresh();
     },
     resetModal() {
       this.create = false;
@@ -1160,7 +1284,7 @@ export default {
     }
 
     this.broker_client_orders = JSON.parse(this.orders);
-    // console.log(this.broker_client_orders);
+    // //console.log(this.broker_client_orders);
   },
 };
 </script>

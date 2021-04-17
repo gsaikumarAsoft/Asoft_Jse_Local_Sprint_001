@@ -24,21 +24,56 @@
             :per-page="perPage"
             aria-controls="local-brokers"
           ></b-pagination>
-          <b-button v-b-modal.modal-1 @click="create = true">Create Local Broker</b-button>
+          <b-button 
+            v-b-modal.modal-1
+            @click="create = true">Create Local Broker</b-button>
         </b-card>
-        <b-modal id="modal-1" :title="modalTitle" @ok="handleOk" @hidden="resetModal">
+        <b-modal id="modal-1" 
+          :title="modalTitle" 
+          @ok="handleOk"           
+          :no-close-on-backdrop=true
+          :no-close-on-esc=true           
+          @hidden="resetModal">
           <p class="my-4">Please update the fields below as required!</p>
           <form ref="form" @submit.stop.prevent="handleSubmit">
             <b-form-group label="Name" label-for="name-input" invalid-feedback="Name is required">
-              <b-form-input id="name-input" v-model="broker.name" :state="nameState" required></b-form-input>
+              <b-form-input 
+                id="name-input" 
+                v-model="broker.name" 
+                :state="nameState" 
+                :disabled="!this.formReady"
+                required></b-form-input>
             </b-form-group>
+
             <b-form-group
               label="Email"
               label-for="email-input"
-              invalid-feedback="Email is required"
+              invalid-feedback="A valid Email is required"
             >
-              <b-form-input id="name-input" v-model="broker.email" :state="nameState" required></b-form-input>
+              <b-form-input 
+                id="email-input" 
+                type="email"
+                v-model="broker.email" 
+                :state="nameState"                 
+                :disabled="!this.formReady"
+                required></b-form-input>
             </b-form-group>
+            
+            <b-form-group
+              sm
+              label="Admin Can Trade"
+              label-for="admin-can-trade-input"
+              invalid-feedback="Admin Can Trade is required"
+            >
+              <b-form-select                
+                v-model="broker.admin_can_trade" 
+                :options="can_trade_options"                
+                :state="nameState"
+                :disabled="!this.formReady"
+                required
+              ></b-form-select>
+            </b-form-group>
+            <!-- -->
           </form>
         </b-modal>
       </div>
@@ -60,7 +95,11 @@ export default {
     return {
       create: false,
       local_brokers: [],
-      broker: {},
+      can_trade_options: [        
+          { text: 'Yes', value: 'Yes' },
+          { text: 'No', value: 'No' },
+      ],
+      broker: { admin_can_trade: 'No'},
       perPage: 5,
       currentPage: 1,
       fields: [
@@ -75,12 +114,25 @@ export default {
           label: "Email"
         },
         {
+          key: "admin_can_trade",
+          sortable: true,
+          label: "Admin Can Trade"
+        },
+        {
           key: "user.status",
           sortable: true,
           label: "Account Status"
         }
+         /*
+        {
+          key: "local_broker_id",
+          sortable: true,
+          label: "Local Broker ID"
+        }
+        //*/
       ],
       modalTitle: "Local Broker Update",
+      formReady: true,
       nameState: null
     };
   },
@@ -110,6 +162,19 @@ export default {
       await this.getBrokers();
     },
     async handleOk(bvModalEvt) {
+      if (!this.formReady) {        
+        this.$swal.fire({
+          title: `${this.create ? "Creating" : "Updating"} Local Broker Account`,
+          html: "An update is already beoong processed. Please wait while we setup the Account",
+          timerProgressBar: true,
+          onBeforeOpen: () => {
+            this.$swal.showLoading();
+          }
+        });
+        return;
+      }
+      this.formReady = false;
+
       // Prevent modal from closing
       bvModalEvt.preventDefault();
       // Trigger submit handler
@@ -127,12 +192,12 @@ export default {
       });
 
       try {
+        //console.log("CREATE/UPDATE this.broker", this.broker);
         await axios.post("store-local-broker", this.broker);
         await this.getBrokers();
         this.$swal(
-          `Account ${this.created ? "Created" : "Updated"} for ${
-            this.broker.email
-          }`
+          `Account ${this.created ? "Created" : "Updated"} ${this.broker.email ? "for" : ""} 
+            ${this.broker.email ? this.broker.email : ""}`
         );
         await this.resetModal();
         await this.$nextTick();
@@ -140,6 +205,7 @@ export default {
       } catch (error) {
         this.checkDuplicateError(error);
       }
+      this.formReady = true;
 
       // Push the name to submitted names
       // this.submittedNames.push(this.name);
@@ -149,7 +215,6 @@ export default {
       // });
     },
     async localBrokerHandler(b) {
-      this.broker = b.user;
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -164,6 +229,11 @@ export default {
         cancelButtonAriaLabel: "cancel"
       }); //.then(result => {
       if (result.value) {
+        //console.log("b", b);
+        ////console.log("b.admin_can_trade", b.admin_can_trade);
+        this.broker = b.user;
+        Object.assign(this.broker, {admin_can_trade: b.admin_can_trade});        
+        ////console.log("selected this.broker", this.broker);      
         this.$bvModal.show("modal-1");
       }
       if (result.dismiss === "cancel") {
@@ -172,7 +242,7 @@ export default {
     },
     async getBrokers() {
       ({ data: this.local_brokers } = await axios.get("local-brokers")); //.then(response => {
-      console.log("this.local_brokers", this.local_brokers);
+      ////console.log("this.local_brokers", this.local_brokers);
     },
 
     add() {

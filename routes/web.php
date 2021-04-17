@@ -18,7 +18,7 @@ use App\BrokerTradingAccount;
 use App\Helpers\OrderStatus;
 use App\Jobs\ExecutionBalanceUpdate;
 use App\LocalBroker;
-use App\Mail\BrokerUserAccountCreated;
+use App\Mail\BrokerUserAccountVerified;
 use App\User;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
@@ -95,8 +95,6 @@ Auth::routes(['verify' => true]);
 Route::get('/create-user', 'ApplicationController@ok');
 
 
-
-
 Route::group(['prefix' => '/', 'middleware' => ['auth', 'verified']], function () {
     Route::get('/', 'ApplicationController@index')->name('home');
 });
@@ -106,8 +104,6 @@ Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], fun
     Route::get('/', 'ProfileController@index')->name('home');
     Route::post('/store', "ProfileController@store");
 });
-
-
 
 Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
     Route::get('/md-test', "BrokerController@mdTest");
@@ -147,12 +143,17 @@ Route::group(['prefix' => '/operator', 'middleware' => ['App\Http\Middleware\Loc
     Route::get('/trading-accounts', 'OperatorController@traderList');
     Route::post('/store-broker-trader', "TraderController@storeOperatorClient");
     Route::post('/store-operator-client-order', "OperatorController@operatorClientOrder");
+    Route::post('/store-broker-client-order', "BrokerController@clientOrder");
     Route::get('/broker-users', 'UserController@index');
     Route::delete('/client-broker-delete/{id}', 'ClientController@destroy');
     Route::delete('/destroy-broker-client-order/{id}', "BrokerController@destroyOrder");
-    Route::get('/broker-trading-accounts', 'BrokerController@operatorTradingAccounts');
-    // Route::get('/orders', "BrokerTraderController@orderList");
-    Route::get('/orders', 'OperatorController@orders');
+    //Route::get('/broker-trading-accounts', 'OperatorController@operatorTradingAccounts');
+    Route::get('/broker-trading-accounts', 'BrokerController@tradingAccounts');
+    Route::get('/assigned-trading-accounts', 'BrokerController@operatorTradingAccounts');
+    //Route::get('/assigned-trading-accounts', 'OperatorController@operatorTradingAccounts');
+    //Route::get('/orders', 'OperatorController@orders');
+    Route::get('/orders', 'BrokerController@orders');
+    //Route::get('/orders', 'BrokerController@orders');
 });
 
 Route::group(['prefix' => '/trader-broker', 'middleware' => ['App\Http\Middleware\LocalBrokerTraderMiddleware']], function () {
@@ -166,16 +167,13 @@ Route::group(['prefix' => '/foreign-broker', 'middleware' => ['App\Http\Middlewa
     Route::get('/tradings', "OutboundBrokerController@trading");
 });
 
-
 Route::group(['prefix' => '/settlement-agent', 'middleware' => ['App\Http\Middleware\SettlementAgentMiddleware']], function () {
     Route::get('/', "SettlementAgentController@index");
 });
 
-
-
-
 Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\AdminMiddleware']], function () {
     Route::get('internal_audit/', 'ApplicationController@audit');
+    Route::get('fetch-broker-messages/', 'ApplicationController@fetchbrokermessages');
     Route::get('/', "BrokerController@index")->name('jse-admin');
     Route::get('foreign-broker-list/', 'ApplicationController@indexCad');
     Route::get('/foreign-brokers', 'ApplicationController@foreignBrokerList');
@@ -199,8 +197,6 @@ Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\Ad
     Route::delete('/foreign-broker-delete/{id}', 'ApplicationController@destroyForeignBroker');
     Route::put('/foreign-broker-update/{id}', 'ApplicationController@updateForeignBroker');
 
-
-
     Route::get('logActivity', 'ApplicationController@logActivity');
 
     Route::get('/dma-home', 'BrokerController@index');
@@ -209,9 +205,7 @@ Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\Ad
 });
 
 
-
 Route::get('/logout', 'Auth\LoginController@logout');
-
 
 
 Route::put('nv9w8yp8rbwg4t/', function () {
@@ -248,11 +242,13 @@ Route::get('get-rbc-bai', function () {
         $user = Auth::user()->getRoleNames();
 
         if ($user[0] === "ADMD") { //Only run if this is the JSE ADMIN Account
-            $file_date = date('Ymd');
+            //$file_date = date('Ymd');
+            $file_date = date('Ymd', time() -5 * 60 * 60);
+            
             $remote_file_path = "/upload/BALTRN3_" . $file_date . ".001";
             $contents = Storage::disk('sftp')->get($remote_file_path);
 
-            echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
+            echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
             echo '<script type="text/javascript">',
                 '
                 var data = ' . $contents . '; 
@@ -332,7 +328,7 @@ Route::get('get-rbc-bai', function () {
     //     echo "Error due to :" . $e->getMessage();
     // }
 
-    // echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
+    // echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
     // echo '<script type="text/javascript">',
     //     '
     //     var data = ' . $contents . '; 
@@ -357,4 +353,31 @@ Route::get('get-rbc-bai', function () {
 
     // ; ',
     //     '</script>';
+});
+
+
+Route::get('refresh_order_status', function () {
+    //If we intend to store the data before updating the accounts 
+    // $path = 'RBC.json';
+    // Storage::disk('public_uploads')->put($path, $file);
+    // ===========================================================
+
+
+    //Check if user has been authenticted before running updater
+    if (auth()->user()) {
+
+        //Check if this user is the JSE Admin
+        $user = Auth::user()->getRoleNames();
+
+        if ($user[0] === "ADMD") { //Only run if this is the JSE ADMIN Account           
+
+            return "You will need to Login with the JSE Admin account to update balances";
+        } else {
+            return "You will need to Login with the JSE Admin account to refresh orders statuses";
+        }
+    } else {
+        return "Please Login to access this function <a href='login'>Login</a>";
+    }
+
+
 });

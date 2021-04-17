@@ -12,8 +12,8 @@
     <p>Email {{$user['email']}}</p>
     <p>JCSD Account Number JCSD{{$user['jcsd']}}</p>
     <p>Please provide your verification of these settings using the links below:</p>
-    <a href="{{ env('APP_URL') }}verify-broker-trader/{{ $user['id'] }}/accept">Accept </a><br>
-    <a href="{{ env('APP_URL') }}verify-broker-trader/{{ $user['id'] }}/reject">Reject </a><br>
+    <a href="{{ config('app.url') }}verify-broker-trader/{{ $user['id'] }}/accept">Accept </a><br>
+    <a href="{{ config('app.url') }}verify-broker-trader/{{ $user['id'] }}/reject">Reject </a><br>
 </body>
 
 </html>

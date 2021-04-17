@@ -17,6 +17,10 @@ class BrokerUser extends Model
     {
         return $this->belongsTo(LocalBroker::class);
     }
+    public function broker_user()
+    {
+        return $this->belongsTo(BrokerUser::class);
+    }
 
 
     public function role()

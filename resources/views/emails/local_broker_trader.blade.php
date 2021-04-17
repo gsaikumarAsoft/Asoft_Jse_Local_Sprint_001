@@ -11,8 +11,8 @@
 <p>{{$user['name']}}</p>
 <p>{{$user['email']}}</p>
 <br>
-<a href="{{env('APP_URL')}}verify-broker-trader/{{$user['id']}}/accept">Accept </a><br>
-<a href="{{env('APP_URL')}}verify-broker-trader/{{$user['id']}}/reject">Reject </a><br>
+<a href="{{config('app.url')}}verify-broker-trader/{{$user['id']}}/accept">Accept </a><br>
+<a href="{{config('app.url')}}verify-broker-trader/{{$user['id']}}/reject">Reject </a><br>
 </body>
 
 </html>

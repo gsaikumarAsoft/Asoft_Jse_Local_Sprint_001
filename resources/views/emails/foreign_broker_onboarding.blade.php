@@ -13,7 +13,7 @@
         Registered user-temporary-password is <b>password</b>
     </p>
     <p>Please use the link below to login</p>
-        <a href="{{env('APP_URL')}}logout">Login</a><br>
+        <a href="{{config('app.url')}}logout">Login</a><br>
 </body>
 
 </html>

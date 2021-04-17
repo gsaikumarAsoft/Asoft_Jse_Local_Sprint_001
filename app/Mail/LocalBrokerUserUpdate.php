@@ -7,10 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class BrokerUserAccountVerified extends Mailable
+class LocalBrokerUserUpdate extends Mailable
 {
     use Queueable, SerializesModels;
-
     public $user;
     /**
      * Create a new message instance.
@@ -29,6 +28,6 @@ class BrokerUserAccountVerified extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.welcome_broker_user');
+        return $this->view('emails.local_broker_user_update');
     }
 }

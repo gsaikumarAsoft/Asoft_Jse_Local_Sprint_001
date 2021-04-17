@@ -247,7 +247,7 @@ export default {
         ]);
       }
 
-      // console.log(this.broker_settlement_accounts[i])
+      // //console.log(this.broker_settlement_accounts[i])
       // tableData.push(this.broker_settlement_accounts[i]);
 
       var doc = new jsPDF();
@@ -378,13 +378,13 @@ export default {
     async getClients() {
       ({ data: this.clients } = await axios.get("operator-clients")); //.then(response => {
       let user_permissions = [];
-      console.log("getClients", this.clients);
+      //console.log("getClients", this.clients);
       //Handle Permissions
       let i, j, k;
       for (i = 0; i < this.clients.length; i++) {
         this.clients[i].types = [];
         user_permissions = this.clients[i].permission;
-        // console.log(user_permissions);
+        // //console.log(user_permissions);
         for (k = 0; k < user_permissions.length; k++) {
           var specific_permission = user_permissions[k].permission;
           this.clients[i].types.push(specific_permission);
@@ -392,7 +392,7 @@ export default {
       }
     },
     async storeClient(broker) {
-      console.log("storeClient", broker);
+      //console.log("storeClient", broker);
       try {
         await axios.post("store-broker-trader", broker);
         await this.getClients();

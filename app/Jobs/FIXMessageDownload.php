@@ -49,13 +49,13 @@ class FIXMessageDownload implements ShouldQueue
     public function handle()
     {
         // Download all data from the message download wrapper
-        $url = env('FIX_API_URL') . "api/messagedownload/download";
+        $url = config('fixwrapper.base_url') . "api/messagedownload/download";
         $data = array(
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $this->senderSubID,
             "seqNum" => 0,
-            'StartTime' => date('Y-m-d') . " 11:00:00.000",
-            'EndTime' => date('Y-m-d') . " 23:30:00.000",
+            'StartTime' => date('Y-m-d', time() -5 * 60 * 60) . " 00:00:00.000",
+            'EndTime' => date('Y-m-d', time() -5 * 60 * 60) . " 23:59:59.000",
         );
         $postdata = json_encode($data);
 
@@ -67,7 +67,7 @@ class FIXMessageDownload implements ShouldQueue
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
         $result = curl_exec($ch);
         curl_close($ch);
         $request = json_decode($result, true);

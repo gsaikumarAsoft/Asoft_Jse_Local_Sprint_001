@@ -320,7 +320,7 @@ export default {
         };
       }
 
-      console.log("account", account);
+      ////console.log("account", account);
 
       this.$swal.fire({
         title: `${this.isNew ? "Creating" : "Updating"} Trading Account`,
@@ -358,7 +358,7 @@ export default {
       ({ data: this.broker_settlement_accounts } = await axios.get(
         "settlement-list"
       ));
-      console.log("getSettlementAccounts", this.broker_settlement_accounts);
+      ////console.log("getSettlementAccounts", this.broker_settlement_accounts);
     },
 
     async destroy(id) {
@@ -382,13 +382,13 @@ export default {
 
     async getLocalBrokers() {
       const { data } = await axios.get("local-brokers");
-      // console.log(local_brokers);
+      // ////console.log(local_brokers);
       this.local_brokers = data.map((broker) => ({
         user_id: broker.user.id,
         text: broker.user.name,
         value: broker.id,
       }));
-      console.log("local brokers", this.local_brokers);
+      ////console.log("local brokers", this.local_brokers);
     },
 
     async getForeignBrokers() {
@@ -398,12 +398,12 @@ export default {
         text: broker.user.name,
         value: broker.id,
       }));
-      console.log("foreign brokers", this.foreign_brokers);
+      ////console.log("foreign brokers", this.foreign_brokers);
     },
   },
 
   async mounted() {
-    console.log("accounts", this.accounts);
+    ////console.log("accounts", this.accounts);
     await Promise.all([
       this.getLocalBrokers(),
       this.getForeignBrokers(),

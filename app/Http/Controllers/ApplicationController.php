@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
@@ -50,6 +51,101 @@ class ApplicationController extends Controller
         $data = AppLogActivity::with('user')->get();
         return $data;
     }
+
+    function fetchbrokermessages()
+    {
+        DB::table('users') 
+        ->join('local_brokers', 'users.id', '=', 'local_brokers.user_id') 
+        ->select('users.id', 'users.name') 
+        ->where('status', '=', 'Verified') 
+        ->orderBy('id') 
+        ->chunk(100, function ($broker_users) { 
+            foreach ($broker_users as $broker_user) {
+                $executionBalanceUpdate = new ExecutionBalanceUpdate($broker_user->name); 
+                $executionBalanceUpdate ; 
+                //dispatch($executionBalanceUpdate); 
+                //$fix_url_helper = new FunctionSet(); 
+                //$url = $fix_url_helper. fix_wrapper_url("api/messagedownload/download");
+
+                $url = config('fixwrapper.base_url') . "api/messagedownload/download";
+                Log::debug('FETCHING BROKER MESSAGES | Local Broker: ' . $broker_user->name .'| URL: '. $url);
+
+                //$url = config('fix.api.url') . "api/messagedownload/download";
+                $data = array(
+                    'BeginString' => 'FIX.4.2',
+                    "SenderSubID" => $broker_user->name,
+                    "seqNum" => 0,
+                    'StartTime' => date('Y-m-d', time() -5 * 60 * 60) . " 00:00:00.000",
+                    'EndTime' => date('Y-m-d', time() -5 * 60 * 60) . " 23:59:59.000",
+                );
+                $postdata = json_encode($data);
+        
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
+                $result = curl_exec($ch);
+                curl_close($ch);
+                $request = json_decode($result, true);
+        
+                Log::debug('FETCHED BROKER MESSAGES | Local Broker: ' . $broker_user->name .'| MESSAGES: '. $result);
+
+            } 
+        });
+    }
+
+    public function mdTest()
+    {
+        // $user = auth()->user();
+        // // Call The Execution Balance Update Job
+        // /*
+        //     * Run FIX Message Download Api
+        //     - Import new execution reports only
+        //     - Update the status of orders based on the execution report for this specific broker
+        //     - Update Account Balances based on (REJECTED,CANCELLED,NEW,FILLED,PARTIALLYFILLED)
+        // */
+        // $executionBalanceUpdate = new ExecutionBalanceUpdate($user->name);
+        // $this->dispatch($executionBalanceUpdate);
+        // /*--*/
+        $url = fix_wrapper_url('FIX_API_URL') . "api/messagedownload/download";
+        $data = array(
+            'BeginString' => 'FIX.4.2',
+            "SenderSubID" => 'BARITA',
+            "seqNum" => 0,
+            'StartTime' => date('Y-m-d', time() -5 * 60 * 60) . " 00:00:00.000",
+            'EndTime' => date('Y-m-d', time() -5 * 60 * 60) . " 23:59:59.000",
+        );
+        // 'StartTime' => date('Y-m-d') . " 11:00:00.000",
+        // 'EndTime' => date('Y-m-d') . " 23:30:00.000",
+        $postdata = json_encode($data);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        $request = json_decode($result, true);
+        return $request;
+    }
+
+
+
+
+
+
+
+
 
     function index(Request $request)
     {
@@ -126,23 +222,31 @@ class ApplicationController extends Controller
     function storeLocalBroker(Request $request)
     {
 
-
-
-        $pass = $this->HelperClass->rand_pass(8);
+        $pass = $this->HelperClass->rand_pass(8);        
+        $hash = $this->HelperClass->generateRandomString(20);
         $role_ADMB = Role::where('name', 'ADMB')->first();
 
         if ($request->id) {
+            Log::debug('NEW LOCAL BROKER request.id: ' . $request->id);
             $this->LogActivity::addToLog('Updated Local Broker Details');
-            $broker = User::updateOrCreate(
+            $broker_user = User::updateOrCreate(
                 ['id' => $request->id],
-                ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified']
-
+                ['name' => $request->name, 'email' => $request->email,  'status' => 'Unverified' ]
             );
-            $request['hash']  = $broker->hash;
+            $broker = LocalBroker::updateOrCreate(
+                ['user_id' => $request->id],
+                ['admin_can_trade' => $request->admin_can_trade]
+            );            
+            Log::debug('Saved | Local Broker: ' . $broker_user->name .'| email: '. $broker_user->email .'| admin_can_trade:' . $broker->admin_can_trade);
+            
+            //$request['id'] = $user['id'];
+            $request['hash'] = $broker_user->hash;
+
             Mail::to($request->email)->send(new LocalBrokerDetailsUpdate($request));
         } else {
+            Log::debug('Adding | Local Broker: '. $request->name . '| email: '. $request->email .'| admin_can_trade: ' . $request->admin_can_trade) .'...';
+
             $this->LogActivity::addToLog('Created A Local Broker');
-            $hash = $this->HelperClass->generateRandomString(20);
             $user = new User();
             $user->name = $request->name;
             $user->email = $request->email;
@@ -154,12 +258,12 @@ class ApplicationController extends Controller
 
             $broker = new LocalBroker;
             $broker->user_id = $user->id;
+            $broker->admin_can_trade = $request->admin_can_trade;
+            
             $broker->save();
             $request['id'] = $user['id'];
             $request['hash'] = $hash;
-
-
-
+            
             // Notify Settlement Bank
             Mail::to($request->email)->send(new MailLocalBroker($request, $pass));
         }
@@ -288,9 +392,6 @@ class ApplicationController extends Controller
                 // $request['id'] = $broker_settlement_account->id;
 
 
-
-
-
                 $hash = $this->HelperClass->generateRandomString(20);
                 $user = new User();
                 $user->name = $request->bank_name;
@@ -300,10 +401,7 @@ class ApplicationController extends Controller
                 $user->hash = $user_hash;
                 $user->save();
 
-
                 $user->roles()->attach($role_AGTS);
-
-
 
                 $data = [];
                 $data['password'] = $pass;
@@ -369,8 +467,6 @@ class ApplicationController extends Controller
             $request['id'] = $user['id'];
             $request['hash'] = $hash;
 
-
-
             Mail::to($request->email)->send(new NewForeignBroker($request, $pass));
             $this->LogActivity::addToLog('Created New Foreign Broker');
         }
@@ -397,9 +493,10 @@ class ApplicationController extends Controller
 
     function updateLocalBroker(Request $request, $id)
     {
-        $broker               = LocalBroker::find($id);
-        $broker->name         = $request->name;
-        $broker->email        = $request->email;
+        $broker                     = LocalBroker::find($id);
+        $broker->name               = $request->name;
+        $broker->admin_can_trade    = $request->admin_can_trade;
+        $broker->email              = $request->email;
         $broker->save();
     }
 

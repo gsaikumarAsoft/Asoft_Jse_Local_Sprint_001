@@ -12,10 +12,9 @@ class LocalBroker extends Model
 
     protected $fillable = [
         'user_id',
-        'dma_client_id'
-
+        'dma_client_id',
+        'admin_can_trade'
     ];
-
 
     public function user()
     {
