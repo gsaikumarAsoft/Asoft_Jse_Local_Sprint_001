@@ -1,7 +1,7 @@
 <template v-slot:custom-foot="row">
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="content">
         <b-card title="Current Orders" v-if="permissions.indexOf('read-broker-order') !== -1">
           <div class="float-right" style="margin-bottom: 15px; padding-bottom: 15px;">
@@ -14,6 +14,21 @@
             ></b-input>
           </div>
 
+
+        <b-pagination
+          v-if="permissions.indexOf('read-broker-order') !== -1"
+          v-model="currentPage"
+          :total-rows="rows"
+          :per-page="perPage"
+          aria-controls="orders-table"
+          style="padding-top:15px;"
+        ></b-pagination>
+        <b-button
+          v-if="permissions.indexOf('create-broker-order') !== -1"
+          v-b-modal.jse-new-order
+          @click="add"
+          >Create New Order</b-button>        
+        <b-button @click="exportOrders">Export Orders (PDF)</b-button>
 
           <b-table
             responsive
@@ -447,20 +462,6 @@
             </b-container>
           </form>
         </b-modal>
-        <b-pagination
-          v-if="permissions.indexOf('read-broker-order') !== -1"
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="orders-table"
-          style="padding-top:15px;"
-        ></b-pagination>
-        <b-button
-          v-if="permissions.indexOf('create-broker-order') !== -1"
-          v-b-modal.jse-new-order
-          @click="add"
-          >Create New Order</b-button>        
-        <b-button @click="exportOrders">Export Orders (PDF)</b-button>
       </div>
     </div>
   </div>
@@ -635,7 +636,8 @@ export default {
             }
           },
         },
-
+        
+        { key: "created_by", label: "Trader", sortable: true },
         // { key: "foreign_broker", sortable: true }
       ],
       visibleRows: [],

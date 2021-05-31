@@ -13,6 +13,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 class ExecutionBalanceUpdate implements ShouldQueue
 {
@@ -74,11 +76,17 @@ class ExecutionBalanceUpdate implements ShouldQueue
             $request = json_decode($result, true);
             if (isset ($request['executionReports'])) {
                 $execution_report = $request['executionReports'];
-                if ($execution_report) {
+
+                if ($execution_report) { 
                     foreach ($execution_report as $a) {
+                        //Log::debug('ExecutionBalanceUpdate | Processing executionReport: '. json_encode($a) ); 
                         $this->api->logExecution($a);
                     }
+                } else {
+                    Log::debug('ExecutionBalanceUpdate | No executionReports retrieved.' );
                 }
+            } else {
+                Log::debug('ExecutionBalanceUpdate | Failure retrieving executionReports failed' );
             }
             
         //}

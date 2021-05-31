@@ -1,20 +1,62 @@
 <template v-slot:custom-foot="row">
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="content">
         <b-card title="Current Orders" v-if="!new_order">
-          <div class="float-right" style="margin-bottom: 15px; padding-bottom: 15px;">
-            <b-input
-              id="search_content"
-              v-model="filter"
-              type="text"
-              placeholder="Filter Orders..."
-              class="mb-2 mr-sm-2 mb-sm-0"
-            ></b-input>
-          </div>
+          <b-container style="text-align: left;margin:0">
+            <b-row style="text-align: left;">
+              <b-col style="text-align: left;">
+                  <label for="print-order-list" style="margin-bottom: 0;">Orders List</label></br>
+                  <b-button id="print-order-list" @click="exportOrders">Print (PDF)</b-button>
+              </b-col>
 
+              <b-col>
+                <label for="new-order" style="margin-bottom: 0;">New Order </label></br>
+                <template v-if="this.user_can_trade=='Yes'">
+                    <b-button id="new-order" @click="displayNewOrder">Create Order</b-button>
+                </template >
+              </b-col>
+              <b-col>
+              </b-col>
+            </b-row>
 
+            <b-row>
+              <b-col style="text-align: left;">
+                    <label for="search_content" style="margin-bottom: 0;">Search criteria: </label>
+                    <b-input
+                        id="search_content"
+                        v-model="filter"
+                        type="text"
+                        placeholder="Filter Orders..."
+                        class="mb-2 mr-sm-2 mb-sm-0"
+                      ></b-input>    
+              </b-col>
+            
+              <b-col>
+                  <b-form-checkbox id="toggle-pagination" v-model="usePagination" inline>Rows per page</b-form-checkbox>
+                  <b-form-spinbutton id="rows-per-page" v-model="perPage" min="0" max="100" style="vertical-align: text-top;" inline></b-form-spinbutton>
+              </b-col>
+                  
+              <b-col>
+                  <label for="pagination-control" style="margin-bottom: 0;">Pagination Control: </label>
+                  <b-pagination
+                    id="pagination-control"
+                    v-if="usePagination"
+                    v-model="currentPage"
+                    :total-rows="rows"  
+                    :per-page="perPage"
+                    aria-controls="orders-table"
+                    style="vertical-align: text-top; height: 20px;" 
+                    inline
+                  >
+                  </b-pagination>                
+
+              </b-col>
+            </b-row>
+          </b-container>
+          
+         
           <b-table
             responsive
             ref="selectedOrder"
@@ -36,25 +78,17 @@
               <p>Iceberg Order</p>
             </template>-->
           </b-table>
-          <b-form inline>
-              <b-pagination
-                v-model="currentPage"
-                :total-rows="rows"  
-                :per-page="perPage"
-                aria-controls="orders-table"
-                style="vertical-align: text-top; height: 20px;" 
-                inline
-                ></b-pagination>
-                 - Rows per page: 
-              <b-form-spinbutton id="rows-per-page" v-model="perPage" min="0" max="100" style="vertical-align: text-top;" inline></b-form-spinbutton>
-               - <b-form-checkbox id="toggle-pagination" v-model="usePagination" inline> Use pages</b-form-checkbox>
-          </b-form>
 
-          <template v-if="this.user_can_trade=='Yes'">
-              <b-button @click="displayNewOrder">Create New Order</b-button>
-          </template >
-          <b-button @click="exportOrders">Export Orders (PDF)</b-button>
-          
+          <b-pagination
+            v-if="usePagination"
+            v-model="currentPage"
+            :total-rows="rows"  
+            :per-page="perPage"
+            aria-controls="orders-table"
+            style="vertical-align: text-top; height: 20px;" 
+            inline
+          >
+          </b-pagination>
         </b-card>
         <b-card v-else id="jse-new-order" :title="title" class="text-center">
           <form ref="form" @submit.stop.prevent="handleJSEOrder">
@@ -699,17 +733,18 @@ export default {
         { key: "remaining", label: "Remainder Held", sortable: true },
         {
           key: "max_floor",
-          label: "Visibility",
+          label: "Iceberg",
           sortable: true,       
           filterByFormatted: true, 
           formatter: (value, key, item) => {
             if (value) {
-              return "Iceberg Order";
+              return "Yes";
             } else {
-              return "Full Order";
+              return "No";
             }
           },
         },
+        { key: "created_by", label: "Trader", sortable: true },
 
         // { key: "foreign_broker", sortable: true }
       ],
@@ -894,6 +929,13 @@ export default {
       }
       // //console.log(this.expiration);
       // }
+    },
+    "perPage": function (p) {
+      if (p == 0) {
+        this.usePagination = false;
+      } else {
+        this.usePagination = true;
+      }
     },
     "filter": function(filt){
         //if(filt) {  

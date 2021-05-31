@@ -19,7 +19,7 @@
         
         <p>Please provide your verification of these settings using the links below:</p>
         <a href="{{config('app.url')}}verify-trading-account/{{$user['hash']}}/accept">Accept </a><br>
-        <a href="{{config('app.url')config('app.url')}}verify-trading-account/{{$user['hash']}}/reject">Reject </a><br>
+        <a href="{{config('app.url')}}verify-trading-account/{{$user['hash']}}/reject">Reject </a><br>
  
 </body>
 

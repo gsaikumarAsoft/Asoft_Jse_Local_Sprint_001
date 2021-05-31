@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="content">
         <b-card title="Settlement Accounts" v-if="!settlement_account">
           <b-table
@@ -416,10 +416,7 @@ export default {
       ({ data: this.broker_settlement_accounts } = await axios.get(
         "../settlement-list"
       )); //.then(response => {
-      //console.log(
-        "broker_settlement_accounts",
-        this.broker_settlement_accounts
-      );
+      //console.log("broker_settlement_accounts", this.broker_settlement_accounts);
     },
 
     async destroy(id) {

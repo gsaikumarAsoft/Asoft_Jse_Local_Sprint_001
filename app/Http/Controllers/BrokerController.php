@@ -189,28 +189,40 @@ class BrokerController extends Controller
     public function execution()
     {
         $user = auth()->user();
-        // $execution_reports = DB::table('broker_client_order_execution_reports')
-        //     ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
-        //     ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.clordid')
-        //     ->join('local_brokers', 'broker_client_orders.local_broker_id', 'local_brokers.id')
-        //     ->join('broker_trading_accounts', 'local_brokers.id', 'broker_trading_accounts.local_broker_id')
-        //     // ->join('users', 'broker_client_order_execution_reports.senderSubID', 'users.name')
-        //     ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
-        //     ->distinct()
-        //     ->get();
 
         $execution_reports = DB::table('broker_client_order_execution_reports')
             ->where('broker_client_order_execution_reports.senderSubID', $user->name)
-            ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent')
+            ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent', 'broker_trading_accounts.foreign_broker_id', 'fu.name as foreign_broker', 'lu.name as local_broker'  )
             ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.client_order_number')
             ->join('broker_trading_accounts', 'broker_client_orders.trading_account_id', 'broker_trading_accounts.id')
             ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
+            ->join('users as fu', 'broker_settlement_accounts.foreign_broker_id', 'fu.id')
+            ->join('users as lu', 'broker_settlement_accounts.local_broker_id', 'lu.id')
             ->orderBy('messageDate', 'asc')
             ->get();
 
-
-        // return $execution_reports;
         return view('brokers.execution')->with('execution_reports', $execution_reports);
+    }
+    public function executionListFor($id, $report_date)
+    {
+        $user = auth()->user();
+
+        $execution_reports = DB::table('broker_client_order_execution_reports')
+            ->where('broker_client_order_execution_reports.senderSubID', $user->name)
+            ->where('broker_settlement_accounts.foreign_broker_id', $id)
+            ->where('broker_client_order_execution_reports.messageDate', ">=" ,$report_date)
+            ->select('broker_client_order_execution_reports.*', 'broker_settlement_accounts.account as settlement_account_number', 'broker_settlement_accounts.bank_name as settlement_agent', 'broker_trading_accounts.foreign_broker_id', 'fu.name as foreign_broker', 'lu.name as local_broker'  )
+            ->join('broker_client_orders', 'broker_client_order_execution_reports.clordid', 'broker_client_orders.client_order_number')
+            ->join('broker_trading_accounts', 'broker_client_orders.trading_account_id', 'broker_trading_accounts.id')
+            ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+            ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
+            ->join('users as fu', 'broker_settlement_accounts.foreign_broker_id', 'fu.id')
+            ->join('users as lu', 'broker_settlement_accounts.local_broker_id', 'lu.id')
+            ->orderBy('messageDate', 'asc')
+            ->get();
+
+        return $execution_reports;
     }
 
     public function mdTest()
@@ -252,15 +264,25 @@ class BrokerController extends Controller
         $request = json_decode($result, true);
         return $request;
     }
-    public function logExecution(Request $request)
+
+    
+    public function x_logExecutionlogExecution(Request $request)
     {
         $execution_report = $request->executionReports;
+        $processExecutionResult = processExecution($execution_report);
+        return $processExecutionResult;
+    }
 
-        // return $request;
+    public function processExecution($execution_report)
+    {
+        //$execution_report = $request->executionReports;
         // BrokerOrderExecutionReport::truncate();
+        
+        Log::debug('Processing Received ERs: ' . $execution_report );
+
+        $clients = [];
         foreach ($execution_report as $report) {
             $clients[] = $report;
-
 
             $broker_order_execution_report = new BrokerOrderExecutionReport();
             $broker_order_execution_report->clOrdID = $report['clOrdID'];
@@ -285,7 +307,6 @@ class BrokerController extends Controller
             $broker_order_execution_report->messageDate = $report['messageDate'];
             $broker_order_execution_report->save();
         }
-
 
         return $this->HelperClass->executionBalanceUpdate($clients);
     }
@@ -403,7 +424,7 @@ class BrokerController extends Controller
 
                 // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Broker Blocked');
 
-                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Settlement Funds!']);
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: Insufficient Broker Settlement Funds!']);
             } else if ($client_available < $order_value) {
 
                 // $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Client Blocked');
@@ -411,19 +432,17 @@ class BrokerController extends Controller
             } else {
                 // [Settlement Allocated] = [Settlement Allocated] + [Order Value]  
                 $settlement_allocated = max($settlement->amount_allocated + $order_value, 0);
-                $settlement_account_balance = max($settlement->account_balance - $order_value, 0);
+                //$settlement_account_balance = max($settlement->account_balance - $order_value, 0);
 
                 // [Client Open Orders] = [Client Open Orders] + [Order Value]
                 $client_open_orders = $broker_client->open_orders + $order_value;
-
 
                 // Update Settlement Account Balances
                 BrokerSettlementAccount::updateOrCreate(
                     ['hash' => $settlement->hash],
                     ['amount_allocated' => $settlement_allocated]
                 );
-
-
+                
                 // Update Broker Clients Open Orders
                 BrokerClient::updateOrCreate(
                     ['id' => $broker_client->id],

@@ -107,6 +107,7 @@ Route::group(['prefix' => '/profile', 'middleware' => ['auth', 'verified']], fun
 
 Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Middleware\LocalBrokerAdminMiddleware']], function () {
     Route::get('/md-test', "BrokerController@mdTest");
+    Route::get('/foreign-brokers', 'ApplicationController@foreignBrokerList');
     Route::get('/reset-unsettled-trades', "BrokerController@resetTrades");
     Route::get('/', "BrokerController@index");
     Route::get('/get-users', 'BrokerController@getUsers');
@@ -130,13 +131,18 @@ Route::group(['prefix' => '/broker', 'middleware' => ['verified', 'App\Http\Midd
     Route::delete('/user-broker-delete/{id}', 'UserController@destroy');
     Route::post('/store-broker-client', "TraderController@store");
     Route::delete('/client-broker-delete/{id}', 'ClientController@destroy');
+    
+    Route::get('/manual-cancel-er-for/{id}/{ordStatus}', 'ApplicationController@manualCancelExecutionReport');
 
     // Route::get('/', 'BrokerController@log');
     Route::get('/broker-list', 'ApplicationController@brokerList');
     Route::get('/foreign-broker-list', 'ApplicationController@foreignBrokerList');
+    Route::get('/execution-list-for/{id}/{order_date}', 'ApplicationController@executionListFor');
+    
 });
 Route::group(['prefix' => '/operator', 'middleware' => ['App\Http\Middleware\LocalBrokerOperatorMiddleware']], function () {
     Route::get('/', "OperatorController@index");
+    Route::get('/foreign-brokers', 'ApplicationController@foreignBrokerList');
     Route::get('/clients', 'OperatorController@clients');
     Route::get('/execution', 'OperatorController@execution');
     Route::get('/operator-clients', 'OperatorController@clientList');
@@ -154,6 +160,9 @@ Route::group(['prefix' => '/operator', 'middleware' => ['App\Http\Middleware\Loc
     //Route::get('/orders', 'OperatorController@orders');
     Route::get('/orders', 'BrokerController@orders');
     //Route::get('/orders', 'BrokerController@orders');
+    Route::get('/foreign-broker-list', 'ApplicationController@foreignBrokerList');
+    
+    
 });
 
 Route::group(['prefix' => '/trader-broker', 'middleware' => ['App\Http\Middleware\LocalBrokerTraderMiddleware']], function () {
@@ -187,6 +196,18 @@ Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\Ad
     Route::post('/store-trading-account', "TradingController@store");
     Route::get('/trader-list', "TraderController@list");
     Route::delete('/trading-account-delete/{id}', "TradingController@destroy");
+    Route::get('/expiring-buy-orders', 'ApplicationController@expiringOrders');
+    Route::get('/expired-buy-orders', 'ApplicationController@expiredOrders');
+    Route::get('/fill-expired-buy-orders', 'ApplicationController@fillExpiredOrders');
+    Route::post('/expiring-buy-orders-for/{id}/{order_date}', 'ApplicationController@expiringOrdersFor');
+    Route::get('/expiring-orders', 'ApplicationController@expiringOrderList');
+    Route::get('/expiring-orders-for/{id}/{order_date}', 'ApplicationController@expiringOrderListFor');
+    Route::get('/order-execution', 'ApplicationController@orderExecution');
+    Route::get('/execution-list-for/{id}/{order_date}', 'ApplicationController@executionListFor');
+    Route::get('/manual-cancel-er-for/{id}/{ordStatus}', 'ApplicationController@manualCancelExecutionReport');
+    Route::post('/fill-expired-order', "ApplicationController@fillExpiredOrder");
+    
+    Route::delete('/destroy-broker-client-order/{id}', "BrokerController@destroyOrder");
     // Route::put('/trading-account-update/{id}', "TradingController@update");
 
     Route::post('/store-local-broker', "ApplicationController@storeLocalBroker");
@@ -226,8 +247,6 @@ Route::get('unverified', function () {
 
 
 Route::get('get-rbc-bai', function () {
-
-
 
     //If we intend to store the data before updating the accounts 
     // $path = 'RBC.json';

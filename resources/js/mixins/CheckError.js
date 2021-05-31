@@ -1,10 +1,26 @@
 export default {
   methods: {
+    checkManualFillError(error) {
+      console.error("post error", error);
+      this.$swal(
+        "Error Detected!",
+        "Contact Support: "+ error,
+        "error"
+      );
+    },
     checkDeleteError(error) {
       console.error("delete error", error);
       this.$swal(
         "Error Detected!",
-        "Contact System Administrator For Assistance.",
+        "Contact Support: "+ error,
+        "error"
+      );
+    },
+    checkCancelRequestError(error) {
+      console.error("delete error", error);
+      this.$swal(
+        "Error Detected!",
+        "Contact Support: "+error,
         "error"
       );
     },
@@ -19,7 +35,7 @@ export default {
         console.error("submit error", error);
         this.$swal(
           "Error Detected!",
-          "Contact System Administrator For Assistance.",
+          "Contact Support: "+error,
           "error"
         );
       }
@@ -36,7 +52,7 @@ export default {
         console.error("submit error", error);
         this.$swal(
           "Error Detected!",
-          "Contact System Administrator For Assistance.",
+          "Contact Support: "+error,
           "error"
         );
       }

@@ -26,6 +26,9 @@ Vue.prototype.$userId = document.querySelector("meta[name='user-id']").getAttrib
 Vue.component('jse-home', require('./components/Index.vue').default);
 Vue.component('foreign', require('./components/ForeignBrokerList.vue').default);
 Vue.component('local-brokers', require('./components/LocalBrokerList.vue').default);
+Vue.component('expiring_buy_order', require('./components/ExpiringBuyOrders.vue').default);
+Vue.component('expired_buy_order', require('./components/ExpiredBuyOrders.vue').default);
+Vue.component('fill_expired_order', require('./components/FillExpiredBuyOrders.vue').default);
 Vue.component('settlements', require('./components/Settlements.vue').default);
 
 // const files = require.context('./', true, /\.vue$/i)
@@ -57,8 +60,6 @@ Vue.component('outbound-trading', require('./components/outbound/Trading.vue').d
 
 
 Vue.component('settlement-agent-home', require('./components/settlement_agent/Index.vue').default);
-
-
 
 Vue.component('account-profile', require('./components/profile/Index').default);
 
