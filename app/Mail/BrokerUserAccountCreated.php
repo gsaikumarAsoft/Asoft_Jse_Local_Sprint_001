@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class BrokerUserAccountCreated extends Mailable
+class BrokerUserAccountVerified extends Mailable
 {
     use Queueable, SerializesModels;
 

@@ -84,7 +84,7 @@ export default {
                 .post("/store-local-broker", this.broker)
                 .then(response => {
                     this.getBrokers();
-                    console.log(response);
+                    //////console.log(response);
                     this.create = false;
                     this.getBrokers();
                 })

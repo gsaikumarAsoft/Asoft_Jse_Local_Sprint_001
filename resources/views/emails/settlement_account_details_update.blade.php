@@ -18,8 +18,8 @@
         <li>Password: <b>{{$user['password']}}</b></li>
         <br>
        <p> Please provide your verification of these settings using the links below:</p>
-       <a href="{{env('APP_URL')}}verify-settlement-account/{{$user['hash']}}/accept">Accept </a><br>
-       <a href="{{env('APP_URL')}}verify-settlement-account/{{$user['hash']}}/reject">Reject </a><br>
+       <a href="{{config('app.url')}}verify-settlement-account/{{$user['hash']}}/accept">Accept </a><br>
+       <a href="{{config('app.url')}}verify-settlement-account/{{$user['hash']}}/reject">Reject </a><br>
 
 </body>
 

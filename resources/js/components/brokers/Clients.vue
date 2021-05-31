@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="content">
         <b-card title="Client Accounts" v-if="!broker_client">
           <b-table
@@ -234,7 +234,7 @@ export default {
         ]);
       }
 
-      // console.log(this.broker_settlement_accounts[i])
+      // //console.log(this.broker_settlement_accounts[i])
       // tableData.push(this.broker_settlement_accounts[i]);
 
       var doc = new jsPDF();
@@ -322,7 +322,7 @@ export default {
     },
 
     async storeBrokerClient(client) {
-      console.log(this.broker_client);
+      //console.log(this.broker_client);
       const result = this.$swal.fire({
         title: "Creating Client Account",
         html: "One moment while we setup  a new Client Account",
@@ -331,7 +331,7 @@ export default {
           this.$swal.showLoading();
         },
       });
-      console.log("Storing Broker Client");
+      //console.log("Storing Broker Client");
       try {
         await axios.post("store-broker-client", client);
         await this.getClients();
@@ -368,7 +368,7 @@ export default {
     this.local_broker_clients = clients;
     // this.getClients();
     const { data: local_brokers } = await axios.get("local-brokers");
-    console.log("local brokers", local_brokers);
+    //console.log("local brokers", local_brokers);
     for (let i = 0; i < local_brokers.length; i++) {
       this.local_brokers.push({
         text: local_brokers[i].name,

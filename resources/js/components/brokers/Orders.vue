@@ -1,23 +1,66 @@
-<template>
+<template v-slot:custom-foot="row">
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="content">
         <b-card title="Current Orders" v-if="!new_order">
-          <div class="float-right" style="margin-bottom: 15px">
-            <b-input
-              id="search_content"
-              v-model="filter"
-              type="text"
-              placeholder="Filter Orders..."
-              class="mb-2 mr-sm-2 mb-sm-0"
-            ></b-input>
-          </div>
+          <b-container style="text-align: left;margin:0">
+            <b-row style="text-align: left;">
+              <b-col style="text-align: left;">
+                  <label for="print-order-list" style="margin-bottom: 0;">Orders List</label></br>
+                  <b-button id="print-order-list" @click="exportOrders">Print (PDF)</b-button>
+              </b-col>
 
+              <b-col>
+                <label for="new-order" style="margin-bottom: 0;">New Order </label></br>
+                <template v-if="this.user_can_trade=='Yes'">
+                    <b-button id="new-order" @click="displayNewOrder">Create Order</b-button>
+                </template >
+              </b-col>
+              <b-col>
+              </b-col>
+            </b-row>
+
+            <b-row>
+              <b-col style="text-align: left;">
+                    <label for="search_content" style="margin-bottom: 0;">Search criteria: </label>
+                    <b-input
+                        id="search_content"
+                        v-model="filter"
+                        type="text"
+                        placeholder="Filter Orders..."
+                        class="mb-2 mr-sm-2 mb-sm-0"
+                      ></b-input>    
+              </b-col>
+            
+              <b-col>
+                  <b-form-checkbox id="toggle-pagination" v-model="usePagination" inline>Rows per page</b-form-checkbox>
+                  <b-form-spinbutton id="rows-per-page" v-model="perPage" min="0" max="100" style="vertical-align: text-top;" inline></b-form-spinbutton>
+              </b-col>
+                  
+              <b-col>
+                  <label for="pagination-control" style="margin-bottom: 0;">Pagination Control: </label>
+                  <b-pagination
+                    id="pagination-control"
+                    v-if="usePagination"
+                    v-model="currentPage"
+                    :total-rows="rows"  
+                    :per-page="perPage"
+                    aria-controls="orders-table"
+                    style="vertical-align: text-top; height: 20px;" 
+                    inline
+                  >
+                  </b-pagination>                
+
+              </b-col>
+            </b-row>
+          </b-container>
+          
+         
           <b-table
             responsive
             ref="selectedOrder"
-            :empty-text="'No Orders have been Created. Create an Order below.'"
+            :empty-text="'No orders found. Create an Order below.'"
             id="orders-table"
             :items="broker_client_orders"
             :per-page="perPage"
@@ -26,20 +69,26 @@
             striped
             hover
             :fields="fields"
+            v-model="visibleRows"             
             :filter="filter"
             @row-clicked="brokerOrderHandler"
+            @filtered="onFiltered"
           >
             <!-- <template :v-if="data.item.max_floor" v-slot:cell(max_floor)="data">
               <p>Iceberg Order</p>
             </template>-->
           </b-table>
+
           <b-pagination
+            v-if="usePagination"
             v-model="currentPage"
-            :total-rows="rows"
+            :total-rows="rows"  
             :per-page="perPage"
             aria-controls="orders-table"
-          ></b-pagination>
-          <b-button @click="displayNewOrder">Create New Order</b-button>
+            style="vertical-align: text-top; height: 20px;" 
+            inline
+          >
+          </b-pagination>
         </b-card>
         <b-card v-else id="jse-new-order" :title="title" class="text-center">
           <form ref="form" @submit.stop.prevent="handleJSEOrder">
@@ -47,30 +96,50 @@
               <b-row>
                 <b-col>
                   <b-form-group
+                    v-if="!this.isNew"
                     label="Trading Account"
                     label-for="broker-input"
                     invalid-feedback="Trading Account is required"
-                  >
-                    <b-form-select
+                  >                    
+                    <b-form-select 
                       v-model="order.trading_account"
                       :options="broker_trading_account_options"
                       class="mb-3"
                       :disabled="disabled"
                       @change="currencyHandler(order.trading_account)"
-                    >
+                    > 
+                    
                       <template v-slot:first>
                         <b-form-select-option :value="null" disabled>
                           -- Please select a Trading
                           Account--
                         </b-form-select-option>
                       </template>
-                      <!-- <b-form-select-option
-                        v-for="b in local_brokers_list"
-                        :value="b.value"
-                        :key="b.id"
-                      >{{ b.text }}</b-form-select-option>-->
                     </b-form-select>
                   </b-form-group>
+
+                  <b-form-group v-if="this.isNew"
+                    label="Trading Account"
+                    label-for="broker-input"
+                    invalid-feedback="Trading Account is required"
+                  >                    
+                    <b-form-select 
+                      v-model="order.trading_account"
+                      :options="operator_trading_account_options"
+                      class="mb-3"
+                      :disabled="disabled"
+                      @change="currencyHandler(order.trading_account)"
+                    >                     
+                      <template v-slot:first>
+                        <b-form-select-option :value="null" disabled>
+                          -- Please select a Trading
+                          Account--
+                        </b-form-select-option>
+                      </template>
+                    </b-form-select>
+                  </b-form-group>
+
+
                 </b-col>
                 <b-col>
                   <b-form-group
@@ -495,7 +564,7 @@
             <b-container class="bv-example-row">
               <b-row>
                 <b-col cols="12" class="text-center">
-                  <b-button type="submit" variant="primary" v-show="isNew">Create Order</b-button>
+                  <b-button type="submit" variant="primary" v-show="isNew">Create Order</b-button>                  
                   <b-button variant="danger" @click="reloadPage()">Exit</b-button>
                 </b-col>
               </b-row>
@@ -515,8 +584,9 @@ import headNav from "./../partials/Nav.vue";
 import currenciesMixin from "../../mixins/Currencies.js";
 import checkErrorMixin from "../../mixins/CheckError.js";
 // import jsonfile from 'jsonfile';
+import jsPDF from "jspdf";
 export default {
-  props: ["orders", "client_accounts", "local_brokers", "foreign_brokers"],
+  props: ["orders", "client_accounts", "local_brokers", "foreign_brokers", "broker_user"],
   components: {
     headNav,
     Multiselect,
@@ -524,87 +594,78 @@ export default {
   mixins: [currenciesMixin, checkErrorMixin],
   data() {
     return {
-      // messageDownload: [],
       new_order: false,
       filter: null,
       expiration: false,
       order_template_data: [],
       file: "",
       order_option_input: false,
-      filterOn: ["clordid", "side", "jcsd", "client_name"],
+      filterOn: ["clordid", "side", "jcsd", "client_name", "symbol", "order_date", "order_type.text", "time_in_force", "currency", "order_status", "price", "max_floor"],
       template: false,
       broker_trading_account_options: [],
+      operator_trading_account_options: [],
       client_trading_account_options: [],
       order_option_inputs: [],
       local_brokers_list: [],
       foreign_brokers_list: [],
       local_broker: [],
+      user_can_trade: [],
+      user_is_broker_admin: true,
       foreign_broker: [],
       selected: null,
       order: null,
       fields: [
         // { key: "handling_instructions", sortable: true, },
         { key: "order_date", sortable: true },
-        { key: "clordid", label: "Order#", sortable: true },
-        {
-          key: "order_type.text",
-          label: "Type",
-          sortable: true,
-          formatter: (value, key, item) => {
-            var type = JSON.parse(item.order_type);
-            var order = JSON.parse(type);
-            return order.text;
-          },
-        },
         { key: "client_name", label: "Client", sortable: true },
-        { key: "jcsd", label: "JCSD", sortable: true },
-        {
-          key: "symbol.text",
-          label: "Symbol",
-          sortable: true,
+        { key: "jcsd", label: "JCSD#", sortable: true },
+        { key: "clordid", label: "Client Order#", sortable: true },
+        { key: "order_status",
+          label: "Status",
+          sortable: true,         
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
-            const data = JSON.parse(item.symbol);
-            return data.text;
-            // return symbol.text;
-          },
-        },
-        {
-          key: "time_in_force",
-          label: "Time In Force",
-          sortable: true,
-          formatter: (value, key, item) => {
-            if (value) {
-              var data = JSON.parse(item.time_in_force);
-              return data.value;
+            // return value;
+            if (value === "0") {
+              return "NEW";
+            } else if (value === "Submitted") {
+              return "SUBMITTED";
+            } else if (value === "Failed") {
+              return "FAILED";
+            } else if (value === "-1") {
+              return "PENDING SENT";
+            } else if (value === "1") {
+              return "PARTIALLY FILLED";
+            } else if (value === "2") {
+              return "FILLED";
+            } else if (value === "4") {
+              return "CANCELLED";
+            } else if (value === "6") {
+              return "PENDING CANCEL";
+            } else if (value === "5") {
+              return "REPLACED";
+            } else if (value === "C") {
+              return "EXPIRED";
+            } else if (value === "Z") {
+              return "PRIVATE";
+            } else if (value === "U") {
+              return "UNPLACED";
+            } else if (value === "x") {
+              return "INACTIVE";
+            } else if (value === "8") {
+              return "REJECTED";
             } else {
-              return "N/A";
+              return value;
             }
-            // return symbol.text;
           },
         },
-        {
-          key: "currency",
-          label: "Currency",
-          sortable: true,
-          formatter: (value, key, item) => {
-            if (value) {
-              var data = JSON.parse(item.currency);
-              var s = data;
-
-              return s.value;
-            } else {
-              return "N/A";
-            }
-            // return symbol.text;
-          },
-        },
-        {
-          key: "side",
+        { key: "side",
           label: "Side",
-          sortable: true,
+          sortable: true,       
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
             if (value) {
-              var data = JSON.parse(item.side);
+              var data = JSON.parse(item.side) || {};
               var s = data;
 
               return s.text;
@@ -614,61 +675,86 @@ export default {
             // return symbol.text;
           },
         },
-        { key: "order_quantity", label: "Qty", sortable: true },
-        { key: "remaining", label: "Remainder Held", sortable: true },
-        { key: "price", sortable: true },
         {
-          key: "order_status",
-          label: "Status",
-          sortable: true,
+          key: "symbol.text",
+          label: "Symbol",
+          sortable: true,       
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
-            // return value;
-            if (value === "0") {
-              return "New";
-            } else if (value === "1") {
-              return "Partially Filled";
-            } else if (value === "2") {
-              return "Filled";
-            } else if (value === "4") {
-              return "Cancelled";
-            } else if (value === "6") {
-              return "Pending Cancel";
-            } else if (value === "5") {
-              return "Replaced";
-            } else if (value === "C") {
-              return "Expired";
-            } else if (value === "Z") {
-              return "Private";
-            } else if (value === "U") {
-              return "Unplaced; order is not in the orderbook (Nasdaq defined)";
-            } else if (value === "x") {
-              return "Inactive Trigger; Stop Limit is waiting for its triggering conditions to be met (Nasdaq Defined)";
-            } else if (value === "8") {
-              return "Rejected";
-            } else {
-              return value;
-            }
+            const data = JSON.parse(item.symbol) || {};
+            return data.text ;
+            // return symbol.text;
           },
         },
+        { key: "order_quantity", label: "Qty", sortable: true },
         {
-          key: "max_floor",
-          label: "Order Type",
-          sortable: true,
+          key: "time_in_force",
+          label: "Time In Force",
+          sortable: true,       
+          filterByFormatted: true, 
           formatter: (value, key, item) => {
             if (value) {
-              return "Iceberg Order";
+              //var data = JSON.parse(item.time_in_force);
+              var data = JSON.parse(item.time_in_force) || {};
+              return data.value;
             } else {
-              return "Full Order";
+              return "N/A";
+            }
+            // return symbol.text;
+          },
+        },
+        { key: "order_type.text",
+          label: "Type",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            var type = JSON.parse(item.order_type) || {};
+            var order = JSON.parse(type) ||'';
+            return order.text;
+          },
+        },
+        { key: "currency",
+          label: "Currency",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            if (value) {
+              var data = JSON.parse(item.currency) || {};
+              var s = data;
+
+              return s.value;
+            } else {
+              return "N/A";
+            }
+            // return symbol.text;
+          },
+        },
+        { key: "price", sortable: true },
+        { key: "remaining", label: "Remainder Held", sortable: true },
+        {
+          key: "max_floor",
+          label: "Iceberg",
+          sortable: true,       
+          filterByFormatted: true, 
+          formatter: (value, key, item) => {
+            if (value) {
+              return "Yes";
+            } else {
+              return "No";
             }
           },
         },
+        { key: "created_by", label: "Trader", sortable: true },
 
         // { key: "foreign_broker", sortable: true }
       ],
+      visibleRows: [],
       broker_client_orders: [],
+      totalRows: 0,
       broker: {},
       perPage: 5,
       currentPage: 1,
+      usePagination: true,
       handling_options: [
         {
           text: "Automated execution order, private, no Broker intervention",
@@ -822,26 +908,92 @@ export default {
         return `Viewing Order ${this.order.clordid}`;
       }
     },
-    rows() {
-      return this.broker_client_orders.length;
+    rows() {      
+      if (!this.filter) {
+        return this.broker_client_orders.length;
+      } else {
+        return this.broker_client_orders.length;
+      }      
     },
   },
   watch: {
     "order.time_in_force": function (d) {
       // if (d.fix_value) {
-      // console.log("d", d);
+      // //console.log("d", d);
       var fix_value = d.fix_value;
       this.expiration = false;
       if (fix_value === "6") {
-        // console.log(TIF.fix_valu:disabled="validated == 1"e);
+        // //console.log(TIF.fix_valu:disabled="validated == 1"e);
         // Show the Expiration date input for this order
         this.expiration = true;
       }
-      // console.log(this.expiration);
+      // //console.log(this.expiration);
       // }
+    },
+    "perPage": function (p) {
+      if (p == 0) {
+        this.usePagination = false;
+      } else {
+        this.usePagination = true;
+      }
+    },
+    "filter": function(filt){
+        //if(filt) {  
+          this.currentPage = 1;
+          this.totalRows = this.visibleRows.length;
+          this.usePagination = true
+          //this.perPage = 0
+        //} else { 
+        //  this.perPage = 5
+        //}
+    },
+    "usePagination": function(usePages){
+        if(usePages) {  
+          this.perPage = 5
+        } else { 
+          this.perPage = 0
+        }
     },
   },
   methods: {
+      statusFilter(data) {
+      if (data === "0") {
+        return "NEW";
+      } else if (data === "-1") {
+        return "PENDING";
+      } else if (data === "1") {
+        return "PARTIALLY FILLED";
+      } else if (data === "2") {
+        return "FILLED";
+      } else if (data === "4") {
+        return "CANCELLED";
+      } else if (data === "5") {
+        return "REPLACED";
+      } else if (data === "C") {
+        return "EXPIRED";
+      } else if (data === "Z") {
+        return "PRIVATE";
+      } else if (data === "U") {
+        return "UNPLACED";
+      } else if (data === "x") {
+        return "INACTIVE";
+      } else if (data === "8") {
+        return "REJECTED";
+      } else if (data === "Submitted") {
+        return "SUBMITTED";
+      } else if (data === "Failed") {
+        return "FAILED";
+      } else if (data === "Cancel Submitted") {
+        return "CANCEL SUBMITTED";
+      } else {
+        return "["+data+"]";
+      }
+    },
+    onFiltered(filteredItems) {
+        // Trigger pagination to update the number of buttons/pages due to filtering
+        this.filteredItemsCount = filteredItems.length
+        this.currentPage = 1
+      },
     search(nameKey, myArray) {
       for (var i = 0; i < myArray.length; i++) {
         if (myArray[i].value === nameKey) {
@@ -866,11 +1018,12 @@ export default {
     async brokerOrderHandler(o) {
       // this.$refs.selectedOrder.clearSelected();
       // =============================================================================================
+
       const result = await this.$swal({
         title: o.clordid,
         text: "The Options for the current order are.",
         icon: "question",
-        showCancelButton: true,
+        showCancelButton: this.user_can_trade=="Yes",
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "View Order",
@@ -884,15 +1037,15 @@ export default {
 
         this.disabled = true;
 
-        // console.log("order", o);
-        //Pre Select Client And Trading Accounts
+        // //console.log("order", o);
+        //Pre Select Client And ////console.log(
         // var data = { ...this.orders };
-        var data = JSON.parse(this.orders);
+        var data = JSON.parse(this.orders) || {};
 
         var clients = data[0].clients;
         var trading = data[0].trading;
         var i, j;
-        // console.log(trading);
+        // //console.log(trading);
         for (i = 0; i < clients.length; i++) {
           if (o.broker_client_id === clients[i].id) {
             this.order.client_trading_account = clients[i].id;
@@ -908,15 +1061,15 @@ export default {
         if (typeof o.time_in_force === "string") {
           // Parse stringified data from database back to json for viewing in the multiselect dropdown
           // let handling = JSON.parse(o.handling_instructions);
-          // console.log("order", this.order);
+          // //console.log("order", this.order);
           this.order.handling_instructions = JSON.parse(
             o.handling_instructions
           );
-          this.order.symbol = JSON.parse(o.symbol);
-          this.order.currency = JSON.parse(o.currency);
-          this.order.side = JSON.parse(o.side);
-          this.order.order_type = JSON.parse(JSON.parse(o.order_type));
-          this.order.time_in_force = JSON.parse(o.time_in_force);
+          this.order.symbol = JSON.parse(o.symbol) || {};
+          this.order.currency = JSON.parse(o.currency) || {};
+          this.order.side = JSON.parse(o.side) || {};
+          this.order.order_type = JSON.parse(JSON.parse(o.order_type)) || {};
+          this.order.time_in_force = JSON.parse(o.time_in_force) || {};
         }
       }
       if (result.dismiss === "cancel") {
@@ -926,11 +1079,11 @@ export default {
     readJSONTemplate(e) {
       //  let files = this.$refs.file.files[0];
       const files = this.$refs.file.files[0];
-      // console.log(this.files);
+      // //console.log(this.files);
       const fr = new FileReader();
       const self = this;
       fr.onload = (e) => {
-        // console.log("e.target.result", e.target.result);
+        // //console.log("e.target.result", e.target.result);
         //const result = JSON.parse(e.target.result);
         self.order_template_data = e.target.result;
       };
@@ -939,7 +1092,7 @@ export default {
     },
     importOrderFromJSON() {
       //  this.order = this.file;
-      // console.log(this.order_template_data);
+      // //console.log(this.order_template_data);
       this.order = {};
       this.order = this.order_template_data.order_standard;
       this.order_option_inputs = this.order_template_data.order_options;
@@ -983,15 +1136,12 @@ export default {
       });
 
       if (result.value) {
-        //Re Open Modal and allow user to continue their function
-        this.$bvModal.show("jse-new-order");
+          this.$bvModal.show("jse-new-order");        
       }
     },
-
     async tradingAccounts() {
-      const { data } = await axios.get("broker-trading-accounts"); //.then(response => {
-      //let data = response.data;
-      // console.log("tradingAccounts", data);
+      const { data } = await axios.get("broker-trading-accounts"); 
+      //console.log("tradingAccounts", data);
       this.broker_trading_account_options = data.map((x) => ({
         text:
           x.foreign_broker +
@@ -1004,16 +1154,52 @@ export default {
         value: x.id,
         data: x,
       }));
+      if (this.user_is_broker_admin) {
+        this.operator_trading_account_options = this.broker_trading_account_options; 
+      } else {
+        const { data } = await axios.get("assigned-trading-accounts"); 
+            this.operator_trading_account_options = data.map((x) => ({
+            text:
+              x.foreign_broker +
+              " : " +
+              x.bank +
+              "-" +
+              x.trading_account_number +
+              " : " +
+              x.account,
+            value: x.id,
+            data: x,
+          }));
+      }   
     },
+
+/*
+      const { data2 } = await axios.get("assigned-trading-accounts"); 
+      //let data = response.data;
+      //console.log("assignedTradingAccounts", data);
+      this.operator_trading_account_options = data.map((x) => ({
+        text:
+          x.foreign_broker +
+          " : " +
+          x.bank +
+          "-" +
+          x.trading_account_number +
+          " : " +
+          x.account,
+        value: x.id,
+        data: x,
+      }));
+*/
+
 
     /* setTradingAccounts() {
       axios.get("broker-trading-accounts").then(response => {
         let data = response.data;
         console.log;
-        console.log(data);
+        //console.log(data);
         let i;
         for (i = 0; i < data.length; i++) {
-          //console.log(data[i]);
+          ////console.log(data[i]);
           // this.broker_trading_account_options.push({
           //   text:
           //     data[i].foreign_broker +
@@ -1054,8 +1240,8 @@ export default {
       // •	The “Account” represents the “JCSD #” from the “Client Account” for the this.order.
       // •	The “ClientID” represents the “Trader Number” from the “Trading Account” selected for the order.
       try {
-        const { value: side_type } = JSON.parse(this.order.side);
-        // console.log("side_type", side_type);
+        const { value: side_type } = JSON.parse(this.order.side) || {};
+        // //console.log("side_type", side_type);
 
         /*  if (!this.order.trading_account || !this.order.client_trading_account) {
           throw new Error(
@@ -1073,7 +1259,7 @@ export default {
 
         this.$swal.fire({
           title: "Creating Client Order",
-          html: "Please wait while we validate your order..",
+          html: "Please wait while we submit your order..",
           timerProgressBar: true,
           showCancelButton: false,
           allowOutsideClick: false,
@@ -1123,8 +1309,7 @@ export default {
       this.symbols = data;
       // });
     },
-
-    displayNewOrder() {
+    displayNewOrder() {        
       var d = new Date();
       var formatteddatestr = moment(d).format("YMMDhhmmss");
       this.new_order = true;
@@ -1134,7 +1319,7 @@ export default {
 
       this.order.order_type = this.order_types[0]; //Preselect the order type by default
       this.order.handling_instructions = this.handling_options[0];
-      // console.log(this.order_types[0]);
+      // //console.log(this.order_types[0]);
       // The “OrderID” must be unique per request submitted.
       this.order.client_order_number =
         formatteddatestr + ("" + Math.random()).substring(2, 5);
@@ -1161,7 +1346,7 @@ export default {
       this.$swal.fire({
         title: `${id}`,
         html:
-          "Please wait while we validate your cancel request for order #" + id,
+          "Please wait while we submit your cancel request for order #" + id,
         timerProgressBar: true,
         showCancelButton: false,
         allowOutsideClick: false,
@@ -1201,11 +1386,58 @@ export default {
       await this.createBrokerClientOrder();
       // }
     },
+    exportOrders() {
+      ////console.log("Filtered Orders");
+      this.perPage=0;
+      this.$refs.selectedOrder.refresh();
+      //console.log(this.visibleRows);
+      const tableData = this.visibleRows.map((r) =>
+        //for (var i = 0; i < this.report_data.length; i++) {
+        //tableData.push([
+        [
+          r.order_date.trim(),
+          r.jcsd,
+          r.clordid,          
+          this.statusFilter(r.order_status),
+          JSON.parse(r.side)["text"],
+          (JSON.parse(r.symbol) || {})["text"],
+          r.quantity,
+          (JSON.parse(r.currency) || {})["value"],
+          r.price,
+          r.remaining
+        ]
+      );
+
+      var doc = new jsPDF('l', 'in', [612, 792]);
+      //   // It can parse html:
+      //   doc.autoTable({ html: "#foreign-brokers" });
+      // Or use javascript directly:
+      doc.autoTable({
+        head: [
+          [
+            "Order Date",
+            "JCSD#",
+            "Client Order#",
+            "Status",
+            "Side",
+            "Symbol",
+            "Quantity",
+            "Currency",
+            "Price",
+            "Remainder"
+          ],
+        ],
+        body: tableData,
+      });
+      doc.save("DMA-ORDERS-REPORT.pdf");
+      this.perPage = 5;
+      this.$refs.selectedOrder.refresh();
+    },
   },
   async mounted() {
     this.$swal.fire({
       title: "Loading Orders",
-      html: "One moment while we load the current orders",
+      html: "One moment while we load your orders",
       timerProgressBar: true,
       onBeforeOpen: () => {
         this.$swal.showLoading();
@@ -1213,26 +1445,42 @@ export default {
     });
     await this.getSymbols();
     //await this.getBrokers();
-    await this.tradingAccounts();
+    
     const order_data = JSON.parse(this.orders);
-    console.log("order_data", order_data);
+    //console.log("order_data", order_data);
+    ////console.log("order_data", order_data);
+    ////console.log("Current User ID:", this.currentUserID());
+    ////console.log("admin_can_trade", order_data[0].admin_can_trade);
+    
+    this.user_is_broker_admin = (this.$userId == order_data[0].user_id)? true: false ;
+
+    if (!order_data[0].admin_can_trade) {
+        this.user_can_trade = "Yes";
+    } else {
+        if (this.user_is_broker_admin) {
+            this.user_can_trade =  order_data[0].admin_can_trade;
+        } else {
+          this.user_can_trade = "Yes";
+        }
+    }
+    await this.tradingAccounts();
+
     const client_accounts_data = JSON.parse(this.client_accounts);
-    //var orders = order_data[0]["order"];
 
     const { order: orders } = order_data[0];
 
     const { clients: client_accounts } = client_accounts_data[0];
+    
+    // //console.log("client_accounts", client_accounts);
 
-    // console.log("client_accounts", client_accounts);
-
-    // console.log("orders", orders);
+    // //console.log("orders", orders);
     this.broker_client_orders = orders.map((x) => {
       x.client = client_accounts.find((y) => y.id === x.broker_client_id);
       x.jcsd = x.client.jcsd;
       x.client_name = x.client.name;
       return x;
     });
-    // console.log("this.broker_client_orders", this.broker_client_orders);
+    // //console.log("this.broker_client_orders", this.broker_client_orders);
 
     this.broker_client_orders.sort(function (a, b) {
       return b.client_order_number > a.client_order_number ? -1 : 1;

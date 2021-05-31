@@ -17,8 +17,8 @@
         
 
        <p> Please provide your verification of these settings using the links below:</p>
-       <a href="{{env('APP_URL')}}verify/client/{{$user['jcsd']}}/accept">Accept </a><br>
-       <a href="{{env('APP_URL')}}verify/client/{{$user['jcsd']}}/reject">Reject </a><br>
+       <a href="{{config('app.url')}}verify/client/{{$user['jcsd']}}/accept">Accept </a><br>
+       <a href="{{config('app.url')}}verify/client/{{$user['jcsd']}}/reject">Reject </a><br>
 
 </body>
 

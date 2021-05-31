@@ -74,10 +74,10 @@ class OperatorController extends Controller
     }
     public function orders()
     {
-        //Broker Operator
         $user = auth()->user();
-        // return $user;
         $local_broker = LocalBroker::find($user->local_broker_id);
+            //$local_brokers = LocalBroker::all();
+            //$foreign_brokers = ForeignBroker::all();
 
         $broker_admin = User::find($local_broker->user_id);
         // Call The Execution Balance Update Job
@@ -115,7 +115,6 @@ class OperatorController extends Controller
         $user = auth()->user();
         $user_definition  = LocalBroker::where('id', $user->local_broker_id)->first();
         $local_broker_id = $user_definition->id;
-
         // ===================================================================
 
 
@@ -189,5 +188,19 @@ class OperatorController extends Controller
             // Create the order in our databases and send order server side using curl
             return $this->HelperClass->createBrokerOrder($request, $local_broker_id, 'Submitted', $request->client_trading_account);
         }
+    }
+    public function operatorTradingAccounts()
+    {
+        $user = auth()->user();
+
+        $operator_trading_account = DB::table('broker_trading_accounts')->where('broker_users.user_id', $user->id)
+                        ->select('users.name as foreign_broker', 'broker_settlement_accounts.bank_name as bank', 'broker_trading_accounts.trading_account_number', 'broker_settlement_accounts.account', 'broker_settlement_accounts.account_balance as balance', 'broker_settlement_accounts.currency', 'broker_trading_accounts.id')
+                        ->join('broker_users', 'broker_users.broker_trading_account_id', 'broker_trading_accounts.id')
+                        ->join('broker_settlement_accounts', 'broker_trading_accounts.broker_settlement_account_id', 'broker_settlement_accounts.id')
+                        ->join('foreign_brokers', 'broker_trading_accounts.foreign_broker_id', 'foreign_brokers.id')
+                        ->join('users', 'foreign_brokers.user_id', 'users.id')
+                        ->get();
+        
+        return $operator_trading_account;
     }
 }

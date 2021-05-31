@@ -7,7 +7,7 @@
 
     Hello {{ $user['name'] }},
     <br>
-    <p>The following profile has been created for you on the JSE DMA Platform:</p>
+    <p>The following profile has been verified for you on the JSE DMA Platform:</p>
     <h4>CREDENTIALS</h4>
     Username: {{ $user['name'] }}<br>
     Email:{{ $user['email'] }}<br>
@@ -18,10 +18,10 @@
         {{ $data['name'] }}<br>
     @endforeach
     <br>
-    <p>Please use the links below to verify or reject the information.</p>
+    <p>Please use the links below to accept or reject the information.</p>
 <br>
-    <a href="{{env('APP_URL')}}verify/{{$user['hash']}}/accept">Accept</a><br>
-    <a href="{{env('APP_URL')}}verify/{{$user['hash']}}/reject">Reject</a>
+    <a href="{{config('app.url')}}verify/{{$user['hash']}}/accept">Accept</a><br>
+    <a href="{{config('app.url')}}verify/{{$user['hash']}}/reject">Reject</a>
     
 </body>
 

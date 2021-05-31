@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px">
+    <div class="container-fluid" style="margin-top: 20px">
       <div class="content">
         <b-card title="Users">
           <div class="float-right" style="margin-bottom: 15px">
@@ -80,14 +80,18 @@
               invalid-feedback="Name is required"
             >
               <b-form-select
+                id="trading-input"
                 label="Trading Account"
                 label-for="Trading Account-input"
                 invalid-feedback="A Trading is required"
                 sm
                 v-model="broker.broker_trading_account_id"
                 :options="broker_trading_account_options"
-              ></b-form-select>
+              ></b-form-select> 
             </b-form-group>
+            
+              <!--b-button type="reset" size="sm" >Reset</b-button-->
+
             <!-- <b-form-group label="User Permissions:">
               <b-form-checkbox-group
                 id="checkbox-group-1"
@@ -227,14 +231,14 @@ export default {
   methods: {
     async getUserRole() {
       const { data } = await axios.put(`/nv9w8yp8rbwg4t`);
-      console.log("getUserRole data", data);
+      //console.log("getUserRole data", data);
       let role = data.roles[0];
       let broker_account = data.broker;
-      // console.log(broker_account);
+      // //console.log(broker_account);
       this.user_role = role.name;
       this.user_name = data.name;
 
-      // console.log(this.permissions.indexOf("create") !== -1);
+      // //console.log(this.permissions.indexOf("create") !== -1);
 
       if (
         this.permissions.indexOf("create-broker-user") !== -1 &&
@@ -289,10 +293,14 @@ export default {
       this.create = false;
       this.broker = {};
     },
+    resetTradingAccount() {
+      this.broker.broker_trading_account_id = -1;
+      this.broker_trading_account_id = -1;
+    },
     async handleOk(bvModalEvt) {
       // Prevent modal from closing
       bvModalEvt.preventDefault();
-      // console.log(this.broker);
+      // //console.log(this.broker);
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) return;
 
@@ -332,7 +340,7 @@ export default {
           this.$swal.showLoading();
         },
       });
-
+      //console.log("", account);
       try {
         await axios.post("store-broker", account);
         await this.getBrokerUsers();
@@ -353,7 +361,7 @@ export default {
     async brokerUserHandler(b) {
       this.broker = b;
       this.broker.selected_permissions = this.broker.types;
-      // console.log(this.broker);
+      // //console.log(this.broker);
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -378,10 +386,10 @@ export default {
     async getBrokerUsers() {
       try {
         ({ data: this.local_broker_users } = await axios.get("broker-users"));
-        console.log("this.local_broker_users", this.local_broker_users);
+        //console.log("this.local_broker_users", this.local_broker_users);
         //Handle Permissions
         for (let i = 0; i < this.local_broker_users.length; i++) {
-          // console.log(this.local_broker_users[i].permissions)
+          // //console.log(this.local_broker_users[i].permissions)
           this.local_broker_users[i].types = [];
           this.local_broker_users[i].selected_client_permissions = [];
           this.local_broker_users[i].selected_broker_permissions = [];
@@ -413,10 +421,11 @@ export default {
 
     async tradingAccounts() {
       const { data } = await axios.get("broker-trading-accounts");
-      console.log("tradingAccounts", data);
+      //console.log("tradingAccounts", data);
+      data.push([]);
       this.broker_trading_account_options = data.map((x) => ({
-        text: `${x.foreign_broker} : ${x.bank}-${x.trading_account_number} : ${x.account}`,
-        value: x.id,
+        text: `${x.foreign_broker||"Any"} : ${x.bank||"Any"}-${x.trading_account_number||"Any"} : ${x.account||"Any"}`,
+        value: x.id||0,
       }));
     },
 
@@ -442,7 +451,7 @@ export default {
     },
     async getLocalBrokers() {
       const { data } = await axios.get("local-brokers");
-      console.log("local_brokers", data);
+      //console.log("local_brokers", data);
       this.local_brokers = data.map((x) => ({
         text: x.name,
         value: x.id,
@@ -465,7 +474,7 @@ export default {
       this.getLocalBrokers(),
     ]);
     this.$swal.close();
-    console.log("permissions", this.permissions);
+    //console.log("permissions", this.permissions);
   },
 };
 </script>

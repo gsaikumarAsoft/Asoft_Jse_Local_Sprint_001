@@ -54,7 +54,7 @@ export default {
       try {
         const response = await axios.post("/store-local-broker", this.broker);
         //.then(response => {
-        console.log(response);
+        ////console.log(response);
         await this.getBrokers();
         this.create = false;
       } catch (error) {}

@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="content">
         <b-card title="Settlement Accounts" v-if="!settlement_account">
           <b-table
@@ -289,7 +289,7 @@ export default {
   },
   methods: {
     async resetFilledOrders(d) {
-      console.log(d.item);
+      //console.log(d.item);
       //Identify the settlement account based on its hash
       const account = d.item;
       account.filled_orders = 0;
@@ -302,7 +302,7 @@ export default {
         );
         account.filled_orders = false;
       } catch (error) {
-        console.log(error);
+        //console.log(error);
         // this.checkDuplicateError(error);
       }
     },
@@ -332,7 +332,7 @@ export default {
         ]);
       }
 
-      // console.log(this.broker_settlement_accounts[i])
+      // //console.log(this.broker_settlement_accounts[i])
       // tableData.push(this.broker_settlement_accounts[i]);
 
       var doc = new jsPDF();
@@ -376,7 +376,7 @@ export default {
         },
       });
 
-      // console.log(account);
+      // //console.log(account);
       try {
         await axios.post("../store-settlement-broker", account);
         await this.getSettlementList();
@@ -388,8 +388,8 @@ export default {
     },
 
     async settlmentAccountHandler(b) {
-      // console.log(b);
-      console.log("selected account1", b);
+      // //console.log(b);
+      //console.log("selected account1", b);
       const result = await this.$swal({
         title: "",
         icon: "info",
@@ -405,7 +405,7 @@ export default {
       });
       if (result.value) {
         this.settlement_account = { ...b };
-        console.log("selected account2", this.settlement_account);
+        //console.log("selected account2", this.settlement_account);
       }
       if (result.dismiss === "cancel") {
         await this.destroy(b.id);
@@ -416,10 +416,7 @@ export default {
       ({ data: this.broker_settlement_accounts } = await axios.get(
         "../settlement-list"
       )); //.then(response => {
-      console.log(
-        "broker_settlement_accounts",
-        this.broker_settlement_accounts
-      );
+      //console.log("broker_settlement_accounts", this.broker_settlement_accounts);
     },
 
     async destroy(id) {
@@ -450,7 +447,7 @@ export default {
         text: user.name,
         value: user.id,
       }));
-      console.log("local brokers", this.local_brokers);
+      //console.log("local brokers", this.local_brokers);
     },
     async getForeignBrokers() {
       const { data } = await axios.get("../foreign-brokers");
@@ -458,7 +455,7 @@ export default {
         text: user.name,
         value: user.id,
       }));
-      console.log("foreign brokers", this.foreign_brokers);
+      //console.log("foreign brokers", this.foreign_brokers);
     },
   },
   async mounted() {

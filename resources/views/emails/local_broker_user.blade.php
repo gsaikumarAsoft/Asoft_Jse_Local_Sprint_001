@@ -21,8 +21,8 @@ Email:<b>{{ $user['email'] }}</b>
 <br>
 {{-- <p>Please confirm or deny this new user using the links below:</p> --}}
 <br></>
-<a href="{{ env('APP_URL') }}verify-broker-user/{{ $user['hash'] }}/accept">Accept</a><br>
-<a href="{{ env('APP_URL') }}verify-broker-user/{{ $user['hash'] }}/reject">Reject</a><br>
+<a href="{{ config('app.url') }}verify-broker-user/{{ $user['hash'] }}/accept">Accept</a><br>
+<a href="{{ config('app.url') }}verify-broker-user/{{ $user['hash'] }}/reject">Reject</a><br>
 
 
 

@@ -9,7 +9,7 @@ use App\BrokerUser;
 use App\ForeignBroker;
 use App\Helpers\FunctionSet;
 use App\LocalBroker;
-use App\Mail\BrokerUserAccountCreated;
+use App\Mail\BrokerUserAccountVerified;
 use App\Mail\LocalBrokerTradingAccountVerification;
 use App\Mail\NewForeignBrokerOnboarding;
 use App\Mail\OnboardLocalBrokerOperator;
@@ -226,9 +226,7 @@ class AccountVerificationController extends Controller
                 $broker = User::updateOrCreate(
                     ['hash' => $id],
                     ['status' => 'Verified', 'password' => Hash::make($password)]
-
                 );
-
 
                 // Find the user we are trying to send credentials to using their hash.
                 $user = User::where('hash', $id)->first();
@@ -236,7 +234,7 @@ class AccountVerificationController extends Controller
 
 
                 // Notify the new broker user with their login credentials
-                Mail::to($user->email)->send(new BrokerUserAccountCreated($user));
+                Mail::to($user->email)->send(new BrokerUserAccountVerified($user));
 
                 // $this->HelperClass->createBrokerUserAccount($id);
 

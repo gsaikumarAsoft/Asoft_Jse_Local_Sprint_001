@@ -1,0 +1,72 @@
+CREATE OR REPLACE VIEW expiring_buy_orders AS 
+            (
+                SELECT
+                u.name local_broker,
+                uf.name foreign_broker,
+                c.name client,
+                c.jcsd,
+                o.clordid client_order_id,
+                o.market_order_number,
+                o.order_date, 
+                o.updated_at,
+                CASE 
+                    WHEN UPPER(json_unquote(json_extract(o.time_in_force, "$.text"))) = "GTD" THEN o.expiration_date
+                    WHEN UPPER(json_unquote(json_extract(o.time_in_force, "$.text"))) = "DAY" THEN o.order_date
+                    WHEN UPPER(json_unquote(json_extract(o.time_in_force, "$.text"))) = "GTC" THEN (O.order_date + 90)
+                    ELSE O.expiration_date
+                END expiration_date,
+                UPPER(JSON_UNQUOTE(JSON_EXTRACT(REPLACE(REPLACE(REPLACE(`o`.`order_type`, '\\"', '"'),
+                                        '"{',
+                                        '{'),
+                                    '}"',
+                                    '}'),
+                                '$.text'))) AS `order_type`,
+        UPPER(json_unquote(json_extract(o.time_in_force, "$.text"))) order_time_in_force,
+                UPPER(json_unquote(json_extract(o.side, "$.value"))) order_side,
+                CASE 
+                    WHEN o.order_status = "-1" THEN "FAILED"
+                    WHEN o.order_status = "0" THEN "NEW"
+                    WHEN o.order_status = "1" THEN "PARTIALLY FILLED"
+                    WHEN o.order_status = "2" THEN "FILLED"
+                    WHEN o.order_status = "3" THEN "DONE FOR DAY"
+                    WHEN o.order_status = "4" THEN "CANCELLED"
+                    WHEN o.order_status = "5" THEN "REPLACED"
+                    WHEN o.order_status = "6" THEN "PENDING CANCEL"
+                    WHEN o.order_status = "7" THEN "STOPPED"
+                    WHEN o.order_status = "8" THEN "REJECTED"
+                    WHEN o.order_status = "9" THEN "SUSPENDED"
+                    WHEN o.order_status = "A" THEN "PENDING NEW"
+                    WHEN o.order_status = "B" THEN "CALCULATED"
+                    WHEN o.order_status = "C" THEN "EXPIRED"
+                    WHEN o.order_status = "D" THEN "ACCPETED"
+                    WHEN o.order_status = "E" THEN "PENDING REPLACE"
+                    ELSE upper(o.order_status)
+                END order_status, 
+                json_unquote(json_extract(o.symbol, "$.text")) order_symbol,
+                o.order_quantity, o.quantity, 
+                json_unquote(json_extract(o.currency, "$.value")) currency,
+                o.price, 
+                o.remaining, 
+                o.amount_filled,
+                concat(t.sender_comp_id,"=>",t.target_comp_id, " : ", t.trading_account_number," : ",s.bank_name,"-",s.account) trading_account,
+                o.id order_id, b.id local_broker_id, u.id local_broker_user_id,
+                t.id trading_account_id, s.id settlement_account_id,
+                o.foreign_broker_id foreign_broker_user_id, c.id client_id
+                FROM broker_client_orders o
+                inner join local_brokers b on b.id = o.local_broker_id 
+                inner join users u on u.id = b.user_id 
+                inner join broker_clients c on c.id = o.broker_client_id
+                inner join users uf on uf.id = o.foreign_broker_id
+                inner join foreign_brokers f on uf.id = f.user_id
+                inner join broker_trading_accounts t on t.id = o.trading_account_id
+                inner join broker_settlement_accounts s on s.id = t.broker_settlement_account_id
+                WHERE json_unquote(json_extract(o.side, "$.value")) = "Buy"
+                AND o.order_status IN ("0", "1", "6", "9", "Submitted") 
+                AND (
+                    (json_unquote(json_extract(o.time_in_force, "$.text")) = "GTD" AND o.expiration_date <= curdate())
+                    OR 
+                    (json_unquote(json_extract(o.time_in_force, "$.text")) = "GTC" AND o.order_date+90 )
+                    OR 
+                    (upper(json_unquote(json_extract(o.time_in_force, "$.text"))) = "DAY")
+                    )  
+            )

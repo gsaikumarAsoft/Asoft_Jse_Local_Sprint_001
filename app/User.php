@@ -77,7 +77,6 @@ class User extends Authenticatable
   {
     return $this->belongsTo(LocalBroker::class);
   }
-
   public function role()
   {
     return $this->belongsTo(Role::class);
@@ -96,4 +95,5 @@ class User extends Authenticatable
   {
     return $this->hasMany(BrokerTradingAccount::class, 'user_id');
   }
+  
 }

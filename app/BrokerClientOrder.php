@@ -34,6 +34,10 @@ class BrokerClientOrder extends Model
         'broker_client_id',
         'is_partial',
         'remaining',
+        'amount_filled',
+        'value_filled',
+        'created_by',
+        'updated_by',
         
 
     ];

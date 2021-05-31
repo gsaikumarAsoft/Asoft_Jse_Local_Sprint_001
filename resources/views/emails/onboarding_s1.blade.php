@@ -27,12 +27,12 @@
     @endif --}}
     @if (empty($user['level']))
         <p>Please use the links below to verify or reject the information.</p>
-        <a href="{{ env('APP_URL') }}verify-settlement-account/{{ $user['hash'] }}/accept">Accept </a><br>
-        <a href="{{ env('APP_URL') }}verify-settlement-account/{{ $user['hash'] }}/reject">Reject </a><br>
+        <a href="{{ config('app.url') }}verify-settlement-account/{{ $user['hash'] }}/accept">Accept </a><br>
+        <a href="{{ config('app.url') }}verify-settlement-account/{{ $user['hash'] }}/reject">Reject </a><br>
     @else
         <p>Please use the links below to verify or reject the information.</p>
-        <a href="{{ env('APP_URL') }}verify-settlement-account-foreign/{{ $user['hash'] }}/accept">Accept </a><br>
-        <a href="{{ env('APP_URL') }}verify-settlement-account-foreign/{{ $user['hash'] }}/reject">Reject </a><br>
+        <a href="{{ config('app.url') }}verify-settlement-account-foreign/{{ $user['hash'] }}/accept">Accept </a><br>
+        <a href="{{ config('app.url') }}verify-settlement-account-foreign/{{ $user['hash'] }}/reject">Reject </a><br>
     @endif
 
 

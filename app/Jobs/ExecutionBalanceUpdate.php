@@ -13,6 +13,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 class ExecutionBalanceUpdate implements ShouldQueue
 {
@@ -43,35 +45,52 @@ class ExecutionBalanceUpdate implements ShouldQueue
     public function handle()
     {
         // Download all data from the message download wrapper
-        $url = env('FIX_API_URL') . "api/messagedownload/download";
+        $url = config('fixwrapper.base_url') . "api/messagedownload/download";
         $data = array(
             'BeginString' => 'FIX.4.2',
             "SenderSubID" => $this->senderSubID,
             "seqNum" => 0,
-            'StartTime' => date('Y-m-d') . " 11:00:00.000",
-            'EndTime' => date('Y-m-d') . " 23:30:00.000",
+            'StartTime' => date('Y-m-d', time() -5 * 60 * 60) . " 00:00:00.000",
+            'EndTime' => date('Y-m-d', time() -5 * 60 * 60) . " 23:59:59.000",
         );
-        $postdata = json_encode($data);
+/*
+        $len = isset($cOTLdata[$data]) ? count($cOTLdata[$data]) : 0;
+            
+        if ($len == 0) {
+            //do nothing
+        } else {
+            */
+            $postdata = json_encode($data);
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
         $result = curl_exec($ch);
-        curl_close($ch);
-        $request = json_decode($result, true);
-        $execution_report = $request['executionReports'];
+            curl_close($ch);
+            $request = json_decode($result, true);
+            if (isset ($request['executionReports'])) {
+                $execution_report = $request['executionReports'];
 
-
-        if ($execution_report) {
-            foreach ($execution_report as $a) {
-                $this->api->logExecution($a);
+                if ($execution_report) { 
+                    foreach ($execution_report as $a) {
+                        //Log::debug('ExecutionBalanceUpdate | Processing executionReport: '. json_encode($a) ); 
+                        $this->api->logExecution($a);
+                    }
+                } else {
+                    Log::debug('ExecutionBalanceUpdate | No executionReports retrieved.' );
+                }
+            } else {
+                Log::debug('ExecutionBalanceUpdate | Failure retrieving executionReports failed' );
             }
-        }
+            
+        //}
+
+
     }
 }

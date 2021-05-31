@@ -14,6 +14,7 @@ use App\Mail\ClientDetailsUpdate;
 use App\Mail\LocalBrokerClient;
 use App\Mail\LocalBrokerDetailsUpdate;
 use App\Mail\LocalBrokerUser;
+use App\Mail\LocalBrokerUserUpdate;
 use App\Role;
 use App\User;
 use Carbon\Carbon;
@@ -21,6 +22,7 @@ use CreateBrokerClientOrderExecutionReports;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class FunctionSet
 {
@@ -44,7 +46,7 @@ class FunctionSet
     //set fix wrapper url
     public function fix_wrapper_url($path)
     {
-        return env('FIX_API_URL') . $path; //"api/OrderManagement/OrderCancelRequest";
+        return config('fixwrapper.base_url') . $path;
     }
 
     //check if Order is opened and side = BUY
@@ -59,13 +61,19 @@ class FunctionSet
 
     public function cancelOrder($id)
     {
-
+        Log::debug('CANCELLING | Order: ' . $id . '...');
         $order = BrokerClientOrder::where('clordid', $id)->first();
+        Log::debug('PROCESSING | Cancel Order: ' . $id . '...');        
+        /*
         $order_ex = BrokerOrderExecutionReport::where('clordid', $id)->where('status', 'Cancel Submitted')->first();
-        if ($order_ex['status'] === "Cancel Submitted") {
-            return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
-        }
-
+        if (isset($order_ex)) {
+            Log::debug('PROCESSING | Cancel Request Already Made: ' . $order_ex  );
+            if ($order_ex['status'] === "Cancel Submitted") {
+                return response()->json(['isvalid' => false, 'errors' => 'A Cancellation Request for this order has already been submitted']);
+            }
+        }       
+        */
+        
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
         $timeNdate = gmdate($dateFormat, time() - $offset);
@@ -112,11 +120,17 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
         $result = curl_exec($ch);
 
-        curl_close($ch);
+        $info = curl_getinfo($ch);
 
+        if ($info['http_code']!='200') {
+            return response()->json(['isvalid' => false, 'errors' => 'API HTTP Status Error: ' + $info['http_code']]);
+            Log::debug('ERROR | Order: '+$order->clordid+' Cancel Request - HTTP Status' . $info['http_code'] . '...');                
+        }
+        
+        curl_close($ch);
 
         $data['text'] = 'Order Cancel Request Submitted';
         $data['status'] = 'Cancel Submitted';
@@ -152,6 +166,7 @@ class FunctionSet
 
     public function createBrokerOrder($request, $local_broker_id, $order_status, $client_id)
     {
+        $orig_user_name = auth()->user()->name;
 
         // Find Local Broker For This Order & Define the SenderSub Id
         $local_broker = $this->LocalBrokerPick($local_broker_id);
@@ -215,7 +230,11 @@ class FunctionSet
         $broker_client_order->broker_client_id = $client_id;
         $broker_client_order->remaining = $request->price * $request->quantity;
         $broker_client_order->trading_account_id = $request->trading_account;
+        $broker_client_order->created_by = $orig_user_name;
         $broker_client_order->save();
+
+        $side = json_decode($request->side, true);
+        $order_value = $request->quantity * $request->price; //New Order Value
 
         // Send customer order to FIX 4.2 Switch - API Beta Fix Swith PHP Post 4.2
         $url = $this->fix_wrapper_url("api/OrderManagement/NewOrderSingle");
@@ -235,6 +254,7 @@ class FunctionSet
             'Account' => 'JCSD' . $client->jcsd,
             'ClientID' => $trading->trading_account_number,
             'AccountType' => 'CL',
+            'text' => '',
         );
 
         //Check if this is an iceberg order
@@ -267,9 +287,91 @@ class FunctionSet
 
         $postdata = json_encode($data);
 
-        $ch = curl_init($url);
-        // Check if any error occurred
+        //$log_text = isset($cOTLdata[$postdata]) ? $cOTLdata[$postdata] : 'NULL';        
+        Log::debug('PROCESSING | New Order Single: ' . $request->client_order_number . '...');
 
+        $curl_error_codes = array(
+            1 => 'CURLE_UNSUPPORTED_PROTOCOL',
+            2 => 'CURLE_FAILED_INIT',
+            3 => 'CURLE_URL_MALFORMAT',
+            4 => 'CURLE_URL_MALFORMAT_USER',
+            5 => 'CURLE_COULDNT_RESOLVE_PROXY',
+            6 => 'CURLE_COULDNT_RESOLVE_HOST',
+            7 => 'CURLE_COULDNT_CONNECT',
+            8 => 'CURLE_FTP_WEIRD_SERVER_REPLY',
+            9 => 'CURLE_REMOTE_ACCESS_DENIED',
+            11 => 'CURLE_FTP_WEIRD_PASS_REPLY',
+            13 => 'CURLE_FTP_WEIRD_PASV_REPLY',
+            14 =>'CURLE_FTP_WEIRD_227_FORMAT',
+            15 => 'CURLE_FTP_CANT_GET_HOST',
+            17 => 'CURLE_FTP_COULDNT_SET_TYPE',
+            18 => 'CURLE_PARTIAL_FILE',
+            19 => 'CURLE_FTP_COULDNT_RETR_FILE',
+            21 => 'CURLE_QUOTE_ERROR',
+            22 => 'CURLE_HTTP_RETURNED_ERROR',
+            23 => 'CURLE_WRITE_ERROR',
+            25 => 'CURLE_UPLOAD_FAILED',
+            26 => 'CURLE_READ_ERROR',
+            27 => 'CURLE_OUT_OF_MEMORY',
+            28 => 'CURLE_OPERATION_TIMEDOUT',
+            30 => 'CURLE_FTP_PORT_FAILED',
+            31 => 'CURLE_FTP_COULDNT_USE_REST',
+            33 => 'CURLE_RANGE_ERROR',
+            34 => 'CURLE_HTTP_POST_ERROR',
+            35 => 'CURLE_SSL_CONNECT_ERROR',
+            36 => 'CURLE_BAD_DOWNLOAD_RESUME',
+            37 => 'CURLE_FILE_COULDNT_READ_FILE',
+            38 => 'CURLE_LDAP_CANNOT_BIND',
+            39 => 'CURLE_LDAP_SEARCH_FAILED',
+            41 => 'CURLE_FUNCTION_NOT_FOUND',
+            42 => 'CURLE_ABORTED_BY_CALLBACK',
+            43 => 'CURLE_BAD_FUNCTION_ARGUMENT',
+            45 => 'CURLE_INTERFACE_FAILED',
+            47 => 'CURLE_TOO_MANY_REDIRECTS',
+            48 => 'CURLE_UNKNOWN_TELNET_OPTION',
+            49 => 'CURLE_TELNET_OPTION_SYNTAX',
+            51 => 'CURLE_PEER_FAILED_VERIFICATION',
+            52 => 'CURLE_GOT_NOTHING',
+            53 => 'CURLE_SSL_ENGINE_NOTFOUND',
+            54 => 'CURLE_SSL_ENGINE_SETFAILED',
+            55 => 'CURLE_SEND_ERROR',
+            56 => 'CURLE_RECV_ERROR',
+            58 => 'CURLE_SSL_CERTPROBLEM',
+            59 => 'CURLE_SSL_CIPHER',
+            60 => 'CURLE_SSL_CACERT',
+            61 => 'CURLE_BAD_CONTENT_ENCODING',
+            62 => 'CURLE_LDAP_INVALID_URL',
+            63 => 'CURLE_FILESIZE_EXCEEDED',
+            64 => 'CURLE_USE_SSL_FAILED',
+            65 => 'CURLE_SEND_FAIL_REWIND',
+            66 => 'CURLE_SSL_ENGINE_INITFAILED',
+            67 => 'CURLE_LOGIN_DENIED',
+            68 => 'CURLE_TFTP_NOTFOUND',
+            69 => 'CURLE_TFTP_PERM',
+            70 => 'CURLE_REMOTE_DISK_FULL',
+            71 => 'CURLE_TFTP_ILLEGAL',
+            72 => 'CURLE_TFTP_UNKNOWNID',
+            73 => 'CURLE_REMOTE_FILE_EXISTS',
+            74 => 'CURLE_TFTP_NOSUCHUSER',
+            75 => 'CURLE_CONV_FAILED',
+            76 => 'CURLE_CONV_REQD',
+            77 => 'CURLE_SSL_CACERT_BADFILE',
+            78 => 'CURLE_REMOTE_FILE_NOT_FOUND',
+            79 => 'CURLE_SSH',
+            80 => 'CURLE_SSL_SHUTDOWN_FAILED',
+            81 => 'CURLE_AGAIN',
+            82 => 'CURLE_SSL_CRL_BADFILE',
+            83 => 'CURLE_SSL_ISSUER_ERROR',
+            84 => 'CURLE_FTP_PRET_FAILED',
+            84 => 'CURLE_FTP_PRET_FAILED',
+            85 => 'CURLE_RTSP_CSEQ_ERROR',
+            86 => 'CURLE_RTSP_SESSION_ERROR',
+            87 => 'CURLE_FTP_BAD_FILE_LIST',
+            88 => 'CURLE_CHUNK_FAILED');       
+        
+        $ch = curl_init($url);       
+        //curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true); // Required for HTTP error codes to be reported via our call to curl_error($ch)  
         // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30); //timeout in seconds
@@ -279,100 +381,224 @@ class FunctionSet
         // curl_setopt($ch, CURLOPT_TIMEOUT, '20L');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $result = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
+       
+        //$result = curl_exec($ch);
+        if( ! $result = curl_exec($ch))
+        {
+            //trigger_error(curl_error($ch));
+            $data['text'] = 'Communications Error: API Unreachable!' ;
+            $data['status'] = $this->OrderStatus->Failed();
+            Log::debug('ORDER: ' . $request->client_order_number . ' Failed | ' . $data['text'] );
+            $this->createDMAExecutionReport($data, $broker_client_order);
+            // Return funds only if this is a buy order as we deducted funds previously
+            $this->releaseFailedOrderFunds(
+                $side['fix_value'], 
+                $broker_client_order['id'], 
+                $this->OrderStatus->Failed(), 
+                $broker_client_order['remaining'] - $order_value,
+                $settlement->hash,
+                $settlement->amount_allocated - $order_value,
+                $client_id,
+                $client->open_orders - $order_value,                                            
+                $order_value,
+                $request->client_order_number);
+                curl_close($ch);
+            return response()->json(['isvalid' => false, 'errors' =>$data['text'] .' for Order#: ' . $request->client_order_number]);
+        }     
+
+        Log::debug('ORDER: ' . $request->client_order_number . ' | CURL_EXEC Result: ' . $result );
+                    
+                // Check if curl INIT FAILED
+                if ($result = False) {
+                    $data['text'] = 'Communications Error: API Unreachable!' ;
+                    $data['status'] = $this->OrderStatus->Failed();
+                    Log::debug('ORDER: ' . $request->client_order_number . ' Failed | ' . $data['text'] );
+
+                    $this->createDMAExecutionReport($data, $broker_client_order);
+                    // Return funds only if this is a buy order as we deducted funds previously
+                    $this->releaseFailedOrderFunds(
+                        $side['fix_value'], 
+                        $broker_client_order['id'], 
+                        $this->OrderStatus->Failed(), 
+                        $broker_client_order['remaining'] - $order_value,
+                        $settlement->hash,
+                        $settlement->amount_allocated - $order_value,
+                        $client_id,
+                        $client->open_orders - $order_value,                                            
+                        $order_value,
+                        $request->client_order_number);
+                    curl_close($ch);
+                    return response()->json(['isvalid' => false, 'errors' =>$data['text'] .' for Order#: ' . $request->client_order_number]);
+                } 
+
+        //$http_code = 0;
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);       
         curl_close($ch);
 
-        // ================================================================================================
-        $data['text'] = 'Order Submitted Successfully';
-        $data['status'] = 'Submitted';
-        $this->createDMAExecutionReport($data, $broker_client_order);
-        // ================================================================================================
+        // Check HTTP status code
+        Log::debug('ORDER: ' . $request->client_order_number . '| API HTTP Status Code: '. $http_code);
+        
+        switch ($http_code) {
+            case 200:  # OK
+            // ================================================================================================
+            $data['text'] = 'Order submitted for routing (Status Pending).';
+            $data['status'] = 'Submitted';
+            $this->createDMAExecutionReport($data, $broker_client_order);
 
+            $fix_status_result = '';
 
+            //Check Response Content
+            Log::debug('ORDER: ' . $request->client_order_number . '| API Response: '. $fix_status_result . '| Response: ' . $result );
+            if ( str_contains($fix_status_result, 'Session could not be established')) {           
+                $data['text'] = 'Error connecting to '. $trading->target_comp_id .'['. $fix_status_result.']';
+                $data['status'] = $this->OrderStatus->Failed();
+                $this->createDMAExecutionReport($data, $broker_client_order);
+                if ($side['fix_value'] === '1') {
+                    // Return funds only if this is a buy order as we deducted funds previously
+                    $this->releaseFailedOrderFunds(
+                        $side['fix_value'], 
+                        $broker_client_order['id'], 
+                        $this->OrderStatus->Failed(), 
+                        $broker_client_order['remaining'] - $order_value,
+                        $settlement->hash,
+                        $settlement->amount_allocated - $order_value,
+                        $client_id,
+                        $client->open_orders - $order_value,                                            
+                        $order_value,
+                        $request->client_order_number);
+                }
+                return response()->json(['isvalid' => false, 'errors' => 'Error connecting to ' . $trading->target_comp_id . 'for Order#: ' . $request->client_order_number]);
+                // ================================================================================================
+            }
+            return response()->json(['isvalid' => true, 'errors' => 'Order '. $request->client_order_number. ' submitted to '. $trading->target_comp_id .'!' ]);
+            break;
+            // ================================================================================================
+        
+        default:
+            //'Unexpected HTTP code: ', $http_code, "\n";
+            // ================================================================================================
+            $data['text'] = 'Order Submission Failed - Communication Error: [HTTP:'.$http_code.']';
+            $data['status'] = $this->OrderStatus->Failed();
+            $this->createDMAExecutionReport($data, $broker_client_order);
+            return response()->json(['isvalid' => false, 'errors' => $data['text'] ]);            
+            break;
+            // ================================================================================================
+        }
 
+/*
         $fix_status = json_decode($result, true);
+        $fix_status_result = $fix_status['result'];
+        $log_text = isset($cOTLdata[$result]) ? $cOTLdata[$result] : 'NULL';        
+        
+        Log::debug('ORDER: ' . $request->client_order_number . '| API Response: '  .  $result );
+        $log_text = isset($cOTLdata[$result]) ? $cOTLdata[$result] : 'NULL';        
+
+        $result_len = isset($cOTLdata[$result]) ? count($cOTLdata[$result]) : 0;
+
+        if ($result_len >0) {
+            //Default the $fix_status_result variable to the HTTP Response code of the FIX Wrapper request
+            $fix_status_result = 'HTTP Response(' . $http_code . ')';   
+            
+            ///Check HTTP Request Status
+            if ($http_code!=200) {
+                //$data['text'] = 'Order Submission Failed!';
+                $data['text'] = 'Communication Failure (HTTP ' . $http_code . ')';
+                $data['status'] = $this->OrderStatus->Failed();
+            } else {
+                $data['text'] = 'Order Submitted';
+                $data['status'] = 'Submitted';
+                $fix_status_result = 'HTTP OK (' . $http_code . ')';
+            }
+            
+        } else {
+            $fix_status_result = 'Unexpected Server Response!';
+            $data['text'] = 'Order Submission Status Pending!';
+            //$data['status'] = $this->OrderStatus->Failed();
+        }
+
+        //Fetch API Request Response
+        if ($result_len > 0) {
+            //Update the $fix_status_result variable with the payload returned from FIX Wrapper
+            $fix_status_result = $fix_status['result'];
+        }
+        
+        //Check API Request Response
+        if ( str_contains($fix_status_result, 'Session could not be established')) {            
+            $data['text'] = 'Order Submission Failed!';
+            $data['status'] = $this->OrderStatus->Failed();
+        }
+
         $order_value = $request->quantity * $request->price;
 
         $settlement_allocated = $settlement->amount_allocated - $order_value;
         $client_open_orders = $client->open_orders - $order_value;
         $side = json_decode($request->side, true);
-
-
-        switch ($fix_status['result']) {
-            case "Session could not be established with CIBC. Order number {0}":
-                $this->LogActivity->addToLog('Order Failed:' . $fix_status['result'] . '-' . $request->client_order_number);
-                $data['text'] = 'Order Submission Failed: ' . $fix_status['result'] . '-' . $request->client_order_number;
+        
+        
+        if ( $data['status'] = "Failed") {
+                $this->LogActivity->addToLog('Order Failed:' . $fix_status_result . '-' . $request->client_order_number);
+                $data['text'] = 'Order Submission Failed: ' . $fix_status_result . '-' . $request->client_order_number;
                 $data['status'] = 'Session Failed';
 
-                // Return funds only if this is a buy order as we deducted funds previously
                 if ($side['fix_value'] === '1') {
-                    BrokerClientOrder::updateOrCreate(
-                        ['id', $broker_client_order['id']],
-                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
-                    );
-
-                    BrokerSettlementAccount::updateOrCreate(
-                        ['hash' => $settlement->hash],
-                        ['amount_allocated' => $settlement_allocated]
-                    );
-
-
-                    // Update Broker Clients Open Orders
-                    BrokerClient::updateOrCreate(
-                        ['id' => $client_id],
-                        ['open_orders' => $client_open_orders]
-                    );
+                    // Return funds only if this is a buy order as we deducted funds previously
+                    $this->releaseFailedOrderFunds(
+                        $side['fix_value'], 
+                        $broker_client_order['id'], 
+                        $this->OrderStatus->Failed(), 
+                        $broker_client_order['remaining'] - $order_value,
+                        $settlement->hash,
+                        $settlement->amount_allocated - $order_value,
+                        $client_id,
+                        $client->open_orders - $order_value,                                            
+                        $order_value,
+                        $request->client_order_number);
                 }
-
-
                 $this->createDMAExecutionReport($data, $broker_client_order);
-                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $fix_status['result'] . '-' . $request->client_order_number]);
-                break;
-            case "Please Check the endpoint /MessageDownload/Download for message queue":
-                // If the order is successfull create a log
-                $this->LogActivity->addToLog('Order Successfull: Please Check the endpoint /MessageDownload/Download for message queue' . '-' . $request->client_order_number);
-                // $this->executionBalanceUpdate($sender_sub_id);
-                return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
-                break;
-            default:
-                // If the response fails create a record in the audit log and in the execution reports as well
-                $data['text'] = "Order Submission Failed: " . $fix_status['result'];
-                $data['status'] = $this->OrderStatus->Failed();
-                // ============================================================================================
+                return response()->json(['isvalid' => false, 'errors' => 'ORDER SUBMISSION FAILED: ' . $fix_status_result . '-' . $request->client_order_number]);
+                
+        } else {
+            $this->LogActivity->addToLog('Order Successfully Submitted:' . $fix_status_result . '-' . $request->client_order_number);
+            $this->createDMAExecutionReport($data, $broker_client_order);                
+            return response()->json(['isvalid' => true, 'errors' => 'New Order Single Sent!']);
+        }
+ */
+    }
 
-                if ($side['fix_value'] === '1') {
+    public function releaseFailedOrderFunds($side_num, 
+                                            $broker_client_order_id, 
+                                            $new_order_status, 
+                                            $new_remaining,
+                                            $settlement_hash,
+                                            $settlement_allocated,
+                                            $client_id,
+                                            $new_client_allocated_amount,
+                                            $order_value,
+                                            $client_order_number
+                                        ) {
+        // Return funds only if this is a buy order as we deducted funds previously
+        if ($side_num === '1') {
+            BrokerClientOrder::updateOrCreate(
+                ['id' => $broker_client_order_id],
+                ['order_status' => $new_order_status, 'remaining' => $new_remaining ]
+            );
 
-                    BrokerClientOrder::updateOrCreate(
-                        ['id', $broker_client_order['id']],
-                        ['order_status' => $this->OrderStatus->Failed(), 'remaining' => $broker_client_order['remaining'] - $order_value]
-                    );
-                    //Return Funds Upon Failing To Submit The Order
-                    // Update Settlement Account Balances
+            BrokerSettlementAccount::updateOrCreate(
+                ['hash' => $settlement_hash],
+                ['amount_allocated' => $settlement_allocated]
+            );
 
-                    BrokerSettlementAccount::updateOrCreate(
-                        ['hash' => $settlement->hash],
-                        ['amount_allocated' => $settlement_allocated]
-                    );
-
-
-                    // Update Broker Clients Open Orders
-                    BrokerClient::updateOrCreate(
-                        ['id' => $client_id],
-                        ['open_orders' => $client_open_orders]
-                    );
-                    $this->LogActivity->addToLog('Order Funds Returned: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                }
-
-                $this->LogActivity->addToLog('Order Failed For: ' . $request->client_order_number . '. Message: ' . $data['text']);
-                $this->createDMAExecutionReport($data, $broker_client_order);
-                return response()->json(['isvalid' => false, 'errors' => 'ORDER BLOCKED: ' . $data['text']]);
-                break;
+            // Update Broker Clients Open Orders
+            BrokerClient::updateOrCreate(
+                ['id' => $client_id],
+                ['open_orders' => $new_client_allocated_amount]
+            );
+            $this->LogActivity->addToLog('Failed Order Funds Released:' . $order_value . '-' . $client_order_number);
         }
     }
     public function createDMAExecutionReport($data, $order)
     {
-
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i:s";
         $timeNdate = gmdate($dateFormat, time() - $offset);
@@ -400,13 +626,45 @@ class FunctionSet
         $broker_order_execution_report->messageDate = $timeNdate;
         $broker_order_execution_report->save();
     }
+    public function manualLogExecution($report)
+    {
+        $manual_order_status = $report["status"];
+        $er_date = substr($report["messageDate"],0, 10);
+        $er_date1 = $er_date . "00:00:00";
+        $er_date2 = $er_date . "23:59:59";
+        //Only Expired Orders may be Manually Cancelled!
+        if ($manual_order_status == 4) {
+            $is_order_expired = DB::table('expiring_buy_orders')
+                ->where('client_order_id', $report["clOrdID"])
+                ->where('expiration_date', '<=', $er_date)
+                ->count();
+            if ($is_order_expired >=1) {
+                Log::debug('FunctionSet@manualLogExecution | Cancelling Order#: ' .$report["clOrdID"]);     
+                $this->logExecution($report);
+            } else {
+                Log::warning('FunctionSet@manualLogExecution | Cannot Cancel Order#: ' .$report["clOrdID"] );
+            }
+        }
+
+        //Only Expired Orders may be Manually Filled!
+        if (($manual_order_status == 1)| ($manual_order_status == 2)) {
+            $is_order_expired = DB::table('expiring_buy_orders')
+                ->where('client_order_id', $report["clOrdID"])
+                ->where('expiration_date', '<', $er_date)
+                ->count();
+            if ($is_order_expired >=1) {
+                Log::debug('FunctionSet@manualLogExecution | Filling Expired Order#: ' .$report["clOrdID"]);     
+                $this->logExecution($report);
+            } else {
+                Log::warning('FunctionSet@manualLogExecution | Cannot Fill Unexpired Order#: ' .$report["clOrdID"] );
+            }
+        }         
+    }
     public function logExecution($report)
     {
-
         /*
         JSE PAYLOAD Example (Array Positions)
-        --------------------------------------------
-            
+        --------------------------------------------       
             0"id"
             1"clOrdID"
             2"origClOrdID"
@@ -430,16 +688,18 @@ class FunctionSet
             20"seqNum"
             21"sendingTime"
             22"messageDate"
-        
         ----------------------------------------------
         */
+        //Log::debug('FunctionSet@logExecution | ER: '. json_encode($report) ); 
+        
         if (array_values($report)[1] === "XXXX") {
             $report['clOrdID'] = array_values($report)[2];
         }
         $execution_report = $report;
         $offset = 5 * 60 * 60;
         $dateFormat = "Y-m-d H:i";
-        $timeNdate = gmdate($dateFormat, time() - $offset);
+        $timeNdate = gmdate($dateFormat, time() - $offset); 
+        
         if ($execution_report) {
             if (count($report) == 21) {
                 $time = $timeNdate;
@@ -447,11 +707,20 @@ class FunctionSet
                 $time = array_values($report)[21];
             }
 
-            $record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])->where('seqNum', array_values($report)[20])->where('sendingTime', $time);
-            if ($record->exists()) {
+            $records = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])
+                ->where('clOrdID', array_values($report)[1])
+                ->where('seqNum', array_values($report)[20])
+                ->where('sendingTime', $time)
+                ->count();
+            //$record = BrokerOrderExecutionReport::where('senderSubID', array_values($report)[17])->first();    
+            if ($records > 0) {
+                //Log::debug('FunctionSet@logExecution | Checkpoint : Execution Report Already Processed...' );
                 //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT but update the marker order number
                 DB::table('broker_client_orders')->where('clordid', $report['clOrdID'])->update(['market_order_number' => $report['orderID']]);
+                
             } else {
+                //Log::debug('FunctionSet@logExecution | Checkpoint : Processing New Execution Report...' );
+                
                 // IF IT IS A NEW RECORD INSERT IT AND UPDATE THE BALANCES
                 $broker_order_execution_report = new BrokerOrderExecutionReport();
                 $broker_order_execution_report->clOrdID = $report['clOrdID'] ?? $report['OrderID'];
@@ -476,102 +745,14 @@ class FunctionSet
                 $broker_order_execution_report->messageDate = $report['messageDate'] ?? $timeNdate;
                 $broker_order_execution_report->save();
 
+                
                 // UPDATE THE CLIENT & SETTLEMENT ACCOUNT BALANCES DEPENDING ON THE ACCOUNT STATUS FROM THE ORDER EXECUTION REPORT
                 return $this->clientSettlementBalanceUpdate($report);
             }
             // }
         }
-        //Uncomment the below to handle reject messages
-        // if ($request["rejectMessages"]) {
-        //     foreach ($request["rejectMessages"] as $rejRep) {
-        //         // return $rejRep;
-        //         //Define the order number we want to reject
-        //         $order_no = $rejRep['clOrdID'];
-        //         $record = BrokerOrderExecutionReport::where('clordid', $order_no)->where('text', $rejRep['text']);
-        //         if ($record->exists()) {
-        //             //IF THE RECORD ALREADY EXISTS DO NOTHING TO IT
-
-        //         } else {
-        //             // return "Reject Record Doesnt Exist";
-
-        //             //Process rejection of orders
-        //             //Find the order that was peviously made based on the current $order_no
-        //             $order = BrokerClientOrder::where('clordid', $order_no)->first();
-        //             $order_total = number_format($order["price"] * $order->quantity, 2, '.', '');
-        //             $remaining_balance_of_order = $order["remaining"];
-
-        //             //define the trading, settlement & client account for this order 
-        //             $trading_account = BrokerTradingAccount::find($order->trading_account_id);
-        //             $settlement_account = BrokerSettlementAccount::find($trading_account->broker_settlement_account_id);
-        //             $client = BrokerClient::find($order->broker_client_id);
-
-        //             $broker_order_execution_report = new BrokerOrderExecutionReport();
-        //             $broker_order_execution_report->clOrdID = $order_no;
-        //             $broker_order_execution_report->orderID = '000000-000000-1';
-        //             $broker_order_execution_report->text = $rejRep['text'];
-        //             $broker_order_execution_report->ordRejRes = null;
-        //             $broker_order_execution_report->status = $this->OrderStatus->Rejected();
-        //             $broker_order_execution_report->buyorSell = $this->jsonStrip(json_decode($order->side, true), 'fix_value');
-        //             $broker_order_execution_report->securitySubType = 0;
-        //             $broker_order_execution_report->time = null;
-        //             $broker_order_execution_report->ordType = 99;»
-        //             $broker_order_execution_report->orderQty = 0;
-        //             $broker_order_execution_report->timeInForce = 0;
-        //             $broker_order_execution_report->symbol = null;
-        //             $broker_order_execution_report->qTradeacc = 'JCSD' . $client->jcsd;
-        //             $broker_order_execution_report->price = 0;
-        //             $broker_order_execution_report->stopPx = $rejRep['stopPx'] ?? 0;
-        //             $broker_order_execution_report->execType = $rejRep['execType'] ?? 0;
-        //             $broker_order_execution_report->senderSubID = $rejRep['senderSubID'];
-        //             $broker_order_execution_report->seqNum = $rejRep['seqNum'] ?? 0;
-        //             $broker_order_execution_report->sendingTime = $rejRep['sendingTime'] ?? $timeNdate;
-        //             $broker_order_execution_report->messageDate = $rejRep['messageDate'] ?? $timeNdate;
-        //             $broker_order_execution_report->save();
-
-        //             // return $client;
-
-        //             if ($remaining_balance_of_order === $order_total) {
-        //                 //if the balance remaining and the order total are the same the order has not been filled or partially filled
-        //                 //just update the order status to rejected
-        //                 // Update the status to rejected and remove the remaining balance
-        //                 BrokerClientOrder::updateOrCreate(
-        //                     ['clordid' => $order_no],
-        //                     ['remaining' => '0', 'status' =>  $this->OrderStatus->Rejected()]
-        //                 );
-        //                 //Write to audit trail
-        //             } else if ($remaining_balance_of_order < $order_total & $remaining_balance_of_order > 0) {
-        //                 // if the remaining balance is less than the order total: the current order has a partial fill
-        //                 // return the partially filled amount the client account balance and settlement account
-        //                 // reset the remaining amount to 0;
-
-
-        //                 //find how much was partially filled
-        //                 $partially_filled_amount = $order_total - $remaining_balance_of_order;
-
-        //                 //Return the partally filled amount to the client and settlement account balances.
-        //                 // Update Settlement Account Balances
-        //                 $bsa = BrokerSettlementAccount::updateOrCreate(
-        //                     ['id' => $settlement_account->id],
-        //                     ['amount_allocated' => (int) $settlement_account->amount_allocated - $partially_filled_amount, 'account_balance' => (int) $settlement_account->account_balance + $partially_filled_amount, 'filled_orders' => (int) $settlement_account->filled_orders - (int) $partially_filled_amount]
-
-        //                 );
-        //                 // // Update Broker Clients Open Orders
-        //                 $bc = BrokerClient::updateOrCreate(
-        //                     ['id' => $client->id],
-        //                     ['open_orders' => $client->open_orders - $partially_filled_amount, 'filled_orders' => $client->filled_orders - $partially_filled_amount]
-        //                 );
-
-
-
-        //                 BrokerClientOrder::updateOrCreate(
-        //                     ['client_order_number' =>  (int)$order_no],
-        //                     ['order_status' => $this->OrderStatus->Rejected(), 'remaining' => '0.00']
-        //                 );
-        //             }
-        //         }
-        //     }
-        // }
     }
+       
     public function executionBalanceUpdate($sender_sub_id)
     {
         // Call fix and return excutiun report for the required SensderSubID
@@ -585,6 +766,9 @@ class FunctionSet
         );
         $postdata = json_encode($data);
 
+        $log_text = isset($cOTLdata[$postdata]) ? $cOTLdata[$postdata] : 'NULL';        
+        Log::debug('FIX API Request | Message Download: ' . $sender_sub_id . ' | ' . $log_text);
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -592,9 +776,14 @@ class FunctionSet
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Cache-Control: no-cache'));
+        
         $result = curl_exec($ch);
         curl_close($ch);
+
+        $log_text = isset($cOTLdata[$result]) ? $cOTLdata[$result] : 'NULL';        
+        Log::debug('FIX API Response | Message Download: ' . $sender_sub_id . ' | ' . $log_text);
+
 
         $request = json_decode($result, true);
         $account = $request['executionReports'];
@@ -605,6 +794,7 @@ class FunctionSet
 
     public function clientSettlementBalanceUpdate($data)
     {
+        
         /*
         JSE PAYLOAD Example (Array Positions)
         --------------------------------------------
@@ -636,47 +826,54 @@ class FunctionSet
         ----------------------------------------------
         */
 
-        // Determine variables for use
-        $order_number = array_values($data)[1];
-        $side = array_values($data)[7];
-        $sender_sub_id = array_values($data)[17];
-        $price = array_values($data)[14];
-        $quantity = array_values($data)[10];
-        $status = array_values($data)[6];
-        $jcsd_num = array_values($data)[13];
-
-        // JSE NEW RELEASE AUGUST 29,2020
-        $original_order_number = array_values($data)[2];
-        $last_order_quantity = array_values($data)[19];
-        $last_order_price = array_values($data)[18];
-
-
-
-        if ($original_order_number) {
-            // this is a cancel request
+        //[DEPRECATED 2021-05-27] Determine variables for use 
+        //$order_number = array_values($data)[1];
+        //$side = array_values($data)[7];
+        //$sender_sub_id = array_values($data)[17];
+        //$price = array_values($data)[14];
+        //$quantity = array_values($data)[10];
+        //$status = array_values($data)[6];
+        //$jcsd_num = array_values($data)[13];
+        $jcsd_num = $data["qTradeacc"];
+        $status = $data["status"];
+        $quantity = $data["orderQty"];
+        $price = $data["price"];
+        $sender_sub_id = $data["senderSubID"];
+        $order_number = $data["clOrdID"];
+        $side = $data["buyorSell"];
+        
+        //[DEPRECATED 2021-05-27] // JSE NEW RELEASE AUGUST 29,2020.
+        //$original_order_number = array_values($data)[2];        
+        //$last_order_quantity = array_values($data)[19];
+        //$last_order_price = array_values($data)[18];
+        $original_order_number = $data["origClOrdID"];
+        if (($status == "1") || ($status == "2") ) {
+            $last_order_quantity = $data["lastOrderQty"];
+            $last_order_price = $data["lastPrice"];
+        }
+        
+        //[DEPRECATED 2021-05-27] //if ($original_order_number) {
+            //CANCEL REQUEST - Identify (either BUY/SELL)
+            if ($status == "4") {            
             //Update DMA Records to acurately mathch the cancellation request new order number : initial order number
             BrokerOrderExecutionReport::updateOrCreate(
                 ['clordid' => $order_number],
                 ['clordid' => $original_order_number]
             );
-
             $order_number = $original_order_number;
         } else {
-            $order_number = array_values($data)[1];
+            Log::debug('FunctionSet@clientSettlementBalanceUpdate | Checkpoint: ' . $order_number . ' not a CANCEL REQUEST...');
         }
-
-
         // Define the clients jcsd number
         $jcsd = str_replace('JCSD', "", $jcsd_num);
         //Find the broker order linked to this execution report (account number)
         $order = BrokerClientOrder::where('clordid', $order_number)->first();
-
         // // Define The broker client
         $broker_client = BrokerClient::where('jcsd', $jcsd)->first();
         if ($order) {
+            Log::debug('FunctionSet@clientSettlementBalanceUpdate | Order found!' );
             //Trading Account Information
             $trading = BrokerTradingAccount::find((int)$order->trading_account_id);
-
             //Find the broker settlement account linked to this execution report (account number (senderSubID)
             $settlement_account = BrokerSettlementAccount::find($trading->broker_settlement_account_id);
 
@@ -685,125 +882,113 @@ class FunctionSet
                 $trader = $broker_client;
 
                 if ($original_order->id) {
-                    // $order_status = $this->orderStatus($original_order->id);
                     $broker_settlement_account = $settlement_account;
-
-                    $order_value = $quantity * $price; //ER Order Value
-
+                   
                     // Allocated Value of order [Release what was initially allocated per stock]
-                    $allocated_value_of_order = $quantity * $original_order['price'];
-                    $filled_value = $quantity * $price;
-
-                    //Determine If The Order Is A Buy Or Sell
+                    //[DEPRECATED 2021-05-27] $allocated_value_of_order = $quantity * $original_order['price'];
+                    $allocated_value_of_order = $original_order['remaining'];
+                    if (($status == "1") || ($status == "2") ) {
+                        //[DEPRECATED 2021-05-27] //$filled_value = $quantity * $price;
+                        $filled_value = $last_order_quantity * $last_order_price;
+                    }
+                    //SIDE: Determine If The Order Is A Buy Or Sell
                     $side = json_decode($order->side, true);
+                    
+                    //SIDE: BUY Order
                     if ($side['fix_value'] === '1') {
-                        //Only Update account Balances if this is a buy order
+                        //STATUS UPDATE ONLY - No balance updates required & Order remains "Open"
                         if (
-                            $status === $this->OrderStatus->Expired() ||
-                            $status === $this->OrderStatus->_New()
+                                $status != $this->OrderStatus->Expired() && 
+                                $status != $this->OrderStatus->Failed() && 
+                                $status != $this->OrderStatus->Cancelled() && 
+                                $status != $this->OrderStatus->Rejected() && 
+                                $status != $this->OrderStatus->Filled() && 
+                                $status != $this->OrderStatus->PartialFilled()
+                            //$status == $this->OrderStatus->Expired() ||
+                            //$status == $this->OrderStatus->_New()
                         ) {
-                            // UPDATE ORDER STATUS ONLY
+                            //STATUS UPDATE ONLY - Update the Order
                             BrokerClientOrder::updateOrCreate(
-
                                 ['id' => $original_order->id],
                                 ['order_status' => $status]
-
                             );
-                        } else if ($status === $this->OrderStatus->Cancelled()) {
+                            return;
+                        }                                                
+                        // EXPIRED/FAILED/CANCELLED/REJECTED - Process the ER
+                        if (
+                                $status == $this->OrderStatus->Expired() ||
+                                $status == $this->OrderStatus->Failed() || 
+                                $status == $this->OrderStatus->Cancelled() || 
+                                $status == $this->OrderStatus->Rejected()
+                            ) {
+                                // EXPIRED/FAILED/CANCELLED/REJECTED - Calculate new values                           
+                                $new_order_remaining = 0;
+                                $new_settlement_amount_allocated = $broker_settlement_account['amount_allocated'] - $original_order['remaining'];
+                                $new_client_open_orders = $trader['open_orders'] - $original_order['remaining'];
+                                
+                            // EXPIRED/FAILED/CANCELLED/REJECTED - Update the Order 
                             BrokerClientOrder::updateOrCreate(
-
                                 ['id' => $original_order->id],
-                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
-
+                                [   'order_status' => $status, 
+                                    'remaining' => $new_order_remaining ]
                             );
-
-                            // Update Settlement Account Balances
+                            // EXPIRED/FAILED/CANCELLED/REJECTED - Update the Settlement Account 
                             $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $broker_settlement_account['id']],
-                                ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order]
+                                [   'amount_allocated' => $new_settlement_amount_allocated  ]
                             );
-
-
-                            // Update Broker Clients Open Orders
+                            // EXPIRED/FAILED/CANCELLED/REJECTED - Update the Client Account
                             $broker_client_account = BrokerClient::updateOrCreate(
                                 ['id' => $trader->id],
-                                ['open_orders' => $trader['open_orders'] - $allocated_value_of_order]
+                                [   'open_orders' => $new_client_open_orders    ]
                             );
-                        } else if ($status === $this->OrderStatus->Failed() || $status === $this->OrderStatus->Rejected()) {
-                            BrokerClientOrder::updateOrCreate(
-
-                                ['id' => $original_order->id],
-                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
-
-                            );
-
-                            // Update Settlement Account Balances
-                            $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                                ['id' => $broker_settlement_account['id']],
-                                ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order]
-                            );
-
-
-                            // Update Broker Clients Open Orders
-                            $broker_client_account = BrokerClient::updateOrCreate(
-                                ['id' => $trader->id],
-                                ['open_orders' => $trader['open_orders'] - $allocated_value_of_order]
-                            );
-                        } else if ($status === $this->OrderStatus->Filled()) {
-
-                            $allocated_value_of_order = $last_order_quantity * $original_order['price'];
+                        } 
+                        // FILLED/PARTIALLY FILLED - Process the ER
+                        if (
+                                $status == $this->OrderStatus->Filled() || 
+                                $status == $this->OrderStatus->PartialFilled()
+                            ) {
+                            // FILLED/PARTIALLY FILLED - Calculate new values                           
                             $filled_value = $last_order_quantity * $last_order_price;
-
-                            // UPDATE THE ORDER STATUS 
+                            if ($status == $this->OrderStatus->Filled()) { 
+                                $new_order_remaining = 0;
+                            } else {
+                                $new_order_remaining = $original_order['remaining'] - $filled_value;
+                            }
+                            $new_order_value_filled = $original_order['value_filled'] + $filled_value;
+                            $new_order_amount_filled = $original_order['amount_filled'] + $last_order_quantity;
+                            $new_settlement_amount_allocated = $broker_settlement_account['amount_allocated'] - $original_order['remaining'];
+                            $new_settlement_filled_orders = $broker_settlement_account['filled_orders'] + $filled_value;
+                            $new_client_open_orders = $trader['open_orders'] - $original_order['remaining'];
+                            $new_client_filled_orders = $trader->filled_orders + $filled_value;
+                            // FILLED/PARTIALLY FILLED - Update the Order
                             $broker_client_order = BrokerClientOrder::updateOrCreate(
                                 ['id' => $original_order->id],
-                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
-
+                                [   'order_status' => $status, 
+                                    'amount_filled' => $new_order_amount_filled,
+                                    'value_filled' => $new_order_value_filled,
+                                    'remaining' => $new_order_remaining ]
                             );
-
-                            // Update Settlement Account Balances
+                            // FILLED/PARTIALLY FILLED - Update the Settlement Account
                             $broker_settlement = BrokerSettlementAccount::updateOrCreate(
                                 ['id' => $broker_settlement_account['id']],
-                                ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order, 'filled_orders' => $broker_settlement_account['filled_orders'] + $filled_value]
+                                [   'amount_allocated' => $new_settlement_amount_allocated, 
+                                    'filled_orders' => $new_settlement_filled_orders    ]                                    
                             );
-
-
-                            // Update Broker Clients Open Orders
+                            // FILLED/PARTIALLY FILLED - Update the Client Account
                             $broker_client_account = BrokerClient::updateOrCreate(
                                 ['id' => $trader->id],
-                                ['open_orders' => $trader['open_orders'] - $allocated_value_of_order, 'filled_orders' => $trader->filled_orders + $filled_value]
+                                [   'open_orders' => $new_client_open_orders,
+                                    'filled_orders' => $new_client_filled_orders    ]
                             );
-                        } else if ($status === $this->OrderStatus->PartialFilled()) {
-                            $allocated_value_of_order = $last_order_quantity * $original_order['price'];
-                            $filled_value = $last_order_quantity * $last_order_price;
-                            // UPDATE THE ORDER STATUS 
-                            $broker_client_order = BrokerClientOrder::updateOrCreate(
-                                ['id' => $original_order->id],
-                                ['order_status' => $status, 'remaining' => $original_order['remaining'] - $allocated_value_of_order]
-
-                            );
-
-                            // Update Settlement Account Balances
-                            $broker_settlement = BrokerSettlementAccount::updateOrCreate(
-                                ['id' => $broker_settlement_account['id']],
-                                ['amount_allocated' => $broker_settlement_account['amount_allocated'] - $allocated_value_of_order, 'filled_orders' => $broker_settlement_account['filled_orders'] + $filled_value]
-                            );
-
-
-                            // Update Broker Clients Open Orders
-                            $broker_client_account = BrokerClient::updateOrCreate(
-                                ['id' => $trader->id],
-                                ['open_orders' => $trader['open_orders'] - $allocated_value_of_order, 'filled_orders' => $trader->filled_orders + $filled_value]
-                            );
-                        }
+                        }                        
                     } else {
+                    //SIDE: SELL Order
                         // If the order side is a sell
                         // UPDATE ORDER STATUS ONLY
                         BrokerClientOrder::updateOrCreate(
-
                             ['id' => $original_order->id],
                             ['order_status' => $status]
-
                         );
                     }
                 }
@@ -992,36 +1177,45 @@ class FunctionSet
 
     public function createBrokerUser($request)
     {
-
         $local_broker = $this->getUserAll($request->local_broker_id);
         $broker_owner = LocalBroker::where('user_id', $local_broker->id)->first();
-        // return $broker_owner;
-
         if ($request->id) {
-            LogActivity::addToLog('Update User Details');
+            $role_OPRB = Role::where('name', 'OPRB')->first();
+            $pass = $this->rand_pass(8);
+            $hash = $this->generateRandomString(20);            
+            $user = User::find($request->id);            
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = Hash::make($pass);
+            $user->status = 'Unverified';
+            $user->status = 'Unverified';
+            $user->local_broker_id = $broker_owner['id'];
+            $user->hash = $hash;
+            $user->save();
+            $user->roles()->attach($role_OPRB);            
+            //needed for the valudation link in the email
+            $request['id'] = $user->id;
+            $request['hash'] = $hash;
+            $request['p'] = $pass;
+            ////////////////////////////////
+            LogActivity::addToLog('Updated User Details');            
             $broker = User::updateOrCreate(
                 ['id' => $request->id],
                 ['name' => $request->name, 'email' => $request->email, 'status' => 'Unverified']
-
             );
-
             $broker_user = BrokerUser::updateOrCreate(
                 ['user_id' => $request->id],
                 ['broker_trading_account_id' => $request->broker_trading_account_id]
-
             );
-
             $broker->syncPermissions();
-
             $permission_length = count($request->permissions);
             for ($i = 0; $i < $permission_length; $i++) {
-                // $user->givePermissionTo($permissions[$i] . '-' . $target);
                 $broker->givePermissionTo($request->permissions[$i]);
-
-                // $user->givePermissionTo($request->permissions[$i]);
-                // $user = User::find($user->is); // returns an instance of \App\User
-
             }
+            //Notify Local Broker Admin
+            Mail::to($local_broker->email)->send(new LocalBrokerUserUpdate($request));
+
+
         } else {
             $role_OPRB = Role::where('name', 'OPRB')->first();
             $pass = $this->rand_pass(8);
@@ -1038,23 +1232,16 @@ class FunctionSet
             $request['id'] = $user->id;
             $request['hash'] = $hash;
             $request['p'] = $pass;
-
             $broker_user = new BrokerUser();
             $broker_user->user_id = $user->id;
             $broker_user->dma_broker_id = $request->local_broker_id;
             $broker_user->broker_trading_account_id = $request->broker_trading_account_id;
             $broker_user->save();
-
             //Check to see how many permission have been selected to appl to the new broker user
             $permission_length = count($request->permissions);
             for ($i = 0; $i < $permission_length; $i++) {
-
-                //Apply the specific permission for the target type selected
                 $user->givePermissionTo($request->permissions[$i]);
-                // $user = User::find($user->is); // returns an instance of \App\User
-
             }
-
             //Notify Local Broker Admin
             Mail::to($local_broker->email)->send(new LocalBrokerUser($request));
         }
@@ -1093,5 +1280,40 @@ class FunctionSet
         // check current broker client order status
         $order_status = BrokerClientOrder::select('order_status')->where('id', $id)->first();
         return $order_status;
+    }
+    
+    public function statusFilter($data)
+    {
+        if ($data === "0") {
+          return "NEW";
+        } else if ($data === "-1") {
+          return "PENDING";
+        } else if ($data === "1") {
+          return "PARTIALLY FILLED";
+        } else if ($data === "2") {
+          return "FILLED";
+        } else if ($data === "4") {
+          return "CANCELLED";
+        } else if ($data === "5") {
+          return "REPLACED";
+        } else if ($data === "C") {
+          return "EXPIRED";
+        } else if ($data === "Z") {
+          return "PRIVATE";
+        } else if ($data === "U") {
+          return "UNPLACED";
+        } else if ($data === "x") {
+          return "INACTIVE";
+        } else if ($data === "8") {
+          return "REJECTED";
+        } else if ($data === "Submitted") {
+          return "SUBMITTED";
+        } else if ($data === "Failed") {
+          return "FAILED";
+        } else if ($data === "Cancel Submitted") {
+          return "CANCEL SUBMITTED";
+        } else {
+          return "["+$data+"]";
+        }
     }
 }

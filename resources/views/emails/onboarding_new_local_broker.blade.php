@@ -11,7 +11,7 @@
 <p>Login: {{$user['email']}}</p>
 <p>Temporary Password: Password</p>
 <br>
-<a href="{{env('APP_URL')}}logout">Login</a><br>
+<a href="{{config('app.url')}}logout">Login</a><br>
 </body>
 
 </html>

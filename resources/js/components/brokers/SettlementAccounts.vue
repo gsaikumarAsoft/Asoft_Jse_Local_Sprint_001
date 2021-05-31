@@ -1,7 +1,7 @@
 <template>
   <div>
     <head-nav></head-nav>
-    <div class="container-fluid" style="margin-top: 100px;">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="content">
         <!-- <pre>{{broker_settlement_account}}</pre> -->
         <b-card title="Settlement Accounts" v-if="!settlement_account">
@@ -252,7 +252,7 @@ export default {
         ]);
       }
 
-      // console.log(this.broker_settlement_account[i])
+      // //console.log(this.broker_settlement_account[i])
       // tableData.push(this.broker_settlement_account[i]);
 
       var doc = new jsPDF();
@@ -300,7 +300,7 @@ export default {
         },
       });
 
-      // console.log(account);
+      // //console.log(account);
       try {
         await axios.post("../store-settlement-broker", account);
         //.then(response => {
@@ -312,19 +312,19 @@ export default {
     },
 
     settlmentAccountHandler(b) {
-      console.log(b);
+      //console.log(b);
       this.settlement_account = b;
     },
 
     setLocalBroker() {
-      // console.log(this);
+      // //console.log(this);
     },
     async getSettlementList() {
       // axios.get("../settlement-list").then(response => {
       //   let broker_settlement_accounts = response.data;
       //   this.broker_settlement_account = [];
       //   // this.broker_settlement_account = broker_settlement_accounts;
-      //   // console.log(this.broker_settlement_account);
+      //   // //console.log(this.broker_settlement_account);
       // });
       // setTimeout(location.reload.bind(location));
     },
@@ -354,7 +354,7 @@ export default {
         text: user.name,
         value: user.id,
       }));
-      console.log("local brokers", this.local_brokers);
+      //console.log("local brokers", this.local_brokers);
     },
     async getForeignBrokers() {
       const { data } = await axios.get("foreign-broker-list");
@@ -362,7 +362,7 @@ export default {
         text: user.name,
         value: user.id,
       }));
-      console.log("foreign brokers", this.foreign_brokers);
+      //console.log("foreign brokers", this.foreign_brokers);
     },
   },
   async mounted() {

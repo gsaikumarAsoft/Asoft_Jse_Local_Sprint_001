@@ -15,6 +15,17 @@
         <b-nav-item href="/jse-admin/local-broker-list ">Local Broker List</b-nav-item>
         <b-nav-item href="/jse-admin/settlements/">Settlement Accounts</b-nav-item>
         <b-nav-item href="/jse-admin/broker-2-broker">Trading Accounts</b-nav-item>
+        <b-nav-item-dropdown
+          id="order-management-dropdown-menu"
+          text="Order Management"
+          toggle-class="nav-link-custom"
+          right
+          >
+            <b-dropdown-item href="/jse-admin/order-execution">Order Execution Reports</b-dropdown-item >
+            <b-dropdown-item href="/jse-admin/expiring-buy-orders">Cancel Expiring Buy Orders (Manually)</b-dropdown-item >
+            <b-dropdown-item href="/jse-admin/expired-buy-orders">Cancel Expired Buy Orders (Manually)</b-dropdown-item >
+            <b-dropdown-item href="/jse-admin/fill-expired-buy-orders">Fill Expired Buy Orders (Manually)</b-dropdown-item >
+        </b-nav-item-dropdown>
       </b-navbar-nav>
 
       <b-navbar-nav v-if="user_role === 'ADMB'">
