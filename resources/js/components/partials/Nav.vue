@@ -6,7 +6,7 @@
 
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav v-if="user_role === 'AGTS'">
-        <b-nav-item href="/settlement-agent">Home</b-nav-item>
+        <b-nav-item href="/settlement-agent">Home New</b-nav-item>
         <b-nav-item href="#">Transactions</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav v-if="user_role === 'ADMD'">
@@ -25,8 +25,16 @@
             <b-dropdown-item href="/jse-admin/expiring-buy-orders">Cancel Expiring Buy Orders (Manually)</b-dropdown-item >
             <b-dropdown-item href="/jse-admin/expired-buy-orders">Cancel Expired Buy Orders (Manually)</b-dropdown-item >
             <b-dropdown-item href="/jse-admin/fill-expired-buy-orders">Fill Expired Buy Orders (Manually)</b-dropdown-item >
+        </b-nav-item-dropdown> 
+      <b-nav-item-dropdown
+          id="reports-dropdown-menu"
+          text="Reports"
+          toggle-class="nav-link-custom"
+          right
+          >
+        <b-dropdown-item href="/jse-admin/dma-trade-report">DMA Trades Report</b-dropdown-item > 
         </b-nav-item-dropdown>
-      </b-navbar-nav>
+      </b-navbar-nav> 
 
       <b-navbar-nav v-if="user_role === 'ADMB'">
         <b-nav-item href="/broker">Home</b-nav-item>
@@ -36,6 +44,14 @@
         <b-nav-item href="/broker/traders">Client Accounts</b-nav-item>
         <b-nav-item href="/broker/orders">Orders</b-nav-item>
         <b-nav-item href="/broker/execution">Order Execution Reports</b-nav-item>
+         <b-nav-item-dropdown
+          id="reports-dropdown-menu"
+          text="Reports"
+          toggle-class="nav-link-custom"
+          right
+          >
+        <b-dropdown-item href="/broker/dma-trade-report">DMA Trades Report</b-dropdown-item > 
+        </b-nav-item-dropdown>
         <!-- <b-nav-item href="/broker/spprovals">Approval Request List</b-nav-item> -->
         <!-- <b-nav-item href="/broker/log">Audit Log List</b-nav-item> -->
       </b-navbar-nav>
