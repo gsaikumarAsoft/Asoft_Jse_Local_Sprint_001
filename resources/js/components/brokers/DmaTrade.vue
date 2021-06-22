@@ -137,7 +137,7 @@ export default {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       
     return {
-      filterOn: ["clordid", "qTradeacc", "messageDate", "buyorSell", "status", "settlement_account_number", "text"],
+      filterOn: ["orderDate", "tradeDate", "clientName", "JCSD", "client_order_number", "mrktOrdNo", "symbol","currency"],
       filter: null,
       from_date: today.getFullYear().toString()+"-"+('0' + (today.getMonth()+1)).slice(-2)+"-"+('0' + (today.getDate())).slice(-2),
       to_date: today.getFullYear().toString()+"-"+('0' + (today.getMonth()+1)).slice(-2)+"-"+('0' + (today.getDate())).slice(-2),
@@ -146,8 +146,7 @@ export default {
       execution_reports: [],  
       side_options: [],  
       report_data: [],
-      selected_foreign_broker: "0",
-      selected_foreign_broker_name: "",
+      selected_foreign_broker: "0", 
       selected_local_broker: "0",
       selected_side: "0",  
       fields: [
@@ -163,7 +162,7 @@ export default {
         { key: "FillQty", sortable: true, label: "Fill Qty" },
         { key: "currency", sortable: true, label: "Currency" },
         { key: "FillPrice", sortable: true, label: "Fill Price" }, 
-        { key: "FilledValue", sortable: true, label: "Fill Value" }  
+        { key: "FilledValue", sortable: true, label: "Fill Value" },  
         
       ],
       visibleRows: [],
