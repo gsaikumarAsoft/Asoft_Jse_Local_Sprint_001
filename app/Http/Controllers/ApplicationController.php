@@ -815,4 +815,96 @@ class ApplicationController extends Controller
         return view('expiring_buy_order')->with('orders', $expiring_buy_orders);
     }
 
+
+////DMA TRADE REPORT
+
+public function dmaTradeReport()
+{
+    $dmatrade_report = [];
+
+    // return $execution_reports;
+    return view('brokers.dmatrade')->with('dmatrade_report', $dmatrade_report);
+}
+ 
+
+    public function dmaTradeReportListFor($fromdate,$todate,$foreign_broker_id,$local_broker_id,$side)
+    {
+   
+    $dmatrade_report = DB::table('broker_client_orders as A')
+    ->where('B.messageDate', ">=" ,$fromdate)
+    ->where('B.messageDate', "<=" ,$todate)
+    ->where('A.foreign_broker_id',$foreign_broker_id)
+    ->where('A.local_broker_id',$local_broker_id)
+    ->where('A.side',$side)
+    ->select(DB::raw('DATE_FORMAT(A.order_date,"%m/%d/%Y") as orderDate'),DB::raw('DATE_FORMAT(B.messageDate,"%m/%d/%Y") as tradeDate'),'F.name as clientName','F.jcsd as JCSD','A.client_order_number','A.market_order_number as mrktOrdNo',
+    'B.text as comments','A.side','A.symbol','B.orderQty as FillQty','A.currency','B.price as FillPrice','fb.name as ForeignBrokerName','lb.name as localbrokerName','A.value_filled as FilledValue')
+    ->join('broker_client_order_execution_reports as B','B.clordid','A.client_order_number')
+    ->join('local_brokers as D', 'D.id', 'A.local_broker_id')
+    ->join('users as lb','lb.id','D.user_id')
+    ->join('broker_clients as F','F.id','A.broker_client_id')
+    ->join('foreign_brokers as E','E.id','A.foreign_broker_id')
+    ->join('users as fb','fb.id','E.user_id')
+    ->orderBy('B.messageDate', 'asc')
+    ->get();
+    
+    Log::debug('DMA TRADE REPORT QUERY | DMA: '. $dmatrade_report);
+
+
+         return $dmatrade_report; 
+    }
+
+    public function localBrokerDmaTradeReport()
+    {
+    $local_broker_dmatrade_report = [];
+
+    // return $execution_reports;
+    return view('brokers.local_broker_dma_report')->with('local_broker_dmatrade_report', $local_broker_dmatrade_report);
+    }
+
+    public function brokerdmaTradeReportListFor($fromdate,$todate,$local_broker_id)
+    {
+   
+    $local_broker_dmatrade_report = DB::table('broker_client_order_execution_reports as B')
+    ->where('C.created_at', ">=" ,$fromdate)
+    ->where('C.created_at', "<=" ,$todate) 
+    ->where('A.local_broker_id',$local_broker_id)
+    ->select('A.order_date as orderDate','C.created_at as tradeDate','F.name as clientName','A.client_order_number','A.market_order_number as mrktOrdNo',
+    'B.text as comments','A.side','A.symbol','A.quantity','A.currency','A.value_filled','A.price','fu.name as trader')
+    ->join('broker_client_orders as A','B.clordid','A.id')
+    ->join('broker_trading_accounts as C', 'C.id', 'A.trading_account_id')
+    ->join('broker_users as D','D.broker_trading_account_id','C.id')
+    ->join('broker_clients as F','F.id','A.broker_client_id')
+    ->join('users as fu','fu.id','D.user_id')
+    ->orderBy('messageDate', 'asc')
+    ->get();
+    
+    Log::debug('LOCAL BROKER TRADE REPORT QUERY | DMA: '. $local_broker_dmatrade_report);
+
+
+     return $local_broker_dmatrade_report; 
+    }
+
+
+////DMA TRADE REPORT END
+
+
+    function getSideList(){
+
+            $sidesListData= array(
+                array(
+                 'value' => 'Buy',
+                 'text' => 'Buy',
+                ),
+                array(
+                  'value' => 'Sell',
+                  'text' => 'Sell',
+                )
+              );
+
+              return $sidesListData; 
+    
+ }
+
+ 
+
 }

@@ -223,7 +223,20 @@ Route::group(['prefix' => '/jse-admin', 'middleware' => ['App\Http\Middleware\Ad
     Route::get('/dma-home', 'BrokerController@index');
     Route::get('/broker-2-broker', 'ApplicationController@b2b');
     Route::get('/', 'BrokerController@log');
+
+
+    ///dma trade report
+
+    Route::get('/dma-trade-report', "ApplicationController@dmaTradeReport");
+    Route::get('/dma-trade-report-list/{fromdate}/{todate}/{foreign_broker_id}/{local_broker_id}/{side_id}', "ApplicationController@dmaTradeReportListFor");
+
+    ///Side DropDown List
+
+    Route::get('/sidelist', "ApplicationController@getSideList");
+
+
 });
+
 
 
 Route::get('/logout', 'Auth\LoginController@logout');

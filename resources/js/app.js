@@ -45,6 +45,11 @@ Vue.component('broker-2-broker', require('./components/B2b.vue').default);
 Vue.component('broker-settlements', require('./components/brokers/SettlementAccounts').default);
 
 
+///DMA TRADE
+Vue.component('dmatrade-report', require('./components/brokers/DmaTrade.vue').default);
+Vue.component('localbroker-dmatrade-report', require('./components/brokers/Local_broker_dma_report.vue').default);
+///DMA TRADE
+ 
 
 Vue.component('operator-home', require('./components/operators/Index.vue').default);
 Vue.component('operator-client', require('./components/operators/Client-Management.vue').default);
