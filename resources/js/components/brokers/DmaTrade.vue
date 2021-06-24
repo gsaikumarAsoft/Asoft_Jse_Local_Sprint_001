@@ -139,15 +139,19 @@ export default {
     return {
       filterOn: ["orderDate", "tradeDate", "clientName", "JCSD", "client_order_number", "mrktOrdNo", "symbol","currency"],
       filter: null,
+      current_date: today.getFullYear().toString()+"-"+('0' + (today.getMonth()+1)).slice(-2)+"-"+('0' + (today.getDate())).slice(-2),
       from_date: today.getFullYear().toString()+"-"+('0' + (today.getMonth()+1)).slice(-2)+"-"+('0' + (today.getDate())).slice(-2),
       to_date: today.getFullYear().toString()+"-"+('0' + (today.getMonth()+1)).slice(-2)+"-"+('0' + (today.getDate())).slice(-2),
       foreign_broker_options: [],
       local_broker_options: [], 
-      execution_reports: [],  
+      dma_trade_reports: [],  
       side_options: [],  
       report_data: [],
+      user_name1: [],
       selected_foreign_broker: "0", 
       selected_local_broker: "0",
+      selected_foreign_broker_name: '',
+      selected_local_broker_name:'',
       selected_side: "0",  
       fields: [
         { key: "orderDate", sortable: true, label: "Order Date" },
@@ -207,8 +211,7 @@ export default {
     },  
     async getForeignBrokers() {
       ({ data: this.foreign_brokers } = await axios.get("foreign-brokers"));
-      
-
+       
       //console.log(this.foreign_brokers);
 
       this.selected_foreign_broker = "0";
@@ -217,25 +220,22 @@ export default {
           this.foreign_broker_options.push({value: foreign_broker.id, text: foreign_broker.user.name });
           if(this.selected_foreign_broker == "0") {
             this.selected_foreign_broker = foreign_broker.id;
+            this.selected_foreign_broker_name=foreign_broker.user.name;
           }
         }
       );
-
+ 
       this.fetchReports();
-      //console.log("foreing_brokers", this.foreign_broker_options  );
+       
     },
     selectForeignBroker() {
-      //console.log("selected_broker_id", this.selected_foreign_broker);
-      //console.log("selected_expiry_date", this.expiring_orders_date);
-      //for each this.foreign_broker_options 
+      
       this.foreign_broker_options.forEach(broker => 
             {if(broker.value == this.selected_foreign_broker) 
             {this.selected_foreign_broker_name= broker.text;};}
           );
       this.fetchReports();
-      this.selected_foreign_broker_name=this.selected_foreign_broker_name;
-      //console.log("selected_broker_name", this.selected_foreign_broker_name );
-        
+      
     },
 
     //local broker dropdown
@@ -250,25 +250,23 @@ export default {
           this.local_broker_options.push({value: local_broker.id, text: local_broker.user.name });
           if(this.selected_local_broker == "0") {
             this.selected_local_broker = local_broker.id;
+             this.selected_local_broker_name= local_broker.user.name;
           }
         }
       ); 
 
       this.fetchReports();
-     // console.log("local_brokers", this.local_broker_options);
+      
     },
     selectLocalBroker() {
-      //console.log("selected_broker_id", this.selected_foreign_broker);
-      //console.log("selected_expiry_date", this.expiring_orders_date);
-      //for each this.local_broker_options 
+     
       this.local_broker_options.forEach(broker => 
             {if(broker.value == this.selected_local_broker) 
             {this.selected_local_broker_name= broker.text;};}
           );
       this.fetchReports();
-      //console.log("selected_broker_name", this.selected_foreign_broker_name );
-        
-    },
+         
+     },
 
      async getSideDetails() {
 
@@ -290,51 +288,15 @@ export default {
             {this.selected_side_name= sideopt.text;};}
           );
 
-      this.fetchReports();
-      console.log("selected_broker_name", this.selected_side_name );
+      this.fetchReports(); 
         
     },
 
     async getReports() {
-      this.execution_reports  = [];
-      //this.execution_date
-      ({ data: this.execution_reports } = await axios.get("dma-trade-report-list/"+this.from_date+"/"+this.to_date+"/"+this.selected_foreign_broker+"/"+this.selected_local_broker+"/"+this.selected_side)); //.then(response => {
-      this.report_data = this.execution_reports;
-      //this.expiring_orders.forEach( order => this.selected_orders.push(order.client_order_id));
-    },
-    statusFilter(data) {
-      if (data === "0") {
-        return "NEW";
-      } else if (data === "-1") {
-        return "PENDING";
-      } else if (data === "1") {
-        return "PARTIALLY FILLED";
-      } else if (data === "2") {
-        return "FILLED";
-      } else if (data === "4") {
-        return "CANCELLED";
-      } else if (data === "5") {
-        return "REPLACED";
-      } else if (data === "C") {
-        return "EXPIRED";
-      } else if (data === "Z") {
-        return "PRIVATE";
-      } else if (data === "U") {
-        return "UNPLACED";
-      } else if (data === "x") {
-        return "INACTIVE";
-      } else if (data === "8") {
-        return "REJECTED";
-      } else if (data === "Submitted") {
-        return "SUBMITTED";
-      } else if (data === "Failed") {
-        return "FAILED";
-      } else if (data === "Cancel Submitted") {
-        return "CANCEL SUBMITTED";
-      } else {
-        return "["+data+"]";
-      }
-    },
+      this.dma_trade_reports  = []; 
+      ({ data: this.dma_trade_reports} = await axios.get("dma-trade-report-list/"+this.from_date+"/"+this.to_date+"/"+this.selected_foreign_broker+"/"+this.selected_local_broker+"/"+this.selected_side)); //.then(response => {
+      this.report_data = this.dma_trade_reports;
+    }, 
     onFiltered(filteredItems) {
         // Trigger pagination to update the number of buttons/pages due to filtering
         this.filteredItemsCount = filteredItems.length
@@ -342,11 +304,12 @@ export default {
       },
     exportReports() {
 
-
-    alert(this.selected_foreign_broker_name);
-
       this.perPage=0;
-      //console.log(this.visibleRows);      
+      const ClientOrders = [];
+      const Symbols = [];
+      const Currency = [];
+
+         
       const tableData = this.visibleRows.map((r) =>
        [
           r.orderDate,
@@ -364,18 +327,28 @@ export default {
           r.FilledValue
         ]
       );
- 
        
+      const tableData1 = [];
+      var sFQty=0;var sFPrice=0;var sFValue=0;
+      for (var i = 0; i < tableData.length; i++) {([
+         ClientOrders.push(tableData[i][4]),
+         Symbols.push(tableData[i][8]),
+         Currency.push(tableData[i][10]),
+         sFQty = sFQty + parseInt(tableData[i][9]),
+         sFPrice = sFPrice + parseInt(tableData[i][11]),
+         sFValue = sFValue + parseInt(tableData[i][12]),
+      ]);
+      }
+
+      
+
         var doc = new jsPDF('l', 'pt');
-
-
-
 
 //Filters
         var Filtercolumns = ['Filter Values',''];
-        var Filtercolumns1 = ['From Date:','To Date:','Foreign Broker:','Local Broker:','Side:'];
-        var FiltercolumnsVal = [this.from_date,this.to_date, this.selected_foreign_broker,  this.selected_local_broker,this.selected_side];
-          const FiltertableData = [];
+        var Filtercolumns1 = ['From Date:','To Date:','Foreign Broker:','Local Broker:','Side:','Report Date:','Generated By:'];
+        var FiltercolumnsVal = [this.from_date,this.to_date, this.selected_foreign_broker_name,  this.selected_local_broker_name,this.selected_side,this.current_date,this.user_name1];
+        const FiltertableData = [];
               for (var i = 0; i < Filtercolumns1.length; i++) {
                 FiltertableData.push([
                   Filtercolumns1[i],
@@ -391,19 +364,17 @@ export default {
                 ]);
               }
               doc.autoTable(Filtercolumns, FiltertableData, {margin: {top: 80}});
-        
       
 //header
               var header = function(data) {
               doc.setFontSize(18);
               doc.setTextColor(40);
               doc.setFontStyle('normal'); 
-              doc.text("DMA Trades (Filled Orders) Report", data.settings.margin.left, 50); 
+              doc.text("DMA Trades (Filled Orders) Report", data.settings.margin.right, 50); 
+              //doc.text("Date", data.settings.margin.right, 55); 
+
                 };
   
-
-
-
           var options = {
             beforePageContent: header,
             margin: {
@@ -412,13 +383,38 @@ export default {
           };
           var columns = ['Order Date','Trade Date','Client','JCSD#','Client Order#','Market Order#','Comment(text)','Side','Symbol','Fill Qty','Currency','Fill Price','Fill Value'];
           doc.autoTable(columns,tableData,options); 
+          tableData1.push([
+          tableData.length + ' Trades', '','','',tableData.length + ' Clients',[...new Set(ClientOrders)].length +' Orders','','','',[...new Set(Symbols)].length + ' Symbol',sFQty+ ' ',[...new Set(Symbols)],sFPrice+ ' ', sFValue+ ' ',
+          ]);
+
+          var columns1 = ['Totals','','','','','','','','','Symbol','Fill Qty','Currency','Fill Price','Fill Value'];
+          doc.autoTable(columns1,tableData1,options); 
           doc.save("DMA-TRADE-FILL-REPORTS.pdf");
     },
     exportExcel()
     { 
-      debugger;
         
-    } 
+
+      const tableData = this.visibleRows.map((r) =>
+       [
+          r.orderDate,
+          r.tradeDate,    
+          r.clientName,
+          r.JCSD,
+          r.client_order_number,   
+          r.mrktOrdNo,
+          r.comments,
+          r.side,   
+          r.symbol,
+          r.FillQty,
+          r.currency,   
+          r.FillPrice,
+          r.FilledValue
+        ]
+      );
+    
+     
+    }
   },
   async mounted() {
     //console.log(this.execution_reports);
@@ -428,6 +424,11 @@ export default {
       this.getReports(),  
       this.getSideDetails(),    
     ]);
+
+    axios.put(`/nv9w8yp8rbwg4t`).then(response => {
+      let data = response.data; 
+      this.user_name1 = data.name; 
+    });
     
           //console.log(r);
   },

@@ -26,7 +26,7 @@
             <b-dropdown-item href="/jse-admin/expired-buy-orders">Cancel Expired Buy Orders (Manually)</b-dropdown-item >
             <b-dropdown-item href="/jse-admin/fill-expired-buy-orders">Fill Expired Buy Orders (Manually)</b-dropdown-item >
         </b-nav-item-dropdown> 
-      <b-nav-item-dropdown
+        <b-nav-item-dropdown
           id="reports-dropdown-menu"
           text="Reports"
           toggle-class="nav-link-custom"
