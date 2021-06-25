@@ -10,6 +10,7 @@ import VueSweetalert2 from 'vue-sweetalert2';
 import jsPDF from 'jspdf'; 
 import { BootstrapVueIcons } from 'bootstrap-vue';
 import Multiselect from 'vue-multiselect';
+import JsonExcel from "vue-json-excel";
 window.Vue = require('vue');
 
 Vue.use(BootstrapVue);
@@ -17,6 +18,7 @@ Vue.use(Multiselect);
 Vue.use(BootstrapVueIcons); 
 Vue.use(VueSweetalert2);
 Vue.use(jsPDF);
+
 
 Vue.prototype.$userPermissions = document.querySelector("meta[name='user-permissions']").getAttribute('content');
 Vue.prototype.$fixApi = document.querySelector("meta[name='fix-api']").getAttribute('content');
@@ -30,6 +32,10 @@ Vue.component('expiring_buy_order', require('./components/ExpiringBuyOrders.vue'
 Vue.component('expired_buy_order', require('./components/ExpiredBuyOrders.vue').default);
 Vue.component('fill_expired_order', require('./components/FillExpiredBuyOrders.vue').default);
 Vue.component('settlements', require('./components/Settlements.vue').default);
+
+//excel plugin
+Vue.component("downloadExcel", JsonExcel);
+Vue.config.productionTip = false;
 
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))

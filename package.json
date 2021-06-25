@@ -30,10 +30,11 @@
         "jsonfile": "^6.1.0",
         "jspdf": "^1.5.3",
         "jspdf-autotable": "^3.5.14",
-        "moment": "^2.29.1",
+        "moment": "^2.29.1", 
         "vue-multiselect": "^2.1.6",
         "vue-router": "^3.5.1",
         "vue-sweetalert2": "^3.0.8",
-        "vuetify": "^2.4.10"
+        "vuetify": "^2.4.10",
+        "xlsx": "^0.17.0"
     }
 }

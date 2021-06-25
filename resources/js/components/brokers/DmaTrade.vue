@@ -113,7 +113,7 @@
               <b-form-spinbutton id="rows-per-page" v-model="perPage" min="0" max="100" style="vertical-align: text-top;" inline></b-form-spinbutton>
                - <b-form-checkbox id="toggle-pagination" v-model="usePagination" inline> Use pages</b-form-checkbox>
           </b-form>
-          <b-button @click="exportReports">Export Execution Reports (PDF)</b-button>
+           <b-button @click="exportReports">Export Execution Reports (PDF)</b-button>
            <b-button @click="exportExcel">Export Execution Reports (Excel)</b-button>
         </b-card>
       </div>
@@ -127,6 +127,7 @@ import Multiselect from "vue-multiselect";
 import axios from "axios";
 import headNav from "./../partials/Nav.vue";
 import jsPDF from "jspdf";  
+import XLSX from 'xlsx';
 export default {
   components: {
     headNav,
@@ -152,6 +153,7 @@ export default {
       selected_local_broker: "0",
       selected_foreign_broker_name: '',
       selected_local_broker_name:'',
+      ExcelExportData:[],
       selected_side: "0",  
       fields: [
         { key: "orderDate", sortable: true, label: "Order Date" },
@@ -308,8 +310,7 @@ export default {
       const ClientOrders = [];
       const Symbols = [];
       const Currency = [];
-
-         
+ 
       const tableData = this.visibleRows.map((r) =>
        [
           r.orderDate,
@@ -339,9 +340,7 @@ export default {
          sFValue = sFValue + parseInt(tableData[i][12]),
       ]);
       }
-
-      
-
+ 
         var doc = new jsPDF('l', 'pt');
 
 //Filters
@@ -394,29 +393,36 @@ export default {
     exportExcel()
     { 
         
-
-      const tableData = this.visibleRows.map((r) =>
-       [
-          r.orderDate,
-          r.tradeDate,    
-          r.clientName,
-          r.JCSD,
-          r.client_order_number,   
-          r.mrktOrdNo,
-          r.comments,
-          r.side,   
-          r.symbol,
-          r.FillQty,
-          r.currency,   
-          r.FillPrice,
-          r.FilledValue
-        ]
+       const tableData = this.visibleRows.map((r) =>
+      
+       this.ExcelExportData.push( {
+ 
+          "Order Date": r.orderDate,
+          "Trade Date": r.tradeDate, 
+          "Client": r.clientName,
+          "JCSD#":  r.JCSD,
+          "Client Order#": r.client_order_number,  
+          "Market Order#": r.mrktOrdNo,
+          "Comment (Text)":r.comments,
+          "Side":  r.side, 
+          "Symbol": r.symbol,
+          "Fill Qty": r.FillQty,
+          "Currency": r.currency,   
+          "Fill Price": r.FillPrice,
+          "Fill Value": r.FilledValue
+          },
+          ) 
       );
-    
-     
-    }
-  },
-  async mounted() {
+
+       var worksheet_name = "DMA TRADE REPORT";
+       var excelFileData = XLSX.utils.json_to_sheet(this.ExcelExportData);          
+       var wb = XLSX.utils.book_new();    
+       XLSX.utils.book_append_sheet(wb, excelFileData,worksheet_name);   
+       XLSX.writeFile(wb,'DMA-TRADE-REPORT.xlsx'); 
+        
+   }
+   },
+   async mounted() {
     //console.log(this.execution_reports);
     await Promise.all([
       this.getForeignBrokers(),
