@@ -329,15 +329,15 @@ export default {
         ]
       );
        
-      const tableData1 = [];
-      var sFQty=0;var sFPrice=0;var sFValue=0;
+      const countTabelData = [];
+      var sumFQty=0;var sumFPrice=0;var sumFValue=0;
       for (var i = 0; i < tableData.length; i++) {([
          ClientOrders.push(tableData[i][4]),
          Symbols.push(tableData[i][8]),
          Currency.push(tableData[i][10]),
-         sFQty = sFQty + parseInt(tableData[i][9]),
-         sFPrice = sFPrice + parseInt(tableData[i][11]),
-         sFValue = sFValue + parseInt(tableData[i][12]),
+         sumFQty = sumFQty + parseInt(tableData[i][9]),
+         sumFPrice = sumFPrice + parseInt(tableData[i][11]),
+         sumFValue = sumFValue + parseInt(tableData[i][12]),
       ]);
       }
  
@@ -382,12 +382,12 @@ export default {
           };
           var columns = ['Order Date','Trade Date','Client','JCSD#','Client Order#','Market Order#','Comment(text)','Side','Symbol','Fill Qty','Currency','Fill Price','Fill Value'];
           doc.autoTable(columns,tableData,options); 
-          tableData1.push([
-          tableData.length + ' Trades', '','','',tableData.length + ' Clients',[...new Set(ClientOrders)].length +' Orders','','','',[...new Set(Symbols)].length + ' Symbol',sFQty+ ' ',[...new Set(Symbols)],sFPrice+ ' ', sFValue+ ' ',
+          countTabelData.push([
+          tableData.length + ' Trades', '','','',tableData.length + ' Clients',[...new Set(ClientOrders)].length +' Orders','','','',[...new Set(Symbols)].length + ' Symbol',sumFQty+ ' ',[...new Set(Currency)],sumFPrice+ ' ', sumFValue+ ' ',
           ]);
 
           var columns1 = ['Totals','','','','','','','','','Symbol','Fill Qty','Currency','Fill Price','Fill Value'];
-          doc.autoTable(columns1,tableData1,options); 
+          doc.autoTable(columns1,countTabelData,options); 
           doc.save("DMA-TRADE-FILL-REPORTS.pdf");
     },
     exportExcel()
